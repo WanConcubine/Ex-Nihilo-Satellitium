@@ -76,7 +76,7 @@ public class BarrelBlockEntity extends BlockEntity {
     /** Whether the held stack can do anything at all (used for client prediction). */
     public boolean canUse(final ItemStack stack) {
         if (isFluidContainer(stack)) {
-            return true;
+            return this.compostProgress == 0;
         }
         return this.tank.getFluidAmount() == 0
                 && this.compostProgress < COMPOST_MAX
@@ -88,6 +88,9 @@ public class BarrelBlockEntity extends BlockEntity {
         final ItemStack stack = player.getItemInHand(hand);
 
         if (isFluidContainer(stack)) {
+            if (this.compostProgress > 0) {
+                return InteractionResult.PASS;
+            }
             if (FluidUtil.interactWithFluidHandler(player, hand, this.tank)) {
                 this.setChanged();
                 this.sync();

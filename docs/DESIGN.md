@@ -1,18 +1,20 @@
 # 设计文档：无中生有：东施效颦
 
-> 状态：M0（骨架）／最后更新：2026-10-27
+> 状态：M1（木桶）／最后更新：2026-10-27
 
-## 1. Clean-room 原则
+## 1. 独立实现原则
 
-本项目是净室重写，以下规则贯穿始终：
+本项目是独立实现，不是严格的净室重写。以下规则贯穿始终：
 
-1. **不阅读、不复制**任何现有 Ex Nihilo 分支（原版、Adscensio、Omnia、Creatio、
-   Sequentia、Ex Deorum、Fabrico、Fabricae）的源代码。
-2. 需求只来自**公开的玩法描述**：Wiki、MC百科词条、视频、玩家讨论、配方截图。
-3. 所有代码、贴图、模型、音效、文本自行创作；不使用上游的任何资源文件。
+1. **不复制**任何现有 Ex Nihilo 分支（原版、Adscensio、Omnia、Creatio、Sequentia、
+   Ex Deorum、Fabrico、Fabricae）的代码、贴图、模型或音效。
+2. 需求来自**公开玩法资料**：Wiki、MC百科词条、视频、玩家讨论、配方截图；另外对原版
+   GPLv3 仓库做过**只读参考**，仅用于理解功能性思路（内缩桶身、桶内内容物渲染）。
+3. 所有代码、贴图、模型、音效、文本由本项目独立编写；原版仓库放在 `reference/`
+   （gitignore），不随本项目分发。
 4. 不冒充官方：项目名带明确副标题，`mods.toml` 与 README 均声明非官方。
-5. 玩法机制（规则、数值、流程）不受版权保护，可以作为设计参考；受保护的是
-   具体表达（代码、美术、文本、名称标识）。
+5. 玩法机制（规则、数值、流程）不受版权保护；受保护的是具体表达（代码、美术、文本、
+   名称标识）。本项目只借鉴前者。
 
 ## 2. 目标与非目标
 
@@ -144,9 +146,9 @@ com.kaifengcrt.exnihiloimitatio
 - 模组英文名最终用 `Ex Nihilo: Imitatio` 还是 `Imitatio: Out of Nothing`？
 - 是否需要 Skyblock 世界类型（Ex Deorum 有，工作量不小）？
 - 是否提供 1.20.1 之外的版本分支？
-- ARR 是否长期保留，还是稳定后转 MIT？
+- ~~ARR 是否长期保留~~ → **已转 MIT（2026-10-27）**，代码与自绘贴图均按 MIT 发布。
 
-## 8. M1 实现记录（2026-10-27）
+## 8. M1 实现记录（2026-10-27，含内缩模型 + MIT）
 
 **已完成**
 
@@ -154,18 +156,31 @@ com.kaifengcrt.exnihiloimitatio
 - 堆肥：`#exnihiloimitatio:compostable` 物品标签负责客户端交互预测；
   `data/<namespace>/compost/*.json` 提供数值（默认 30 条）；满 100 后 600 tick 转泥土，木桶被消耗。
 - 比较器输出：`max(流体比例, 堆肥比例)` 映射到 0–15。
-- 客户端 `BarrelRenderer`：开口木箱模型 + 液面 quad，流体纹理/颜色走
-  `IClientFluidTypeExtensions`。
+- **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
+  同步内缩；五个 cuboid、按面分配 side/top/inner/bottom 贴图。
+- **客户端 `BarrelRenderer`**：液面 + 堆肥面，按 fill 高度上升；流体走
+  `IClientFluidTypeExtensions`，堆肥走 `barrel_compost.png`。
+- **贴图**：木桶 5 张（side/top/inner/bottom/compost）+ 瓷土 1 张，全部 16×16 手写像素；
+  `python3 scripts/check-textures.py` 守“模型里不许出现 `minecraft:` 贴图”。
+- **许可证**：ARR → **MIT**；`gradle.properties`、`LICENSE`、`THIRD-PARTY.md` 同步。
 
 **验证**
 
-- `./gradlew build` 通过（无警告）。
+- `./gradlew build` 通过（无警告）；jar 内 `license="MIT"`、贴图与模型均打包。
+- `python3 scripts/check-textures.py` 通过，assets 下已无 `minecraft:` 贴图引用。
 - 开发服 RCON 实测：
   - `setblock ... exnihiloimitatio:barrel` + `data merge {Compost:100,CompostTicks:1}`
     → 2 秒后变成 `minecraft:dirt`（`execute if block` 返回 Test passed）。
   - `data merge {FluidName:"minecraft:lava",Amount:1000}` 后 `data get` 读回
     `minecraft:lava` / `1000`。
   - 标签加载无 `TagLoader` 报错，日志 `[compost] loaded 30 entries`。
+
+**与原版的关系**
+
+原版 Ex Nihilo 是 1.7.10 的 TESR + Techne 模型：约 12.8×16 的桶身，`setBlockBounds(0.1..0.9)`，
+内容物由 `ModelBarrelInternal` 在液面高度画 quad，贴图是 128×128 图集。
+本项目只借鉴了“内缩桶身 + 内容物表面”这一功能性思路，使用 1.20.1 JSON 模型、自有代码和
+16×16 手绘贴图；没有复制原版代码、模型或贴图。原版仓库仅本地只读参考（`reference/`，gitignore）。
 
 **踩过的坑**
 
@@ -176,9 +191,13 @@ com.kaifengcrt.exnihiloimitatio
   `minecraft:carrot` / `minecraft:potato`。
 - Forge 47.4.x 把 `BlockBehaviour#use` 和比较器方法标了 `@Deprecated`，但 1.20.1
   没有替代；`BarrelBlock` 用 `@SuppressWarnings("deprecation")` 抑制并注明原因。
+- 内缩模型的外侧面**不能加 `cullface`**：墙在 z=1/x=1，不在方块边界，加了会在相邻方块
+  旁边被整面剔除，露出空洞。
 
 **未验证 / 下一步**
 
-- 液面渲染与开口模型没有进游戏目视（headless 只能保证编译和逻辑）。
+- 液面、堆肥面、内缩模型与 16×16 贴图**没有进游戏目视**（headless 只能保证编译、JSON、
+  贴图引用和逻辑）；需要一次客户端截图验收。
 - 比较器没有实测（RCON `setblock` 出来的比较器读不到 BE，属于测试方式问题）。
 - 桶内方块转化（水 + 熔岩 → 石/黑曜石）未做，留到 M1.5。
+- 外凸铁箍 / 切角八边形还没做；当前是方桶身的像素化折中。

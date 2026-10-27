@@ -6,8 +6,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -15,6 +17,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -31,6 +35,9 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("deprecation")
 public class BarrelBlock extends BaseEntityBlock {
 
+    /** Inset body: 14x16x14, leaving a 1px gap on each side. */
+    private static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 16.0D, 15.0D);
+
     public BarrelBlock(final BlockBehaviour.Properties properties) {
         super(properties);
     }
@@ -38,6 +45,18 @@ public class BarrelBlock extends BaseEntityBlock {
     @Override
     public RenderShape getRenderShape(final BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    public VoxelShape getShape(final BlockState state, final BlockGetter level, final BlockPos pos,
+                               final CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(final BlockState state, final BlockGetter level, final BlockPos pos,
+                                        final CollisionContext context) {
+        return SHAPE;
     }
 
     @Nullable
