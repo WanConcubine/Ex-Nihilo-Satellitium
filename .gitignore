@@ -32,3 +32,6 @@ reference/
 
 # Files from Forge MDK
 forge*changelog.txt
+
+# Extracted vanilla textures used by the preview renderer
+art/barrel/.vanilla_textures/

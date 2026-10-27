@@ -62,7 +62,7 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 ## 纹理
 
 风格、色板、命名和 AI 政策见 [docs/textures.md](docs/textures.md)。
-木桶走 **vanilla-sampled**：模型直接引用原版 `oak_planks` / `spruce_planks` / `iron_block`，
+木桶走 **vanilla-sampled**：模型直接引用原版 `oak_planks` / `spruce_planks` / `gray_concrete`，
 铁箍是外凸几何体；瓷土和堆肥面是自有 16×16 像素。
 `scripts/check-textures.py` 会阻止模型引用原版 **item** 贴图，但允许原版 **block** 贴图。
 

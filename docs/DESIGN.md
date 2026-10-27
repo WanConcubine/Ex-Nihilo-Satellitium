@@ -159,7 +159,7 @@ com.kaifengcrt.exnihiloimitatio
 - 比较器输出：DIRT 状态固定 15；否则 `max(流体比例, 堆肥比例)` 映射到 0–15。
 - **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
   同步内缩；采用 **vanilla-sampled**：桶身直接引用 `oak_planks` / `spruce_planks`（侧面
-  `rotation: 90`），两道铁箍是 8 个外凸 0.5px 的 `iron_block` 体素。
+  `rotation: 90`），两道铁箍是 8 个外凸 0.5px 的 `gray_concrete` 体素。
 - **物品模型**：恢复为开口 block model（移除封闭盖），靠 `display` 变换在物品栏/手持
   显示 3D 空心桶。
 - **客户端 `BarrelRenderer`**：液面 + 堆肥/泥土内容 box，按 fill 高度上升；堆肥计时期间

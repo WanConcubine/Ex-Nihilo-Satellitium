@@ -7,7 +7,7 @@
 - **方块（木桶、筛子、坩埚等）：vanilla-sampled。**
   模型直接引用原版 `minecraft:block/*` 贴图，**不复制文件、不打包**。
   木桶身 = `oak_planks` / `spruce_planks`（侧面 `rotation: 90` 让木纹竖起来），
-  两道铁箍 = 8 个外凸 0.5px 的体素 + `iron_block`。
+  两道铁箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
 - **物品与特殊表面（瓷土、堆肥面）：自有 16×16 手绘像素。**
   放在 `assets/exnihiloimitatio/textures/`，由脚本逐像素生成，可复现。
 
