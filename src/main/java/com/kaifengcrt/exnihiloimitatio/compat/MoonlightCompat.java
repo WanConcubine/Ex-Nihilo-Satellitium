@@ -49,7 +49,7 @@ public final class MoonlightCompat {
         if (!isLoaded()) {
             return null;
         }
-        return ForgeRegistries.ITEMS.getValue(new ResourceLocation(MOD_ID, path));
+        return ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath(MOD_ID, path));
     }
 
     /** 对方是否存在该物品。 */

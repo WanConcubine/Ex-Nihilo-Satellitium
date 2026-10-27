@@ -1,6 +1,7 @@
 package com.kaifengcrt.exnihiloimitatio;
 
 import com.kaifengcrt.exnihiloimitatio.compat.MoonlightCompat;
+import com.kaifengcrt.exnihiloimitatio.registry.ModBlockEntities;
 import com.kaifengcrt.exnihiloimitatio.registry.ModBlocks;
 import com.kaifengcrt.exnihiloimitatio.registry.ModCreativeTabs;
 import com.kaifengcrt.exnihiloimitatio.registry.ModItems;
@@ -29,6 +30,7 @@ public final class ExNihiloImitatio {
         final IEventBus modBus = context.getModEventBus();
 
         ModBlocks.register(modBus);
+        ModBlockEntities.register(modBus);
         ModItems.register(modBus);
         ModCreativeTabs.register(modBus);
 
