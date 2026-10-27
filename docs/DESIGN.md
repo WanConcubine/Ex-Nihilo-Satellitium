@@ -206,3 +206,18 @@ com.kaifengcrt.exnihiloimitatio
 - 比较器没有实测（RCON `setblock` 出来的比较器读不到 BE，属于测试方式问题）。
 - 桶内方块转化（水 + 熔岩 → 石/黑曜石）未做，留到 M1.5。
 - 外凸铁箍 / 切角八边形还没做；当前是方桶身的像素化折中。
+
+## 9. Jade（玉）集成（2026-10-27）
+
+- 依赖：`compileOnly "maven.modrinth:jade:11.13.3+forge"`（Modrinth Maven）。
+  **不打包、不随我们的 jar 分发**，只用于编译插件。
+- `mods.toml`：`jade` optional dependency，`[11.0.0,)`，`ordering=AFTER`，`side=CLIENT`。
+- `compat/jade/BarrelJadePlugin`（`@WailaPlugin`）+ `BarrelComponentProvider`：
+  只读已经同步到客户端的 `BarrelBlockEntity`，显示：
+  - `堆肥：x / 100`
+  - `还需 n 秒`
+  - `泥土已就绪（右键取出）`
+  - 流体：`水：x / 1000 mB`
+- 没装 Jade 时：`@WailaPlugin` 类不会被 Jade 扫描/加载，模组独立运行。
+- 验证：编译通过；无 Jade 的服务端启动正常；jar 内只有我们的插件类，没有 Jade 类。
+- 未验证：真实 Jade 客户端里的 tooltip 渲染（需要装 Jade 进游戏看）。

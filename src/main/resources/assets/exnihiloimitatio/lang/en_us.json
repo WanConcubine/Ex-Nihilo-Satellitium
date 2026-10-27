@@ -1,5 +1,9 @@
 {
   "itemGroup.exnihiloimitatio": "Ex Nihilo: Imitatio",
   "block.exnihiloimitatio.barrel": "Barrel",
-  "item.exnihiloimitatio.porcelain": "Porcelain"
+  "item.exnihiloimitatio.porcelain": "Porcelain",
+  "jade.exnihiloimitatio.barrel.ready": "Dirt ready (right-click to extract)",
+  "jade.exnihiloimitatio.barrel.compost": "Compost: %s / %s",
+  "jade.exnihiloimitatio.barrel.timer": "Ready in %s s",
+  "jade.exnihiloimitatio.barrel.fluid": "%s: %s / %s mB"
 }

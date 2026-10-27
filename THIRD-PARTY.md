@@ -34,3 +34,9 @@ Minecraft 是 Mojang Studios 的商标。Minecraft 与 Forge 不随本仓库分�
 
 “Ex Nihilo”是拉丁语短语；“无中生有”是中文成语。本项目名称仅用于说明玩法渊源，
 不代表、也不隶属于 Ex Nihilo 系列或其作者。
+
+## Jade（可选，不打包）
+
+Jade 是可选依赖，**不随本项目分发**。本项目只以 `compileOnly` 方式引用其 API
+（`maven.modrinth:jade:11.13.3+forge`）来编译 HUD 插件；用户需要自行安装 Jade。
+Jade 的许可证与版权归其作者所有，见其项目页。
