@@ -154,12 +154,16 @@ com.kaifengcrt.exnihiloimitatio
 
 - `BarrelBlock` + `BarrelBlockEntity`：1000 mB `FluidTank`、`IFluidHandler` capability、NBT 持久化、客户端同步。
 - 堆肥：`#exnihiloimitatio:compostable` 物品标签负责客户端交互预测；
-  `data/<namespace>/compost/*.json` 提供数值（默认 30 条）；满 100 后 600 tick 转泥土，木桶被消耗。
-- 比较器输出：`max(流体比例, 堆肥比例)` 映射到 0–15。
+  `data/<namespace>/compost/*.json` 提供数值（默认 30 条）；满 100 后 600 tick 进入 DIRT 状态，
+  **木桶保留**；右键取出 1 个泥土并重置，桶可继续用。
+- 比较器输出：DIRT 状态固定 15；否则 `max(流体比例, 堆肥比例)` 映射到 0–15。
 - **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
   同步内缩；五个 cuboid、按面分配 side/top/inner/bottom 贴图。
-- **客户端 `BarrelRenderer`**：液面 + 堆肥面，按 fill 高度上升；流体走
-  `IClientFluidTypeExtensions`，堆肥走 `barrel_compost.png`。
+- **客户端 `BarrelRenderer`**：液面 + 堆肥/泥土内容 box，按 fill 高度上升；堆肥计时期间
+  颜色向泥土过渡，完成时播放 `COMPOSTER_READY` + 堆肥粒子；流体走
+  `IClientFluidTypeExtensions`，堆肥走 `barrel_compost.png`，DIRT 状态走原版泥土贴图。
+- **物品栏**：block model 补了标准 `display` 变换（gui/ground/手持）；`models/item/barrel.json`
+  另做了一个**封闭盖**版本（盖在 2..14 / 15..16），物品栏和手持看到的是有盖的桶，不是空心开口。
 - **贴图**：木桶 5 张（side/top/inner/bottom/compost）+ 瓷土 1 张，全部 16×16 手写像素；
   `python3 scripts/check-textures.py` 守“模型里不许出现 `minecraft:` 贴图”。
 - **许可证**：ARR → **MIT**；`gradle.properties`、`LICENSE`、`THIRD-PARTY.md` 同步。
@@ -170,7 +174,7 @@ com.kaifengcrt.exnihiloimitatio
 - `python3 scripts/check-textures.py` 通过，assets 下已无 `minecraft:` 贴图引用。
 - 开发服 RCON 实测：
   - `setblock ... exnihiloimitatio:barrel` + `data merge {Compost:100,CompostTicks:1}`
-    → 2 秒后变成 `minecraft:dirt`（`execute if block` 返回 Test passed）。
+    → 2 秒后**仍是 barrel**，`DirtReady=1`、`Compost=100`（`execute if block` 返回 Test passed）。
   - `data merge {FluidName:"minecraft:lava",Amount:1000}` 后 `data get` 读回
     `minecraft:lava` / `1000`。
   - 标签加载无 `TagLoader` 报错，日志 `[compost] loaded 30 entries`。
@@ -196,8 +200,9 @@ com.kaifengcrt.exnihiloimitatio
 
 **未验证 / 下一步**
 
-- 液面、堆肥面、内缩模型与 16×16 贴图**没有进游戏目视**（headless 只能保证编译、JSON、
-  贴图引用和逻辑）；需要一次客户端截图验收。
+- 液面、堆肥/泥土 box、内缩模型与 16×16 贴图**没有进游戏目视**（headless 只能保证编译、
+  JSON、贴图引用和逻辑）；需要一次客户端截图验收。
+- 右键取出泥土没有自动化测试（需要真实玩家）；逻辑已按原版 `ExtractMode.Always` 实现。
 - 比较器没有实测（RCON `setblock` 出来的比较器读不到 BE，属于测试方式问题）。
 - 桶内方块转化（水 + 熔岩 → 石/黑曜石）未做，留到 M1.5。
 - 外凸铁箍 / 切角八边形还没做；当前是方桶身的像素化折中。
