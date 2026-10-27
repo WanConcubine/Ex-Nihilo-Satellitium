@@ -3,7 +3,8 @@
 
 Checks:
   - every model texture reference to this mod resolves to an existing PNG
-  - no model texture reference points at minecraft:*
+  - no model texture reference points at minecraft:item/* (vanilla block
+    textures are allowed for the vanilla-sampled style)
   - every block/item texture is 16x16 (PNG header only, no Pillow needed)
 
 Usage:
@@ -47,8 +48,14 @@ def walk_textures(node: object, model: Path) -> None:
                 for layer, reference in value.items():
                     if not isinstance(reference, str):
                         continue
+                    if reference.startswith("minecraft:item/"):
+                        errors.append(f"{model}: layer '{layer}' uses a vanilla item texture {reference}")
+                        continue
+                    if reference.startswith("minecraft:block/"):
+                        # Intentional vanilla-sampled block texture; not redistributed.
+                        continue
                     if reference.startswith("minecraft:"):
-                        errors.append(f"{model}: layer '{layer}' still points at vanilla {reference}")
+                        errors.append(f"{model}: layer '{layer}' points at unsupported vanilla resource {reference}")
                         continue
                     path = texture_path(reference)
                     if path is not None and not path.exists():

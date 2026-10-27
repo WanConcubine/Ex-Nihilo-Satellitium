@@ -13,12 +13,16 @@
 Minecraft 是 Mojang Studios 的商标。Minecraft 与 Forge 不随本仓库分发；
 使用本项目需要合法的 Minecraft 与 Forge 安装。
 
+木桶等方块模型会在运行时引用原版方块贴图（`oak_planks`、`spruce_planks`、
+`iron_block`）；这些贴图不随本项目的 jar 分发。
+
 ## Ex Nihilo 系列（参考，不含代码/资源）
 
 本项目是独立实现，**没有复制**任何现有 Ex Nihilo 分支的代码、贴图、模型或音效。
 
 设计阶段以只读方式参考了原版 Ex Nihilo（Erasmus_Crowley，GPLv3）的公开仓库，
 用于理解桶类方块的**功能性思路**（例如内缩的桶身轮廓、在桶内渲染内容物）。
+没有复制它的 PNG；木桶采用同样的“采样自原版”思路，直接引用 vanilla block 贴图。
 这些属于玩法/功能层面的参考；具体代码、模型几何与像素图均由本项目独立编写。
 原版仓库仅作本地只读参考，不随本项目分发。
 

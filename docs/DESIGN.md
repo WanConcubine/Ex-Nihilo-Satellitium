@@ -158,14 +158,18 @@ com.kaifengcrt.exnihiloimitatio
   **木桶保留**；右键取出 1 个泥土并重置，桶可继续用。
 - 比较器输出：DIRT 状态固定 15；否则 `max(流体比例, 堆肥比例)` 映射到 0–15。
 - **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
-  同步内缩；五个 cuboid、按面分配 side/top/inner/bottom 贴图。
+  同步内缩；采用 **vanilla-sampled**：桶身直接引用 `oak_planks` / `spruce_planks`（侧面
+  `rotation: 90`），两道铁箍是 8 个外凸 0.5px 的 `iron_block` 体素。
+- **物品模型**：恢复为开口 block model（移除封闭盖），靠 `display` 变换在物品栏/手持
+  显示 3D 空心桶。
 - **客户端 `BarrelRenderer`**：液面 + 堆肥/泥土内容 box，按 fill 高度上升；堆肥计时期间
   颜色向泥土过渡，完成时播放 `COMPOSTER_READY` + 堆肥粒子；流体走
   `IClientFluidTypeExtensions`，堆肥走 `barrel_compost.png`，DIRT 状态走原版泥土贴图。
 - **物品栏**：block model 补了标准 `display` 变换（gui/ground/手持）；`models/item/barrel.json`
-  另做了一个**封闭盖**版本（盖在 2..14 / 15..16），物品栏和手持看到的是有盖的桶，不是空心开口。
-- **贴图**：木桶 5 张（side/top/inner/bottom/compost）+ 瓷土 1 张，全部 16×16 手写像素；
-  `python3 scripts/check-textures.py` 守“模型里不许出现 `minecraft:` 贴图”。
+  直接继承开口 block model，物品栏/手持是**空心**的 3D 桶。
+- **贴图**：木桶不再有自有 PNG（直接引用 vanilla block 贴图）；只保留 `barrel_compost.png`
+  和 `porcelain.png` 两张自有 16×16。`scripts/check-textures.py` 禁止 vanilla **item**
+  贴图，允许 vanilla **block** 贴图。
 - **许可证**：ARR → **MIT**；`gradle.properties`、`LICENSE`、`THIRD-PARTY.md` 同步。
 
 **验证**
