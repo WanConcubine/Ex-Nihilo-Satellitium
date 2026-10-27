@@ -97,10 +97,46 @@ com.kaifengcrt.exnihiloimitatio
 
 ## 6. 与「月光魔法」的联动
 
-- 在 `mods.toml` 中把月光魔法声明为 **optional** 依赖，不装也能启动。
-- 通过 `ModList.get().isLoaded("...")` 判断，再注册兼容事件/配方。
-- 优先使用对方的公开 API；没有 API 时用事件 + 反射隔离，避免编译期硬依赖。
-- 联动内容候选：月光魔法素材 → 筛网/坩埚产物；本模组矿粒 → 月光魔法仪式材料。
+**对接对象**（本机 `Projects/Minecraft-Mod-(Neo)Forge/1.20.1`）：
+
+| 项 | 值 |
+|---|---|
+| mod id | `moonlight_magic` |
+| 版本 | 1.2.0 |
+| 包名 | `com.moonlight.magic` |
+| 加载器 / MC | Forge 47.4.x / 1.20.1 |
+| 许可证 | MIT |
+| 公开 API | **没有独立 `api` 包**（有 `event` / `ritual` / `spell` / `energy`，但都是内部实现） |
+
+**策略**
+
+- `mods.toml` 里声明 **optional** 依赖（`mandatory=false, ordering=AFTER`），
+  不装月光魔法时本模组必须能独立启动。
+- 代码侧统一走 `compat/MoonlightCompat`：只检查 `ModList` + 按注册名查
+  `ForgeRegistries`，**不 import 对方任何类**，避免编译期耦合和版本脆断。
+- 内容联动优先用**数据包**（配方 / 掉落 / 堆肥值 + `forge:mod_loaded` 条件），
+  代码只负责少量运行时判断。
+- 不碰对方内部类；如果将来对方提供正式 API，再替换 `MoonlightCompat` 的实现。
+
+**候选联动点**（M8 落地，需和玩家确认数值）
+
+| 方向 | 内容 |
+|---|---|
+| 月光 → 无中生有 | `moonlight_thread` 做「月光筛网」；`pool_dust` 作为稀有筛出物 |
+| 月光 → 无中生有 | `moon_flax` / `rainbow_flower` 等植物进木桶堆肥 |
+| 无中生有 → 月光 | 本模组矿粒 / 瓷土作为月光仪式或合成材料 |
+| 双向 | 月光魔法素材 → 坩埚熔炼产物；本模组尘土 → 月光肥料 |
+
+具体配方等 M2（数据驱动掉落）和 M6（瓷土/巫水）完成后再定，避免现在写死。
+
+**联调测试注意**
+
+月光魔法的 1.2.0 是**生产 jar（reobf / SRG 名）**，直接丢进本项目的 `run/mods/` 会在 dev
+环境报 `NoSuchFieldError: f_279569_`（例如 `ModCreativeTabs.<clinit>`）——这不是双方代码
+的问题，是 dev 用 official 名、生产 jar 用 SRG 名的映射错位。联调要用**正式 Forge 服务端 /
+客户端**（两边都放 reobf jar），或者让月光魔法提供 deobf 依赖后再走 Gradle。
+
+
 
 ## 7. 待定问题
 

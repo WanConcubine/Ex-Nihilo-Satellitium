@@ -51,8 +51,14 @@
 
 ## 联动
 
-计划对作者的「月光魔法」项目做**软依赖**联动：在 `mods.toml` 中声明 optional
-dependency，通过事件/API 隔离，确保没有装月光魔法时也能独立运行。
+对「月光魔法」（`moonlight_magic`，1.20.1 Forge，1.2.0）做**软依赖**联动：
+
+- `mods.toml` 里是 optional dependency（`mandatory=false`），没装月光魔法也能独立运行。
+- 代码走 `compat/MoonlightCompat`，只通过 mod id + 注册名查找，不直接引用对方类。
+- 联动内容用数据包实现（配方 / 掉落 / 堆肥值 + `forge:mod_loaded` 条件）。
+
+候选内容：月光线做筛网、池尘做稀有筛出物、月光植物进堆肥、本模组矿粒作为月光仪式材料。
+详见 [docs/DESIGN.md](docs/DESIGN.md) 第 6 节。
 
 ## 许可证
 

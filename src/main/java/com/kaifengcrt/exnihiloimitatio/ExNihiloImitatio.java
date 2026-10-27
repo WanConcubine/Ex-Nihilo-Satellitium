@@ -1,11 +1,13 @@
 package com.kaifengcrt.exnihiloimitatio;
 
+import com.kaifengcrt.exnihiloimitatio.compat.MoonlightCompat;
 import com.kaifengcrt.exnihiloimitatio.registry.ModBlocks;
 import com.kaifengcrt.exnihiloimitatio.registry.ModCreativeTabs;
 import com.kaifengcrt.exnihiloimitatio.registry.ModItems;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
@@ -30,6 +32,12 @@ public final class ExNihiloImitatio {
         ModItems.register(modBus);
         ModCreativeTabs.register(modBus);
 
+        modBus.addListener(this::commonSetup);
+
         LOGGER.info("Ex Nihilo: Imitatio initialised (clean-room build).");
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(MoonlightCompat::logStatus);
     }
 }
