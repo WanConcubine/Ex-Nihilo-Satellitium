@@ -8,11 +8,13 @@
 
 ## 这是什么
 
-一个 clean-room（净室）重写的 Ex Nihilo 风格模组：从一棵树、一桶水、一格熔岩开始，
+一个独立实现的 Ex Nihilo 风格模组：从一棵树、一桶水、一格熔岩开始，
 通过木桶、筛子、锤子、钩子、坩埚等工具，把空岛一步步变成可发展的基地。
 
-**没有使用任何现有 Ex Nihilo 分支的代码、贴图、模型或音效。** 只参考公开的玩法描述
-（Wiki、MC百科、视频）进行设计。详见 [docs/DESIGN.md](docs/DESIGN.md)。
+**没有复制任何现有 Ex Nihilo 分支的代码、贴图、模型或音效。** 设计参考公开玩法资料
+（Wiki、MC百科、视频），以及原版 GPLv3 仓库中的功能性思路（内缩桶身、内容物渲染）；
+具体实现与像素图均为本项目的原创。详见 [docs/DESIGN.md](docs/DESIGN.md) 与
+[THIRD-PARTY.md](THIRD-PARTY.md)。
 
 ## 技术栈
 
@@ -28,8 +30,8 @@
 
 - [x] Gradle / Forge MDK 骨架，可编译
 - [x] 模组元数据、Creative Tab、中英文本地化
-- [x] 占位内容：`porcelain`（瓷土）、`barrel`（木桶）
-- [x] M1 木桶：堆肥、1000 mB 流体存储、比较器输出、数据驱动堆肥值
+- [x] 基础内容：`porcelain`（瓷土，自绘贴图）、`barrel`（木桶）
+- [x] M1 木桶：堆肥、1000 mB 流体存储、比较器、数据驱动堆肥值、14×16 内缩模型、16×16 手绘贴图
 - [ ] M1.5 桶内方块转化（水 + 熔岩 → 石/黑曜石）
 - [ ] M2 筛子 + 筛网 + 数据驱动掉落
 - [ ] M3 锤子 + 钩子
@@ -45,10 +47,16 @@
 ./gradlew build        # 产物在 build/libs/
 ./gradlew runClient    # 开发客户端
 ./gradlew runServer    # 开发服务端
+python3 scripts/check-textures.py   # 确保没有原版贴图占位
 ```
 
 首次构建会下载 Gradle、Forge、Minecraft 依赖并反编译，耗时较长（约 5–15 分钟），
 之后会走缓存。
+
+## 纹理
+
+风格、色板、命名和 AI 政策见 [docs/textures.md](docs/textures.md)。
+当前木桶与瓷土都是 16×16 手写像素；模型里不允许出现 `minecraft:` 贴图。
 
 ## 联动
 
@@ -63,7 +71,8 @@
 
 ## 许可证
 
-- **本项目的代码与美术资源：All Rights Reserved（保留所有权利）**，详见 [LICENSE](LICENSE)。
+- **本项目的代码与美术资源：MIT**，详见 [LICENSE](LICENSE)。
+- 第三方声明、原版参考说明：见 [THIRD-PARTY.md](THIRD-PARTY.md)。
 - Forge MDK 模板部分（构建脚本等）遵循 **LGPL-2.1**，详见 [LICENSE-FORGE-MDK.txt](LICENSE-FORGE-MDK.txt)。
 - Minecraft / Forge 本身不包含在本仓库中，其版权归各自所有者。
 

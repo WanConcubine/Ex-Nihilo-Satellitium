@@ -27,5 +27,8 @@ mcmodsrepo
 .vscode
 .DS_Store
 
+# GPLv3 upstream clone for read-only reference; never commit or ship
+reference/
+
 # Files from Forge MDK
 forge*changelog.txt
