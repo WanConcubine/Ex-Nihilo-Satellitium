@@ -1,22 +1,23 @@
 package com.kaifengcrt.exnihiloimitatio.common.blockentity;
 
-import com.kaifengcrt.exnihiloimitatio.common.block.BarrelBlock;
 import com.kaifengcrt.exnihiloimitatio.common.compost.CompostRegistry;
 import com.kaifengcrt.exnihiloimitatio.common.tag.ModTags;
 import com.kaifengcrt.exnihiloimitatio.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -30,9 +31,11 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Barrel state: a 1000 mB fluid tank plus a compost progress bar.
  *
- * <p>Composting only works while the tank is empty. When the progress reaches
- * {@link #COMPOST_MAX}, a timer starts; once it expires the barrel turns into a
- * dirt block (the barrel is consumed).</p>
+ * <p>The barrel is never replaced. Composting only works while the tank is
+ * empty. When the progress reaches {@link #COMPOST_MAX}, a timer starts; while
+ * it runs the renderer blends the compost colour towards dirt. Once it ends the
+ * barrel enters the DIRT state; right-clicking extracts one dirt item and
+ * resets the barrel.</p>
  */
 public class BarrelBlockEntity extends BlockEntity {
 
@@ -52,6 +55,7 @@ public class BarrelBlockEntity extends BlockEntity {
 
     private int compostProgress;
     private int compostTicks;
+    private boolean dirtReady;
 
     public BarrelBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.BARREL.get(), pos, state);
@@ -69,12 +73,35 @@ public class BarrelBlockEntity extends BlockEntity {
         return this.compostTicks;
     }
 
+    public boolean isDirtReady() {
+        return this.dirtReady;
+    }
+
+    /** 0 while filling, then 0..1 across the composting timer, 1 in the DIRT state. */
+    public float getCompostTransition() {
+        if (this.dirtReady) {
+            return 1.0F;
+        }
+        if (this.compostProgress < COMPOST_MAX || this.compostTicks <= 0) {
+            return 0.0F;
+        }
+        return 1.0F - (this.compostTicks / (float) COMPOST_TICKS);
+    }
+
+    /** How full the compost heap is, 0..1. */
+    public float getCompostFill() {
+        return this.dirtReady ? 1.0F : this.compostProgress / (float) COMPOST_MAX;
+    }
+
     private static boolean isFluidContainer(final ItemStack stack) {
         return stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent();
     }
 
     /** Whether the held stack can do anything at all (used for client prediction). */
     public boolean canUse(final ItemStack stack) {
+        if (this.dirtReady) {
+            return true;
+        }
         if (isFluidContainer(stack)) {
             return this.compostProgress == 0;
         }
@@ -85,6 +112,11 @@ public class BarrelBlockEntity extends BlockEntity {
 
     /** Server-side interaction. */
     public InteractionResult use(final Player player, final InteractionHand hand) {
+        if (this.dirtReady) {
+            this.extractDirt(player);
+            return InteractionResult.SUCCESS;
+        }
+
         final ItemStack stack = player.getItemInHand(hand);
 
         if (isFluidContainer(stack)) {
@@ -126,16 +158,47 @@ public class BarrelBlockEntity extends BlockEntity {
         return InteractionResult.SUCCESS;
     }
 
+    private void extractDirt(final Player player) {
+        final ItemStack dirt = new ItemStack(Items.DIRT);
+        if (!player.getInventory().add(dirt)) {
+            player.drop(dirt, false);
+        }
+
+        this.dirtReady = false;
+        this.compostProgress = 0;
+        this.compostTicks = 0;
+
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.COMPOSTER_EMPTY,
+                    SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+
+        this.setChanged();
+        this.sync();
+    }
+
     public static void serverTick(final Level level, final BlockPos pos, final BlockState state,
                                   final BarrelBlockEntity barrel) {
-        if (barrel.compostProgress < COMPOST_MAX) {
+        if (barrel.dirtReady || barrel.compostProgress < COMPOST_MAX) {
             return;
         }
 
         if (barrel.compostTicks > 0) {
             barrel.compostTicks--;
-            if (barrel.compostTicks % 20 == 0) {
+            // Keep the client's colour transition roughly in sync.
+            if (barrel.compostTicks % 10 == 0) {
                 barrel.setChanged();
+                barrel.sync();
+            }
+            // A thin trail of compost particles makes the 30s transition visible
+            // even when the colour shift is subtle.
+            if (barrel.compostTicks % 40 == 0 && level instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(ParticleTypes.COMPOSTER,
+                        pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
+                        2, 0.25D, 0.05D, 0.25D, 0.0D);
+            }
+            if (barrel.compostTicks == 0) {
+                barrel.finishCompost();
             }
             return;
         }
@@ -147,16 +210,26 @@ public class BarrelBlockEntity extends BlockEntity {
         if (this.level == null || this.level.isClientSide) {
             return;
         }
-        if (!(this.level.getBlockState(this.worldPosition).getBlock() instanceof BarrelBlock)) {
-            return;
-        }
 
-        this.level.setBlockAndUpdate(this.worldPosition, Blocks.DIRT.defaultBlockState());
+        this.dirtReady = true;
+        this.compostTicks = 0;
         this.level.playSound(null, this.worldPosition, SoundEvents.COMPOSTER_READY,
                 SoundSource.BLOCKS, 1.0F, 1.0F);
+        if (this.level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.COMPOSTER,
+                    this.worldPosition.getX() + 0.5D,
+                    this.worldPosition.getY() + 1.0D,
+                    this.worldPosition.getZ() + 0.5D,
+                    12, 0.3D, 0.1D, 0.3D, 0.01D);
+        }
+        this.setChanged();
+        this.sync();
     }
 
     public int getComparatorOutput() {
+        if (this.dirtReady) {
+            return 15;
+        }
         final int fluid = this.tank.getFluidAmount() * 15 / this.tank.getCapacity();
         final int compost = this.compostProgress * 15 / COMPOST_MAX;
         return Math.max(fluid, compost);
@@ -175,6 +248,7 @@ public class BarrelBlockEntity extends BlockEntity {
         this.tank.writeToNBT(tag);
         tag.putInt("Compost", this.compostProgress);
         tag.putInt("CompostTicks", this.compostTicks);
+        tag.putBoolean("DirtReady", this.dirtReady);
     }
 
     @Override
@@ -183,6 +257,7 @@ public class BarrelBlockEntity extends BlockEntity {
         this.tank.readFromNBT(tag);
         this.compostProgress = tag.getInt("Compost");
         this.compostTicks = tag.getInt("CompostTicks");
+        this.dirtReady = tag.getBoolean("DirtReady");
     }
 
     @Override

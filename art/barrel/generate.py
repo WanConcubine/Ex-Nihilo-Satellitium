@@ -122,35 +122,38 @@ def bottom_texture():
 
 
 def compost_texture():
-    c0 = (48, 36, 24)
-    c1 = (70, 54, 34)
-    c2 = (92, 72, 46)
-    c3 = (110, 88, 56)
-    green = (64, 78, 40)
+    c0 = (42, 30, 18)
+    c1 = (62, 46, 28)
+    c2 = (86, 66, 40)
+    c3 = (108, 84, 52)
+    c4 = (128, 102, 64)
+    green = (58, 70, 32)
+    palette = [c1, c2, c3, c4]
 
-    px = [[c2] * 16 for _ in range(16)]
-    for y in range(16):
-        for x in range(16):
-            n = (x * 13 + y * 7 + x * y * 5) % 29
-            if n < 5:
-                colour = c0
-            elif n < 12:
-                colour = c1
-            elif n < 20:
-                colour = c2
-            elif n < 26:
-                colour = c3
-            else:
-                colour = green
-            if x in (0, 15) or y in (0, 15):
-                colour = c0
-            px[y][x] = colour
+    px = [[c1] * 16 for _ in range(16)]
+    for by in range(4):
+        for bx in range(4):
+            h = (bx * 7 + by * 13 + bx * by * 3) % 11
+            base = palette[h % 4]
+            for y in range(by * 4, (by + 1) * 4):
+                for x in range(bx * 4, (bx + 1) * 4):
+                    n = (x * 5 + y * 11 + x * y * 3) % 17
+                    if n < 2:
+                        colour = c0
+                    elif n < 4:
+                        colour = green
+                    elif n < 6:
+                        colour = c4
+                    elif n < 8:
+                        colour = palette[max(0, h % 4 - 1)]
+                    else:
+                        colour = base
+                    px[y][x] = colour
 
-    for cx, cy in ((4, 5), (10, 9), (7, 12)):
+    for cx, cy in ((3, 4), (9, 8), (6, 12), (12, 3)):
         for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-            xx, yy = cx + dx, cy + dy
-            if 1 <= xx <= 14 and 1 <= yy <= 14:
-                px[yy][xx] = c0
+            px[(cy + dy) % 16][(cx + dx) % 16] = c0
+
     return px
 
 
