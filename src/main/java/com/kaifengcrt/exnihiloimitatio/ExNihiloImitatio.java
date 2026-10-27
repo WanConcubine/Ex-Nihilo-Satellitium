@@ -23,8 +23,8 @@ public final class ExNihiloImitatio {
     public static final String MOD_ID = "exnihiloimitatio";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public ExNihiloImitatio() {
-        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public ExNihiloImitatio(final FMLJavaModLoadingContext context) {
+        final IEventBus modBus = context.getModEventBus();
 
         ModBlocks.register(modBus);
         ModItems.register(modBus);
