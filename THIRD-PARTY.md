@@ -14,7 +14,7 @@ Minecraft 是 Mojang Studios 的商标。Minecraft 与 Forge 不随本仓库分�
 使用本项目需要合法的 Minecraft 与 Forge 安装。
 
 木桶等方块模型会在运行时引用原版方块贴图（`oak_planks`、`spruce_planks`、
-`iron_block`）；这些贴图不随本项目的 jar 分发。
+`gray_concrete`）；这些贴图不随本项目的 jar 分发。
 
 ## Ex Nihilo 系列（参考，不含代码/资源）
 
