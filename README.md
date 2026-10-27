@@ -41,6 +41,15 @@
 - [ ] M7 JEI / 配置 / 数据生成
 - [ ] M8 与「月光魔法」联动
 
+## 文档
+
+- [docs/status.md](docs/status.md) —— 当前状态、验证表、下一步（交接先看这个）
+- [docs/DESIGN.md](docs/DESIGN.md) —— 原则、架构、里程碑、M1 记录
+- [docs/data-format.md](docs/data-format.md) —— 堆肥 JSON、物品标签、NBT、命令
+- [docs/textures.md](docs/textures.md) —— 纹理路线、引用规则、检查脚本
+- [THIRD-PARTY.md](THIRD-PARTY.md) —— 第三方/参考来源
+- [AGENTS.md](AGENTS.md) —— 仓库规则（给协作者/AI）
+
 ## 构建
 
 ```bash
