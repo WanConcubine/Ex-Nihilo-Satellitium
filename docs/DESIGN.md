@@ -85,7 +85,8 @@ com.kaifengcrt.exnihiloimitatio
 | 里程碑 | 内容 | 验收标准 |
 |---|---|---|
 | M0 | 骨架、元数据、Creative Tab、占位方块/物品 | `./gradlew build` 通过，游戏内能看到物品 |
-| M1 | 木桶：堆肥、流体存储、方块转化 | 木桶能堆肥成泥土，能装水/熔岩 |
+| M1 | 木桶：堆肥 + 流体存储（1000 mB）+ 比较器 | 堆肥成泥土；桶能装/倒水与熔岩 |
+| M1.5 | 桶内方块转化（水 + 熔岩 → 石/黑曜石） | 桶内两种流体按规则转化 |
 | M2 | 筛子 + 筛网 + 数据驱动掉落 | 不同筛网筛不同材料，JSON 可改 |
 | M3 | 锤子 + 钩子 | 锤碎圆石/砂砾，钩树叶出树苗/蚕 |
 | M4 | 坩埚 + 热源 | 坩埚熔圆石为熔岩 |
@@ -144,3 +145,40 @@ com.kaifengcrt.exnihiloimitatio
 - 是否需要 Skyblock 世界类型（Ex Deorum 有，工作量不小）？
 - 是否提供 1.20.1 之外的版本分支？
 - ARR 是否长期保留，还是稳定后转 MIT？
+
+## 8. M1 实现记录（2026-10-27）
+
+**已完成**
+
+- `BarrelBlock` + `BarrelBlockEntity`：1000 mB `FluidTank`、`IFluidHandler` capability、NBT 持久化、客户端同步。
+- 堆肥：`#exnihiloimitatio:compostable` 物品标签负责客户端交互预测；
+  `data/<namespace>/compost/*.json` 提供数值（默认 30 条）；满 100 后 600 tick 转泥土，木桶被消耗。
+- 比较器输出：`max(流体比例, 堆肥比例)` 映射到 0–15。
+- 客户端 `BarrelRenderer`：开口木箱模型 + 液面 quad，流体纹理/颜色走
+  `IClientFluidTypeExtensions`。
+
+**验证**
+
+- `./gradlew build` 通过（无警告）。
+- 开发服 RCON 实测：
+  - `setblock ... exnihiloimitatio:barrel` + `data merge {Compost:100,CompostTicks:1}`
+    → 2 秒后变成 `minecraft:dirt`（`execute if block` 返回 Test passed）。
+  - `data merge {FluidName:"minecraft:lava",Amount:1000}` 后 `data get` 读回
+    `minecraft:lava` / `1000`。
+  - 标签加载无 `TagLoader` 报错，日志 `[compost] loaded 30 entries`。
+
+**踩过的坑**
+
+- `FluidTank` 在 Forge 47.4.28 的 NBT 是**顶层** `FluidName` / `Amount`，不是
+  `{Fluid:{...}}`；写 datapack/命令时别套错。
+- `#minecraft:crops` / `#minecraft:seeds` 不是 1.20.1 的物品标签，会整条标签加载失败；
+  改用具体物品 id。`minecraft:carrots` / `minecraft:potatoes` 是方块 id，物品是
+  `minecraft:carrot` / `minecraft:potato`。
+- Forge 47.4.x 把 `BlockBehaviour#use` 和比较器方法标了 `@Deprecated`，但 1.20.1
+  没有替代；`BarrelBlock` 用 `@SuppressWarnings("deprecation")` 抑制并注明原因。
+
+**未验证 / 下一步**
+
+- 液面渲染与开口模型没有进游戏目视（headless 只能保证编译和逻辑）。
+- 比较器没有实测（RCON `setblock` 出来的比较器读不到 BE，属于测试方式问题）。
+- 桶内方块转化（水 + 熔岩 → 石/黑曜石）未做，留到 M1.5。
