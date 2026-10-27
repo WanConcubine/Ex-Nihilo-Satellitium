@@ -53,6 +53,12 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 首次构建会下载 Gradle、Forge、Minecraft 依赖并反编译，耗时较长（约 5–15 分钟），
 之后会走缓存。
 
+如果构建卡在 `Checking server connections`（ForgeGradle 的 TLS 检查），可以加：
+
+```bash
+./gradlew build -Dnet.minecraftforge.gradle.check.certs=false
+```
+
 ## 纹理
 
 风格、色板、命名和 AI 政策见 [docs/textures.md](docs/textures.md)。
@@ -68,6 +74,18 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 
 候选内容：月光线做筛网、池尘做稀有筛出物、月光植物进堆肥、本模组矿粒作为月光仪式材料。
 详见 [docs/DESIGN.md](docs/DESIGN.md) 第 6 节。
+
+## Jade（玉）
+
+安装 [Jade](https://modrinth.com/mod/jade) 后，准星对准木桶会显示：
+
+- `堆肥：42 / 100`
+- `还需 18 秒`（堆肥计时中）
+- `泥土已就绪（右键取出）`（DIRT 状态）
+- `水：1000 / 1000 mB`（有流体时）
+
+Jade 是**可选依赖**；没装时插件类不会被加载。API 只用于编译（`compileOnly`），
+不会打进我们的 jar。
 
 ## 许可证
 
