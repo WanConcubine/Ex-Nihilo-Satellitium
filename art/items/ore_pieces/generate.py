@@ -2,13 +2,13 @@
 
 The original Ex Nihilo/Omnia progression has three distinct item stages:
 
-  broken ore  ->  ore gravel block
-  crushed ore ->  ore sand block
-  powdered ore->  ore dust block
+  broken ore  ->  ore gravel block   (4 pieces -> 1 block)
+  crushed ore ->  ore sand block     (4 pieces -> 1 block)
+  powdered ore->  ore dust block     (4 pieces -> 1 block)
 
-They used a tinted base/template pair; we redraw the three silhouettes with
-per-metal palettes instead, keeping the project MIT and the stages readable
-at 16x16.
+The old mod tinted a base/template pair at runtime.  We redraw three clean
+ASCII silhouettes and tint them per metal: deliberate pixels, no noise, and
+no GPLv3 PNGs.
 
 Outputs are preview-only (art/items/ore_pieces/); nothing here is shipped
 until the M5 ore items exist.
@@ -20,50 +20,74 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-# --- silhouettes -----------------------------------------------------------
-# A single large chunk plus a small chip.  Broken ore should read as "chunk".
-BROKEN_MAIN = {
-    3: (6, 10),
-    4: (5, 11),
-    5: (4, 12),
-    6: (4, 12),
-    7: (4, 12),
-    8: (4, 11),
-    9: (4, 11),
-    10: (5, 11),
-    11: (6, 10),
-    12: (7, 9),
-}
-BROKEN_CHIP = {
-    4: (13, 14),
-    5: (13, 15),
-    6: (14, 15),
+# o=outline  s=shadow  b=base  l=light  h=highlight  .=transparent
+BROKEN = """
+................
+......0000......
+....00333300....
+...0333333110...
+..033333332110..
+..0333333222110.
+.03333322221110.
+.03332222211110.
+.01222222111100.
+.0112222111100..
+..011111111100..
+..00111111100...
+...0001111000...
+.....00000......
+................
+................
+"""
+
+CRUSHED = """
+................
+................
+..434....434....
+.3321...3321....
+.211....211.....
+................
+.....434........
+.4..3321........
+.32..211........
+.21......4......
+.32..434.3321...
+.....3321.211...
+......211.......
+.......11.332...
+................
+................
+"""
+
+POWDERED = """
+................
+................
+.......00.......
+......0330......
+.....033330.....
+....03333330....
+...0333333330...
+..033333333320..
+..133333333320..
+..133333333320..
+...1333333320...
+....11333320....
+......1111......
+................
+................
+................
+"""
+
+STAGE_FACETS = {
+    "broken": ((6, 4, "4"), (7, 4, "4"), (5, 5, "4"), (8, 7, "1"), (8, 8, "1")),
+    "crushed": ((3, 3, "4"), (12, 2, "4"), (4, 11, "4")),
+    "powdered": ((5, 8, "4"), (8, 7, "4"), (10, 9, "1"), (12, 8, "4"), (7, 10, "1")),
 }
 
-# Scattered angular fragments.  Crushed ore should read as "many small bits".
-CRUSHED_CHUNKS = (
-    (2, 3, 3, 3),
-    (8, 2, 3, 3),
-    (5, 6, 3, 3),
-    (11, 7, 3, 3),
-    (3, 9, 3, 3),
-    (9, 10, 3, 3),
-    (13, 4, 2, 2),
-)
-
-# A wide, low heap.  Powdered ore should read as "pile", not a rock.
-POWDER_MOUND = {
-    4: (7, 9),
-    5: (6, 10),
-    6: (5, 11),
-    7: (4, 12),
-    8: (3, 13),
-    9: (2, 14),
-    10: (2, 14),
-    11: (1, 15),
-    12: (2, 14),
-    13: (3, 13),
-    14: (4, 12),
+STAGE_TEMPLATES = {
+    "broken": BROKEN,
+    "crushed": CRUSHED,
+    "powdered": POWDERED,
 }
 
 STAGES = ("broken", "crushed", "powdered")
@@ -89,103 +113,26 @@ def hex_rgb(value):
     return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
 
 
-def inside(mask, x, y):
-    row = mask.get(y)
-    return row is not None and row[0] <= x <= row[1]
-
-
-def add_outline(px, mask, outline):
-    for y in range(16):
-        for x in range(16):
-            if px[y][x] is not None:
-                continue
-            if (inside(mask, x - 1, y) or inside(mask, x + 1, y)
-                    or inside(mask, x, y - 1) or inside(mask, x, y + 1)):
-                px[y][x] = outline
-
-
-def draw_mask(px, mask, palette, facets=None):
-    outline, shadow, base, light, highlight = (hex_rgb(c) for c in palette)
-    ys = list(mask)
-    y0, y1 = min(ys), max(ys)
-
-    for y in range(16):
-        for x in range(16):
-            if not inside(mask, x, y):
-                continue
-            left, right = mask[y]
-            if x <= left + 1 and y <= y0 + 1:
-                colour = light if (x + y) % 3 else highlight
-            elif x >= right - 1 or y >= y1 - 1:
-                colour = shadow
-            else:
-                colour = base
-            px[y][x] = colour
-
-    if facets:
-        for x, y, colour in facets:
-            if inside(mask, x, y):
-                px[y][x] = {"s": shadow, "b": base, "l": light, "h": highlight}[colour]
-
-    add_outline(px, mask, outline)
-
-
-def draw_small_chunk(px, x0, y0, width, height, palette):
-    outline, shadow, base, light, _highlight = (hex_rgb(c) for c in palette)
-    mask = {}
-    for y in range(height):
-        row_y = y0 + y
-        if y == 0 or y == height - 1:
-            mask[row_y] = (x0 + 1, x0 + width - 2)
-        else:
-            mask[row_y] = (x0, x0 + width - 1)
-    if width <= 2:
-        mask = {y0 + y: (x0, x0 + width - 1) for y in range(height)}
-
-    for y, (left, right) in mask.items():
-        for x in range(left, right + 1):
-            if x == left or y == min(mask) or x == right or y == max(mask):
-                px[y][x] = light if (x == left and y == min(mask)) else shadow
-            else:
-                px[y][x] = base
-    add_outline(px, mask, outline)
+def parse_template(text):
+    rows = [row for row in text.strip().splitlines() if row]
+    if len(rows) != 16 or any(len(row) != 16 for row in rows):
+        raise ValueError(f"template must be 16x16, got {len(rows)} rows")
+    return rows
 
 
 def texture(metal, stage):
     palette = PALETTES[metal]
-    px = [[None] * 16 for _ in range(16)]
+    codes = {str(index): hex_rgb(colour) for index, colour in enumerate(palette)}
+    grid = [list(row) for row in parse_template(STAGE_TEMPLATES[stage])]
+    for x, y, code in STAGE_FACETS[stage]:
+        if grid[y][x] not in ".0":
+            grid[y][x] = code
 
-    if stage == "broken":
-        draw_mask(px, BROKEN_MAIN, palette, facets=((6, 4, "h"), (7, 5, "l"),
-                                                   (8, 8, "s"), (9, 9, "s")))
-        # chip first so the main chunk's outline wins where they are close
-        draw_mask(px, BROKEN_CHIP, palette)
-    elif stage == "crushed":
-        for chunk in CRUSHED_CHUNKS:
-            draw_small_chunk(px, *chunk, palette)
-    elif stage == "powdered":
-        draw_mask(px, POWDER_MOUND, palette)
-        # speckles make the heap read as loose powder rather than stone
-        outline, shadow, _base, light, highlight = (hex_rgb(c) for c in palette)
-        for x, y, colour in ((5, 6, highlight), (7, 5, light), (9, 5, shadow),
-                             (11, 7, highlight), (4, 8, light), (8, 8, shadow),
-                             (12, 8, light), (3, 10, highlight), (6, 10, shadow),
-                             (10, 10, light), (13, 10, highlight), (5, 12, light),
-                             (9, 12, shadow), (12, 12, highlight), (7, 13, light)):
-            if px[y][x] not in (None, outline):
-                px[y][x] = colour
-    else:
-        raise ValueError(stage)
-
-    return px
-
-
-def to_image(px):
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for y in range(16):
-        for x in range(16):
-            if px[y][x] is not None:
-                img.putpixel((x, y), px[y][x] + (255,))
+    for y, row in enumerate(grid):
+        for x, code in enumerate(row):
+            if code in codes:
+                img.putpixel((x, y), codes[code] + (255,))
     return img
 
 
@@ -201,24 +148,21 @@ def font(size):
     return ImageFont.load_default()
 
 
-def paste_scaled(canvas, img, x, y, scale):
+def paste(canvas, img, x, y, scale):
     canvas.alpha_composite(img.resize((16 * scale, 16 * scale), Image.Resampling.NEAREST),
                            (x, y))
 
 
 def main():
     out = Path(__file__).resolve().parent
-    for old in list(out.glob("*_piece.png")) + [out / "preview.png"]:
-        old.unlink(missing_ok=True)
-
     images = {}
     for metal in PALETTES:
         for stage in STAGES:
-            img = to_image(texture(metal, stage))
+            img = texture(metal, stage)
             img.save(out / f"{metal}_{stage}.png")
             images[(metal, stage)] = img
 
-    # Clear stage comparison for four representative metals.
+    # Four representative metals across the three stages.
     showcase = ("iron", "copper", "gold", "uranium")
     scale = 8
     cell = 16 * scale
@@ -234,8 +178,8 @@ def main():
         y = 58 + row * (cell + 36)
         draw.text((16, y + cell // 2), metal, fill=(195, 195, 195), font=font(14))
         for col, stage in enumerate(STAGES):
-            paste_scaled(preview, images[(metal, stage)],
-                         20 + col * (cell + 24) + 54, y, scale)
+            paste(preview, images[(metal, stage)],
+                  20 + col * (cell + 24) + 54, y, scale)
     preview.convert("RGB").save(out / "preview_stages.png")
 
     # Full 11-metal contact sheet at 3x.
@@ -253,8 +197,8 @@ def main():
         y = 46 + row * (cell + 14)
         draw.text((12, y + cell // 2 - 4), metal, fill=(195, 195, 195), font=font(10))
         for col, stage in enumerate(STAGES):
-            paste_scaled(sheet, images[(metal, stage)],
-                         70 + col * (cell + 20), y, scale)
+            paste(sheet, images[(metal, stage)],
+                  70 + col * (cell + 20), y, scale)
     sheet.convert("RGB").save(out / "preview_all.png")
 
     print(f"wrote {len(images)} stage PNGs, preview_stages.png, preview_all.png")
