@@ -49,6 +49,20 @@ assets/exnihiloimitatio/textures/
 `python3 scripts/generate_barrel_variants.py` 从同一张表生成，几何仍只维护
 `models/block/barrel_base.json`。新增木种 = 在脚本表里加一行 + 补 lang。
 
+## 矿物碎块（M5 预览）
+
+旧 Ex Nihilo 的矿粒/粉碎矿用 `base + template + color` 运行时染色（`ItemBrokenBase`/
+`ItemCrushedBase` 等），不是每种金属一张 PNG。我们按同样的思路**重绘**：
+
+- `art/items/ore_pieces/generate.py`：共享 16×16“三块矿粒”剪影，按金属套 5 阶色板；
+  输出铁/金/铜/锡/铅/银/镍/铝/铂/铀/锌 11 张 PNG + `preview.png`。
+- 风格：1px 深色描边、透明背景、左上光源、4–5 阶、低饱和；颜色参考 1.20 原版
+  矿物/锭，但**不复制**旧 Ex Nihilo 或原版 PNG。
+- 目前只在 `art/` 里做预览，没有进 `assets/`；M5 加 `ore_piece` / `crushed_ore` 物品时
+  再提升为 `textures/item/*.png`，并保证 16×16。
+- 如果以后要省文件，可以只保留一张灰度 base + `tintindex`，用 1.20 的 `ItemColor`
+  按金属染色；当前先按每金属一张，便于逐个调色。
+
 ## 引用规则
 
 - **允许**模型引用 `minecraft:block/*`：这是 vanilla-sampled 的正常做法，贴图不随 jar 分发。
