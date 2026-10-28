@@ -60,7 +60,7 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 
 ### 标签必须同步
 
-`data/exnihiloimitatio/tags/items/compostable.json`：
+`data/exnihilosatellitium/tags/items/compostable.json`：
 
 ```json
 {
@@ -103,11 +103,11 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 
 ```mcfunction
 # 放一个桶（橡木）
-/setblock ~ ~ ~ exnihiloimitatio:barrel
+/setblock ~ ~ ~ exnihilosatellitium:barrel
 
 # 其他材质：spruce_barrel / birch_barrel / jungle_barrel /
 # acacia_barrel / dark_oak_barrel / stone_barrel
-/setblock ~ ~ ~ exnihiloimitatio:stone_barrel
+/setblock ~ ~ ~ exnihilosatellitium:stone_barrel
 
 # 直接写满堆肥，1 tick 后完成
 /data merge block ~ ~ ~ {Compost:1000,CompostTicks:1}
@@ -118,7 +118,7 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 /data get block ~ ~ ~ CompostTicks
 
 # 确认还是桶（不是泥土）
-/execute if block ~ ~ ~ exnihiloimitatio:barrel
+/execute if block ~ ~ ~ exnihilosatellitium:barrel
 
 # 灌流体（顶层 FluidName / Amount）
 /data merge block ~ ~ ~ {FluidName:"minecraft:lava",Amount:1000}
@@ -135,14 +135,14 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 
 ## 5. Jade tooltip 键
 
-`assets/exnihiloimitatio/lang/{en_us,zh_cn}.json`：
+`assets/exnihilosatellitium/lang/{en_us,zh_cn}.json`：
 
 | 键 | 用途 |
 |---|---|
-| `jade.exnihiloimitatio.barrel.ready` | 泥土已就绪 |
-| `jade.exnihiloimitatio.barrel.compost` | `堆肥：x / 1000` |
-| `jade.exnihiloimitatio.barrel.timer` | `还需 n 秒` |
-| `jade.exnihiloimitatio.barrel.fluid` | `流体：x / 1000 mB` |
+| `jade.exnihilosatellitium.barrel.ready` | 泥土已就绪 |
+| `jade.exnihilosatellitium.barrel.compost` | `堆肥：x / 1000` |
+| `jade.exnihilosatellitium.barrel.timer` | `还需 n 秒` |
+| `jade.exnihilosatellitium.barrel.fluid` | `流体：x / 1000 mB` |
 
 Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，不发额外网络包。
 
@@ -150,7 +150,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 
 - `common/compost/CompostRegistry.java`：解析 JSON、按物品/标签查值。
 - `common/compost/CompostReloadListener.java`：资源重载入口。
-- `common/tag/ModTags.java`：`#exnihiloimitatio:compostable`。
+- `common/tag/ModTags.java`：`#exnihilosatellitium:compostable`。
 - `common/blockentity/BarrelBlockEntity.java`：状态机、NBT、比较器、粒子/音效。
 - `client/BarrelRenderer.java`：液面 / 堆肥 box / DIRT 泥土 box。
 

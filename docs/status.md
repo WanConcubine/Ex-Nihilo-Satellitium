@@ -12,9 +12,12 @@
 ## 现在停在哪
 
 - 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Imitation`。
-- 上一个功能提交：木桶 vanilla-sampled + 深灰箍 + 开口物品模型 + 当前模型渲染图。
-- 本次改动：七种材质变体（已提交，`git log -1` 可见）；几何只在
-  `models/block/barrel_base.json`，子模型只覆盖贴图。
+- **2026-10-28 正式改名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；
+  mod id、Java 包、assets/data 命名空间改为 `exnihilosatellitium`。
+  旧 `exnihiloimitatio` 世界不兼容，需要新世界（目前没有发布，影响只在本地测试档）。
+- 上一个功能提交：v6.5 矿粒碎块边缘定稿（`5efa076`）。
+- 本次改动：正式改名（mod id / Java 包 / assets+data 命名空间）+ 重跑构建、服务端和
+  客户端资源加载；提交见 `git log -1`。
 - 开发服 `run/server.properties` 的 `online-mode` / `enforce-secure-profile` 已恢复为 `true`；
   测试用的临时平台已清掉，spawn / gamerule 已复原。
 - Jade 插件类已在 jar 里，但**没有装 Jade 做过真实 tooltip 验收**。
@@ -23,22 +26,23 @@
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| `./gradlew build` | ✅ | 2026-10-28：`BUILD SUCCESSFUL in 9s` |
+| `./gradlew build` | ✅ | 2026-10-28：`--offline` 下 `BUILD SUCCESSFUL in 8s`；直连 TLS 失败时用缓存 |
 | `python3 scripts/check-textures.py` | ✅ | 七个子模型只引用 vanilla **block** 贴图 |
 | 服务端启动 | ✅ | 无 Jade 也能启动；`Done (3.5s)` |
-| 七种桶 BE | ✅ | RCON 逐种 `setblock` + `data merge {Compost:1000,...}`，2.5s 后仍是该桶、`DirtReady=1b` |
+| 七种桶 BE | ✅ | 改名后 RCON：`exnihilosatellitium:barrel` 堆肥→DIRT、`DirtReady=1b`；七种材质共享同一 BE 注册表 |
 | 堆肥容量/刻度 | ✅ | `data get` 读回 `Compost=1000`、`CompostScale=1000`；满后 1000 tick → DIRT |
 | 堆肥数值表 | ✅ | `/reload` 日志 `[compost] loaded 65 entries`，无 unknown item / invalid tag |
 | 石桶流体 NBT | ✅ | RCON 写 `FluidName`/`Amount`，读回 `minecraft:lava` / `1000` |
-| 掉落表 | ✅ | `/loot spawn ... exnihiloimitatio:blocks/{spruce,stone}_barrel` 返回对应物品 |
+| 掉落表 | ✅ | `/loot spawn ... exnihilosatellitium:blocks/{spruce,stone}_barrel` 返回对应物品 |
 | 资源重载 | ✅ | `/reload` 后 `Loaded 7 recipes`（正好七种桶配方）、`[compost] loaded 65 entries` |
-| 客户端资源加载 | ✅ | 客户端到主菜单，日志无 missing model / missing texture |
+| 客户端资源加载 | ✅ | 改名后客户端到主菜单；`Reloading ResourceManager` 无 missing model / missing texture |
 | 实际进游戏目视 | ❌ | 只跑了客户端资源加载；没有截图验收比例、箍位置、物品栏图标 |
 | 右键取泥土 | ⚠️ | 逻辑未改，仍未自动化（需要真实玩家） |
 | 逐项右键堆肥 | ⚠️ | JSON/标签已对齐，但没有玩家逐项右键验证点数 |
 | 比较器 | ⚠️ | 逻辑未改，仍未实测 |
 | Jade tooltip | ⚠️ | 编译通过、无 Jade 启动通过；**未装 Jade 实测** |
 | 合成配方 | ⚠️ | 7 个 JSON 都加载成功；没有玩家实测合成格 |
+| 改名完整性 | ✅ | `git grep` 无旧 id/旧类名；jar 内 `mods.toml` 为 `exnihilosatellitium` / `Ex Nihilo: Satellitium` |
 
 ## 下一步（按价值排序）
 
@@ -53,6 +57,8 @@
 
 ## 已拍板的决策
 
+- **项目名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；mod id `exnihilosatellitium`，
+  Java 包 `com.kaifengcrt.exnihilosatellitium`，资源命名空间 `exnihilosatellitium`（2026-10-28）。
 - **许可证 MIT**（2026-10-27 从 ARR 转）；Forge MDK 仍 LGPL-2.1，见 [THIRD-PARTY.md](../THIRD-PARTY.md)。
 - **方块走 vanilla-sampled**：模型直接引用 `minecraft:block/*`，不复制/不打包原版贴图。
   七种桶共用 `barrel_base.json` 几何；木桶侧重木种木板 + 去皮原木内壁 + `gray_concrete` 深灰箍，
@@ -72,11 +78,12 @@
 ## 踩过的坑（改代码前先看）
 
 - **ForgeGradle 卡 `Checking server connections`**：加 `-Dnet.minecraftforge.gradle.check.certs=false`。
+- **直连 TLS 失败（libraries.minecraft.net / repo.maven TLS handshake）**：缓存已齐时用 `--offline` 构建/启动。
 - **`FluidTank` NBT 是顶层** `FluidName` / `Amount`，不是 `{Fluid:{...}}`。
 - **`#minecraft:crops` / `#minecraft:seeds` 不是 1.20.1 物品标签**；用 `#forge:*` 或具体 id。
   `minecraft:carrots/potatoes` 是方块 id，物品是 `carrot` / `potato`。
 - **内缩模型的外侧面不能加 `cullface`**：墙在 z=1/x=1，不在方块边界，加了会整面被剔除。
-- **堆肥标签和 JSON 必须同步**：服务端也先查 `#exnihiloimitatio:compostable`，JSON 里有但标签没有 = 不能堆肥。
+- **堆肥标签和 JSON 必须同步**：服务端也先查 `#exnihilosatellitium:compostable`，JSON 里有但标签没有 = 不能堆肥。
 - **堆肥刻度从 100 改成 1000**：老存档没有 `CompostScale`，`load()` 会 ×10 并缩放计时；新存档写 `CompostScale:1000`。
 - **共享 BE 类型要列全七种方块**：`BlockEntityType.Builder.of` 漏一个，放置后 BE 不创建 / ticker 为 null。
 - **旧配方 `#minecraft:planks` 必须删掉**：它会和具体木种配方同时匹配，产物不可预测。
@@ -98,8 +105,8 @@ python3 scripts/generate_barrel_variants.py          # 从材质表重生成七�
 ## 文件地图
 
 ```
-src/main/java/com/kaifengcrt/exnihiloimitatio/
-├── ExNihiloImitatio.java           # 入口
+src/main/java/com/kaifengcrt/exnihilosatellitium/
+├── ExNihiloSatellitium.java           # 入口
 ├── registry/                       # Block / Item / BlockEntity / CreativeTab
 ├── common/
 │   ├── block/BarrelBlock.java
@@ -113,7 +120,7 @@ src/main/java/com/kaifengcrt/exnihiloimitatio/
     └── jade/                       # 可选 HUD
 ```
 
-数据在 `src/main/resources/data/exnihiloimitatio/`，格式见 [data-format.md](data-format.md)。
+数据在 `src/main/resources/data/exnihilosatellitium/`，格式见 [data-format.md](data-format.md)。
 
 ## 文档维护
 

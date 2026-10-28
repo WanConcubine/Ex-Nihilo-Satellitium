@@ -1,0 +1,15 @@
+{
+  "itemGroup.exnihilosatellitium": "无中生有：众星捧月",
+  "block.exnihilosatellitium.barrel": "木桶",
+  "block.exnihilosatellitium.spruce_barrel": "云杉木桶",
+  "block.exnihilosatellitium.birch_barrel": "白桦木桶",
+  "block.exnihilosatellitium.jungle_barrel": "丛林木桶",
+  "block.exnihilosatellitium.acacia_barrel": "金合欢木桶",
+  "block.exnihilosatellitium.dark_oak_barrel": "深色橡木桶",
+  "block.exnihilosatellitium.stone_barrel": "石桶",
+  "item.exnihilosatellitium.porcelain": "瓷土",
+  "jade.exnihilosatellitium.barrel.ready": "泥土已就绪（右键取出）",
+  "jade.exnihilosatellitium.barrel.compost": "堆肥：%s / %s",
+  "jade.exnihilosatellitium.barrel.timer": "还需 %s 秒",
+  "jade.exnihilosatellitium.barrel.fluid": "%s：%s / %s mB"
+}

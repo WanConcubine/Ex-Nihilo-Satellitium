@@ -1,0 +1,15 @@
+{
+  "itemGroup.exnihilosatellitium": "Ex Nihilo: Satellitium",
+  "block.exnihilosatellitium.barrel": "Barrel",
+  "block.exnihilosatellitium.spruce_barrel": "Spruce Barrel",
+  "block.exnihilosatellitium.birch_barrel": "Birch Barrel",
+  "block.exnihilosatellitium.jungle_barrel": "Jungle Barrel",
+  "block.exnihilosatellitium.acacia_barrel": "Acacia Barrel",
+  "block.exnihilosatellitium.dark_oak_barrel": "Dark Oak Barrel",
+  "block.exnihilosatellitium.stone_barrel": "Stone Barrel",
+  "item.exnihilosatellitium.porcelain": "Porcelain",
+  "jade.exnihilosatellitium.barrel.ready": "Dirt ready (right-click to extract)",
+  "jade.exnihilosatellitium.barrel.compost": "Compost: %s / %s",
+  "jade.exnihilosatellitium.barrel.timer": "Ready in %s s",
+  "jade.exnihilosatellitium.barrel.fluid": "%s: %s / %s mB"
+}

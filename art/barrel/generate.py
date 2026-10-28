@@ -209,7 +209,7 @@ def main():
     f14 = font(14)
     f12 = font(12)
 
-    draw.text((20, 12), "Ex Nihilo: Imitatio - barrel test (16x16, modern vanilla)", fill=(230, 230, 230), font=f16)
+    draw.text((20, 12), "Ex Nihilo: Satellitium - barrel test (16x16, modern vanilla)", fill=(230, 230, 230), font=f16)
     draw.text((20, 38), "hand-authored pixels; no vanilla or AI textures", fill=(150, 150, 150), font=f12)
 
     draw.text((20, 66), "side", fill=(210, 210, 210), font=f14)

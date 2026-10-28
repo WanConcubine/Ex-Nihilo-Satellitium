@@ -18,9 +18,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihiloimitatio"
+ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium"
 DATA = ROOT / "src" / "main" / "resources" / "data"
-MOD_ID = "exnihiloimitatio"
+MOD_ID = "exnihilosatellitium"
 
 # (block id, wood type). The public `barrel` id stays oak for save compatibility.
 WOOD_BARRELS = (
