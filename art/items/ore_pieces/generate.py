@@ -61,6 +61,13 @@ CRUSHED = """
 ................
 """
 
+POWDER_CLUMPS = (
+    (5, 8, ("44", "32")),
+    (9, 9, ("34", "21")),
+    (12, 8, ("44", "32")),
+    (7, 11, ("1",)),
+)
+
 POWDERED = """
 ................
 ................
@@ -81,6 +88,8 @@ POWDERED = """
 """
 
 STONE = ("#141414", "#2E2E2E", "#4A4A4A", "#6A6A6A", "#8A8A8A")
+
+BROKEN_LIGHTS = ((6, 4), (7, 4), (6, 5))
 
 STAGES = ("broken", "crushed", "powdered")
 
@@ -119,16 +128,20 @@ def inside(grid, x, y):
 def broken(metal):
     stone = [hex_rgb(c) for c in STONE]
     metal_palette = [hex_rgb(c) for c in PALETTES[metal]]
-    grid = parse_template(BROKEN)
+    grid = [list(row) for row in parse_template(BROKEN)]
+    for x, y in BROKEN_LIGHTS:
+        if grid[y][x] == "1":
+            grid[y][x] = "2"
+    grid = ["".join(row) for row in grid]
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
 
     for y in range(16):
         for x in range(16):
             code = grid[y][x]
             if code == "1":
-                edge = not all(inside(grid, x + dx, y + dy)
-                               for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
-                colour = stone[0] if edge else stone[1]
+                dark_edge = ((y + 1 < 16 and grid[y + 1][x] == ".")
+                             or (x + 1 < 16 and grid[y][x + 1] == "."))
+                colour = stone[0] if dark_edge else stone[1]
             elif code == "2":
                 colour = stone[3] if (x + y) % 3 else stone[2]
             elif code == "O":
@@ -168,8 +181,16 @@ def crushed(metal):
 def powdered(metal):
     palette = [hex_rgb(c) for c in PALETTES[metal]]
     codes = {str(i): palette[i] for i in range(5)}
+    grid = [list(row) for row in parse_template(POWDERED)]
+    for x0, y0, stamp in POWDER_CLUMPS:
+        for dy, row in enumerate(stamp):
+            for dx, code in enumerate(row):
+                x, y = x0 + dx, y0 + dy
+                if grid[y][x] not in ".0":
+                    grid[y][x] = code
+
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for y, row in enumerate(parse_template(POWDERED)):
+    for y, row in enumerate(grid):
         for x, code in enumerate(row):
             if code in codes:
                 img.putpixel((x, y), codes[code] + (255,))
