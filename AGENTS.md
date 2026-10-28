@@ -32,9 +32,10 @@ python3 scripts/check-textures.py
 
 ## 3. 硬规则
 
-1. **不复制 GPLv3 代码/PNG。**
-   - `reference/ex-nihilo-original` 是原版 GPLv3 的只读参考，已 gitignore；**不要提交、不要打包、不要 import 它的类或贴图**。
-   - 需要行为参考时，自己重写；只借鉴功能性思路。
+1. **不复制 GPLv3 代码/资源。**
+   - 原版 Ex Nihilo 与 Ex Nihilo Omnia 都是 **GPLv3**；`reference/` 和本地 Omnia jar 只读、已 gitignore，**不要提交、不要打包、不要 import 它的类**。
+   - 可以对照**玩法数值/行为**，但不要复制它的代码、JSON 文件、贴图、模型或音效；数值表和规则用本项目自己的 JSON/代码重新表达。
+   - 需要行为参考时，自己重写；只借鉴功能性思路。要复制 GPL 资源就必须得到所有者同意并把相应部分按 GPLv3 处理。
 2. **方块走 vanilla-sampled，物品走自有像素。**
    - 允许模型引用 `minecraft:block/*`（不复制文件、不随 jar 分发）。
    - **禁止**模型引用 `minecraft:item/*`；物品图标必须是 `exnihiloimitatio:item/*`。

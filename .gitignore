@@ -31,6 +31,10 @@ mcmodsrepo
 # GPLv3 upstream clone for read-only reference; never commit or ship
 reference/
 
+# GPLv3 reference jars (Omnia/original); local only, never commit or ship
+/exnihiloomnia-*.jar
+/ExNihilo*.jar
+
 # Files from Forge MDK
 forge*changelog.txt
 
