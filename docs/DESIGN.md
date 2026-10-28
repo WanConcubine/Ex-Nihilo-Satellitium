@@ -154,7 +154,7 @@ com.kaifengcrt.exnihiloimitatio
 
 - `BarrelBlock` + `BarrelBlockEntity`：1000 mB `FluidTank`、`IFluidHandler` capability、NBT 持久化、客户端同步。
 - 堆肥：`#exnihiloimitatio:compostable` 物品标签负责客户端交互预测；
-  `data/<namespace>/compost/*.json` 提供数值（默认 60 条）；满 1000 后 1000 tick 进入 DIRT 状态，
+  `data/<namespace>/compost/*.json` 提供数值（默认 65 条）；满 1000 后 1000 tick 进入 DIRT 状态，
   **木桶保留**；右键取出 1 个泥土并重置，桶可继续用。
 - 比较器输出：DIRT 状态固定 15；否则 `max(流体比例, 堆肥比例)` 映射到 0–15。
 - **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
@@ -267,34 +267,42 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 
 最初的 `default.json` 是拍脑袋的一版：树苗 8、树叶 4、苹果 4、面包 6、干草块 18……按 100 分制
 换算后，树苗要 13 个才满一桶，和原版 Ex Nihilo 的 8 个明显对不上；肉类、鱼、南瓜派、
-西瓜块、蜘蛛眼等原版条目也缺失。
+西瓜块、蜘蛛眼等经典条目也缺失。
 
-**来源**
+**来源与取舍**
 
-- 原版 Ex Nihilo 1.7.10：本地只读参考 `reference/ex-nihilo-original` 的
-  `CompostRegistry.load()`。桶容量是 0..1 float，树苗/树叶 `0.125`、花/蘑菇 `0.10`、
-  小麦/胡萝卜/土豆/甘蔗 `0.08`、面包/南瓜派 `0.16`、肉 `0.20`、鱼 `0.15`、
-  西瓜片/线/蚕 `0.04`、西瓜/南瓜 `1/6`。
-- Ex Nihilo: Sequentia 1.20.1：`CompostRecipes` 把同一套比例放大到 **1000** 分制
-  （树苗/树叶 125、花/蘑菇 100、小麦/种子/鸡蛋/甘蔗 80、肉 200、鱼 150、面包/南瓜派 160、
-  西瓜片/线 40、1/6 用 166），并补了海带、浆果、竹子、滴水叶、孢子花、红树根、菌类等
-  1.20 内容。Sequentia 把胡萝卜/土豆/甜菜根/烤土豆/毒土豆/高草提高到 100/150/200；
-  本项目经典物品仍按原版 1.7.10 的 **80**，只有 1.20 新物品用 Sequentia 的 100/80 分类值。
+- **原版 Ex Nihilo 1.7.10**：本地只读参考 `reference/ex-nihilo-original` 的
+  `CompostRegistry.load()`。桶容量是 0..1 float（树苗/树叶 0.125、花/蘑菇 0.10、
+  小麦 0.08、面包 0.16、肉 0.20、鱼 0.15、瓜块 1/6）。
+- **Ex Nihilo Omnia 1.10.2**：`CompostRegistry.registerVanillaRecipes()` 直接用 1000 mB
+  写值（默认 125），是原版比例在 1.10 的延续/微调。本项目以它为**主表**：
+  树苗/树叶 125、花/蘑菇 100、小麦/腐肉/蜘蛛眼 85、面包 125、南瓜派 175、鸡蛋 80、
+  生熟肉 175、鱼 120、苹果 100、金苹果 200、西瓜片 40、西瓜/南瓜块 150、仙人掌 100、
+  胡萝卜/土豆 80、睡莲/藤蔓/下界疣/甘蔗 80、线 40、恶魂之泪 5。
+- **Ex Nihilo: Sequentia 1.20.1**：只用它的 **1000 分制刻度**，不采用它的重平衡
+  （它把肉调到 200、鱼 150、面包 160、瓜块 166，和 Omnia 1.10.2 不一致）。
+
+**高版本适配**
+
+- 1.20 新植物（海带、甜浆果、发光浆果、竹子、孢子花、大/小滴水叶、海草、红树根、
+  绯红/诡异菌与根、垂根）按 Omnia 的“植物/菌类”类别取 **100**。
+- 1.20 新种子（火把花种子、瓶子草荚）按种子取 **80**；甜菜根按根茎作物取 **80**。
+- 藤蔓类（藤蔓、垂泪藤、缠怨藤）取 **80**；单格草/蕨取 **80**，双格高草/大蕨取 **100**。
+- 不能映射的 Omnia 条目（灰烬、蚕、蚕蛹等）等对应物品做出来后再加。
 
 **落地**
 
 - `COMPOST_MAX = 1000`、`COMPOST_TICKS = 1000`（50 秒，对齐原版 `MAX_COMPOSTING_TIME`）。
-- `default.json` 改为 **60 条**（12 个标签 + 48 个具体物品），`compostable.json` 同步；
+- `default.json` 改为 **65 条**（12 个标签 + 53 个具体物品），`compostable.json` 同步；
   肉类按 1.20.1 的十种生/熟肉显式列出，鱼用 `#minecraft:fishes`，种子/作物/蛋/线用
   `#forge:*` 标签。
 - 老存档迁移：`saveAdditional` 写 `CompostScale:1000`；`load()` 发现没有这个键时把
   `Compost` ×10、`CompostTicks` 按 600→1000 缩放，旧测试桶不会变成 1/10 进度。
-- 1/6 的瓜类按 1000 分制取整 **166**；7 个是 1162，桶会截到 1000，和原版
-  “多塞一点会溢出但不会浪费”一致。
+- 150 的瓜类 7 个是 1050，桶会截到 1000，和 Omnia “多塞一点会溢出但不会浪费”一致。
 
 **验证**
 
 - `./gradlew build` 通过；`python3 scripts/check-textures.py` 通过。
-- 服务端 `/reload` 日志：`[compost] loaded 60 entries`，无 `unknown item` / `invalid tag`。
+- 服务端 `/reload` 日志：`[compost] loaded 65 entries`，无 `unknown item` / `invalid tag`。
 - RCON：`data merge {Compost:1000,CompostTicks:1}` → 2 秒后仍是桶、`DirtReady=1b`。
 - 未验证：逐个物品右键塞桶的点数（需要玩家）；JSON 与标签的键已用脚本对齐。

@@ -23,15 +23,15 @@
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| `./gradlew build` | ✅ | 2026-10-28：`BUILD SUCCESSFUL in 6s` |
+| `./gradlew build` | ✅ | 2026-10-28：`BUILD SUCCESSFUL in 9s` |
 | `python3 scripts/check-textures.py` | ✅ | 七个子模型只引用 vanilla **block** 贴图 |
 | 服务端启动 | ✅ | 无 Jade 也能启动；`Done (3.5s)` |
 | 七种桶 BE | ✅ | RCON 逐种 `setblock` + `data merge {Compost:1000,...}`，2.5s 后仍是该桶、`DirtReady=1b` |
 | 堆肥容量/刻度 | ✅ | `data get` 读回 `Compost=1000`、`CompostScale=1000`；满后 1000 tick → DIRT |
-| 堆肥数值表 | ✅ | `/reload` 日志 `[compost] loaded 60 entries`，无 unknown item / invalid tag |
+| 堆肥数值表 | ✅ | `/reload` 日志 `[compost] loaded 65 entries`，无 unknown item / invalid tag |
 | 石桶流体 NBT | ✅ | RCON 写 `FluidName`/`Amount`，读回 `minecraft:lava` / `1000` |
 | 掉落表 | ✅ | `/loot spawn ... exnihiloimitatio:blocks/{spruce,stone}_barrel` 返回对应物品 |
-| 资源重载 | ✅ | `/reload` 后 `Loaded 7 recipes`（正好七种桶配方）、`[compost] loaded 60 entries` |
+| 资源重载 | ✅ | `/reload` 后 `Loaded 7 recipes`（正好七种桶配方）、`[compost] loaded 65 entries` |
 | 客户端资源加载 | ✅ | 客户端到主菜单，日志无 missing model / missing texture |
 | 实际进游戏目视 | ❌ | 只跑了客户端资源加载；没有截图验收比例、箍位置、物品栏图标 |
 | 右键取泥土 | ⚠️ | 逻辑未改，仍未自动化（需要真实玩家） |
@@ -61,8 +61,9 @@
 - **不复制 Ex Nihilo 的 GPLv3 PNG**；`reference/` 只读、gitignore、不随包分发。
 - **木桶 14×16×14 内缩**；物品模型用开口 block model + `display` 变换（没有封闭盖）。
 - **七种桶共享一个 BE 类型**；行为/NBT/Jade 完全一致，石桶暂不做差异化。
-- **堆肥用 1000 分制**：数值对齐原版 Ex Nihilo / Ex Nihilo: Sequentia 1.20.1
-  （树苗/树叶 125、花/蘑菇 100、肉 200、鱼 150、小麦 80、1/6 用 166）；
+- **堆肥用 1000 分制**：以 **Omnia 1.10.2** 的表为骨架，原版 1.7.10 校验比例；
+  Sequentia 只借 1000 刻度，不采用它的重平衡。树苗/树叶 125、面包 125、花/蘑菇 100、
+  腐肉/蜘蛛眼/小麦 85、肉/南瓜派 175、鱼 120、瓜块 150、胡萝卜等 80。
   满 1000 后 1000 tick（50 秒）变 DIRT。老存档按 `CompostScale` 缺失自动 ×10 迁移。
 - **Jade 是可选依赖**：`compileOnly` API，不打包；没装时插件类不加载。
 - **月光魔法是可选软依赖**：`moonlight_magic`，目前只占位，没有实际联动内容。
