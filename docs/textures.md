@@ -13,7 +13,7 @@
   - 石桶 = `stone` + `smooth_stone` 顶沿 + `deepslate_tiles` 深色箍；
   - 木桶的两道箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
 - **物品与特殊表面（瓷土、堆肥面）：自有 16×16 手绘像素。**
-  放在 `assets/exnihiloimitatio/textures/`，由脚本逐像素生成，可复现。
+  放在 `assets/exnihilosatellitium/textures/`，由脚本逐像素生成，可复现。
 
 这样和 Ex Nihilo 的“采样自原版”是同一个思路，但不复制它的 GPLv3 PNG。
 
@@ -37,7 +37,7 @@
 ## 文件
 
 ```
-assets/exnihiloimitatio/textures/
+assets/exnihilosatellitium/textures/
 ├── block/
 │   └── barrel_compost.png   # 堆肥表面（自有）
 └── item/
@@ -83,8 +83,8 @@ assets/exnihiloimitatio/textures/
 ## 引用规则
 
 - **允许**模型引用 `minecraft:block/*`：这是 vanilla-sampled 的正常做法，贴图不随 jar 分发。
-- **禁止**模型引用 `minecraft:item/*`：物品图标必须是自有的 `exnihiloimitatio:item/*`。
-- 自有方块/物品引用 `exnihiloimitatio:*`，文件必须存在且为 16×16。
+- **禁止**模型引用 `minecraft:item/*`：物品图标必须是自有的 `exnihilosatellitium:item/*`。
+- 自有方块/物品引用 `exnihilosatellitium:*`，文件必须存在且为 16×16。
 - 不复制 Ex Nihilo 系列或其他 GPLv3 项目的 PNG。
 
 ## AI 政策
@@ -104,7 +104,7 @@ python3 scripts/check-textures.py
 会失败的情况：
 
 - 模型纹理层指向 `minecraft:item/*`；
-- 引用了不存在的 `exnihiloimitatio:*` 贴图；
+- 引用了不存在的 `exnihilosatellitium:*` 贴图；
 - PNG 不是 16×16。
 
 `minecraft:block/*` 是允许的；这条检查专门防“物品图标又变回原版占位”。

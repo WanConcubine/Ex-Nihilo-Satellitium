@@ -5,7 +5,7 @@
 
 ## 1. 项目是什么
 
-- **Minecraft 1.20.1 / Forge 47.4.x / Java 17**，mod id `exnihiloimitatio`。
+- **Minecraft 1.20.1 / Forge 47.4.x / Java 17**，mod id `exnihilosatellitium`。
 - 独立实现的 Ex Nihilo 风格空岛模组；**不是** Ex Nihilo 的官方续作。
 - 许可证 **MIT**；第三方声明见 [THIRD-PARTY.md](THIRD-PARTY.md)。
 
@@ -38,10 +38,10 @@ python3 scripts/check-textures.py
    - 需要行为参考时，自己重写；只借鉴功能性思路。要复制 GPL 资源就必须得到所有者同意并把相应部分按 GPLv3 处理。
 2. **方块走 vanilla-sampled，物品走自有像素。**
    - 允许模型引用 `minecraft:block/*`（不复制文件、不随 jar 分发）。
-   - **禁止**模型引用 `minecraft:item/*`；物品图标必须是 `exnihiloimitatio:item/*`。
+   - **禁止**模型引用 `minecraft:item/*`；物品图标必须是 `exnihilosatellitium:item/*`。
    - 不把 AI 生图直接放进 release；moodboard 不进仓库。
 3. **堆肥标签和 JSON 必须同步。**
-   - 服务端也先查 `#exnihiloimitatio:compostable`；JSON 有但标签没有 = 不能堆肥。
+   - 服务端也先查 `#exnihilosatellitium:compostable`；JSON 有但标签没有 = 不能堆肥。
    - 标签有但 JSON 没有 = 按 1 点处理。新增条目两处都加。
 4. **内缩模型的外侧面不要加 `cullface`。**
    - 墙在 x/z=1，不在方块边界；加了会在相邻方块旁整面被剔除。
@@ -51,8 +51,8 @@ python3 scripts/check-textures.py
 ## 4. 代码地图
 
 ```
-com/kaifengcrt/exnihiloimitatio/
-├── ExNihiloImitatio.java        # 入口，注册 DeferredRegister
+com/kaifengcrt/exnihilosatellitium/
+├── ExNihiloSatellitium.java        # 入口，注册 DeferredRegister
 ├── registry/                    # ModBlocks / ModItems / ModBlockEntities / CreativeTabs
 ├── common/
 │   ├── block/BarrelBlock.java   # 形状、交互分发、ticker、比较器

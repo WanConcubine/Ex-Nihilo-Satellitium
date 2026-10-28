@@ -1,6 +1,6 @@
 # Third-party notices
 
-本项目（Ex Nihilo: Imitatio / 无中生有：东施效颦）的代码与美术资源采用 MIT，
+本项目（Ex Nihilo: Satellitium / 无中生有：众星捧月）的代码与美术资源采用 MIT，
 见 [LICENSE](LICENSE)。以下是第三方组件与参考来源。
 
 ## Forge MDK
@@ -50,7 +50,7 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 
 ## 美术
 
-`src/main/resources/assets/exnihiloimitatio/textures/` 下的贴图由本项目的
+`src/main/resources/assets/exnihilosatellitium/textures/` 下的贴图由本项目的
 像素绘制脚本（`art/barrel/generate.py`）逐像素生成，按 MIT 授权。
 没有使用 AI 生图，也没有直接引用原版或其他模组的贴图。
 

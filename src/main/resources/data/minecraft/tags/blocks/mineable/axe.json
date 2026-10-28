@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "exnihiloimitatio:barrel",
-    "exnihiloimitatio:spruce_barrel",
-    "exnihiloimitatio:birch_barrel",
-    "exnihiloimitatio:jungle_barrel",
-    "exnihiloimitatio:acacia_barrel",
-    "exnihiloimitatio:dark_oak_barrel"
+    "exnihilosatellitium:barrel",
+    "exnihilosatellitium:spruce_barrel",
+    "exnihilosatellitium:birch_barrel",
+    "exnihilosatellitium:jungle_barrel",
+    "exnihilosatellitium:acacia_barrel",
+    "exnihilosatellitium:dark_oak_barrel"
   ]
 }

@@ -1,0 +1,11 @@
+{
+  "parent": "exnihilosatellitium:block/barrel_base",
+  "textures": {
+    "particle": "minecraft:block/dark_oak_planks",
+    "side": "minecraft:block/dark_oak_planks",
+    "top": "minecraft:block/dark_oak_planks",
+    "inner": "minecraft:block/stripped_dark_oak_log",
+    "bottom": "minecraft:block/stripped_dark_oak_log",
+    "hoop": "minecraft:block/gray_concrete"
+  }
+}

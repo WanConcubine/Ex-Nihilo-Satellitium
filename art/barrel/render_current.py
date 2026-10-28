@@ -29,11 +29,11 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent
 VANILLA_CACHE = OUT / ".vanilla_textures"
 VANILLA_JAR = Path.home() / ".gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client-extra.jar"
-MODELS = ROOT / "src" / "main" / "resources" / "assets" / "exnihiloimitatio" / "models" / "block"
+MODELS = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium" / "models" / "block"
 VANILLA_TEXTURES = VANILLA_CACHE / "assets" / "minecraft" / "textures"
-MOD_TEXTURES = ROOT / "src" / "main" / "resources" / "assets" / "exnihiloimitatio" / "textures"
+MOD_TEXTURES = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium" / "textures"
 
-MOD_ID = "exnihiloimitatio"
+MOD_ID = "exnihilosatellitium"
 
 VARIANTS = (
     ("barrel", "Oak"),

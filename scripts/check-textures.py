@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihiloimitatio"
+ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium"
 MODELS = ASSETS / "models"
 TEXTURES = ASSETS / "textures"
 
@@ -35,7 +35,7 @@ def png_size(path: Path) -> tuple[int, int]:
 
 
 def texture_path(reference: str) -> Path | None:
-    if reference.startswith("exnihiloimitatio:"):
+    if reference.startswith("exnihilosatellitium:"):
         rel = reference.split(":", 1)[1]
         return TEXTURES / f"{rel}.png"
     return None

@@ -1,4 +1,4 @@
-# 设计文档：无中生有：东施效颦
+# 设计文档：无中生有：众星捧月
 
 > 状态：M1（木桶 + 材质变体）/ 最后更新：2026-10-28
 
@@ -64,8 +64,8 @@
 ### 包结构
 
 ```
-com.kaifengcrt.exnihiloimitatio
-├── ExNihiloImitatio.java        # 入口
+com.kaifengcrt.exnihilosatellitium
+├── ExNihiloSatellitium.java        # 入口
 ├── registry/                    # DeferredRegister
 │   ├── ModBlocks.java
 │   ├── ModItems.java
@@ -143,7 +143,8 @@ com.kaifengcrt.exnihiloimitatio
 
 ## 7. 待定问题
 
-- 模组英文名最终用 `Ex Nihilo: Imitatio` 还是 `Imitatio: Out of Nothing`？
+- 模组英文名最终定为 **Ex Nihilo: Satellitium**，中文名「无中生有：众星捧月」；
+  *Satellitium* 是拉丁语“随从/卫星群”，对应“众星捧月”。
 - 是否需要 Skyblock 世界类型（Ex Deorum 有，工作量不小）？
 - 是否提供 1.20.1 之外的版本分支？
 - ~~ARR 是否长期保留~~ → **已转 MIT（2026-10-27）**，代码与自绘贴图均按 MIT 发布。
@@ -153,7 +154,7 @@ com.kaifengcrt.exnihiloimitatio
 **已完成**
 
 - `BarrelBlock` + `BarrelBlockEntity`：1000 mB `FluidTank`、`IFluidHandler` capability、NBT 持久化、客户端同步。
-- 堆肥：`#exnihiloimitatio:compostable` 物品标签负责客户端交互预测；
+- 堆肥：`#exnihilosatellitium:compostable` 物品标签负责客户端交互预测；
   `data/<namespace>/compost/*.json` 提供数值（默认 65 条）；满 1000 后 1000 tick 进入 DIRT 状态，
   **木桶保留**；右键取出 1 个泥土并重置，桶可继续用。
 - 比较器输出：DIRT 状态固定 15；否则 `max(流体比例, 堆肥比例)` 映射到 0–15。
@@ -177,7 +178,7 @@ com.kaifengcrt.exnihiloimitatio
 - `./gradlew build` 通过（无警告）；jar 内 `license="MIT"`、贴图与模型均打包。
 - `python3 scripts/check-textures.py` 通过，assets 下已无 `minecraft:` 贴图引用。
 - 开发服 RCON 实测：
-  - `setblock ... exnihiloimitatio:barrel` + `data merge {Compost:1000,CompostTicks:1}`
+  - `setblock ... exnihilosatellitium:barrel` + `data merge {Compost:1000,CompostTicks:1}`
     → 2 秒后**仍是 barrel**，`DirtReady=1`、`Compost=1000`（`execute if block` 返回 Test passed）。
   - `data merge {FluidName:"minecraft:lava",Amount:1000}` 后 `data get` 读回
     `minecraft:lava` / `1000`。
