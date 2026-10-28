@@ -64,11 +64,16 @@ assets/exnihiloimitatio/textures/
 
 - `art/items/ore_pieces/generate.py`：每种金属 × 三种阶段，输出
   铁/金/铜/锡/铅/银/镍/铝/铂/铀/锌 共 **33 张 16×16 PNG**，以及
-  `preview_stages.png`（四种金属的三阶段对比）和 `preview_all.png`（全部 11 种）。
-- 剪影区分：`broken` = 一大块 + 小碎块；`crushed` = 多块尖锐小碎片；
-  `powdered` = 宽而低的粉末堆 + 颗粒点。三者在 16×16 下必须一眼能分。
-- 风格：1px 深色描边、透明背景、左上光源、4–5 阶、低饱和；颜色参考 1.20 原版
-  矿物/锭，但**不复制**旧 Ex Nihilo 或原版 PNG。
+  `preview_stages.png`（四种金属的三阶段对比）、`preview_all.png`（全部 11 种）和
+  `compare_before_after.png`（旧版 vs 当前版）。
+- 剪影区分：
+  - `broken` = **暗色石质大块 + 金属色矿点**（参考旧 Ex Nihilo 的深色矿石块，不是整块金属色）；
+  - `crushed` = **散落的小金属碎片**，大小/位置不规则，像图二那种碎屑；
+  - `powdered` = 宽底粉堆 + 颗粒/团块。
+  三者在 16×16 下必须一眼能分。
+- 风格：暗色 1px 边、透明背景、左上光源、4–5 阶；`broken` 的石体用共享深灰调，
+  矿点用金属亮色；`crushed` / `powdered` 用金属色阶。颜色参考 1.20 原版矿物/锭，
+  但**不复制**旧 Ex Nihilo 或原版 PNG。
 - 目前只在 `art/` 里做预览，没有进 `assets/`；M5 加 `broken_ore` / `crushed_ore` /
   `powdered_ore` 物品时再提升为 `textures/item/*.png`，并保证 16×16。
 - 如果以后要省文件，可以只保留三张灰度 base + `tintindex`，用 1.20 的 `ItemColor`
