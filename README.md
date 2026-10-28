@@ -105,7 +105,8 @@ Jade 是**可选依赖**；没装时插件类不会被加载。API 只用于编�
 
 - **本项目的代码与美术资源：MIT**，详见 [LICENSE](LICENSE)。
 - 第三方声明、原版参考说明：见 [THIRD-PARTY.md](THIRD-PARTY.md)。
-- Forge MDK 模板部分（构建脚本等）遵循 **LGPL-2.1**，详见 [LICENSE-FORGE-MDK.txt](LICENSE-FORGE-MDK.txt)。
+- Forge MDK 模板部分（构建脚本等）遵循 **LGPL-2.1**，全文见
+  [third-party/LGPL-2.1-Forge-MDK.txt](third-party/LGPL-2.1-Forge-MDK.txt)。
 - Minecraft / Forge 本身不包含在本仓库中，其版权归各自所有者。
 
 ## 致谢
