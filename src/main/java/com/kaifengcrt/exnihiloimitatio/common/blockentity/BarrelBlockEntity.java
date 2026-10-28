@@ -40,8 +40,13 @@ import org.jetbrains.annotations.Nullable;
 public class BarrelBlockEntity extends BlockEntity {
 
     public static final int CAPACITY = 1000;
-    public static final int COMPOST_MAX = 100;
-    public static final int COMPOST_TICKS = 600;
+    /**
+     * Compost capacity. The original Ex Nihilo used a 0..1 float; 1000 keeps
+     * every vanilla value (0.125 saplings, 1/6 melon, ...) as an integer.
+     */
+    public static final int COMPOST_MAX = 1000;
+    /** 50 seconds, matching the original Ex Nihilo {@code MAX_COMPOSTING_TIME}. */
+    public static final int COMPOST_TICKS = 1000;
 
     private final FluidTank tank = new FluidTank(CAPACITY) {
         @Override
@@ -249,6 +254,9 @@ public class BarrelBlockEntity extends BlockEntity {
         tag.putInt("Compost", this.compostProgress);
         tag.putInt("CompostTicks", this.compostTicks);
         tag.putBoolean("DirtReady", this.dirtReady);
+        // 0.1.x used a 0..100 scale and a 600-tick timer. New saves record the
+        // scale so old worlds can be migrated without guessing.
+        tag.putInt("CompostScale", COMPOST_MAX);
     }
 
     @Override
@@ -258,6 +266,18 @@ public class BarrelBlockEntity extends BlockEntity {
         this.compostProgress = tag.getInt("Compost");
         this.compostTicks = tag.getInt("CompostTicks");
         this.dirtReady = tag.getBoolean("DirtReady");
+
+        if (!tag.contains("CompostScale")) {
+            // Legacy barrel: 0..100 progress and a 600-tick timer.
+            this.compostProgress = Math.min(COMPOST_MAX, this.compostProgress * 10);
+            this.compostTicks = this.compostTicks * COMPOST_TICKS / 600;
+        } else {
+            final int storedScale = tag.getInt("CompostScale");
+            if (storedScale > 0 && storedScale != COMPOST_MAX) {
+                this.compostProgress = Math.min(COMPOST_MAX,
+                        Math.round(this.compostProgress * (float) COMPOST_MAX / storedScale));
+            }
+        }
     }
 
     @Override
