@@ -19,8 +19,8 @@ import java.util.Map;
  *
  * <p>Loaded from {@code data/<namespace>/compost/*.json} on server resource
  * reload. Values are additive: a sapling is worth 125, a leaf block 125, and
- * 1000 points fill the barrel. The scale mirrors the original Ex Nihilo's
- * 0..1 float, so 0.125 becomes 125 and 1/6 becomes 166.</p>
+ * 1000 points fill the barrel. The scale is Ex Nihilo Omnia's 1000 mB table,
+ * so 0.125 becomes 125 and the 1/6 melon/pumpkin value becomes 150.</p>
  *
  * <p>This registry is server-side only. The client uses the
  * {@code #exnihiloimitatio:compostable} item tag purely for interaction

@@ -41,8 +41,8 @@ public class BarrelBlockEntity extends BlockEntity {
 
     public static final int CAPACITY = 1000;
     /**
-     * Compost capacity. The original Ex Nihilo used a 0..1 float; 1000 keeps
-     * every vanilla value (0.125 saplings, 1/6 melon, ...) as an integer.
+     * Compost capacity. Ex Nihilo Omnia uses a 1000 mB table, so 0.125
+     * saplings become 125 and the 1/6 melon value becomes 150.
      */
     public static final int COMPOST_MAX = 1000;
     /** 50 seconds, matching the original Ex Nihilo {@code MAX_COMPOSTING_TIME}. */
