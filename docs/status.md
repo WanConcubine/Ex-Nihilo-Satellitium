@@ -1,54 +1,63 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-10-27
+> 最后更新：2026-10-28
 > 先看这 20 行，细节再翻 [DESIGN.md](DESIGN.md)、[data-format.md](data-format.md)、[textures.md](textures.md)。
 
 ## 一句话
 
-**M1 木桶已完成并提交**（堆肥 → DIRT、1000 mB 流体、比较器、内缩 vanilla-sampled 模型、Jade tooltip）；
+**M1 木桶 + 七种材质变体已完成**（橡木/云杉/白桦/丛林/金合欢/深色橡木/石桶；
+共享 BE、堆肥 → DIRT、1000 mB 流体、比较器、内缩 vanilla-sampled 模型、Jade tooltip）；
 **M1.5 桶内方块转化、M2 筛子还没开始**。
 
 ## 现在停在哪
 
-- 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Imitation`，git 干净。
+- 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Imitation`。
 - 上一个功能提交：木桶 vanilla-sampled + 深灰箍 + 开口物品模型 + 当前模型渲染图。
-- 没有做到一半的代码；没有未提交的构建产物（`run/`、`build/`、`reference/` 都忽略）。
+- 本次改动：七种材质变体（已提交，`git log -1` 可见）；几何只在
+  `models/block/barrel_base.json`，子模型只覆盖贴图。
+- 开发服 `run/server.properties` 的 `online-mode` / `enforce-secure-profile` 已恢复为 `true`；
+  测试用的临时平台已清掉，spawn / gamerule 已复原。
 - Jade 插件类已在 jar 里，但**没有装 Jade 做过真实 tooltip 验收**。
 
 ## 验证状态
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| `./gradlew build` | ✅ | 需要 `-Dnet.minecraftforge.gradle.check.certs=false`，见下 |
-| `python3 scripts/check-textures.py` | ✅ | 允许 vanilla block，禁止 vanilla item |
-| 服务端启动 | ✅ | 无 Jade 也能启动；`Done (…)` |
-| 堆肥 → DIRT | ✅ | RCON：`Compost:100, CompostTicks:1` → 2 秒后**仍是 barrel**，`DirtReady=1` |
-| 流体 NBT | ✅ | RCON 写 `FluidName` / `Amount` 后 `data get` 读回 |
-| 客户端资源加载 | ✅ | 无 missing model / missing texture |
-| 进游戏目视 | ❌ | 没有玩家截图：桶的比例、堆肥 box、过渡、物品栏图标都只靠渲染图和推断 |
-| 右键取泥土 | ⚠️ | 逻辑已实现，未自动化（需要真实玩家） |
-| 比较器 | ⚠️ | 逻辑已实现，未实测（RCON 的比较器读不到 BE） |
+| `./gradlew build` | ✅ | 2026-10-28：`BUILD SUCCESSFUL in 13s` |
+| `python3 scripts/check-textures.py` | ✅ | 七个子模型只引用 vanilla **block** 贴图 |
+| 服务端启动 | ✅ | 无 Jade 也能启动；`Done (3.4s)` |
+| 七种桶 BE | ✅ | RCON 逐种 `setblock` + `data merge`，2.5s 后仍是该桶、`DirtReady=1b` |
+| 石桶流体 NBT | ✅ | RCON 写 `FluidName`/`Amount`，读回 `minecraft:lava` / `1000` |
+| 掉落表 | ✅ | `/loot spawn ... exnihiloimitatio:blocks/{spruce,stone}_barrel` 返回对应物品 |
+| 资源重载 | ✅ | `/reload` 后 `Loaded 7 recipes`（正好七种桶配方）、`[compost] loaded 30 entries` |
+| 客户端资源加载 | ✅ | 客户端到主菜单，日志无 missing model / missing texture |
+| 实际进游戏目视 | ❌ | 只跑了客户端资源加载；没有截图验收比例、箍位置、物品栏图标 |
+| 右键取泥土 | ⚠️ | 逻辑未改，仍未自动化（需要真实玩家） |
+| 比较器 | ⚠️ | 逻辑未改，仍未实测 |
 | Jade tooltip | ⚠️ | 编译通过、无 Jade 启动通过；**未装 Jade 实测** |
+| 合成配方 | ⚠️ | 7 个 JSON 都加载成功；没有玩家实测合成格 |
 
 ## 下一步（按价值排序）
 
 1. **进游戏 5 分钟验收**（最便宜）：
-   - 放桶、塞树苗/树叶，看堆肥 box、粒子、30 秒颜色过渡；
-   - 等 DIRT 后右键取泥土，确认桶还在；
-   - 看物品栏/手持是不是空心 3D 桶；
+   - 放七种桶，看颜色/箍/内壁是否可区分，比例是否一致；
+   - 物品栏图标是否是空心 3D 桶；
+   - 塞树苗看堆肥 box、粒子、30 秒颜色过渡；DIRT 后右键取泥土；
    - 装 Jade 看 tooltip。
 2. **M2 筛子 + 筛网 + 数据驱动掉落**：空岛循环真正跑起来的关键。
-3. **M1.5 桶内方块转化**：水 + 熔岩 → 石/黑曜石；和 M4 坩埚前后一起做也行。
+3. **M1.5 桶内方块转化**：水 + 熔岩 → 石/黑曜石；也可以在这里给石桶加“只装熔岩”的差异化。
 4. **M3 锤子 + 钩子**：锤碎圆石/砂砾，钩树叶出树苗/蚕。
 
 ## 已拍板的决策
 
 - **许可证 MIT**（2026-10-27 从 ARR 转）；Forge MDK 仍 LGPL-2.1，见 [THIRD-PARTY.md](../THIRD-PARTY.md)。
 - **方块走 vanilla-sampled**：模型直接引用 `minecraft:block/*`，不复制/不打包原版贴图。
-  木桶 = oak/spruce 木板 + `gray_concrete` 深灰箍（8 个外凸体素）。
+  七种桶共用 `barrel_base.json` 几何；木桶侧重木种木板 + 去皮原木内壁 + `gray_concrete` 深灰箍，
+  石桶用 `stone_bricks` + `smooth_stone` + `deepslate_tiles`。
 - **物品与特殊表面自有像素**：瓷土、堆肥面；不把 AI 生图放进 release。
 - **不复制 Ex Nihilo 的 GPLv3 PNG**；`reference/` 只读、gitignore、不随包分发。
 - **木桶 14×16×14 内缩**；物品模型用开口 block model + `display` 变换（没有封闭盖）。
+- **七种桶共享一个 BE 类型**；行为/NBT/Jade 完全一致，石桶暂不做差异化。
 - **Jade 是可选依赖**：`compileOnly` API，不打包；没装时插件类不加载。
 - **月光魔法是可选软依赖**：`moonlight_magic`，目前只占位，没有实际联动内容。
 
@@ -60,6 +69,9 @@
   `minecraft:carrots/potatoes` 是方块 id，物品是 `carrot` / `potato`。
 - **内缩模型的外侧面不能加 `cullface`**：墙在 z=1/x=1，不在方块边界，加了会整面被剔除。
 - **堆肥标签和 JSON 必须同步**：服务端也先查 `#exnihiloimitatio:compostable`，JSON 里有但标签没有 = 不能堆肥。
+- **共享 BE 类型要列全七种方块**：`BlockEntityType.Builder.of` 漏一个，放置后 BE 不创建 / ticker 为 null。
+- **旧配方 `#minecraft:planks` 必须删掉**：它会和具体木种配方同时匹配，产物不可预测。
+- **子模型不要直接当方块模型用**：`barrel_base.json` 没有 `textures`，只作为 parent。
 - **Jade / 月光魔法生产 jar 不能直接丢 `run/mods` 做 dev 测试**：SRG 名会 `NoSuchFieldError`；
   联调要正式服务端/客户端，或用 deobf 依赖。
 
@@ -68,6 +80,7 @@
 ```bash
 ./gradlew build -Dnet.minecraftforge.gradle.check.certs=false
 python3 scripts/check-textures.py
+python3 scripts/generate_barrel_variants.py          # 从材质表重生成七种桶的 JSON
 ./gradlew runServer -Dnet.minecraftforge.gradle.check.certs=false   # RCON：localhost:25575 / eni
 # 注意：run/ 被 gitignore；fresh clone 需要在 run/server.properties 自己开 RCON
 ./gradlew runClient -Dnet.minecraftforge.gradle.check.certs=false

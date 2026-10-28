@@ -1,6 +1,12 @@
 {
   "itemGroup.exnihiloimitatio": "Ex Nihilo: Imitatio",
   "block.exnihiloimitatio.barrel": "Barrel",
+  "block.exnihiloimitatio.spruce_barrel": "Spruce Barrel",
+  "block.exnihiloimitatio.birch_barrel": "Birch Barrel",
+  "block.exnihiloimitatio.jungle_barrel": "Jungle Barrel",
+  "block.exnihiloimitatio.acacia_barrel": "Acacia Barrel",
+  "block.exnihiloimitatio.dark_oak_barrel": "Dark Oak Barrel",
+  "block.exnihiloimitatio.stone_barrel": "Stone Barrel",
   "item.exnihiloimitatio.porcelain": "Porcelain",
   "jade.exnihiloimitatio.barrel.ready": "Dirt ready (right-click to extract)",
   "jade.exnihiloimitatio.barrel.compost": "Compost: %s / %s",
