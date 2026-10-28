@@ -64,13 +64,14 @@ assets/exnihiloimitatio/textures/
 
 - `art/items/ore_pieces/generate.py`：每种金属 × 三种阶段，输出
   铁/金/铜/锡/铅/银/镍/铝/铂/铀/锌 共 **33 张 16×16 PNG**，以及
-  `preview_stages_v6.png`（四种金属的三阶段对比）、`preview_all_v6.png`（全部 11 种）和
-  `reference_vs_v6.png`（旧版 vs 当前版）。
+  `preview_stages_v65.png`（四种金属的三阶段对比）、`preview_all_v65.png`（全部 11 种）和
+  `reference_vs_v65_broken.png`（旧版 vs 当前版）。
 - 剪影区分：
   - `broken` = **暗色石质大块 + 金属色矿点**（参考旧 Ex Nihilo 的深色矿石块，不是整块金属色）；
   - `crushed` = **散落的小金属碎片**，大小/位置不规则，像图二那种碎屑；
   - `powdered` = 宽底粉堆 + 颗粒/团块。
   三者在 16×16 下必须一眼能分。
+- `broken` 边缘：轮廓保持完整，**左上受光内边 + 右下暗边**，不画整圈黑线、不加缺口，保证一眼是一块。
 - 风格：暗色 1px 边、透明背景、左上光源、4–5 阶；`broken` 的石体用共享深灰调，
   矿点用金属亮色；`crushed` / `powdered` 用金属色阶。颜色参考 1.20 原版矿物/锭，
   但**不复制**旧 Ex Nihilo 或原版 PNG。

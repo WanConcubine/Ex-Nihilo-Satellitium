@@ -139,9 +139,18 @@ def broken(metal):
         for x in range(16):
             code = grid[y][x]
             if code == "1":
-                dark_edge = ((y + 1 < 16 and grid[y + 1][x] == ".")
-                             or (x + 1 < 16 and grid[y][x + 1] == "."))
-                colour = stone[0] if dark_edge else stone[1]
+                bottom = y + 1 >= 16 or grid[y + 1][x] == "."
+                right = x + 1 >= 16 or grid[y][x + 1] == "."
+                top = y - 1 < 0 or grid[y - 1][x] == "."
+                left = x - 1 < 0 or grid[y][x - 1] == "."
+                if bottom or right:
+                    # dark shadow side; no hard outline on the lit side
+                    colour = stone[0]
+                elif top or left:
+                    # lit inner rim, so the silhouette is defined without a black border
+                    colour = stone[2]
+                else:
+                    colour = stone[1]
             elif code == "2":
                 colour = stone[3] if (x + y) % 3 else stone[2]
             elif code == "O":
