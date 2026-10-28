@@ -42,6 +42,12 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 就必须把相应部分及其衍生作品按 GPLv3 处理（通常意味着整个项目改为 GPLv3 并随附源码），
 不能继续只标 MIT。`reference/` 和本地 Omnia jar 都在 `.gitignore` 里，不提交、不随包分发。
 
+具体到 GPLv3 条文：**§5c** 要求基于该作品的整个作品按 GPLv3 授权给任何拿到副本的人；
+**§6** 要求分发 object code 时同时提供 Corresponding Source；**§4/§5** 要求保留许可证/版权声明，
+修改过的版本要注明修改和日期。MIT 代码可以并入 GPLv3 作品，但反过来不行——所以“MIT 项目里
+混入 GPLv3 代码，再整体只标 MIT”是走不通的。只有将来真的引入 GPLv3 组件或决定转协议时，
+才需要把 GPLv3 全文放进仓库并逐项满足这些条件。
+
 ## 美术
 
 `src/main/resources/assets/exnihiloimitatio/textures/` 下的贴图由本项目的
