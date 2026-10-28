@@ -36,6 +36,12 @@ Minecraft 是 Mojang Studios 的商标。Minecraft 与 Forge 不随本仓库分�
 数值属于玩法数据，本项目按 1000 分制重新写成 `compost/default.json`；
 代码、JSON 结构和贴图均为自写。
 
+**许可证注意**：原版 Ex Nihilo 和 Ex Nihilo Omnia（CurseForge/mcmod 标注 **GPLv3**）都是
+GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没有复制代码、JSON 文件、贴图、
+模型或音效，因此本项目仍可按 MIT 发布。如果将来要复制 Omnia/原版的任何代码或美术资源，
+就必须把相应部分及其衍生作品按 GPLv3 处理（通常意味着整个项目改为 GPLv3 并随附源码），
+不能继续只标 MIT。`reference/` 和本地 Omnia jar 都在 `.gitignore` 里，不提交、不随包分发。
+
 ## 美术
 
 `src/main/resources/assets/exnihiloimitatio/textures/` 下的贴图由本项目的

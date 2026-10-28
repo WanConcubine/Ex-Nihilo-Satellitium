@@ -58,7 +58,8 @@
   七种桶共用 `barrel_base.json` 几何；木桶侧重木种木板 + 去皮原木内壁 + `gray_concrete` 深灰箍，
   石桶用 `stone` + `smooth_stone` + `deepslate_tiles`。
 - **物品与特殊表面自有像素**：瓷土、堆肥面；不把 AI 生图放进 release。
-- **不复制 Ex Nihilo 的 GPLv3 PNG**；`reference/` 只读、gitignore、不随包分发。
+- **原版 Ex Nihilo 与 Omnia 都是 GPLv3**：只对照玩法数值/行为，不复制代码、JSON、贴图、模型、
+  音效；`reference/` 和本地 Omnia jar 只读、gitignore、不随包分发。复制 GPL 资源就必须改 GPLv3。
 - **木桶 14×16×14 内缩**；物品模型用开口 block model + `display` 变换（没有封闭盖）。
 - **七种桶共享一个 BE 类型**；行为/NBT/Jade 完全一致，石桶暂不做差异化。
 - **堆肥用 1000 分制**：以 **Omnia 1.10.2** 的表为骨架，原版 1.7.10 校验比例；
