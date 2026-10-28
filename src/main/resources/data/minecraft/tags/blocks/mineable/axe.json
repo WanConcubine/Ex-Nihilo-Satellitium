@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
-    "exnihiloimitatio:barrel"
+    "exnihiloimitatio:barrel",
+    "exnihiloimitatio:spruce_barrel",
+    "exnihiloimitatio:birch_barrel",
+    "exnihiloimitatio:jungle_barrel",
+    "exnihiloimitatio:acacia_barrel",
+    "exnihiloimitatio:dark_oak_barrel"
   ]
 }

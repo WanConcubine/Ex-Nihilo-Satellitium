@@ -1,12 +1,21 @@
-"""Render the current barrel model with the real vanilla textures.
+"""Render the barrel models with the real vanilla textures.
+
+The block models are parent/child: every material inherits the cuboids and the
+`display` transforms from `barrel_base.json` and only overrides texture slots.
+This script follows that parent chain, so the previews show exactly what the
+game bakes.
 
 Outputs:
-  render_current_3d.png    - in-world isometric view
-  render_current_item.png  - GUI/inventory icon using display.gui
-  showcase_current.png     - both, labelled
+  render_current_3d.png     - oak, in-world isometric view
+  render_current_item.png   - oak, GUI/inventory icon using display.gui
+  showcase_current.png      - oak, both views labelled
+  showcase_variants.png     - item icons for every barrel material
+  showcase_variants_3d.png  - isometric views for every barrel material
 
     python3 render_current.py
 """
+
+from __future__ import annotations
 
 import json
 import math
@@ -20,18 +29,21 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent
 VANILLA_CACHE = OUT / ".vanilla_textures"
 VANILLA_JAR = Path.home() / ".gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client-extra.jar"
-NEEDED_TEXTURES = ("oak_planks", "spruce_planks", "gray_concrete")
+MODELS = ROOT / "src" / "main" / "resources" / "assets" / "exnihiloimitatio" / "models" / "block"
+VANILLA_TEXTURES = VANILLA_CACHE / "assets" / "minecraft" / "textures"
+MOD_TEXTURES = ROOT / "src" / "main" / "resources" / "assets" / "exnihiloimitatio" / "textures"
 
-for name in NEEDED_TEXTURES:
-    target = VANILLA_CACHE / "assets/minecraft/textures/block" / f"{name}.png"
-    if target.exists():
-        continue
-    with zipfile.ZipFile(VANILLA_JAR) as jar:
-        jar.extract(f"assets/minecraft/textures/block/{name}.png", VANILLA_CACHE)
+MOD_ID = "exnihiloimitatio"
 
-MODEL_PATH = str(ROOT / "src/main/resources/assets/exnihiloimitatio/models/block/barrel.json")
-VANILLA_TEXTURES = str(VANILLA_CACHE / "assets/minecraft/textures")
-MOD_TEXTURES = str(ROOT / "src/main/resources/assets/exnihiloimitatio/textures")
+VARIANTS = (
+    ("barrel", "Oak"),
+    ("spruce_barrel", "Spruce"),
+    ("birch_barrel", "Birch"),
+    ("jungle_barrel", "Jungle"),
+    ("acacia_barrel", "Acacia"),
+    ("dark_oak_barrel", "Dark Oak"),
+    ("stone_barrel", "Stone"),
+)
 
 COS30 = math.cos(math.radians(30.0))
 SIN30 = 0.5
@@ -45,27 +57,50 @@ SHADE = {
     "east": 0.92,
 }
 
-FACE_ORDER = ("up", "down", "north", "south", "west", "east")
-
-MODEL = json.load(open(MODEL_PATH))
-TEXTURES = MODEL["textures"]
-
-_texture_cache = {}
+_texture_cache: dict[tuple[str, int], np.ndarray] = {}
 
 
-def load_texture(reference: str, rotation: int = 0) -> np.ndarray:
+def ensure_vanilla_texture(path: str) -> Path:
+    """Extract one vanilla block texture from the client jar on demand."""
+    target = VANILLA_TEXTURES / f"{path}.png"
+    if not target.exists():
+        with zipfile.ZipFile(VANILLA_JAR) as jar:
+            jar.extract(f"assets/minecraft/textures/{path}.png", VANILLA_CACHE)
+    return target
+
+
+def load_model(name: str) -> dict:
+    """Load a mod block model and merge its parent chain."""
+    path = MODELS / f"{name}.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    parent = data.get("parent")
+    if not parent:
+        return data
+
+    namespace, _, parent_path = parent.partition(":")
+    if namespace != MOD_ID:
+        raise ValueError(f"{path}: unsupported parent {parent}")
+    base = load_model(Path(parent_path).name)
+
+    merged = dict(base)
+    merged.update(data)
+    merged["textures"] = {**base.get("textures", {}), **data.get("textures", {})}
+    return merged
+
+
+def load_texture(model: dict, reference: str, rotation: int = 0) -> np.ndarray:
+    if reference.startswith("#"):
+        reference = model["textures"][reference[1:]]
+
     key = (reference, rotation)
     if key in _texture_cache:
         return _texture_cache[key]
 
-    if reference.startswith("#"):
-        reference = TEXTURES[reference[1:]]
-
     namespace, path = reference.split(":", 1)
     if namespace == "minecraft":
-        filename = f"{VANILLA_TEXTURES}/{path}.png"
-    elif namespace == "exnihiloimitatio":
-        filename = f"{MOD_TEXTURES}/{path}.png"
+        filename = ensure_vanilla_texture(path)
+    elif namespace == MOD_ID:
+        filename = MOD_TEXTURES / f"{path}.png"
     else:
         raise ValueError(f"unsupported texture {reference}")
 
@@ -94,20 +129,17 @@ def face_vertices(x0, y0, z0, x1, y1, z1, name):
     raise ValueError(name)
 
 
-def build_faces():
+def build_faces(model: dict):
     faces = []
-    for element in MODEL["elements"]:
+    for element in model["elements"]:
         x0, y0, z0 = element["from"]
         x1, y1, z1 = element["to"]
         for name, data in element["faces"].items():
-            texture = load_texture(data["texture"], data.get("rotation", 0))
+            texture = load_texture(model, data["texture"], data.get("rotation", 0))
             vertices = face_vertices(x0, y0, z0, x1, y1, z1, name)
             uvs = [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]
             faces.append((vertices, uvs, texture, SHADE[name]))
     return faces
-
-
-FACES = build_faces()
 
 
 def rasterize(faces, project, width, height, background, z_sign=1.0):
@@ -166,9 +198,10 @@ def scale(image, size):
     return image.resize((size, size), Image.Resampling.LANCZOS)
 
 
-def render_isometric(size=1000, ss=2):
+def render_isometric(faces, size=1000, ss=2):
     width = height = size * ss
-    s = 24.0 * ss
+    # Keep the object-to-canvas ratio constant when rendering smaller previews.
+    s = 24.0 * ss * (size / 1000.0)
     cx = width * 0.5
     cy = height * 0.52
 
@@ -187,18 +220,19 @@ def render_isometric(size=1000, ss=2):
     draw = ImageDraw.Draw(shadow)
     sx, sy, _ = project((8, 0, 8))
     draw.ellipse((sx - 9.5 * s, sy - 3.2 * s, sx + 9.5 * s, sy + 3.2 * s), fill=110)
-    shadow = shadow.filter(ImageFilter.GaussianBlur(18 * ss))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(18 * ss * (size / 1000.0)))
     shadow_np = np.asarray(shadow, dtype=np.float32)[:, :, None] / 255.0
     background *= (1.0 - shadow_np * 0.75)
 
-    colour = rasterize(FACES, project, width, height, background, z_sign=1.0)
+    colour = rasterize(faces, project, width, height, background, z_sign=1.0)
     image = Image.fromarray((np.clip(colour, 0, 1) * 255).astype(np.uint8), "RGB")
     return scale(image, size)
 
 
-def render_item(size=512, ss=2):
+def render_item(faces, size=512, ss=2):
     width = height = size * ss
-    px = 22.0 * ss
+    # Keep the object-to-canvas ratio constant when rendering smaller previews.
+    px = 22.0 * ss * (size / 512.0)
     cx = width * 0.5
     cy = height * 0.52
 
@@ -233,7 +267,7 @@ def render_item(size=512, ss=2):
     alpha = slot_np[:, :, 3:4]
     background = background * (1.0 - alpha) + slot_np[:, :, :3] * alpha
 
-    colour = rasterize(FACES, project, width, height, background, z_sign=-1.0)
+    colour = rasterize(faces, project, width, height, background, z_sign=-1.0)
     image = Image.fromarray((np.clip(colour, 0, 1) * 255).astype(np.uint8), "RGB")
     return scale(image, size)
 
@@ -251,10 +285,12 @@ def font(size):
 
 
 def main():
-    view = render_isometric()
+    oak = build_faces(load_model("barrel"))
+
+    view = render_isometric(oak)
     view.save(OUT / "render_current_3d.png")
 
-    item = render_item()
+    item = render_item(oak)
     item.save(OUT / "render_current_item.png")
 
     canvas = Image.new("RGB", (1200, 700), (18, 19, 22))
@@ -263,9 +299,45 @@ def main():
     draw = ImageDraw.Draw(canvas)
     draw.text((20, 14), "current model - in-world 3/4 view", fill=(225, 225, 225), font=font(20))
     draw.text((760, 14), "current model - inventory icon (display.gui)", fill=(225, 225, 225), font=font(20))
-    draw.text((760, 580), "open top + vanilla oak/spruce + dark hoop geometry", fill=(150, 150, 150), font=font(14))
+    draw.text((760, 580), "open top + vanilla oak planks + stripped oak interior + gray hoops",
+              fill=(150, 150, 150), font=font(14))
     canvas.save(OUT / "showcase_current.png")
-    print("wrote render_current_3d.png, render_current_item.png, showcase_current.png")
+
+    icons = []
+    views = []
+    for name, label in VARIANTS:
+        faces = build_faces(load_model(name))
+        icons.append((label, render_item(faces, size=200, ss=2)))
+        views.append((label, render_isometric(faces, size=320, ss=2)))
+
+    cell = 280
+    grid = Image.new("RGB", (cell * 4, cell * 2 + 40), (24, 24, 28))
+    draw = ImageDraw.Draw(grid)
+    draw.text((16, 10), "barrel materials - inventory icons", fill=(225, 225, 225), font=font(20))
+    for index, (label, icon) in enumerate(icons):
+        col = index % 4
+        row = index // 4
+        x = col * cell + (cell - 200) // 2
+        y = 40 + row * cell
+        grid.paste(icon, (x, y))
+        draw.text((col * cell + 16, y + 204), label, fill=(210, 210, 210), font=font(16))
+    grid.save(OUT / "showcase_variants.png")
+
+    cell = 360
+    grid = Image.new("RGB", (cell * 4, cell * 2 + 40), (18, 19, 22))
+    draw = ImageDraw.Draw(grid)
+    draw.text((16, 10), "barrel materials - in-world 3/4 views", fill=(225, 225, 225), font=font(20))
+    for index, (label, view) in enumerate(views):
+        col = index % 4
+        row = index // 4
+        x = col * cell + (cell - 320) // 2
+        y = 40 + row * cell
+        grid.paste(view, (x, y))
+        draw.text((col * cell + 16, y + 324), label, fill=(210, 210, 210), font=font(16))
+    grid.save(OUT / "showcase_variants_3d.png")
+
+    print("wrote render_current_3d.png, render_current_item.png, showcase_current.png,"
+          " showcase_variants.png, showcase_variants_3d.png")
 
 
 if __name__ == "__main__":

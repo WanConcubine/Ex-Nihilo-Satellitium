@@ -23,7 +23,7 @@ public final class ModCreativeTabs {
             .icon(() -> new ItemStack(ModItems.PORCELAIN.get()))
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.PORCELAIN.get());
-                output.accept(ModItems.BARREL.get());
+                ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
             })
             .build());
 

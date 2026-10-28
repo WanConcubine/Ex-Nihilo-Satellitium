@@ -1,13 +1,17 @@
 # 纹理规范
 
-> 状态：M1（木桶 + 瓷土）／最后更新：2026-10-27
+> 状态：M1（木桶 + 七种材质）/ 最后更新：2026-10-28
 
 ## 两条路线
 
 - **方块（木桶、筛子、坩埚等）：vanilla-sampled。**
   模型直接引用原版 `minecraft:block/*` 贴图，**不复制文件、不打包**。
-  木桶身 = `oak_planks` / `spruce_planks`（侧面 `rotation: 90` 让木纹竖起来），
-  两道铁箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
+  木桶的几何与 `display` 只在 `models/block/barrel_base.json` 里写一份；每种材质是它的
+  **子模型**，只覆盖贴图变量：
+  - 桶身/顶沿 = 该木种的 `<wood>_planks`（侧面 `rotation: 90` 让木纹竖起来）；
+  - 内壁/桶底 = `stripped_<wood>_log`，保留竖向木纹、比外壁深一档；
+  - 石桶 = `stone_bricks` + `smooth_stone` 顶沿 + `deepslate_tiles` 深色箍；
+  - 木桶的两道箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
 - **物品与特殊表面（瓷土、堆肥面）：自有 16×16 手绘像素。**
   放在 `assets/exnihiloimitatio/textures/`，由脚本逐像素生成，可复现。
 
@@ -41,6 +45,9 @@ assets/exnihiloimitatio/textures/
 ```
 
 木桶没有自有 PNG；`art/barrel/*` 是早期自绘实验，不参与游戏。
+七种材质的 blockstate、子模型、物品模型、配方和掉落表由
+`python3 scripts/generate_barrel_variants.py` 从同一张表生成，几何仍只维护
+`models/block/barrel_base.json`。新增木种 = 在脚本表里加一行 + 补 lang。
 
 ## 引用规则
 
@@ -77,11 +84,15 @@ python3 scripts/check-textures.py
 2. 方块轮廓、箍的粗细、木纹方向优先看；像素细节其次。
 3. 通过后再进 `assets/`、再提交。
 
-早期自绘木桶的 3D 预览脚本 `art/barrel/render3d.py` 只对应旧方案，不再代表游戏内模型。
+预览脚本：`art/barrel/render_current.py` 会顺着 parent 链读取当前模型和原版贴图，
+输出 `showcase_current.png`、`showcase_variants.png`、`showcase_variants_3d.png`。
+`render3d.py` 只对应旧的自绘方案，不再代表游戏内模型。
 
 ## 已知待办
 
-- 桶身切角八边形还没做；当前是 14×16 内缩方桶 + 外凸铁箍。
-- 木种变体（oak/spruce/birch/jungle/acacia/dark oak）还没做。
+- 桶身切角八边形还没做；当前是 14×16 内缩方桶 + 外凸箍。
+- 1.20 新增木种（mangrove / cherry / bamboo）没有做；现有六种经典木 + 石桶。
 - 筛子、坩埚的 vanilla-sampled 模型与贴图待做。
 - 流体侧面、流动纹理还没画；现在只有液面。
+- `art/barrel/barrel_side*.png` 等早期自绘图留作参考；如果将来要改用自有贴图，
+  需要同时去掉模型里的外凸箍，避免和贴图里画好的箍叠在一起。

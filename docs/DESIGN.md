@@ -1,6 +1,6 @@
 # 设计文档：无中生有：东施效颦
 
-> 状态：M1（木桶）／最后更新：2026-10-27
+> 状态：M1（木桶 + 材质变体）/ 最后更新：2026-10-28
 
 ## 1. 独立实现原则
 
@@ -188,7 +188,8 @@ com.kaifengcrt.exnihiloimitatio
 原版 Ex Nihilo 是 1.7.10 的 TESR + Techne 模型：约 12.8×16 的桶身，`setBlockBounds(0.1..0.9)`，
 内容物由 `ModelBarrelInternal` 在液面高度画 quad，贴图是 128×128 图集。
 本项目只借鉴了“内缩桶身 + 内容物表面”这一功能性思路，使用 1.20.1 JSON 模型、自有代码和
-16×16 手绘贴图；没有复制原版代码、模型或贴图。原版仓库仅本地只读参考（`reference/`，gitignore）。
+vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原版代码、模型或贴图。
+原版仓库仅本地只读参考（`reference/`，gitignore）。
 
 **踩过的坑**
 
@@ -204,12 +205,12 @@ com.kaifengcrt.exnihiloimitatio
 
 **未验证 / 下一步**
 
-- 液面、堆肥/泥土 box、内缩模型与 16×16 贴图**没有进游戏目视**（headless 只能保证编译、
+- 液面、堆肥/泥土 box、内缩模型与材质贴图**没有进游戏目视**（headless 只能保证编译、
   JSON、贴图引用和逻辑）；需要一次客户端截图验收。
 - 右键取出泥土没有自动化测试（需要真实玩家）；逻辑已按原版 `ExtractMode.Always` 实现。
 - 比较器没有实测（RCON `setblock` 出来的比较器读不到 BE，属于测试方式问题）。
 - 桶内方块转化（水 + 熔岩 → 石/黑曜石）未做，留到 M1.5。
-- 外凸铁箍 / 切角八边形还没做；当前是方桶身的像素化折中。
+- 切角八边形还没做；外凸箍已做（8 个 0.5px 体素），当前是方桶身 + 外凸箍的折中。
 
 ## 9. Jade（玉）集成（2026-10-27）
 
@@ -225,3 +226,37 @@ com.kaifengcrt.exnihiloimitatio
 - 没装 Jade 时：`@WailaPlugin` 类不会被 Jade 扫描/加载，模组独立运行。
 - 验证：编译通过；无 Jade 的服务端启动正常；jar 内只有我们的插件类，没有 Jade 类。
 - 未验证：真实 Jade 客户端里的 tooltip 渲染（需要装 Jade 进游戏看）。
+
+## 10. M1 材质变体（2026-10-28）
+
+**决策**
+
+- 沿用 **vanilla-sampled**，不把 `art/barrel/*` 的早期自绘图塞进 release。
+  木桶外观由原版木板/去皮原木/石砖组合；这样所有材质共用一套几何，也不复制 GPLv3 PNG。
+- 几何与 `display` 抽到 `models/block/barrel_base.json`；每种材质是只覆盖 `textures`
+  的**子模型**，避免七份 560 行 JSON 漂移。
+- **七种材质**：橡木（保留 `barrel` id）、云杉、白桦、丛林、金合欢、深色橡木、石头。
+  1.20 新增的 mangrove / cherry / bamboo 暂不做，避免一次把变体表铺得太开。
+- 七种桶共享 **一个 `BlockEntityType` + 一个 `BarrelBlock` 类**；行为、NBT、比较器、
+  Jade tooltip 完全一致。石桶复制 `Blocks.STONE` 属性（镐、石音效），木桶复制对应木板属性。
+- 配方从“任意木板 → 橡木桶”改为**每种木材一个具体配方**；否则 `#minecraft:planks`
+  会和具体木种配方同时匹配，产物不可预测。石桶用 `stone_bricks`。
+- 数据文件由 `scripts/generate_barrel_variants.py` 生成：blockstate、block/item model、
+  shaped recipe、loot table、`mineable/{axe,pickaxe}` 标签都来自同一张材质表。
+- `art/barrel/render_current.py` 改为解析 parent 链，一次渲染七种材质的物品图标和
+  3/4 视图，输出 `showcase_variants*.png`；早期自绘脚本保留但不再代表游戏内模型。
+
+**验证**
+
+- `./gradlew build` 通过。
+- `python3 scripts/check-textures.py` 通过（七个子模型只引用 vanilla **block** 贴图）。
+- 服务端 RCON 逐种 `setblock` + `data merge` 验证 BE 共享、NBT 读写和方块保留。
+- 未验证：进游戏目视七种桶的比例、箍的位置、物品栏图标；预览图只能保证模型/贴图解析正确。
+
+**坑**
+
+- 子模型只写 `parent` + `textures` 时，纹理检查脚本仍会遍历到；`barrel_base` 本身没有
+  `textures`，不要把它当可直接引用的方块模型。
+- 共享 BE 类型后，`BlockEntityType.Builder.of` 必须把七种方块全部列进去；漏一个会在
+  放置时 `BlockEntity` 创建失败或 `getTicker` 返回 null。
+- 木种配方如果保留旧的 `#minecraft:planks` 版本，会和具体木种配方冲突；已删除。

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PPP",
+    "P P",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "result": {
+    "item": "exnihiloimitatio:stone_barrel"
+  }
+}

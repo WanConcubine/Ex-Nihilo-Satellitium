@@ -1,7 +1,11 @@
 # 数据格式：堆肥、NBT、命令
 
-> 适用：M1 木桶（Forge 1.20.1）。代码位置：
+> 适用：M1 木桶 + 七种材质变体（Forge 1.20.1）。代码位置：
 > `common/compost/`、`common/blockentity/BarrelBlockEntity.java`。
+>
+> 七种桶（`barrel` = 橡木、`spruce_barrel`、`birch_barrel`、`jungle_barrel`、
+> `acacia_barrel`、`dark_oak_barrel`、`stone_barrel`）共用同一个 BE 类型和同一套
+> NBT/行为；区别只有方块属性、模型贴图和配方。`barrel` 保持原名是为了兼容旧存档。
 
 ## 1. 堆肥 JSON
 
@@ -69,8 +73,12 @@
 ## 3. 测试命令
 
 ```mcfunction
-# 放一个桶
+# 放一个桶（橡木）
 /setblock ~ ~ ~ exnihiloimitatio:barrel
+
+# 其他材质：spruce_barrel / birch_barrel / jungle_barrel /
+# acacia_barrel / dark_oak_barrel / stone_barrel
+/setblock ~ ~ ~ exnihiloimitatio:stone_barrel
 
 # 直接写满堆肥，1 tick 后完成
 /data merge block ~ ~ ~ {Compost:100,CompostTicks:1}
@@ -116,3 +124,25 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - `common/tag/ModTags.java`：`#exnihiloimitatio:compostable`。
 - `common/blockentity/BarrelBlockEntity.java`：状态机、NBT、比较器、粒子/音效。
 - `client/BarrelRenderer.java`：液面 / 堆肥 box / DIRT 泥土 box。
+
+## 7. 材质变体数据
+
+`scripts/generate_barrel_variants.py` 从一张表生成七种桶的
+`blockstates/`、`models/block/`、`models/item/`、`recipes/`、`loot_tables/blocks/`
+和 `data/minecraft/tags/blocks/mineable/{axe,pickaxe}.json`。几何只在
+`models/block/barrel_base.json` 里维护，子模型只覆盖 `textures`。
+
+| block id | 桶身贴图 | 内壁/桶底 | 箍 | 配方键 | 工具 |
+|---|---|---|---|---|---|
+| `barrel` | `oak_planks` | `stripped_oak_log` | `gray_concrete` | `oak_planks` | 斧 |
+| `spruce_barrel` | `spruce_planks` | `stripped_spruce_log` | `gray_concrete` | `spruce_planks` | 斧 |
+| `birch_barrel` | `birch_planks` | `stripped_birch_log` | `gray_concrete` | `birch_planks` | 斧 |
+| `jungle_barrel` | `jungle_planks` | `stripped_jungle_log` | `gray_concrete` | `jungle_planks` | 斧 |
+| `acacia_barrel` | `acacia_planks` | `stripped_acacia_log` | `gray_concrete` | `acacia_planks` | 斧 |
+| `dark_oak_barrel` | `dark_oak_planks` | `stripped_dark_oak_log` | `gray_concrete` | `dark_oak_planks` | 斧 |
+| `stone_barrel` | `stone_bricks` | `stone` | `deepslate_tiles` | `stone_bricks` | 镐 |
+
+- 所有桶配方都是 `PPP / P P / PPP`，只换 `P` 的物品；橡木配方不再接受 `#minecraft:planks`，
+  避免和具体木种配方冲突。
+- 石桶复制 `Blocks.STONE` 属性（需要镐、石质音效），木桶复制对应木板属性。
+- 行为、NBT、Jade tooltip 七种桶完全一致；石桶暂不做“只装熔岩”等差异化，留到 M1.5。

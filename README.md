@@ -30,8 +30,9 @@
 
 - [x] Gradle / Forge MDK 骨架，可编译
 - [x] 模组元数据、Creative Tab、中英文本地化
-- [x] 基础内容：`porcelain`（瓷土，自绘贴图）、`barrel`（木桶）
-- [x] M1 木桶：堆肥→泥土（桶保留，右键取出）、1000 mB 流体、比较器、14×16 内缩模型、16×16 手绘贴图
+- [x] 基础内容：`porcelain`（瓷土，自绘贴图）、`barrel`（橡木桶）
+- [x] M1 木桶：堆肥→泥土（桶保留，右键取出）、1000 mB 流体、比较器、14×16 内缩模型、vanilla-sampled 贴图
+- [x] M1 材质变体：云杉/白桦/丛林/金合欢/深色橡木木桶 + 石桶，共享 BE 与行为
 - [ ] M1.5 桶内方块转化（水 + 熔岩 → 石/黑曜石）
 - [ ] M2 筛子 + 筛网 + 数据驱动掉落
 - [ ] M3 锤子 + 钩子
@@ -57,6 +58,7 @@
 ./gradlew runClient    # 开发客户端
 ./gradlew runServer    # 开发服务端
 python3 scripts/check-textures.py   # 确保没有原版贴图占位
+python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶的 JSON
 ```
 
 首次构建会下载 Gradle、Forge、Minecraft 依赖并反编译，耗时较长（约 5–15 分钟），
@@ -71,8 +73,9 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 ## 纹理
 
 风格、色板、命名和 AI 政策见 [docs/textures.md](docs/textures.md)。
-木桶走 **vanilla-sampled**：模型直接引用原版 `oak_planks` / `spruce_planks` / `gray_concrete`，
-铁箍是外凸几何体；瓷土和堆肥面是自有 16×16 像素。
+木桶走 **vanilla-sampled**：桶身用对应木种的木板、内壁/桶底用去皮原木，石桶用石砖 +
+深板岩瓦；铁箍是外凸几何体。七种材质共用 `barrel_base.json` 的几何，子模型只覆盖贴图。
+瓷土和堆肥面是自有 16×16 像素。
 `scripts/check-textures.py` 会阻止模型引用原版 **item** 贴图，但允许原版 **block** 贴图。
 
 ## 联动

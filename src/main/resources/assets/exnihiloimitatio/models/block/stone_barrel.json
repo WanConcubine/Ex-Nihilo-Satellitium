@@ -1,0 +1,11 @@
+{
+  "parent": "exnihiloimitatio:block/barrel_base",
+  "textures": {
+    "particle": "minecraft:block/stone_bricks",
+    "side": "minecraft:block/stone_bricks",
+    "top": "minecraft:block/smooth_stone",
+    "inner": "minecraft:block/stone",
+    "bottom": "minecraft:block/stone",
+    "hoop": "minecraft:block/deepslate_tiles"
+  }
+}
