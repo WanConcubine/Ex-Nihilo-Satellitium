@@ -11,13 +11,13 @@
 
 ## 现在停在哪
 
-- 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Imitation`。
+- 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium`。
 - **2026-10-28 正式改名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；
   mod id、Java 包、assets/data 命名空间改为 `exnihilosatellitium`。
-  旧 `exnihiloimitatio` 世界不兼容，需要新世界（目前没有发布，影响只在本地测试档）。
+  改名前的旧世界不兼容，需要新世界（目前没有发布，影响只在本地测试档）。
 - 上一个功能提交：v6.5 矿粒碎块边缘定稿（`5efa076`）。
 - 本次改动：正式改名（mod id / Java 包 / assets+data 命名空间）+ 重跑构建、服务端和
-  客户端资源加载；提交见 `git log -1`。
+  客户端资源加载；提交见 `git log -1`。随后又清掉工作区路径、构建缓存、旧日志里的旧名残留。
 - 开发服 `run/server.properties` 的 `online-mode` / `enforce-secure-profile` 已恢复为 `true`；
   测试用的临时平台已清掉，spawn / gamerule 已复原。
 - Jade 插件类已在 jar 里，但**没有装 Jade 做过真实 tooltip 验收**。
