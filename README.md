@@ -73,7 +73,7 @@ python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶�
 ## 纹理
 
 风格、色板、命名和 AI 政策见 [docs/textures.md](docs/textures.md)。
-木桶走 **vanilla-sampled**：桶身用对应木种的木板、内壁/桶底用去皮原木，石桶用石砖 +
+木桶走 **vanilla-sampled**：桶身用对应木种的木板、内壁/桶底用去皮原木，石桶用石头 +
 深板岩瓦；铁箍是外凸几何体。七种材质共用 `barrel_base.json` 的几何，子模型只覆盖贴图。
 瓷土和堆肥面是自有 16×16 像素。
 `scripts/check-textures.py` 会阻止模型引用原版 **item** 贴图，但允许原版 **block** 贴图。

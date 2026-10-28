@@ -232,7 +232,7 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 **决策**
 
 - 沿用 **vanilla-sampled**，不把 `art/barrel/*` 的早期自绘图塞进 release。
-  木桶外观由原版木板/去皮原木/石砖组合；这样所有材质共用一套几何，也不复制 GPLv3 PNG。
+  木桶外观由原版木板/去皮原木/石头组合；这样所有材质共用一套几何，也不复制 GPLv3 PNG。
 - 几何与 `display` 抽到 `models/block/barrel_base.json`；每种材质是只覆盖 `textures`
   的**子模型**，避免七份 560 行 JSON 漂移。
 - **七种材质**：橡木（保留 `barrel` id）、云杉、白桦、丛林、金合欢、深色橡木、石头。
@@ -240,7 +240,7 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 - 七种桶共享 **一个 `BlockEntityType` + 一个 `BarrelBlock` 类**；行为、NBT、比较器、
   Jade tooltip 完全一致。石桶复制 `Blocks.STONE` 属性（镐、石音效），木桶复制对应木板属性。
 - 配方从“任意木板 → 橡木桶”改为**每种木材一个具体配方**；否则 `#minecraft:planks`
-  会和具体木种配方同时匹配，产物不可预测。石桶用 `stone_bricks`。
+  会和具体木种配方同时匹配，产物不可预测。石桶用 `stone`。
 - 数据文件由 `scripts/generate_barrel_variants.py` 生成：blockstate、block/item model、
   shaped recipe、loot table、`mineable/{axe,pickaxe}` 标签都来自同一张材质表。
 - `art/barrel/render_current.py` 改为解析 parent 链，一次渲染七种材质的物品图标和

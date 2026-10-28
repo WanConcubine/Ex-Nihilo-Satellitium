@@ -10,7 +10,7 @@
   **子模型**，只覆盖贴图变量：
   - 桶身/顶沿 = 该木种的 `<wood>_planks`（侧面 `rotation: 90` 让木纹竖起来）；
   - 内壁/桶底 = `stripped_<wood>_log`，保留竖向木纹、比外壁深一档；
-  - 石桶 = `stone_bricks` + `smooth_stone` 顶沿 + `deepslate_tiles` 深色箍；
+  - 石桶 = `stone` + `smooth_stone` 顶沿 + `deepslate_tiles` 深色箍；
   - 木桶的两道箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
 - **物品与特殊表面（瓷土、堆肥面）：自有 16×16 手绘像素。**
   放在 `assets/exnihiloimitatio/textures/`，由脚本逐像素生成，可复现。
