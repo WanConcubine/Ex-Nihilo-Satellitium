@@ -6,7 +6,8 @@
 ## Forge MDK
 
 `build.gradle`、Gradle Wrapper、`settings.gradle` 以及它们派生自的示例源码，
-来自 Forge MDK，按 **LGPL-2.1** 授权。全文见 [LICENSE-FORGE-MDK.txt](LICENSE-FORGE-MDK.txt)。
+来自 Forge MDK，按 **LGPL-2.1** 授权。全文见
+[third-party/LGPL-2.1-Forge-MDK.txt](third-party/LGPL-2.1-Forge-MDK.txt)。
 
 ## Minecraft / Forge
 
