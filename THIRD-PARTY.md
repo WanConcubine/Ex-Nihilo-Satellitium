@@ -28,6 +28,12 @@ Minecraft 是 Mojang Studios 的商标。Minecraft 与 Forge 不随本仓库分�
 
 原版地址：<https://bitbucket.org/Erasmus_Crowley/ex-nihilo>
 
+堆肥数值另外对照了原版 1.7.10 的 `CompostRegistry`、
+[Ex Nihilo Omnia](https://github.com/Jozufozu/ExNihiloOmnia) 的 `registries/composting/*.json`
+与 [Ex Nihilo: Sequentia 1.20.1](https://github.com/NovaMachina-Mods/ExNihiloSequentia)
+的 `CompostRecipes`（只读数据参考，未复制代码）。数值属于玩法数据，
+本项目按 1000 分制重新写成 `compost/default.json`；代码、JSON 结构和贴图均为自写。
+
 ## 美术
 
 `src/main/resources/assets/exnihiloimitatio/textures/` 下的贴图由本项目的

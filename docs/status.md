@@ -23,16 +23,19 @@
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| `./gradlew build` | ✅ | 2026-10-28：`BUILD SUCCESSFUL in 13s` |
+| `./gradlew build` | ✅ | 2026-10-28：`BUILD SUCCESSFUL in 6s` |
 | `python3 scripts/check-textures.py` | ✅ | 七个子模型只引用 vanilla **block** 贴图 |
-| 服务端启动 | ✅ | 无 Jade 也能启动；`Done (3.4s)` |
-| 七种桶 BE | ✅ | RCON 逐种 `setblock` + `data merge`，2.5s 后仍是该桶、`DirtReady=1b` |
+| 服务端启动 | ✅ | 无 Jade 也能启动；`Done (3.5s)` |
+| 七种桶 BE | ✅ | RCON 逐种 `setblock` + `data merge {Compost:1000,...}`，2.5s 后仍是该桶、`DirtReady=1b` |
+| 堆肥容量/刻度 | ✅ | `data get` 读回 `Compost=1000`、`CompostScale=1000`；满后 1000 tick → DIRT |
+| 堆肥数值表 | ✅ | `/reload` 日志 `[compost] loaded 60 entries`，无 unknown item / invalid tag |
 | 石桶流体 NBT | ✅ | RCON 写 `FluidName`/`Amount`，读回 `minecraft:lava` / `1000` |
 | 掉落表 | ✅ | `/loot spawn ... exnihiloimitatio:blocks/{spruce,stone}_barrel` 返回对应物品 |
-| 资源重载 | ✅ | `/reload` 后 `Loaded 7 recipes`（正好七种桶配方）、`[compost] loaded 30 entries` |
+| 资源重载 | ✅ | `/reload` 后 `Loaded 7 recipes`（正好七种桶配方）、`[compost] loaded 60 entries` |
 | 客户端资源加载 | ✅ | 客户端到主菜单，日志无 missing model / missing texture |
 | 实际进游戏目视 | ❌ | 只跑了客户端资源加载；没有截图验收比例、箍位置、物品栏图标 |
 | 右键取泥土 | ⚠️ | 逻辑未改，仍未自动化（需要真实玩家） |
+| 逐项右键堆肥 | ⚠️ | JSON/标签已对齐，但没有玩家逐项右键验证点数 |
 | 比较器 | ⚠️ | 逻辑未改，仍未实测 |
 | Jade tooltip | ⚠️ | 编译通过、无 Jade 启动通过；**未装 Jade 实测** |
 | 合成配方 | ⚠️ | 7 个 JSON 都加载成功；没有玩家实测合成格 |
@@ -42,7 +45,7 @@
 1. **进游戏 5 分钟验收**（最便宜）：
    - 放七种桶，看颜色/箍/内壁是否可区分，比例是否一致；
    - 物品栏图标是否是空心 3D 桶；
-   - 塞树苗看堆肥 box、粒子、30 秒颜色过渡；DIRT 后右键取泥土；
+   - 塞树苗看堆肥 box、粒子、50 秒颜色过渡；DIRT 后右键取泥土；
    - 装 Jade 看 tooltip。
 2. **M2 筛子 + 筛网 + 数据驱动掉落**：空岛循环真正跑起来的关键。
 3. **M1.5 桶内方块转化**：水 + 熔岩 → 石/黑曜石；也可以在这里给石桶加“只装熔岩”的差异化。
@@ -58,6 +61,9 @@
 - **不复制 Ex Nihilo 的 GPLv3 PNG**；`reference/` 只读、gitignore、不随包分发。
 - **木桶 14×16×14 内缩**；物品模型用开口 block model + `display` 变换（没有封闭盖）。
 - **七种桶共享一个 BE 类型**；行为/NBT/Jade 完全一致，石桶暂不做差异化。
+- **堆肥用 1000 分制**：数值对齐原版 Ex Nihilo / Ex Nihilo: Sequentia 1.20.1
+  （树苗/树叶 125、花/蘑菇 100、肉 200、鱼 150、小麦 80、1/6 用 166）；
+  满 1000 后 1000 tick（50 秒）变 DIRT。老存档按 `CompostScale` 缺失自动 ×10 迁移。
 - **Jade 是可选依赖**：`compileOnly` API，不打包；没装时插件类不加载。
 - **月光魔法是可选软依赖**：`moonlight_magic`，目前只占位，没有实际联动内容。
 
@@ -69,6 +75,7 @@
   `minecraft:carrots/potatoes` 是方块 id，物品是 `carrot` / `potato`。
 - **内缩模型的外侧面不能加 `cullface`**：墙在 z=1/x=1，不在方块边界，加了会整面被剔除。
 - **堆肥标签和 JSON 必须同步**：服务端也先查 `#exnihiloimitatio:compostable`，JSON 里有但标签没有 = 不能堆肥。
+- **堆肥刻度从 100 改成 1000**：老存档没有 `CompostScale`，`load()` 会 ×10 并缩放计时；新存档写 `CompostScale:1000`。
 - **共享 BE 类型要列全七种方块**：`BlockEntityType.Builder.of` 漏一个，放置后 BE 不创建 / ticker 为 null。
 - **旧配方 `#minecraft:planks` 必须删掉**：它会和具体木种配方同时匹配，产物不可预测。
 - **子模型不要直接当方块模型用**：`barrel_base.json` 没有 `textures`，只作为 parent。
