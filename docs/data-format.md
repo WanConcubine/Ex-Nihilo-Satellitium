@@ -140,7 +140,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `jungle_barrel` | `jungle_planks` | `stripped_jungle_log` | `gray_concrete` | `jungle_planks` | 斧 |
 | `acacia_barrel` | `acacia_planks` | `stripped_acacia_log` | `gray_concrete` | `acacia_planks` | 斧 |
 | `dark_oak_barrel` | `dark_oak_planks` | `stripped_dark_oak_log` | `gray_concrete` | `dark_oak_planks` | 斧 |
-| `stone_barrel` | `stone_bricks` | `stone` | `deepslate_tiles` | `stone_bricks` | 镐 |
+| `stone_barrel` | `stone` | `stone` | `deepslate_tiles` | `stone` | 镐 |
 
 - 所有桶配方都是 `PPP / P P / PPP`，只换 `P` 的物品；橡木配方不再接受 `#minecraft:planks`，
   避免和具体木种配方冲突。

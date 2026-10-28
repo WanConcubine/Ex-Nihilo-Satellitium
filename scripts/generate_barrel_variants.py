@@ -54,9 +54,11 @@ def wood_textures(wood: str) -> dict[str, str]:
 
 
 def stone_textures() -> dict[str, str]:
+    # A stone barrel is carved from stone, not masonry. The smooth-stone rim and
+    # the dark bands keep it readable next to the hooped wooden barrels.
     return {
-        "particle": "minecraft:block/stone_bricks",
-        "side": "minecraft:block/stone_bricks",
+        "particle": "minecraft:block/stone",
+        "side": "minecraft:block/stone",
         "top": "minecraft:block/smooth_stone",
         "inner": "minecraft:block/stone",
         "bottom": "minecraft:block/stone",
@@ -118,7 +120,7 @@ def main() -> None:
 
     for name, wood in WOOD_BARRELS:
         generate(name, wood_textures(wood), f"minecraft:{wood}_planks")
-    generate(STONE_BARREL, stone_textures(), "minecraft:stone_bricks")
+    generate(STONE_BARREL, stone_textures(), "minecraft:stone")
 
     write_json(DATA / "minecraft" / "tags" / "blocks" / "mineable" / "axe.json", {
         "replace": False,

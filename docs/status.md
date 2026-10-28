@@ -53,7 +53,7 @@
 - **许可证 MIT**（2026-10-27 从 ARR 转）；Forge MDK 仍 LGPL-2.1，见 [THIRD-PARTY.md](../THIRD-PARTY.md)。
 - **方块走 vanilla-sampled**：模型直接引用 `minecraft:block/*`，不复制/不打包原版贴图。
   七种桶共用 `barrel_base.json` 几何；木桶侧重木种木板 + 去皮原木内壁 + `gray_concrete` 深灰箍，
-  石桶用 `stone_bricks` + `smooth_stone` + `deepslate_tiles`。
+  石桶用 `stone` + `smooth_stone` + `deepslate_tiles`。
 - **物品与特殊表面自有像素**：瓷土、堆肥面；不把 AI 生图放进 release。
 - **不复制 Ex Nihilo 的 GPLv3 PNG**；`reference/` 只读、gitignore、不随包分发。
 - **木桶 14×16×14 内缩**；物品模型用开口 block model + `display` 变换（没有封闭盖）。
