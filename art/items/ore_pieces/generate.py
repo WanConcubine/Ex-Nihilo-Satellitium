@@ -1,8 +1,11 @@
 """Hand-authored 16x16 ore-stage textures.
 
-Style anchor (from the owner): a dark stone chunk with bright metal flecks for
-broken ore, and scattered small metal fragments for crushed ore.  Powdered ore
-stays a low heap.  All pixels are redrawn here; no GPLv3 PNGs are copied.
+Style anchors supplied by the owner:
+  - broken: a dark stone chunk with bright metal flecks;
+  - crushed: loose, irregular metal fragments.
+
+The silhouettes below are redrawn from those references; colours and the
+rendering are ours.  No GPLv3 PNGs are copied.
 
   broken  -> ore gravel
   crushed -> ore sand
@@ -18,42 +21,45 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-# 0=outline 1=dark 2=base 3=light 4=highlight M=metal light m=metal base
+# 1=stone body 2=stone light O=metal fleck M=metal highlight
 BROKEN = """
 ................
-......0000......
-....00111100....
-...0111222110...
-..011122222110..
-..01122333M2110.
-.011223332m1110.
-.01122332211M10.
-.01M22222111100.
-.01122221111m0..
-..011111111100..
-..00111111100...
-...0001111000...
-.....00000......
-................
+.......111......
+......11111.....
+.....1111111....
+.....11112111...
+.....O122O1111..
+....OO1222O1111.
+...121O1111OO11.
+...O112O11111OO.
+..111111O1121OO.
+..1121211O1111..
+..1111111O1111..
+...1111111O11...
+....11111O1O....
+.....111........
 ................
 """
 
-# Each stamp is a small hand-shaped fragment: light top, base middle, dark base.
-CRUSHED_FRAGMENTS = (
-    (2, 2, ("344", "332", "211")),
-    (8, 1, ("34", "33", "21")),
-    (12, 4, ("44", "21")),
-    (4, 6, ("344", "211")),
-    (9, 7, ("344", "332", "211")),
-    (1, 10, ("44", "21")),
-    (13, 10, ("34", "33", "21")),
-    (6, 12, ("344", "211")),
-    (10, 13, ("44", "21")),
-    (7, 4, ("3",)),
-    (14, 2, ("2",)),
-    (3, 14, ("2",)),
-    (15, 8, ("3",)),
-)
+# O=metal base 3=metal light 2=metal shadow 1=metal dark
+CRUSHED = """
+................
+................
+.....OO...OOO...
+...3OOOO...O3...
+...3OOOO...32...
+....3OO.........
+.........OO3....
+..O..OO.3OO2....
+..OO.1...33.....
+..OO...O....O...
+..32.3OOO.OOO...
+.....3OOO.OO1...
+......33..3O....
+.......1O.333...
+................
+................
+"""
 
 POWDERED = """
 ................
@@ -74,16 +80,7 @@ POWDERED = """
 ................
 """
 
-# Lumpy powder highlights; applied only to interior pixels.
-POWDER_CLUMPS = (
-    (5, 8, ("44", "32")),
-    (9, 9, ("34", "21")),
-    (12, 8, ("44", "32")),
-    (7, 11, ("1",)),
-)
-
-# Dark stone body for broken ore; the metal only shows in the flecks.
-STONE = ("#141414", "#2A2A2A", "#444444", "#666666", "#8C8C8C")
+STONE = ("#141414", "#2E2E2E", "#4A4A4A", "#6A6A6A", "#8A8A8A")
 
 STAGES = ("broken", "crushed", "powdered")
 
@@ -115,45 +112,64 @@ def parse_template(text):
     return rows
 
 
+def inside(grid, x, y):
+    return 0 <= x < 16 and 0 <= y < 16 and grid[y][x] != "."
+
+
 def broken(metal):
     stone = [hex_rgb(c) for c in STONE]
     metal_palette = [hex_rgb(c) for c in PALETTES[metal]]
-    codes = {str(i): stone[i] for i in range(5)}
-    codes["M"] = metal_palette[3]
-    codes["m"] = metal_palette[2]
-
+    grid = parse_template(BROKEN)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for y, row in enumerate(parse_template(BROKEN)):
-        for x, code in enumerate(row):
-            if code in codes:
-                img.putpixel((x, y), codes[code] + (255,))
+
+    for y in range(16):
+        for x in range(16):
+            code = grid[y][x]
+            if code == "1":
+                edge = not all(inside(grid, x + dx, y + dy)
+                               for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                colour = stone[0] if edge else stone[1]
+            elif code == "2":
+                colour = stone[3] if (x + y) % 3 else stone[2]
+            elif code == "O":
+                colour = metal_palette[2] if (x + y) % 3 == 0 else metal_palette[3]
+            elif code == "M":
+                colour = metal_palette[4]
+            else:
+                continue
+            img.putpixel((x, y), colour + (255,))
     return img
 
 
 def crushed(metal):
     palette = [hex_rgb(c) for c in PALETTES[metal]]
+    grid = parse_template(CRUSHED)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for x0, y0, stamp in CRUSHED_FRAGMENTS:
-        for dy, row in enumerate(stamp):
-            for dx, code in enumerate(row):
-                if code.isdigit():
-                    img.putpixel((x0 + dx, y0 + dy), palette[int(code)] + (255,))
+
+    for y in range(16):
+        for x in range(16):
+            code = grid[y][x]
+            if code == "O":
+                edge = ((y + 1 < 16 and grid[y + 1][x] == ".")
+                        or (x + 1 < 16 and grid[y][x + 1] == "."))
+                colour = palette[1] if edge else palette[2]
+            elif code == "3":
+                colour = palette[3]
+            elif code == "2":
+                colour = palette[1]
+            elif code == "1":
+                colour = palette[0]
+            else:
+                continue
+            img.putpixel((x, y), colour + (255,))
     return img
 
 
 def powdered(metal):
     palette = [hex_rgb(c) for c in PALETTES[metal]]
     codes = {str(i): palette[i] for i in range(5)}
-    grid = [list(row) for row in parse_template(POWDERED)]
-    for x0, y0, stamp in POWDER_CLUMPS:
-        for dy, row in enumerate(stamp):
-            for dx, code in enumerate(row):
-                x, y = x0 + dx, y0 + dy
-                if grid[y][x] not in ".0":
-                    grid[y][x] = code
-
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for y, row in enumerate(grid):
+    for y, row in enumerate(parse_template(POWDERED)):
         for x, code in enumerate(row):
             if code in codes:
                 img.putpixel((x, y), codes[code] + (255,))
@@ -187,7 +203,6 @@ def main():
         for stage in STAGES:
             images[(metal, stage)].save(out / f"{metal}_{stage}.png")
 
-    # Four representative metals across the three stages.
     showcase = ("iron", "copper", "gold", "uranium")
     scale = 8
     cell = 16 * scale
@@ -207,7 +222,6 @@ def main():
                   20 + col * (cell + 24) + 54, y, scale)
     preview.convert("RGB").save(out / "preview_stages.png")
 
-    # Full 11-metal contact sheet at 3x.
     scale = 3
     cell = 16 * scale
     width = 20 + len(STAGES) * (cell + 20) + 60
