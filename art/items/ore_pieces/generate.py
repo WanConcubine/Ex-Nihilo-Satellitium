@@ -1,17 +1,15 @@
-"""Hand-authored 16x16 ore-stage textures in a modern vanilla style.
+"""Hand-authored 16x16 ore-stage textures.
 
-The original Ex Nihilo/Omnia progression has three distinct item stages:
+Style anchor (from the owner): a dark stone chunk with bright metal flecks for
+broken ore, and scattered small metal fragments for crushed ore.  Powdered ore
+stays a low heap.  All pixels are redrawn here; no GPLv3 PNGs are copied.
 
-  broken ore  ->  ore gravel block   (4 pieces -> 1 block)
-  crushed ore ->  ore sand block     (4 pieces -> 1 block)
-  powdered ore->  ore dust block     (4 pieces -> 1 block)
+  broken  -> ore gravel
+  crushed -> ore sand
+  powdered-> ore dust
 
-The old mod tinted a base/template pair at runtime.  We redraw three clean
-ASCII silhouettes and tint them per metal: deliberate pixels, no noise, and
-no GPLv3 PNGs.
-
-Outputs are preview-only (art/items/ore_pieces/); nothing here is shipped
-until the M5 ore items exist.
+Outputs are preview-only (art/items/ore_pieces/); promote to assets/ when the
+M5 ore items exist.
 
     python3 generate.py
 """
@@ -20,18 +18,18 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-# o=outline  s=shadow  b=base  l=light  h=highlight  .=transparent
+# 0=outline 1=dark 2=base 3=light 4=highlight M=metal light m=metal base
 BROKEN = """
 ................
 ......0000......
-....00333300....
-...0333333110...
-..033333332110..
-..0333333222110.
-.03333322221110.
-.03332222211110.
-.01222222111100.
-.0112222111100..
+....00111100....
+...0111222110...
+..011122222110..
+..01122333M2110.
+.011223332m1110.
+.01122332211M10.
+.01M22222111100.
+.01122221111m0..
 ..011111111100..
 ..00111111100...
 ...0001111000...
@@ -40,24 +38,22 @@ BROKEN = """
 ................
 """
 
-CRUSHED = """
-................
-................
-..434....434....
-.3321...3321....
-.211....211.....
-................
-.....434........
-.4..3321........
-.32..211........
-.21......4......
-.32..434.3321...
-.....3321.211...
-......211.......
-.......11.332...
-................
-................
-"""
+# Each stamp is a small hand-shaped fragment: light top, base middle, dark base.
+CRUSHED_FRAGMENTS = (
+    (2, 2, ("344", "332", "211")),
+    (8, 1, ("34", "33", "21")),
+    (12, 4, ("44", "21")),
+    (4, 6, ("344", "211")),
+    (9, 7, ("344", "332", "211")),
+    (1, 10, ("44", "21")),
+    (13, 10, ("34", "33", "21")),
+    (6, 12, ("344", "211")),
+    (10, 13, ("44", "21")),
+    (7, 4, ("3",)),
+    (14, 2, ("2",)),
+    (3, 14, ("2",)),
+    (15, 8, ("3",)),
+)
 
 POWDERED = """
 ................
@@ -78,17 +74,16 @@ POWDERED = """
 ................
 """
 
-STAGE_FACETS = {
-    "broken": ((6, 4, "4"), (7, 4, "4"), (5, 5, "4"), (8, 7, "1"), (8, 8, "1")),
-    "crushed": ((3, 3, "4"), (12, 2, "4"), (4, 11, "4")),
-    "powdered": ((5, 8, "4"), (8, 7, "4"), (10, 9, "1"), (12, 8, "4"), (7, 10, "1")),
-}
+# Lumpy powder highlights; applied only to interior pixels.
+POWDER_CLUMPS = (
+    (5, 8, ("44", "32")),
+    (9, 9, ("34", "21")),
+    (12, 8, ("44", "32")),
+    (7, 11, ("1",)),
+)
 
-STAGE_TEMPLATES = {
-    "broken": BROKEN,
-    "crushed": CRUSHED,
-    "powdered": POWDERED,
-}
+# Dark stone body for broken ore; the metal only shows in the flecks.
+STONE = ("#141414", "#2A2A2A", "#444444", "#666666", "#8C8C8C")
 
 STAGES = ("broken", "crushed", "powdered")
 
@@ -120,13 +115,42 @@ def parse_template(text):
     return rows
 
 
-def texture(metal, stage):
-    palette = PALETTES[metal]
-    codes = {str(index): hex_rgb(colour) for index, colour in enumerate(palette)}
-    grid = [list(row) for row in parse_template(STAGE_TEMPLATES[stage])]
-    for x, y, code in STAGE_FACETS[stage]:
-        if grid[y][x] not in ".0":
-            grid[y][x] = code
+def broken(metal):
+    stone = [hex_rgb(c) for c in STONE]
+    metal_palette = [hex_rgb(c) for c in PALETTES[metal]]
+    codes = {str(i): stone[i] for i in range(5)}
+    codes["M"] = metal_palette[3]
+    codes["m"] = metal_palette[2]
+
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(parse_template(BROKEN)):
+        for x, code in enumerate(row):
+            if code in codes:
+                img.putpixel((x, y), codes[code] + (255,))
+    return img
+
+
+def crushed(metal):
+    palette = [hex_rgb(c) for c in PALETTES[metal]]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for x0, y0, stamp in CRUSHED_FRAGMENTS:
+        for dy, row in enumerate(stamp):
+            for dx, code in enumerate(row):
+                if code.isdigit():
+                    img.putpixel((x0 + dx, y0 + dy), palette[int(code)] + (255,))
+    return img
+
+
+def powdered(metal):
+    palette = [hex_rgb(c) for c in PALETTES[metal]]
+    codes = {str(i): palette[i] for i in range(5)}
+    grid = [list(row) for row in parse_template(POWDERED)]
+    for x0, y0, stamp in POWDER_CLUMPS:
+        for dy, row in enumerate(stamp):
+            for dx, code in enumerate(row):
+                x, y = x0 + dx, y0 + dy
+                if grid[y][x] not in ".0":
+                    grid[y][x] = code
 
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y, row in enumerate(grid):
@@ -157,10 +181,11 @@ def main():
     out = Path(__file__).resolve().parent
     images = {}
     for metal in PALETTES:
+        images[(metal, "broken")] = broken(metal)
+        images[(metal, "crushed")] = crushed(metal)
+        images[(metal, "powdered")] = powdered(metal)
         for stage in STAGES:
-            img = texture(metal, stage)
-            img.save(out / f"{metal}_{stage}.png")
-            images[(metal, stage)] = img
+            images[(metal, stage)].save(out / f"{metal}_{stage}.png")
 
     # Four representative metals across the three stages.
     showcase = ("iron", "copper", "gold", "uranium")
