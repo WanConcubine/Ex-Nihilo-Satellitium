@@ -27,14 +27,17 @@ import java.util.List;
  */
 public class SieveBlockEntity extends BlockEntity {
 
-    /** Work needed for one item; also the progress maximum. */
+    /** Work needed for one item. At 2/tick that is 50 ticks (2.5 s) of holding. */
     public static final int WORK_MAX = 100;
-    /** Work added per right-click (four clicks per item). */
-    public static final int WORK_PER_CLICK = 25;
+    /** Work added per game tick while the player keeps sifting. */
+    public static final int WORK_PER_TICK = 2;
+    /** A right-click keeps the sieve "held" for this many ticks. */
+    private static final int HOLD_TICKS = 8;
 
     private ItemStack mesh = ItemStack.EMPTY;
     private ItemStack contents = ItemStack.EMPTY;
     private int work;
+    private long activeUntil;
 
     public SieveBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.SIEVE.get(), pos, state);
@@ -80,19 +83,38 @@ public class SieveBlockEntity extends BlockEntity {
         return true;
     }
 
-    /** One right-click of work; returns true when a sift completed. */
-    public boolean workOnce(final Player player) {
+    /** A right-click keeps the sieve working for a few ticks (hold to keep sifting). */
+    public boolean keepUsing() {
         if (!this.hasMesh() || this.contents.isEmpty()) {
             return false;
         }
-        this.work += WORK_PER_CLICK;
-        if (this.work < WORK_MAX) {
-            this.setChanged();
-            this.sync();
-            return true;
+        if (this.level != null) {
+            this.activeUntil = this.level.getGameTime() + HOLD_TICKS;
         }
-        this.completeSift();
         return true;
+    }
+
+    public static void serverTick(final Level level, final BlockPos pos, final BlockState state,
+                                  final SieveBlockEntity sieve) {
+        if (sieve.contents.isEmpty() || !sieve.hasMesh()) {
+            if (sieve.work != 0) {
+                sieve.work = 0;
+                sieve.sync();
+            }
+            return;
+        }
+        if (level.getGameTime() > sieve.activeUntil) {
+            return;
+        }
+        sieve.work += WORK_PER_TICK;
+        if (sieve.work >= WORK_MAX) {
+            sieve.completeSift();
+            return;
+        }
+        // Sync often enough that the contents layer shrinks smoothly.
+        if (sieve.work % 2 == 0) {
+            sieve.sync();
+        }
     }
 
     /** Empties the contents back to the player (sneak + empty hand). */
