@@ -15,6 +15,18 @@ tag `legacy/1.20.1-forge`。桶（七材质）与矿物六态（12 材料 × 3 �
   旧版打 tag `legacy/1.20.1-forge`（`e0bc177`）。工具链：ModDevGradle 2.0.148 + JDK 21。
   本地构建需要代理访问 `maven.neoforged.net`（本机用 SakuraCat 的 `127.0.0.1:12450`，
   配在 `~/.gradle/gradle.properties`，不进仓库）。
+- **2026-10-29 M2 筛子实现**（分支 main）：
+  - 方块 `sieve`（四条 11px 腿 + 4px 顶框 + 网面，几何照原版 `ModelSieve`）；
+    `getRenderShape` 必须覆盖成 `MODEL`，否则 `BaseEntityBlock` 默认 `INVISIBLE` 不渲染
+  - 三档网：木网 10 / 丝网 64 / 铁筛网 256；坏即消失；档位不影响掉落（照 Omnia）
+  - 行为：**一次只装 1 个材料**，按住右键每 tick +2 work（50 tick ≈ 2.5 秒），
+    松手暂停；满 100 结算掉落 + 网 -1 耐久
+  - 料层渲染 `SieveRenderer`：底面 0.70、厚度 `0.20 × (1 - progress)`——**越筛越薄**
+    （原版 `MIN_RENDER_CAPACITY 0.70 / MAX 0.90`）
+  - 数据：`data/<ns>/sieve/{gravel,sand}.json`，每条独立掷 `chance`
+  - 坑：BE 必须写 `getUpdatePacket()`，否则客户端收不到 contents/work，料层不渲染
+  - Jade：桶（百分比 + 倒计时）、筛子（`铁筛网：236 / 256` + 进度）；
+    新增 provider 必须补 `config.jade.plugin_<ns>_<name>`，否则 Jade 断言炸掉资源重载
 - **2026-10-29 1.21 数据包路径**：`recipes`/`loot_tables`/`tags/items`/`tags/blocks` 全部改单数
   （`recipe`/`loot_table`/`tags/item`/`tags/block`），配方 `result.item` 改 `result.id`。
   这就是「木桶没配方」「桶里放不进植物」的原因（标签在老路径下等于不存在）。
@@ -63,6 +75,9 @@ tag `legacy/1.20.1-forge`。桶（七材质）与矿物六态（12 材料 × 3 �
 | 合成配方 | ⚠️ | 7 个 JSON 都加载成功；没有玩家实测合成格 |
 | 桶：堆肥→泥土（1.21.1） | ✅ | 2026-10-29 实测：苹果 +100 / 仙人掌 +100 / 树叶 +125，满 1000 后 `dirt=true` |
 | 桶：流体装填 | ✅ | 2026-10-29 实测：岩浆桶倒入成功 |
+| 筛子方块渲染 | ✅ | 2026-10-29 作者确认框体可见（修 render shape 之后）|
+| 料层/进度渲染 | ⚠️ | 已修位置（网面 0.70 起）与方向（越筛越薄），未见作者确认 |
+| 筛子 Jade | ⚠️ | provider 已注册并加载，显示内容待作者确认 |
 | 筛子（1.21.1） | 🚧 | 方块 + 三档网 + 数据表已实现；`[sieve] loaded 2 inputs, 29 drops`；待游戏内实测 |
 | 桶：Jade tooltip | ⚠️ | 插件已加载（日志确认），显示内容待作者确认 |
 | 矿物六态注册 | ✅ | 客户端 `/give` 与创意标签可见 72 条；`[materials] loaded 12 entries` |
