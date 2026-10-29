@@ -1,6 +1,9 @@
 package com.kaifengcrt.exnihilosatellitium;
 
+import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
+import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
+import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import com.mojang.logging.LogUtils;
@@ -22,6 +25,9 @@ public final class ExNihiloSatellitium {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public ExNihiloSatellitium(final IEventBus modBus, final ModContainer modContainer) {
+        ModBlocks.register(modBus);
+        ModBlockEntities.register(modBus);
+        ModItems.register(modBus);
         ModOreBlocks.register(modBus);
         ModOreItems.register(modBus);
         ModCreativeTabs.register(modBus);

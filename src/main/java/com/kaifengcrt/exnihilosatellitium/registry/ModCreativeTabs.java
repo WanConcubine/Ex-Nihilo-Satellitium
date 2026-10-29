@@ -25,6 +25,8 @@ public final class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModOreItems.byMaterial().values().iterator().next()
                             .get("ore_gravel").get()))
                     .displayItems((parameters, output) -> {
+                        output.accept(ModItems.PORCELAIN.get());
+                        ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
                         for (final OreMaterial material : OreMaterials.all()) {
                             final var entries = ModOreItems.byMaterial().get(material.id());
                             for (final String kind : ModOreBlocks.KINDS) {
