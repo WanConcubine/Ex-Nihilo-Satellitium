@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xzx",
+    "xzx",
+    "y y"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:oak_planks"
+    },
+    "z": {
+      "item": "exnihilosatellitium:wood_mesh"
+    },
+    "y": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:sieve"
+  }
+}
