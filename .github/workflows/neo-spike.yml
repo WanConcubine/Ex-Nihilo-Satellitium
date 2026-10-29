@@ -5,10 +5,13 @@ on:
   push:
     branches: ["spike/neoforge-1.21.1"]
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  build-and-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
@@ -19,10 +22,33 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build
+      - name: Compile
+        run: ./gradlew build --no-daemon --stacktrace
+
+      - name: Headless server smoke
         run: |
-          set -o pipefail
-          ./gradlew build --no-daemon --stacktrace 2>&1 | tee /tmp/build.log
+          set +e
+          mkdir -p run
+          echo "eula=true" > run/eula.txt
+          printf 'online-mode=false\nlevel-type=flat\nspawn-protection=0\n' > run/server.properties
+
+          ./gradlew runServer --no-daemon > /tmp/server.log 2>&1 &
+          GRADLE_PID=$!
+
+          for i in $(seq 1 180); do
+            if grep -qF "Done (" /tmp/server.log; then break; fi
+            if ! kill -0 "$GRADLE_PID" 2>/dev/null; then break; fi
+            sleep 5
+          done
+
+          echo "--- markers ---"
+          grep -E "Done \(|\[materials\] loaded|Starting minecraft server" /tmp/server.log | tail -10 || true
+
+          kill "$GRADLE_PID" 2>/dev/null
+          pkill -f "net.minecraft.server" 2>/dev/null
+
+          test -n "$(grep -F 'Done (' /tmp/server.log)" \
+            && test -n "$(grep -F '[materials] loaded 12 entries' /tmp/server.log)"
 
       - name: Publish log on failure
         if: failure()
@@ -31,48 +57,7 @@ jobs:
           git config user.email "ci@exnihilo.local"
           git checkout -B ci-logs
           mkdir -p .ci
-          tail -c 200000 /tmp/build.log > .ci/build.log
-          git add -f .ci/build.log
-          git commit -m "ci: neoforge spike build log" || true
-          git push -f origin ci-logs
-
-  smoke:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - uses: gradle/actions/setup-gradle@v4
-
-      - name: Prepare dev server
-        run: |
-          mkdir -p run
-          echo "eula=true" > run/eula.txt
-          printf 'online-mode=false\nlevel-type=flat\nspawn-protection=0\n' > run/server.properties
-
-      - name: Run server and assert registration
-        run: |
-          set +e
-          timeout --signal=INT 420 ./gradlew runServer --no-daemon > /tmp/server.log 2>&1
-          echo "gradle exit: $?"
-          echo "--- start markers ---"
-          grep -E "Done \(|\[materials\] loaded|Starting minecraft server" /tmp/server.log | tail -10
-          test -n "$(grep -F 'Done (' /tmp/server.log)" && \
-          test -n "$(grep -F '[materials] loaded 12 entries' /tmp/server.log)"
-
-      - name: Publish server log on failure
-        if: failure()
-        run: |
-          git config user.name "ci"
-          git config user.email "ci@exnihilo.local"
-          git checkout -B ci-logs
-          mkdir -p .ci
-          tail -c 200000 /tmp/server.log > .ci/server.log
-          git add -f .ci/server.log
+          tail -c 200000 /tmp/server.log > .ci/server.log 2>/dev/null || true
+          git add -f .ci/server.log 2>/dev/null || true
           git commit -m "ci: spike server log" || true
-          git push -f origin ci-logs
+          git push -f origin ci-logs || true
