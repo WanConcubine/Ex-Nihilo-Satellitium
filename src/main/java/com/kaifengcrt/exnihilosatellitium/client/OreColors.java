@@ -23,7 +23,7 @@ import java.util.Map;
  * the model's {@code render_type}, not from code. Items keep their pre-coloured
  * textures, so only block items (whose model is the block model) need a colour.
  */
-@EventBusSubscriber(modid = ExNihiloSatellitium.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ExNihiloSatellitium.MOD_ID, value = Dist.CLIENT)
 public final class OreColors {
 
     private static final Map<Block, Integer> BLOCK_COLORS = new IdentityHashMap<>();

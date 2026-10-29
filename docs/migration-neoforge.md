@@ -15,6 +15,11 @@
 
 **所以：本地开发要么有代理，要么只能靠 CI 验证。**
 
+- 2026-10-29 补测：本机 SakuraCat 的混合端口 `127.0.0.1:12450` 可用作 HTTP 代理，
+  把 `systemProp.http(s).proxyHost/Port` 写进 `~/.gradle/gradle.properties`（**用户级、不进仓库**）
+  后本地 `build` 通过（4 分 52 秒，含首次反编译），`runClient` 也能起。
+  说明只要有一个代理，本地开发回路就正常。
+
 ## 环境
 
 | 项 | 值 |
