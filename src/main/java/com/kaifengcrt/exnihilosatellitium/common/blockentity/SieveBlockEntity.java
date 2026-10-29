@@ -8,6 +8,7 @@ import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -216,5 +217,11 @@ public class SieveBlockEntity extends BlockEntity {
     @Override
     public CompoundTag getUpdateTag(final HolderLookup.Provider registries) {
         return this.saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        // Without this the client never receives contents/work and nothing renders.
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }
