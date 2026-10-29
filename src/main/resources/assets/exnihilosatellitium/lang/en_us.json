@@ -28,6 +28,7 @@
   "block.exnihilosatellitium.platinum_ore_dust": "Platinum Ore Dust",
   "block.exnihilosatellitium.platinum_ore_gravel": "Platinum Ore Gravel",
   "block.exnihilosatellitium.platinum_ore_sand": "Platinum Ore Sand",
+  "block.exnihilosatellitium.sieve": "Sieve",
   "block.exnihilosatellitium.silver_ore_dust": "Silver Ore Dust",
   "block.exnihilosatellitium.silver_ore_gravel": "Silver Ore Gravel",
   "block.exnihilosatellitium.silver_ore_sand": "Silver Ore Sand",
@@ -53,6 +54,7 @@
   "item.exnihilosatellitium.gold_powdered": "Gold Powdered Ore",
   "item.exnihilosatellitium.iron_broken": "Iron Broken Ore",
   "item.exnihilosatellitium.iron_crushed": "Iron Crushed Ore",
+  "item.exnihilosatellitium.iron_mesh": "Iron Mesh",
   "item.exnihilosatellitium.iron_powdered": "Iron Powdered Ore",
   "item.exnihilosatellitium.lead_broken": "Lead Broken Ore",
   "item.exnihilosatellitium.lead_crushed": "Lead Crushed Ore",
@@ -67,6 +69,7 @@
   "item.exnihilosatellitium.platinum_crushed": "Platinum Crushed Ore",
   "item.exnihilosatellitium.platinum_powdered": "Platinum Powdered Ore",
   "item.exnihilosatellitium.porcelain": "Porcelain",
+  "item.exnihilosatellitium.silk_mesh": "Silk Mesh",
   "item.exnihilosatellitium.silver_broken": "Silver Broken Ore",
   "item.exnihilosatellitium.silver_crushed": "Silver Crushed Ore",
   "item.exnihilosatellitium.silver_powdered": "Silver Powdered Ore",
@@ -76,6 +79,7 @@
   "item.exnihilosatellitium.uranium_broken": "Uranium Broken Ore",
   "item.exnihilosatellitium.uranium_crushed": "Uranium Crushed Ore",
   "item.exnihilosatellitium.uranium_powdered": "Uranium Powdered Ore",
+  "item.exnihilosatellitium.wood_mesh": "Wooden Mesh",
   "item.exnihilosatellitium.zinc_broken": "Zinc Broken Ore",
   "item.exnihilosatellitium.zinc_crushed": "Zinc Crushed Ore",
   "item.exnihilosatellitium.zinc_powdered": "Zinc Powdered Ore",
@@ -83,5 +87,6 @@
   "jade.exnihilosatellitium.barrel.compost": "Compost: %s%% (%s / %s)",
   "jade.exnihilosatellitium.barrel.fluid": "%s: %s / %s mB",
   "jade.exnihilosatellitium.barrel.ready": "Dirt ready (right-click)",
-  "jade.exnihilosatellitium.barrel.timer": "Forming: %s s left"
+  "jade.exnihilosatellitium.barrel.timer": "Forming: %s s left",
+  "message.exnihilosatellitium.need_mesh": "Needs a mesh"
 }

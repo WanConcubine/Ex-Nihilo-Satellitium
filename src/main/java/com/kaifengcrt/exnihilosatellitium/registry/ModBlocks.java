@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.block.BarrelBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -40,6 +41,11 @@ public final class ModBlocks {
     public static final DeferredHolder<Block, Block> STONE_BARREL =
             BLOCKS.register("stone_barrel",
                     () -> new BarrelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
+
+    public static final DeferredHolder<Block, Block> SIEVE =
+            BLOCKS.register("sieve", () -> new SieveBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)
+                    .noOcclusion()
+                    .isViewBlocking((state, level, pos) -> false)));
 
     /** Registration order doubles as creative-tab order. */
     public static final List<DeferredHolder<Block, Block>> BARRELS = List.of(

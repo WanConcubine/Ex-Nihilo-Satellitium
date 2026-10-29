@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.BarrelBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.blockentity.SieveBlockEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -25,6 +26,11 @@ public final class ModBlockEntities {
                     .of(BarrelBlockEntity::new, ModBlocks.BARRELS.stream()
                             .map(DeferredHolder::get)
                             .toArray(Block[]::new))
+                    .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SieveBlockEntity>> SIEVE =
+            BLOCK_ENTITIES.register("sieve", () -> BlockEntityType.Builder
+                    .of(SieveBlockEntity::new, ModBlocks.SIEVE.get())
                     .build(null));
 
     private ModBlockEntities() {

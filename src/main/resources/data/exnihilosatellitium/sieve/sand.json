@@ -1,0 +1,53 @@
+{
+  "input": "minecraft:sand",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:iron_crushed",
+      "chance": 0.2
+    },
+    {
+      "item": "exnihilosatellitium:gold_crushed",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:copper_crushed",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:tin_crushed",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:silver_crushed",
+      "chance": 0.02222
+    },
+    {
+      "item": "exnihilosatellitium:lead_crushed",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:nickel_crushed",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:platinum_crushed",
+      "chance": 0.00781
+    },
+    {
+      "item": "exnihilosatellitium:aluminum_crushed",
+      "chance": 0.125
+    },
+    {
+      "item": "exnihilosatellitium:osmium_crushed",
+      "chance": 0.1
+    },
+    {
+      "item": "exnihilosatellitium:zinc_crushed",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:uranium_crushed",
+      "chance": 0.01111
+    }
+  ]
+}
