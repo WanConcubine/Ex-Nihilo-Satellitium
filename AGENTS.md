@@ -76,12 +76,14 @@ com/kaifengcrt/exnihilosatellitium/
 |---|---|
 | [docs/status.md](docs/status.md) | **当前状态**：停在哪、验证表、下一步、坑 |
 | [docs/DESIGN.md](docs/DESIGN.md) | 原则、目标、核心循环、架构、里程碑、决策记录 |
+| [docs/parity.md](docs/parity.md) | **复刻对照表**：经典项与 Ex Astris 的逐项状态、分档 |
 | [docs/data-format.md](docs/data-format.md) | 堆肥 JSON、物品标签、NBT 键、命令、比较器 |
 | [docs/textures.md](docs/textures.md) | 纹理路线、色板、引用规则、AI 政策、检查 |
 | [README.md](README.md) | 面向玩家/贡献者的入口 |
 | [THIRD-PARTY.md](THIRD-PARTY.md) | 第三方与参考来源 |
 
 - 改完功能：先更新 `status.md` 验证表，再补 `DESIGN.md` 的实现记录。
+- 新增/完成一个经典条目或 Ex Astris 条目：同步 `parity.md` 的状态列。
 - 改 JSON/NBT/命令：更新 `data-format.md`。
 - 改贴图/模型引用规则：更新 `textures.md`，并跑检查脚本。
 - 不要在多处抄同一份“当前进度”；status.md 是唯一出处。
