@@ -33,22 +33,17 @@ def mesh_texture(name):
 
 
 def frame_model():
+    """Flat frame only: four 2x3px bars on the rim, no floor (a sieve, not a crate)."""
     plank = "minecraft:block/oak_planks"
+    face = {f: {"texture": "#wood"} for f in ("up", "down", "north", "south", "east", "west")}
     return {
         "parent": "minecraft:block/block",
         "textures": {"particle": plank, "wood": plank},
         "elements": [
-            {"from": [0, 0, 0], "to": [16, 2, 16],
-             "faces": {f: {"texture": "#wood", "cullface": f}
-                       for f in ("down", "up", "north", "south", "west", "east")}},
-            {"from": [0, 2, 0], "to": [16, 6, 2],
-             "faces": {f: {"texture": "#wood"} for f in ("up", "north", "south", "west", "east")}},
-            {"from": [0, 2, 14], "to": [16, 6, 16],
-             "faces": {f: {"texture": "#wood"} for f in ("up", "north", "south", "west", "east")}},
-            {"from": [0, 2, 2], "to": [2, 6, 14],
-             "faces": {f: {"texture": "#wood"} for f in ("up", "north", "south", "west", "east")}},
-            {"from": [14, 2, 2], "to": [16, 6, 14],
-             "faces": {f: {"texture": "#wood"} for f in ("up", "north", "south", "west", "east")}},
+            {"from": [0, 0, 0], "to": [16, 3, 2], "faces": face},
+            {"from": [0, 0, 14], "to": [16, 3, 16], "faces": face},
+            {"from": [0, 0, 2], "to": [2, 3, 14], "faces": face},
+            {"from": [14, 0, 2], "to": [16, 3, 14], "faces": face},
         ],
     }
 
@@ -59,7 +54,7 @@ def mesh_model(name):
         "render_type": "minecraft:cutout",
         "textures": {"particle": tex, "mesh": tex},
         "elements": [{
-            "from": [2, 5, 2], "to": [14, 5.02, 14],
+            "from": [2, 2, 2], "to": [14, 2.02, 14],
             "faces": {"up": {"texture": "#mesh"}, "down": {"texture": "#mesh"}},
         }],
     }
