@@ -33,18 +33,22 @@ def mesh_texture(name):
 
 
 def frame_model():
-    """Flat frame only: four 2x3px bars on the rim, no floor (a sieve, not a crate)."""
+    """Four legs + a rim ring on top, per the owner's reference render."""
     plank = "minecraft:block/oak_planks"
     face = {f: {"texture": "#wood"} for f in ("up", "down", "north", "south", "east", "west")}
+    legs = [
+        ([1, 0, 1], [3, 6, 3]), ([13, 0, 1], [15, 6, 3]),
+        ([1, 0, 13], [3, 6, 15]), ([13, 0, 13], [15, 6, 15]),
+    ]
+    rim = [
+        ([0, 6, 0], [16, 10, 2]), ([0, 6, 14], [16, 10, 16]),
+        ([0, 6, 2], [2, 10, 14]), ([14, 6, 2], [16, 10, 14]),
+    ]
+    elements = [{"from": f, "to": t, "faces": face} for f, t in legs + rim]
     return {
         "parent": "minecraft:block/block",
         "textures": {"particle": plank, "wood": plank},
-        "elements": [
-            {"from": [0, 0, 0], "to": [16, 3, 2], "faces": face},
-            {"from": [0, 0, 14], "to": [16, 3, 16], "faces": face},
-            {"from": [0, 0, 2], "to": [2, 3, 14], "faces": face},
-            {"from": [14, 0, 2], "to": [16, 3, 14], "faces": face},
-        ],
+        "elements": elements,
     }
 
 
@@ -54,7 +58,7 @@ def mesh_model(name):
         "render_type": "minecraft:cutout",
         "textures": {"particle": tex, "mesh": tex},
         "elements": [{
-            "from": [2, 2, 2], "to": [14, 2.02, 14],
+            "from": [2, 6.02, 2], "to": [14, 6.04, 14],
             "faces": {"up": {"texture": "#mesh"}, "down": {"texture": "#mesh"}},
         }],
     }
