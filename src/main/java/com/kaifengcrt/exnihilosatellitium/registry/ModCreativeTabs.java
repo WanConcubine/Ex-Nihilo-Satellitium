@@ -1,10 +1,13 @@
 package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterial;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -24,6 +27,17 @@ public final class ModCreativeTabs {
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.PORCELAIN.get());
                 ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
+                for (final OreMaterial material : OreMaterials.all()) {
+                    final var entries = ModOreItems.byMaterial().get(material.id());
+                    for (final String kind : ModOreBlocks.KINDS) {
+                        final RegistryObject<? extends net.minecraft.world.item.Item> item =
+                                entries.get("ore_" + kind);
+                        output.accept(item.get());
+                    }
+                    for (final String stage : ModOreItems.STAGES) {
+                        output.accept(entries.get(stage).get());
+                    }
+                }
             })
             .build());
 
