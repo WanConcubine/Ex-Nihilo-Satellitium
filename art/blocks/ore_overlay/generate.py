@@ -58,19 +58,32 @@ def vanilla_block(name):
     return Image.open(target).convert("RGBA")
 
 
-def gravel_mask(target=55, alpha=163):
-    """21% 覆盖、统一 alpha 163 的稀疏色斑（原版 gravel 模板就是这两档 alpha）。"""
-    centres = [(3, 3), (10, 4), (12, 10), (5, 11), (8, 14), (2, 8)]
-    cand = []
-    for cx, cy in centres:
-        for y in range(16):
-            for x in range(16):
-                d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
-                if d <= 2.6:
-                    cand.append((d, x, y))
-    cand.sort(key=lambda t: (t[0], t[1], t[2]))
-    picked = {(x, y) for _, x, y in cand[:target]}
-    return [[(255, 255, 255, alpha if (x, y) in picked else 0) for x in range(16)] for y in range(16)]
+def gravel_mask(alpha=196, seed=11, target=66):
+    """稀疏矿脉：方向、粗细、长度都打散，避免排成斜纹（原版 gravel 模板是 21% 覆盖）。"""
+    rng = random.Random(seed)
+    rows = [[(255, 255, 255, 0) for _ in range(16)] for _ in range(16)]
+    dirs = [(1, 0), (0, 1), (1, 1), (1, -1), (2, 1), (1, 2)]
+    placed = 0
+    tries = 0
+    while placed < target and tries < 400:
+        tries += 1
+        x, y = rng.randint(0, 15), rng.randint(0, 15)
+        dx, dy = rng.choice(dirs)
+        n = rng.randint(2, 4)
+        thick = rng.choice([1, 1, 2])
+        cells = []
+        for i in range(n):
+            for t in range(thick):
+                cx, cy = x + i * dx + (t if dy == 0 else 0), y + i * dy + (t if dx == 0 else 0)
+                if 0 <= cx < 16 and 0 <= cy < 16:
+                    cells.append((cx, cy))
+        # 不许和已有脉贴在一起，否则会连成大片
+        if any(rows[cy][cx][3] for cx, cy in cells):
+            continue
+        for cx, cy in cells:
+            rows[cy][cx] = (255, 255, 255, alpha)
+        placed += len(cells)
+    return rows
 
 
 def wash(level, jitter, seed):
@@ -82,13 +95,20 @@ def wash(level, jitter, seed):
 
 def mask_image(kind):
     rows = {"gravel": gravel_mask,
-            "sand": lambda: wash(132, 12, 21),
-            "dust": lambda: wash(102, 10, 33)}[kind]()
+            "sand": lambda: wash(140, 12, 21),
+            "dust": lambda: wash(108, 10, 33)}[kind]()
     img = Image.new("RGBA", (16, 16))
     for y in range(16):
         for x in range(16):
             img.putpixel((x, y), rows[y][x])
     return img
+
+
+def block_color(metal):
+    """方块罩色用 materials.json 的 color（原版 OreList 的身份色），不是物品明暗阶里的灰。"""
+    mats = json.load(open(ROOT / "src/main/resources/exnihilosatellitium/materials.json", encoding="utf-8"))["materials"]
+    hit = next((m for m in mats if m["id"] == metal), None)
+    return _rgb(hit["color"]) if hit else _rgb(PALETTES[metal][2])
 
 
 def _rgb(h):
@@ -99,7 +119,7 @@ def _rgb(h):
 def composite(metal, kind):
     """预览：按 alpha 把纯色混到底图上，等价于游戏里的 tint + translucent。"""
     base = vanilla_block(BASES[kind]).copy()
-    col = _rgb(PALETTES[metal][2])
+    col = block_color(metal)
     m = mask_image(kind)
     for y in range(16):
         for x in range(16):
