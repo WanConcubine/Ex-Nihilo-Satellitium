@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "xxx",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:wood_mesh"
+  }
+}
