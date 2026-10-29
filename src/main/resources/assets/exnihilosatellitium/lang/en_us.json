@@ -80,8 +80,8 @@
   "item.exnihilosatellitium.zinc_crushed": "Zinc Crushed Ore",
   "item.exnihilosatellitium.zinc_powdered": "Zinc Powdered Ore",
   "itemGroup.exnihilosatellitium": "Ex Nihilo: Satellitium",
-  "jade.exnihilosatellitium.barrel.compost": "Compost: %s / %s",
+  "jade.exnihilosatellitium.barrel.compost": "Compost: %s%% (%s / %s)",
   "jade.exnihilosatellitium.barrel.fluid": "%s: %s / %s mB",
-  "jade.exnihilosatellitium.barrel.ready": "Dirt ready (right-click to extract)",
-  "jade.exnihilosatellitium.barrel.timer": "Ready in %s s"
+  "jade.exnihilosatellitium.barrel.ready": "Dirt ready (right-click)",
+  "jade.exnihilosatellitium.barrel.timer": "Forming: %s s left"
 }

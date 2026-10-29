@@ -140,11 +140,14 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 | 键 | 用途 |
 |---|---|
 | `jade.exnihilosatellitium.barrel.ready` | 泥土已就绪 |
-| `jade.exnihilosatellitium.barrel.compost` | `堆肥：x / 1000` |
-| `jade.exnihilosatellitium.barrel.timer` | `还需 n 秒` |
+| `jade.exnihilosatellitium.barrel.compost` | `堆肥：45%（450 / 1000）` —— 百分比 + 原始值 |
+| `jade.exnihilosatellitium.barrel.timer` | `成型中：还需 n 秒` —— 堆肥满后倒计时 |
 | `jade.exnihilosatellitium.barrel.fluid` | `流体：x / 1000 mB` |
 
 Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，不发额外网络包。
+服务端在倒计时期间每 10 tick 同步一次（`serverTick` 里的 `sync()`），所以百分比和秒数是活的。
+
+显示顺序：流体 → 泥土就绪（有就返回）→ 堆肥百分比 → 成型倒计时。
 
 ## 6. 相关代码
 

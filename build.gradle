@@ -16,7 +16,13 @@ java {
 
 repositories {
     maven { name = 'BMCLAPI'; url = uri('https://bmclapi2.bangbang93.com/maven/') }
+    maven { name = 'Modrinth'; url = uri('https://api.modrinth.com/maven') }
     mavenCentral()
+}
+
+dependencies {
+    // Jade HUD integration: compile-time only, never shipped.
+    compileOnly "maven.modrinth:jade:${jade_version}"
 }
 
 neoForge {

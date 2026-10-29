@@ -94,8 +94,13 @@ public class BarrelBlock extends BaseEntityBlock {
         }
 
         if (level.isClientSide) {
+            final boolean ok = barrel.canUse(stack);
+            com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium.LOGGER.info(
+                    "[barrel-debug] CLIENT item={} canUse={} tank={} progress={} dirt={}",
+                    stack.getItem(), ok, barrel.getTank().getFluidAmount(),
+                    barrel.getCompostProgress(), barrel.isDirtReady());
             // Client-side prediction only: never mutate the tank here.
-            return barrel.canUse(stack)
+            return ok
                     ? ItemInteractionResult.SUCCESS
                     : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
