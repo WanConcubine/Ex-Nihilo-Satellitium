@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.client;
 
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterial;
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
+import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import net.minecraft.client.gui.GuiGraphics;
@@ -34,6 +35,11 @@ public final class OreDebugScreen extends Screen {
                         20 + (index % 18) * 22, 24 + (index / 18) * 22);
                 index++;
             }
+        }
+        int bx = 20;
+        for (final var barrel : ModItems.BARREL_ITEMS) {
+            graphics.renderItem(new ItemStack(barrel.get()), bx, 24 + 4 * 22);
+            bx += 22;
         }
         graphics.drawString(this.font, "ore icon sheet (debug)", 20, 10, 0xFFFFFF);
     }
