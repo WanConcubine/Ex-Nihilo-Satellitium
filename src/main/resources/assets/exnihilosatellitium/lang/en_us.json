@@ -44,6 +44,7 @@
   "block.exnihilosatellitium.zinc_ore_gravel": "Zinc Ore Gravel",
   "block.exnihilosatellitium.zinc_ore_sand": "Zinc Ore Sand",
   "config.jade.plugin_exnihilosatellitium.barrel": "Barrel Info",
+  "config.jade.plugin_exnihilosatellitium.sieve": "Sieve Info",
   "item.exnihilosatellitium.aluminum_broken": "Aluminum Broken Ore",
   "item.exnihilosatellitium.aluminum_crushed": "Aluminum Crushed Ore",
   "item.exnihilosatellitium.aluminum_powdered": "Aluminum Powdered Ore",
@@ -89,5 +90,8 @@
   "jade.exnihilosatellitium.barrel.fluid": "%s: %s / %s mB",
   "jade.exnihilosatellitium.barrel.ready": "Dirt ready (right-click)",
   "jade.exnihilosatellitium.barrel.timer": "Forming: %s s left",
+  "jade.exnihilosatellitium.sieve.mesh": "%s: %s / %s",
+  "jade.exnihilosatellitium.sieve.no_mesh": "No mesh",
+  "jade.exnihilosatellitium.sieve.progress": "Sifting: %s%%",
   "message.exnihilosatellitium.need_mesh": "Needs a mesh"
 }

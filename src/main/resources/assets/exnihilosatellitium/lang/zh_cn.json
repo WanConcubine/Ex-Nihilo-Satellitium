@@ -44,6 +44,7 @@
   "block.exnihilosatellitium.zinc_ore_gravel": "锌矿沙砾",
   "block.exnihilosatellitium.zinc_ore_sand": "锌矿沙子",
   "config.jade.plugin_exnihilosatellitium.barrel": "木桶信息",
+  "config.jade.plugin_exnihilosatellitium.sieve": "筛子信息",
   "item.exnihilosatellitium.aluminum_broken": "破碎铝矿",
   "item.exnihilosatellitium.aluminum_crushed": "粉碎铝矿",
   "item.exnihilosatellitium.aluminum_powdered": "粉末铝矿",
@@ -89,5 +90,8 @@
   "jade.exnihilosatellitium.barrel.fluid": "%s：%s / %s mB",
   "jade.exnihilosatellitium.barrel.ready": "泥土已就绪（右键取出）",
   "jade.exnihilosatellitium.barrel.timer": "成型中：还需 %s 秒",
+  "jade.exnihilosatellitium.sieve.mesh": "%s：%s / %s",
+  "jade.exnihilosatellitium.sieve.no_mesh": "未装筛网",
+  "jade.exnihilosatellitium.sieve.progress": "筛选：%s%%",
   "message.exnihilosatellitium.need_mesh": "需要先放入筛网"
 }
