@@ -1,0 +1,160 @@
+{
+  "materials": [
+    {
+      "id": "iron",
+      "color": "F2AB7C",
+      "name": {
+        "en_us": "Iron",
+        "zh_cn": "铁"
+      },
+      "tier": "common",
+      "rarity": 5,
+      "ingot": "minecraft:iron_ingot",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "gold",
+      "color": "FFD000",
+      "name": {
+        "en_us": "Gold",
+        "zh_cn": "金"
+      },
+      "tier": "uncommon",
+      "rarity": 32,
+      "ingot": "minecraft:gold_ingot",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "copper",
+      "color": "FF4D00",
+      "name": {
+        "en_us": "Copper",
+        "zh_cn": "铜"
+      },
+      "tier": "common",
+      "rarity": 18,
+      "ingot": "#forge:ingots/copper",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "tin",
+      "color": "ABC9B6",
+      "name": {
+        "en_us": "Tin",
+        "zh_cn": "锡"
+      },
+      "tier": "common",
+      "rarity": 18,
+      "ingot": "#forge:ingots/tin",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "silver",
+      "color": "8CC9FF",
+      "name": {
+        "en_us": "Silver",
+        "zh_cn": "银"
+      },
+      "tier": "uncommon",
+      "rarity": 45,
+      "ingot": "#forge:ingots/silver",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "lead",
+      "color": "2D2563",
+      "name": {
+        "en_us": "Lead",
+        "zh_cn": "铅"
+      },
+      "tier": "uncommon",
+      "rarity": 32,
+      "ingot": "#forge:ingots/lead",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "nickel",
+      "color": "BAB877",
+      "name": {
+        "en_us": "Nickel",
+        "zh_cn": "镍"
+      },
+      "tier": "uncommon",
+      "rarity": 32,
+      "ingot": "#forge:ingots/nickel",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "platinum",
+      "color": "38CDFF",
+      "name": {
+        "en_us": "Platinum",
+        "zh_cn": "铂"
+      },
+      "tier": "epic",
+      "rarity": 128,
+      "ingot": "#forge:ingots/platinum",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "aluminum",
+      "color": "FFC7C7",
+      "name": {
+        "en_us": "Aluminum",
+        "zh_cn": "铝"
+      },
+      "tier": "common",
+      "rarity": 8,
+      "ingot": "#forge:ingots/aluminum",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "osmium",
+      "color": "608FC4",
+      "name": {
+        "en_us": "Osmium",
+        "zh_cn": "锇"
+      },
+      "tier": "common",
+      "rarity": 10,
+      "ingot": "#forge:ingots/osmium",
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "zinc",
+      "color": "9DB0A4",
+      "name": {
+        "en_us": "Zinc",
+        "zh_cn": "锌"
+      },
+      "tier": "common",
+      "rarity": 24,
+      "ingot": "#forge:ingots/zinc",
+      "source": "estimate",
+      "enabled": true
+    },
+    {
+      "id": "uranium",
+      "color": "6BA84F",
+      "name": {
+        "en_us": "Uranium",
+        "zh_cn": "铀"
+      },
+      "tier": "rare",
+      "rarity": 90,
+      "ingot": "#forge:ingots/uranium",
+      "source": "estimate",
+      "enabled": true
+    }
+  ]
+}

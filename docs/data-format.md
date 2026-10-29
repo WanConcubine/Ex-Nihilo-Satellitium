@@ -207,9 +207,10 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
       "color": "FF4D00",
       "name": { "en_us": "Copper", "zh_cn": "铜" },
       "tier": "common",
-      "rarity": { "gravel": 18, "sand": 32, "dust": 48 },
+      "rarity": 18,
       "ingot": "forge:ingots/copper",
       "owner_mod": "mymod",
+      "source": "classic",
       "enabled": true
     }
   ]
@@ -221,11 +222,21 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `id` | ✅ | 材料名，只允许 `[a-z0-9_]`；决定注册名（`copper_broken` 等） |
 | `color` | ✅ | `RRGGBB`，用于物品/方块染色；缺失则该条报错跳过 |
 | `name` | ✅ | 显示名，至少给 `en_us`；缺 `zh_cn` 时回退 `en_us` |
-| `tier` | ✅ | `common` / `uncommon` / `rare` / `epic`，只用于校验数值区间与文档 |
-| `rarity` | ✅ | 三种筛料的 `1/N` 的 N，必须 > 0；人工调过手感才允许提交 |
-| `ingot` | ❌ | 已有锭的注册名；填了就熔炼到它，不重复造锭 |
+| `tier` | ✅ | `common` / `uncommon` / `rare` / `epic`，校验数值区间用（见下） |
+| `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。需要分筛料微调时写成对象 `{"gravel":18,"sand":32,"dust":48}` |
+| `ingot` | ❌ | 已有锭：写物品名（`minecraft:iron_ingot`）或标签（`#forge:ingots/copper`，取标签里第一个物品）。填了就熔炼到它，不重复造锭；解析不到则该材料的熔炼配方跳过并报错 |
 | `owner_mod` | ❌ | 主要来源模组，只用于自检与文档 |
+| `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；表外骨架行默认 `false` |
+
+`tier` 与 `rarity` 的对应（校验用，越界即报错跳过）：
+
+| tier | rarity |
+|---|---|
+| `common` | ≤ 24 |
+| `uncommon` | 25 – 48 |
+| `rare` | 49 – 96 |
+| `epic` | ≥ 97 |
 
 ### 规则
 
@@ -234,3 +245,8 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - **校验失败即跳过该条**（不拖垮启动）：`id` 非法、颜色格式错、`rarity <= 0`、重复 `id`。
   日志用 `[materials] ...` 前缀，和 `[compost]` 保持一致的风格。
 - **注册名不可变**：`id` 改了就等于换了材料，旧存档里的物品会变成缺失——发布后不要改已用的 `id`。
+- **宝石不走材料链**：钻石、绿宝石、青金石、石英、红石、下界石英这类没有“锭”的东西，
+  直接写进筛子掉落表（`1/N`），不占 `materials` 的条目——它们的链条在 1.7.10 里也不存在。
+- **维度变体暂缺**：1.7.10 有 overworld / nether / end 三套矿砾（碎下界岩、末地砾）。
+  当前 schema 只有一件事（筛砂砾/沙子/尘土），下界与末地变体留到 M2 实现时再扩字段，
+  现在不要在表里硬塞。
