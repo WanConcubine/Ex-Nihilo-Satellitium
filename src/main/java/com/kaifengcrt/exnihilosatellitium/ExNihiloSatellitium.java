@@ -5,6 +5,8 @@ import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
+import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
+import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -30,6 +32,8 @@ public final class ExNihiloSatellitium {
         final IEventBus modBus = context.getModEventBus();
 
         ModBlocks.register(modBus);
+        ModOreBlocks.register(modBus);
+        ModOreItems.register(modBus);
         ModBlockEntities.register(modBus);
         ModItems.register(modBus);
         ModCreativeTabs.register(modBus);
