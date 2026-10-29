@@ -49,6 +49,25 @@ assets/exnihilosatellitium/textures/
 `python3 scripts/generate_barrel_variants.py` 从同一张表生成，几何仍只维护
 `models/block/barrel_base.json`。新增木种 = 在脚本表里加一行 + 补 lang。
 
+## 矿物方块（M2 起）：原版底 + 自有矿斑叠加
+
+方块**不手绘底图**，走 vanilla-sampled：
+
+| 方块 | 底图（引用，不打包） | 叠加层 |
+|---|---|---|
+| 矿砾方块 | `minecraft:block/gravel` | `exnihilosatellitium:block/ore_fleck` |
+| 矿砂方块 | `minecraft:block/sand` | 同上 |
+| 矿尘方块 | `minecraft:block/light_gray_concrete_powder` | 同上 |
+
+- 叠加层是**唯一**随包分发的 PNG（`art/blocks/ore_overlay/ore_fleck.png`，16×16）：
+  三档灰（亮面 `FF`、本体 `BE`、投影 `3C`），游戏里由 `BlockColor` 相乘得到材料色。
+- 模型两个 element：底 cube `tintindex -1`（不吃色），叠加面 `tintindex 0`（吃色），
+  外扩 0.01 防 z-fighting，`render_type: cutout`。
+- 预览：`python3 art/blocks/ore_overlay/generate.py`（会从本机 client-extra.jar 抽底图到
+  gitignore 的 `.vanilla_textures/`，仅用于预览）。
+
+曾尝试按材料生成整套方块底图，16×16 下会读成小方块或竖条，已废弃，别再走。
+
 ## 矿物碎块（M5 预览）
 
 原版 Ex Nihilo / Omnia 是**三段式**，不是一种“矿粒”：
