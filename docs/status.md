@@ -63,6 +63,10 @@
 - **项目名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；mod id `exnihilosatellitium`，
   Java 包 `com.kaifengcrt.exnihilosatellitium`，资源命名空间 `exnihilosatellitium`（2026-10-28）。
 - **许可证 MIT**（2026-10-27 从 ARR 转）；Forge MDK 仍 LGPL-2.1，见 [THIRD-PARTY.md](../THIRD-PARTY.md)。
+- **联动条目一律人工定值**（2026-10-29）：不做“发现即自动注册”，也不按 tag / worldgen 密度
+  自动推概率。理由：所有分支（原版、Omnia、Sequentia、Ex Deorum）都是人工逐条定值；
+  自动概率脱离手感、会打穿整合包进度设计。发现只用于**覆盖自检**，不参与定档。
+  详见 [DESIGN.md](DESIGN.md) §6.1 第 4 条。
 - **方块走 vanilla-sampled**：模型直接引用 `minecraft:block/*`，不复制/不打包原版贴图。
   七种桶共用 `barrel_base.json` 几何；木桶侧重木种木板 + 去皮原木内壁 + `gray_concrete` 深灰箍，
   石桶用 `stone` + `smooth_stone` + `deepslate_tiles`。
