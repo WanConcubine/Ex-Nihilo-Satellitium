@@ -234,7 +234,9 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
   `art/items/ore_pieces/generate.py`；新金属 = 加一条 `PALETTES`。
 - **方块**（矿砾 / 矿砂 / 矿尘）：**原版底 + 遮罩 + 纯色按 alpha 混合**，与原版/Omnia 同一套算法。
   底图引用 `minecraft:block/gravel`、`sand`、`light_gray_concrete_powder`（不复制、不打包）；
-  我们出三张遮罩（白色 + alpha）：矿砾 21% 覆盖 / alpha 163，矿砂 100% / 132，矿尘 100% / 102。
+  我们出三张遮罩（白色 + alpha）：矿砾 21% 覆盖 / alpha 163，矿砂 100% / 140，矿尘 100% / 108。
+  罩色必须用材料表的**身份色**（`materials.json` 的 `color`），不能用物品调色板的中间明暗阶——
+  那会让铁这类浅色金属发白（踩过）。
   模型：底 cube `tintindex -1`，遮罩面 `tintindex 0` 收 `BlockColor`，render layer 用 `translucent`。
 - 不接受另外两条路：① 按材料生成整套方块底图（16×16 读成小方块/竖条）；
   ② 在底图上画清晰矿斑（原版是纯色罩色，不是碎块，会变成另一种美术语言）。两条都试过，已废弃。

@@ -70,6 +70,9 @@ assets/exnihilosatellitium/textures/
 | 矿尘方块 | `minecraft:block/light_gray_concrete_powder` | `ore_mask_dust`（100% / 102） |
 
 - 三张遮罩是**唯一**随包分发的方块 PNG（`art/blocks/ore_overlay/`，16×16，白色 + alpha）。
+- **罩色取 `materials.json` 的 `color`（身份色，原版 `OreList` 的那套）**，不要取物品调色板的
+  中间阶：物品 `PALETTES` 是明暗阶，铁的第 3 阶是 `#B0B0B0`（灰），拿它罩色会让铁发白。
+  原版物品与方块共用同一个 `Color`，这点要保留。
 - 模型两个 element：底 cube `tintindex -1` 不吃色；遮罩面 `tintindex 0` 吃 `BlockColor`。
   方块 render layer 设 `translucent`，才能得到半透明罩色。
 - 预览：`python3 art/blocks/ore_overlay/generate.py`。
