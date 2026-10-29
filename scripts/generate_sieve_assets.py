@@ -16,7 +16,8 @@ MATS = json.load(open(RES / "exnihilosatellitium/materials.json", encoding="utf-
 MESH_COLORS = {"wood": (122, 88, 52), "silk": (232, 232, 228), "iron": (188, 190, 196)}
 MESH_NO = {"wood": 1, "silk": 2, "iron": 3}
 # 档位不是换色：编织密度不同。pitch=网格间距，strand=线宽
-MESH_WEAVE = {"wood": (6, 2), "silk": (4, 2), "iron": (3, 1)}
+# 三档同结构（斜向编织），只换色；铁网没有单独贴图，按木网配色推
+MESH_PITCH, MESH_STRAND = 6, 2
 
 
 def write_json(path, data):
@@ -25,25 +26,26 @@ def write_json(path, data):
 
 
 def mesh_texture(name):
-    """Woven screen; pitch and strand width differ per tier, not just hue."""
+    """Diagonal woven lattice: strands along both diagonals, diamond holes between."""
     colour = MESH_COLORS[name]
-    pitch, strand = MESH_WEAVE[name]
-    dark = tuple(max(0, c - 48) for c in colour)
-    light = tuple(min(255, c + 26) for c in colour)
+    dark = tuple(max(0, c - 50) for c in colour)
+    mid = tuple(max(0, c - 18) for c in colour)
+    light = tuple(min(255, c + 24) for c in colour)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            h_strand = (y % pitch) < strand
-            v_strand = (x % pitch) < strand
-            if not (h_strand or v_strand):
+            a = (x + y) % MESH_PITCH
+            b = (x - y) % MESH_PITCH
+            on_a = a < MESH_STRAND
+            on_b = b < MESH_STRAND
+            if not (on_a or on_b):
                 continue
-            if h_strand and v_strand:
-                over = ((x // pitch) + (y // pitch)) % 2 == 0
-                c = light if over else dark
-            elif h_strand:
-                c = colour if (y % pitch) == 0 else dark
+            if on_a and on_b:
+                c = light
+            elif on_a:
+                c = dark if a == MESH_STRAND - 1 else colour
             else:
-                c = colour if (x % pitch) == 0 else dark
+                c = dark if b == MESH_STRAND - 1 else colour
             img.putpixel((x, y), c + (255,))
     img.save(ASSETS / f"textures/block/sieve_mesh_{name}.png")
 
