@@ -49,24 +49,36 @@ assets/exnihilosatellitium/textures/
 `python3 scripts/generate_barrel_variants.py` 从同一张表生成，几何仍只维护
 `models/block/barrel_base.json`。新增木种 = 在脚本表里加一行 + 补 lang。
 
-## 矿物方块（M2 起）：原版底 + 自有矿斑叠加
+## 矿物方块（M2 起）：底图 + 遮罩 + 纯色，按 alpha 混合
 
-方块**不手绘底图**，走 vanilla-sampled：
+原版与 Omnia 都不是“画矿块”，而是三件套：**共用底图 + 共用遮罩（单色 + alpha）+ 一个纯色**，
+运行期按 alpha 混成最终贴图（`ImageManipulator.Recolor` → `Composite`）。
+实测它们的遮罩参数（我们按同一组数字重画，像素是自己的）：
 
-| 方块 | 底图（引用，不打包） | 叠加层 |
+| 状态 | 遮罩覆盖 | 遮罩 alpha | 读感 |
+|---|---|---|---|
+| 矿砾方块 | 21%（稀疏斑块） | 163 ≈ 64% | 砂砾上叠局部色斑，底图纹理保留 |
+| 矿砂方块 | 100%（整面） | 128–142 ≈ 50% | 整块罩一层半透明色，接近纯色 |
+| 矿尘方块 | 100%（整面） | 97–108 ≈ 40% | 同上，更淡 |
+
+1.20.1 不做运行期合图，改成 **vanilla 底 + 我们的遮罩 + BlockColor**：
+
+| 方块 | 底图（引用，不打包） | 遮罩 |
 |---|---|---|
-| 矿砾方块 | `minecraft:block/gravel` | `exnihilosatellitium:block/ore_fleck` |
-| 矿砂方块 | `minecraft:block/sand` | 同上 |
-| 矿尘方块 | `minecraft:block/light_gray_concrete_powder` | 同上 |
+| 矿砾方块 | `minecraft:block/gravel` | `ore_mask_gravel`（21% / 163） |
+| 矿砂方块 | `minecraft:block/sand` | `ore_mask_sand`（100% / 132） |
+| 矿尘方块 | `minecraft:block/light_gray_concrete_powder` | `ore_mask_dust`（100% / 102） |
 
-- 叠加层是**唯一**随包分发的 PNG（`art/blocks/ore_overlay/ore_fleck.png`，16×16）：
-  三档灰（亮面 `FF`、本体 `BE`、投影 `3C`），游戏里由 `BlockColor` 相乘得到材料色。
-- 模型两个 element：底 cube `tintindex -1`（不吃色），叠加面 `tintindex 0`（吃色），
-  外扩 0.01 防 z-fighting，`render_type: cutout`。
-- 预览：`python3 art/blocks/ore_overlay/generate.py`（会从本机 client-extra.jar 抽底图到
-  gitignore 的 `.vanilla_textures/`，仅用于预览）。
+- 三张遮罩是**唯一**随包分发的方块 PNG（`art/blocks/ore_overlay/`，16×16，白色 + alpha）。
+- 模型两个 element：底 cube `tintindex -1` 不吃色；遮罩面 `tintindex 0` 吃 `BlockColor`。
+  方块 render layer 设 `translucent`，才能得到半透明罩色。
+- 预览：`python3 art/blocks/ore_overlay/generate.py`。
 
-曾尝试按材料生成整套方块底图，16×16 下会读成小方块或竖条，已废弃，别再走。
+**别走的两条路**（都试过，效果不对）：
+
+1. 按材料生成整套方块底图——16×16 下自绘噪点读成小方块或竖条。
+2. 在底图上画“清晰的矿斑/碎点”——原版是**纯色罩色**，不是有明暗的碎块；画碎点会变成另一种美术语言，
+   和物品三态打架。
 
 ## 矿物碎块（M5 预览）
 
