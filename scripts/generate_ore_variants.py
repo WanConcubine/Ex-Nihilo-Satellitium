@@ -63,11 +63,11 @@ def block_model(kind):
         "textures": {"particle": base, "base": base,
                      "ore": f"exnihilosatellitium:block/ore_mask_{kind}"},
         "elements": [
-            {"from": [0, 0, 0], "to": [16, 16, 16],
+            {"from": [0.02, 0.02, 0.02], "to": [15.98, 15.98, 15.98],
              "faces": {f: {"texture": "#base", "cullface": f}
                        for f in ("down", "up", "north", "south", "west", "east")}},
-            {"from": [-0.01, -0.01, -0.01], "to": [16.01, 16.01, 16.01],
-             "faces": {f: {"texture": "#ore", "tintindex": 0, "cullface": f}
+            {"from": [0, 0, 0], "to": [16, 16, 16],
+             "faces": {f: {"texture": "#ore", "tintindex": 0}
                        for f in ("down", "up", "north", "south", "west", "east")}},
         ],
     }
