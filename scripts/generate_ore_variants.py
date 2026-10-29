@@ -85,10 +85,6 @@ def loot_table(mid, kind):
 
 def main():
     for kind in KINDS:
-        src = ART_BLOCKS / f"ore_mask_{kind}.png"
-        dst = ASSETS / "textures/block" / f"ore_mask_{kind}.png"
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src, dst)
         write_json(ASSETS / f"models/block/ore_{kind}_block.json", block_model(kind))
 
     shovel = []

@@ -1,6 +1,6 @@
 # 数据格式：堆肥、NBT、命令
 
-> 适用：M1 木桶 + 七种材质变体（Forge 1.20.1）。代码位置：
+> 适用：M1 木桶 + 七种材质变体（NeoForge 1.21.1）。代码位置：
 > `common/compost/`、`common/blockentity/BarrelBlockEntity.java`。
 >
 > 七种桶（`barrel` = 橡木、`spruce_barrel`、`birch_barrel`、`jungle_barrel`、

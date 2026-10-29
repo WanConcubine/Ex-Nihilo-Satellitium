@@ -5,11 +5,18 @@
 
 ## 一句话
 
-**M1 木桶 + 七种材质变体已完成**（橡木/云杉/白桦/丛林/金合欢/深色橡木/石桶；
-共享 BE、堆肥 → DIRT、1000 mB 流体、比较器、内缩 vanilla-sampled 模型、Jade tooltip）；
-**M1.5 桶内方块转化、M2 筛子还没开始**。
+**主线已切到 Minecraft 1.21.1 / NeoForge 21.1.x**（2026-10-29），1.20.1/Forge 版归档在
+tag `legacy/1.20.1-forge`。桶（七材质）与矿物六态（12 材料 × 3 方块 + 3 物品）都已迁过来并编译通过；
+**桶的 BER / 流体 / 堆肥尚未在 1.21.1 里实际验证**；**M1.5 桶内转化、M2 筛子还没开始**。
 
 ## 现在停在哪
+
+- **2026-10-29 主线切换**：`main` 从 1.20.1/Forge 47 切到 1.21.1/NeoForge 21.1.265；
+  旧版打 tag `legacy/1.20.1-forge`（`e0bc177`）。工具链：ModDevGradle 2.0.148 + JDK 21。
+  本地构建需要代理访问 `maven.neoforged.net`（本机用 SakuraCat 的 `127.0.0.1:12450`，
+  配在 `~/.gradle/gradle.properties`，不进仓库）。
+- **2026-10-29 迁移中修掉的两个渲染坑**：① 双层模型（底图+遮罩）在物品栏图标里叠加层不出现，
+  改单层 tint；② 底块内缩会留缝，恢复 0..16。相关记录见 [textures.md](textures.md)。
 
 - 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium`。
 - **2026-10-29 矿物六态入游**：按 `materials.json` 动态注册 36 个方块（矿砾/矿砂/矿尘）
@@ -92,7 +99,7 @@
 
 ## 踩过的坑（改代码前先看）
 
-- **ForgeGradle 卡 `Checking server connections`**：加 `-Dnet.minecraftforge.gradle.check.certs=false`。
+- **本地构建需要访问 maven.neoforged.net**：国内网络要挂代理（见 [migration-neoforge.md](migration-neoforge.md)）。
 - **直连 TLS 失败（libraries.minecraft.net / repo.maven TLS handshake）**：缓存已齐时用 `--offline` 构建/启动。
 - **`FluidTank` NBT 是顶层** `FluidName` / `Amount`，不是 `{Fluid:{...}}`。
 - **`#minecraft:crops` / `#minecraft:seeds` 不是 1.20.1 物品标签**；用 `#forge:*` 或具体 id。
@@ -109,12 +116,12 @@
 ## 常用命令
 
 ```bash
-./gradlew build -Dnet.minecraftforge.gradle.check.certs=false
+./gradlew build
 python3 scripts/check-textures.py
 python3 scripts/generate_barrel_variants.py          # 从材质表重生成七种桶的 JSON
-./gradlew runServer -Dnet.minecraftforge.gradle.check.certs=false   # RCON：localhost:25575 / eni
+./gradlew runServer   # RCON：localhost:25575 / eni
 # 注意：run/ 被 gitignore；fresh clone 需要在 run/server.properties 自己开 RCON
-./gradlew runClient -Dnet.minecraftforge.gradle.check.certs=false
+./gradlew runClient
 ```
 
 ## 文件地图

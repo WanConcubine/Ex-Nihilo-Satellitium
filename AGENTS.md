@@ -5,24 +5,24 @@
 
 ## 1. 项目是什么
 
-- **Minecraft 1.20.1 / Forge 47.4.x / Java 17**，mod id `exnihilosatellitium`。
+- **Minecraft 1.21.1 / NeoForge 21.1.x / Java 21**，mod id `exnihilosatellitium`。
 - 独立实现的 Ex Nihilo 风格空岛模组；**不是** Ex Nihilo 的官方续作。
 - 许可证 **MIT**；第三方声明见 [THIRD-PARTY.md](THIRD-PARTY.md)。
 
 ## 2. 构建与验证
 
 ```bash
-# ForgeGradle 的 TLS 环境检查在部分网络会卡住，统一加这个参数
-./gradlew build -Dnet.minecraftforge.gradle.check.certs=false
+# ModDevGradle；本机需要能访问 maven.neoforged.net（否则走代理，见 docs/migration-neoforge.md）
+./gradlew build
 
 # 纹理守卫：允许 vanilla block，禁止 vanilla item
 python3 scripts/check-textures.py
 
 # 开发服（RCON 已配：localhost:25575 / eni）
-./gradlew runServer -Dnet.minecraftforge.gradle.check.certs=false
+./gradlew runServer
 
 # 开发客户端
-./gradlew runClient -Dnet.minecraftforge.gradle.check.certs=false
+./gradlew runClient
 ```
 
 - 改完**至少**跑 `build` + `check-textures.py`。
