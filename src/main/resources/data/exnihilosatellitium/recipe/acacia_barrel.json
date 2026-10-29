@@ -7,10 +7,10 @@
   ],
   "key": {
     "P": {
-      "item": "minecraft:jungle_planks"
+      "item": "minecraft:acacia_planks"
     }
   },
   "result": {
-    "item": "exnihilosatellitium:jungle_barrel"
+    "id": "exnihilosatellitium:acacia_barrel"
   }
 }

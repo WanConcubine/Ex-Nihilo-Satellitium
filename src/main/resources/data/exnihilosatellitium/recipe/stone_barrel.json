@@ -7,10 +7,10 @@
   ],
   "key": {
     "P": {
-      "item": "minecraft:dark_oak_planks"
+      "item": "minecraft:stone"
     }
   },
   "result": {
-    "item": "exnihilosatellitium:dark_oak_barrel"
+    "id": "exnihilosatellitium:stone_barrel"
   }
 }
