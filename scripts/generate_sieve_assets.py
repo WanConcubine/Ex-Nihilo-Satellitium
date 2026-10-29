@@ -23,12 +23,25 @@ def write_json(path, data):
 
 
 def mesh_texture(name):
+    """Woven screen: 2px strands on a 4px pitch, alternating over/under, holes between."""
     colour = MESH_COLORS[name]
+    dark = tuple(max(0, c - 48) for c in colour)
+    light = tuple(min(255, c + 26) for c in colour)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    for i in range(0, 16, 3):
-        d.line([(i, 0), (i, 15)], fill=colour + (255,))
-        d.line([(0, i), (15, i)], fill=tuple(max(0, c - 30) for c in colour) + (255,))
+    for y in range(16):
+        for x in range(16):
+            strand_h = (y % 4) < 2
+            strand_v = (x % 4) < 2
+            if not (strand_h or strand_v):
+                continue
+            if strand_h and strand_v:
+                over = ((x // 4) + (y // 4)) % 2 == 0
+                c = light if over else dark
+            elif strand_h:
+                c = colour if (y % 4) == 0 else dark
+            else:
+                c = colour if (x % 4) == 0 else dark
+            img.putpixel((x, y), c + (255,))
     img.save(ASSETS / f"textures/block/sieve_mesh_{name}.png")
 
 

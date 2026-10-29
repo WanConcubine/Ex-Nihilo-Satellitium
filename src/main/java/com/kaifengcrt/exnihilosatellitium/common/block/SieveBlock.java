@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -63,6 +64,12 @@ public class SieveBlock extends BaseEntityBlock {
     public VoxelShape getShape(final BlockState state, final BlockGetter level, final BlockPos pos,
                                final CollisionContext context) {
         return SHAPE;
+    }
+
+    @Override
+    protected RenderShape getRenderShape(final BlockState state) {
+        // BaseEntityBlock defaults to INVISIBLE; we want the JSON model drawn.
+        return RenderShape.MODEL;
     }
 
     @Nullable
