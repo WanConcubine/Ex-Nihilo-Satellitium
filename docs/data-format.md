@@ -175,3 +175,62 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   避免和具体木种配方冲突。
 - 石桶复制 `Blocks.STONE` 属性（需要镐、石质音效），木桶复制对应木板属性。
 - 行为、NBT、Jade tooltip 七种桶完全一致；石桶暂不做“只装熔岩”等差异化，留到 M1.5。
+
+## 8. 材料表（矿物链，M2 起用）
+
+矿物不是“别的模组给什么就产出什么”，而是**每种材料注册一套我们自己的物品链**（见
+[DESIGN.md](DESIGN.md) §6.4）：
+
+```
+筛 砂砾 → 破碎矿   筛 沙子 → 粉碎矿   筛 尘土 → 粉末
+破碎 ×4 → 矿砾方块  粉碎 ×4 → 矿砂方块  粉末 ×4 → 矿尘方块
+锤 矿砾 → 粉碎矿    锤 矿砂 → 粉末    熔炼 矿砾/矿砂/矿尘 → 锭
+```
+
+### 位置
+
+| 层 | 路径 | 说明 |
+|---|---|---|
+| 内置 | `src/main/resources/exnihilosatellitium/materials.json` | 我们手写，随 jar 发布 |
+| 扩展 | `config/exnihilosatellitium/materials.json` | 整合包作者/玩家补表外材料 |
+| 数据包 | `data/<ns>/...` | 只能覆盖概率/配方，**不能新增材料** |
+
+**改材料表需要重启游戏**：物品与方块在注册期冻结，无法在 `/reload` 时新增。
+
+### Schema
+
+```json
+{
+  "materials": [
+    {
+      "id": "copper",
+      "color": "FF4D00",
+      "name": { "en_us": "Copper", "zh_cn": "铜" },
+      "tier": "common",
+      "rarity": { "gravel": 18, "sand": 32, "dust": 48 },
+      "ingot": "forge:ingots/copper",
+      "owner_mod": "mymod",
+      "enabled": true
+    }
+  ]
+}
+```
+
+| 字段 | 必填 | 说明 |
+|---|---|---|
+| `id` | ✅ | 材料名，只允许 `[a-z0-9_]`；决定注册名（`copper_broken` 等） |
+| `color` | ✅ | `RRGGBB`，用于物品/方块染色；缺失则该条报错跳过 |
+| `name` | ✅ | 显示名，至少给 `en_us`；缺 `zh_cn` 时回退 `en_us` |
+| `tier` | ✅ | `common` / `uncommon` / `rare` / `epic`，只用于校验数值区间与文档 |
+| `rarity` | ✅ | 三种筛料的 `1/N` 的 N，必须 > 0；人工调过手感才允许提交 |
+| `ingot` | ❌ | 已有锭的注册名；填了就熔炼到它，不重复造锭 |
+| `owner_mod` | ❌ | 主要来源模组，只用于自检与文档 |
+| `enabled` | ❌ | 默认 `true`；表外骨架行默认 `false` |
+
+### 规则
+
+- **同一 `id` 只能有一个生效来源**：扩展表覆盖内置表，数据包再覆盖两者。
+- **表外材料不注册**：启动时只处理表内条目；发现表外材料只写骨架行（`enabled: false`）。
+- **校验失败即跳过该条**（不拖垮启动）：`id` 非法、颜色格式错、`rarity <= 0`、重复 `id`。
+  日志用 `[materials] ...` 前缀，和 `[compost]` 保持一致的风格。
+- **注册名不可变**：`id` 改了就等于换了材料，旧存档里的物品会变成缺失——发布后不要改已用的 `id`。

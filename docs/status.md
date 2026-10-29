@@ -14,7 +14,8 @@
 - 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium`。
 - **2026-10-29 定位入档**：DESIGN 写明项目是「1.7.10 版 Ex Nihilo 1 经典复刻」，
   **联动是本职**（§6.1），承自 Ex Astris 的是**自动化思路**（§6.2：判定单一来源、
-  FE 能源、升级插件）。新增 [parity.md](parity.md) 逐项对照表。**代码未改动。**
+  FE 能源、升级插件）。新增 [parity.md](parity.md) 逐项对照表；DESIGN §6.4 定义
+  **材料表 + 自持矿物链**，表结构见 [data-format.md](data-format.md) §8。**代码未改动。**
 - **2026-10-28 正式改名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；
   mod id、Java 包、assets/data 命名空间改为 `exnihilosatellitium`。
   改名前的旧世界不兼容，需要新世界（目前没有发布，影响只在本地测试档）。
@@ -63,10 +64,10 @@
 - **项目名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；mod id `exnihilosatellitium`，
   Java 包 `com.kaifengcrt.exnihilosatellitium`，资源命名空间 `exnihilosatellitium`（2026-10-28）。
 - **许可证 MIT**（2026-10-27 从 ARR 转）；Forge MDK 仍 LGPL-2.1，见 [THIRD-PARTY.md](../THIRD-PARTY.md)。
-- **联动条目一律人工定值**（2026-10-29）：不做“发现即自动注册”，也不按 tag / worldgen 密度
-  自动推概率。理由：所有分支（原版、Omnia、Sequentia、Ex Deorum）都是人工逐条定值；
-  自动概率脱离手感、会打穿整合包进度设计。发现只用于**覆盖自检**，不参与定档。
-  详见 [DESIGN.md](DESIGN.md) §6.1 第 4 条。
+- **材料表 + 自持矿物链**（2026-10-29）：自动发现保留，但注册只认材料表。表内材料由我们
+  手写颜色 / `tier` / `rarity`，并在游戏里拥有完整自有链（矿砾 → 破碎 → 粉碎 → 粉末 → 锭）；
+  表外材料只生成骨架行、默认关闭，作者填值并重启后开启。不做“扫到即生效”。
+  详见 [DESIGN.md](DESIGN.md) §6.1 第 4 条、§6.4；表结构见 [data-format.md](data-format.md) §8。
 - **方块走 vanilla-sampled**：模型直接引用 `minecraft:block/*`，不复制/不打包原版贴图。
   七种桶共用 `barrel_base.json` 几何；木桶侧重木种木板 + 去皮原木内壁 + `gray_concrete` 深灰箍，
   石桶用 `stone` + `smooth_stone` + `deepslate_tiles`。
