@@ -40,6 +40,7 @@ forge*changelog.txt
 
 # Extracted vanilla textures used by the preview renderer
 art/barrel/.vanilla_textures/
+art/blocks/ore_overlay/.vanilla_textures/
 
 # Python bytecode from the art/scripts generators
 __pycache__/

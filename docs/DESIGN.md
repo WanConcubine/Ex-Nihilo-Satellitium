@@ -228,8 +228,18 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
 所以它不能是数据包，只能是 jar 内资源 + config。数据包能改的是概率与配方，
 不能“让一个新物品凭空出现”。
 
-**贴图**：所有材料共用灰度底图 + 按材料 `color` 染色（`ItemColor` / `BlockColor`），
-等价于 1.7.10 的运行时合成，但不需要生成 PNG，也不占美术预算。
+**贴图（两条线，都不手绘方块底图）**：
+
+- **物品**（破碎 / 粉碎 / 粉末）：5 阶调色板手绘像素，已完成的 11 种见
+  `art/items/ore_pieces/generate.py`；新金属 = 加一条 `PALETTES`。
+- **方块**（矿砾 / 矿砂 / 矿尘）：**原版底 + 自有矿斑叠加**（`AGENTS.md` 硬规则 2）。
+  底图直接引用 `minecraft:block/gravel`、`minecraft:block/sand`、
+  `minecraft:block/light_gray_concrete_powder`（不复制、不打包）；
+  我们只出一张 `ore_fleck.png`，模型里做叠加 element，`tintindex 0` 收 `BlockColor`。
+  模型：底 cube `tintindex -1`，叠加层略微外扩 0.01 避免 z-fighting，`render_type: cutout`。
+- 不接受“按材料生成整套方块底图”：16×16 里自绘噪点会读成小方块或竖条，
+  而且和原版地形不搭。曾试过一版，已废弃。
+
 材料表因此必须带颜色；没有颜色的材料不给注册（宁可报错，也不要一堆灰方块）。
 
 **JEI**：筛子是自定义 `RecipeType`，JEI 直接读 `RecipeManager`，动态注册的配方会自动出现在
