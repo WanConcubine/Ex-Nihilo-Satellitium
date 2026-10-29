@@ -36,7 +36,7 @@ OSMIUM = ("#26313D", "#3F5B78", "#608FC4", "#8FB4DC", "#C4DCF4")
 _pieces.PALETTES.setdefault("osmium", OSMIUM)
 PALETTES = dict(_pieces.PALETTES)
 
-BASES = {"gravel": "gravel", "sand": "sand", "dust": "light_gray_concrete_powder"}
+BASES = {"gravel": "gravel", "sand": "sand", "dust": "gray_concrete_powder"}
 
 
 def font(size):
@@ -58,32 +58,26 @@ def vanilla_block(name):
     return Image.open(target).convert("RGBA")
 
 
-def gravel_mask(alpha=196, seed=11, target=66):
-    """稀疏矿脉：方向、粗细、长度都打散，避免排成斜纹（原版 gravel 模板是 21% 覆盖）。"""
+def gravel_mask(alpha=178, target=55, seed=5):
+    """矿砾遮罩：单像素碎点为主、偶尔两格相连（原版模板就是这个形态，21% / alpha 163）。"""
     rng = random.Random(seed)
-    rows = [[(255, 255, 255, 0) for _ in range(16)] for _ in range(16)]
-    dirs = [(1, 0), (0, 1), (1, 1), (1, -1), (2, 1), (1, 2)]
-    placed = 0
-    tries = 0
-    while placed < target and tries < 400:
-        tries += 1
-        x, y = rng.randint(0, 15), rng.randint(0, 15)
-        dx, dy = rng.choice(dirs)
-        n = rng.randint(2, 4)
-        thick = rng.choice([1, 1, 2])
-        cells = []
-        for i in range(n):
-            for t in range(thick):
-                cx, cy = x + i * dx + (t if dy == 0 else 0), y + i * dy + (t if dx == 0 else 0)
-                if 0 <= cx < 16 and 0 <= cy < 16:
-                    cells.append((cx, cy))
-        # 不许和已有脉贴在一起，否则会连成大片
-        if any(rows[cy][cx][3] for cx, cy in cells):
+    pts = set()
+    while len(pts) < target:
+        x, y = rng.randrange(16), rng.randrange(16)
+        if (x, y) in pts:
             continue
-        for cx, cy in cells:
-            rows[cy][cx] = (255, 255, 255, alpha)
-        placed += len(cells)
-    return rows
+        pts.add((x, y))
+        # 偶尔多加 1~2 格，形成 2-3px 的小团，而不是清一色单点
+        extra = 0
+        if rng.random() < 0.55:
+            extra = 2 if rng.random() < 0.3 else 1
+        for _ in range(extra):
+            if len(pts) >= target:
+                break
+            nx, ny = x + rng.choice((-1, 0, 1)), y + rng.choice((-1, 0, 1))
+            if 0 <= nx < 16 and 0 <= ny < 16 and (nx, ny) not in pts:
+                pts.add((nx, ny))
+    return [[(255, 255, 255, alpha if (x, y) in pts else 0) for x in range(16)] for y in range(16)]
 
 
 def wash(level, jitter, seed):
@@ -95,8 +89,8 @@ def wash(level, jitter, seed):
 
 def mask_image(kind):
     rows = {"gravel": gravel_mask,
-            "sand": lambda: wash(140, 12, 21),
-            "dust": lambda: wash(108, 10, 33)}[kind]()
+            "sand": lambda: wash(126, 6, 21),
+            "dust": lambda: wash(110, 6, 33)}[kind]()
     img = Image.new("RGBA", (16, 16))
     for y in range(16):
         for x in range(16):

@@ -57,7 +57,7 @@ assets/exnihilosatellitium/textures/
 
 | 状态 | 遮罩覆盖 | 遮罩 alpha | 读感 |
 |---|---|---|---|
-| 矿砾方块 | 21%（稀疏斑块） | 163 ≈ 64% | 砂砾上叠局部色斑，底图纹理保留 |
+| 矿砾方块 | 21%（碎点 + 2~3px 小团） | 163 ≈ 64% | 砂砾上叠局部色斑，底图纹理保留 |
 | 矿砂方块 | 100%（整面） | 128–142 ≈ 50% | 整块罩一层半透明色，接近纯色 |
 | 矿尘方块 | 100%（整面） | 97–108 ≈ 40% | 同上，更淡 |
 
@@ -65,9 +65,9 @@ assets/exnihilosatellitium/textures/
 
 | 方块 | 底图（引用，不打包） | 遮罩 |
 |---|---|---|
-| 矿砾方块 | `minecraft:block/gravel` | `ore_mask_gravel`（21% / 163） |
-| 矿砂方块 | `minecraft:block/sand` | `ore_mask_sand`（100% / 132） |
-| 矿尘方块 | `minecraft:block/light_gray_concrete_powder` | `ore_mask_dust`（100% / 102） |
+| 矿砾方块 | `minecraft:block/gravel` | `ore_mask_gravel`（21% 碎点 / 178） |
+| 矿砂方块 | `minecraft:block/sand` | `ore_mask_sand`（100% / 126） |
+| 矿尘方块 | `minecraft:block/gray_concrete_powder` | `ore_mask_dust`（100% / 110） |
 
 - 三张遮罩是**唯一**随包分发的方块 PNG（`art/blocks/ore_overlay/`，16×16，白色 + alpha）。
 - **罩色取 `materials.json` 的 `color`（身份色，原版 `OreList` 的那套）**，不要取物品调色板的
