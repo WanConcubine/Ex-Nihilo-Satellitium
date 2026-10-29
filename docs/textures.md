@@ -49,39 +49,33 @@ assets/exnihilosatellitium/textures/
 `python3 scripts/generate_barrel_variants.py` 从同一张表生成，几何仍只维护
 `models/block/barrel_base.json`。新增木种 = 在脚本表里加一行 + 补 lang。
 
-## 矿物方块（M2 起）：底图 + 遮罩 + 纯色，按 alpha 混合
+## 矿物方块：单层 tint（现状）
 
-原版与 Omnia 都不是“画矿块”，而是三件套：**共用底图 + 共用遮罩（单色 + alpha）+ 一个纯色**，
-运行期按 alpha 混成最终贴图（`ImageManipulator.Recolor` → `Composite`）。
-实测它们的遮罩参数（我们按同一组数字重画，像素是自己的）：
+一个**完整 cube**，六面 `tintindex: 0`，底图直接引用原版，颜色由 `BlockColor` 给：
 
-| 状态 | 遮罩覆盖 | 遮罩 alpha | 读感 |
-|---|---|---|---|
-| 矿砾方块 | 21%（碎点 + 2~3px 小团） | 163 ≈ 64% | 砂砾上叠局部色斑，底图纹理保留 |
-| 矿砂方块 | 100%（整面） | 128–142 ≈ 50% | 整块罩一层半透明色，接近纯色 |
-| 矿尘方块 | 100%（整面） | 97–108 ≈ 40% | 同上，更淡 |
+| 方块 | 底图（引用，不打包） |
+|---|---|
+| 矿砾方块 | `minecraft:block/gravel` |
+| 矿砂方块 | `minecraft:block/sand` |
+| 矿尘方块 | `minecraft:block/gray_concrete_powder` |
 
-1.20.1 不做运行期合图，改成 **vanilla 底 + 我们的遮罩 + BlockColor**：
+```json
+{ "parent": "minecraft:block/block",
+  "textures": { "particle": "minecraft:block/gravel", "all": "minecraft:block/gravel" },
+  "elements": [{ "from": [0,0,0], "to": [16,16,16],
+    "faces": { "up": { "texture": "#all", "tintindex": 0, "cullface": "up" }, "...": {} } }] }
+```
 
-| 方块 | 底图（引用，不打包） | 遮罩 |
-|---|---|---|
-| 矿砾方块 | `minecraft:block/gravel` | `ore_mask_gravel`（21% 碎点 / 178） |
-| 矿砂方块 | `minecraft:block/sand` | `ore_mask_sand`（100% / 126） |
-| 矿尘方块 | `minecraft:block/gray_concrete_powder` | `ore_mask_dust`（100% / 110） |
+**为什么不再用“底图 + 叠加遮罩”**（试过，废弃）：
 
-- 三张遮罩是**唯一**随包分发的方块 PNG（`art/blocks/ore_overlay/`，16×16，白色 + alpha）。
-- **罩色取 `materials.json` 的 `color`（身份色，原版 `OreList` 的那套）**，不要取物品调色板的
-  中间阶：物品 `PALETTES` 是明暗阶，铁的第 3 阶是 `#B0B0B0`（灰），拿它罩色会让铁发白。
-  原版物品与方块共用同一个 `Color`，这点要保留。
-- 模型两个 element：底 cube `tintindex -1` 不吃色；遮罩面 `tintindex 0` 吃 `BlockColor`。
-  方块 render layer 设 `translucent`，才能得到半透明罩色。
-- 预览：`python3 art/blocks/ore_overlay/generate.py`。
+1. 双层模型在**世界里**能染色，但**物品栏图标**里叠加层不出现（GUI 渲染路径不同）。
+2. 为了躲 z-fighting 把底块内缩 `0.02`，会让相邻方块之间出现缝隙。
 
-**别走的两条路**（都试过，效果不对）：
+**代价**：单层 tint 是整表面 100% 染色，丢掉了原版“21% 斑块”的观感。
+要拿回斑块只能走**运行期合成贴图**（1.7.10 的做法：底图 + 遮罩 + 颜色在客户端合成），
+尚未实现，记在 [status.md](status.md) 待办里。
 
-1. 按材料生成整套方块底图——16×16 下自绘噪点读成小方块或竖条。
-2. 在底图上画“清晰的矿斑/碎点”——原版是**纯色罩色**，不是有明暗的碎块；画碎点会变成另一种美术语言，
-   和物品三态打架。
+原版参数（参考用，不代表我们实现）：矿砾遮罩 21% 覆盖 / alpha 163，矿砂 100% / 132，矿尘 100% / 102。
 
 ## 矿物碎块（M5 预览）
 

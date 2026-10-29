@@ -67,7 +67,7 @@ python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶�
 如果构建卡在 `Checking server connections`（ForgeGradle 的 TLS 检查），可以加：
 
 ```bash
-./gradlew build -Dnet.minecraftforge.gradle.check.certs=false
+./gradlew build
 ```
 
 ## 纹理

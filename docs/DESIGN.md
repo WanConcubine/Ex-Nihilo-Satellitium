@@ -22,7 +22,7 @@
 
 - 本项目是 **1.7.10 版 Ex Nihilo 1 经典玩法的复刻**，并继承
   **Ex Astris（星辉生万物，LoveHoly / insaneau 的 Ex Nihilo 附属）** 的**自动化思路**：
-  让当年那套“一棵树起步、一套完整资源链”的空岛体验，在 1.20.1 Forge 上重新成立。
+  让当年那套“一棵树起步、一套完整资源链”的空岛体验，在 1.21.1 NeoForge 上重新成立。
 - 之所以做：`无中生有-世间万物`（Omnia）曾经做到过这件事，但已停更；经典循环不该断在这里。
 - **联动是本职，不是附加项**：Ex Nihilo 系本身不产矿，它的价值就是把别的模组的资源接进空岛。
   所以“给别的模组做支持”是一等公民需求，写法见 §6。
@@ -31,7 +31,7 @@
 
 **目标**
 
-- Minecraft 1.20.1 / Forge 47.x / Java 17。
+- Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
 - 还原“空岛从无到有”的核心循环，并补齐 Ex Nihilo 系缺失的现代体验（数据驱动、JEI、配置）。
 - **经典项全齐**：1.7.10 版有的方块与机制逐项落地，清单与完成度见 [parity.md](parity.md)。
 - **自动化支柱**（承自 Ex Astris）：自动筛 / 自动锤 / 升级插件，能源走 FE；
@@ -44,7 +44,7 @@
 
 - **数值与美术的 1:1 照抄**：复刻结构，不复刻数字。堆肥分数、筛出概率按本项目平衡表定；
   贴图、模型、音效、文本一律自绘自写。
-- 支持 1.20.1 以外的版本（后续再评估）。
+- 支持 1.21.1 以外的版本（后续再评估）。
 - 兼容旧版 Ex Nihilo 的存档或配方格式。
 
 ## 3. 核心玩法循环
@@ -74,7 +74,7 @@
 |---|---|
 | 注册 | `DeferredRegister`（Blocks / Items / BlockEntities / RecipeTypes / Menus） |
 | 方块实体 | `BlockEntity` + `IItemHandler` / `IFluidHandler` capabilities |
-| 配方 | 1.20.1 自定义 `RecipeType` + `RecipeSerializer`（JSON，`Codec`） |
+| 配方 | 1.21.1 自定义 `RecipeType` + `RecipeSerializer`（JSON，`RecipeInput` + `MapCodec`） |
 | 网络 | `SimpleChannel`，仅同步必要的客户端状态（流体、进度） |
 | 数据生成 | `DataGenerator`（blockstates / models / loot / tags / recipes） |
 | 兼容 | JEI 插件、`mods.toml` optional dependency、事件隔离 |
@@ -232,15 +232,11 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
 
 - **物品**（破碎 / 粉碎 / 粉末）：5 阶调色板手绘像素，已完成的 11 种见
   `art/items/ore_pieces/generate.py`；新金属 = 加一条 `PALETTES`。
-- **方块**（矿砾 / 矿砂 / 矿尘）：**原版底 + 遮罩 + 纯色按 alpha 混合**，与原版/Omnia 同一套算法。
-  底图引用 `minecraft:block/gravel`、`sand`、`light_gray_concrete_powder`（不复制、不打包）；
-  我们出三张遮罩（白色 + alpha）：矿砾 21% 碎点 / alpha 178，矿砂 100% / 126，矿尘 100% / 110。
-  罩色必须用材料表的**身份色**（`materials.json` 的 `color`），不能用物品调色板的中间明暗阶——
-  那会让铁这类浅色金属发白（踩过）。
-  模型：底 cube `tintindex -1`，遮罩面 `tintindex 0` 收 `BlockColor`，render layer 用 `translucent`。
-- 不接受另外两条路：① 按材料生成整套方块底图（16×16 读成小方块/竖条）；
-  ② 在底图上画清晰矿斑（原版是纯色罩色，不是碎块，会变成另一种美术语言）。两条都试过，已废弃。
-
+- **方块**（矿砾 / 矿砂 / 矿尘）：**单层 tint**。一个完整 cube，六面 `tintindex: 0`，
+  底图引用 `minecraft:block/gravel`、`sand`、`gray_concrete_powder`（不复制、不打包），
+  颜色由 `BlockColor` 给。
+  早先试过“底图 + 叠加遮罩”，在物品栏图标里叠加层不出现、内缩底块还会留缝，已废弃。
+  代价是整表面 100% 染色，原版 21% 斑块的观感丢了；要恢复得做运行期合成贴图。
 材料表因此必须带颜色；没有颜色的材料不给注册（宁可报错，也不要一堆灰方块）。
 
 **JEI**：筛子是自定义 `RecipeType`，JEI 直接读 `RecipeManager`，动态注册的配方会自动出现在
