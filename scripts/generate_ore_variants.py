@@ -30,7 +30,7 @@ MATERIALS = json.load(open(RES / "exnihilosatellitium/materials.json", encoding=
 STAGES = ("broken", "crushed", "powdered")
 KINDS = {"gravel": "gravel", "sand": "sand", "dust": "gray_concrete_powder"}
 STAGE_ZH = {"broken": "破碎", "crushed": "粉碎", "powdered": "粉末"}
-KIND_ZH = {"gravel": "矿砾", "sand": "矿砂", "dust": "矿尘"}
+KIND_ZH = {"gravel": "沙砾", "sand": "沙子", "dust": "粉尘"}
 
 _spec = importlib.util.spec_from_file_location("ore_pieces", ART_ITEMS / "generate.py")
 _pieces = importlib.util.module_from_spec(_spec)
@@ -58,6 +58,7 @@ def ensure_item_texture(mid, stage):
 def block_model(kind):
     base = f"minecraft:block/{KINDS[kind]}"
     return {
+        "parent": "minecraft:block/block",
         "render_type": "minecraft:translucent",
         "textures": {"particle": base, "base": base,
                      "ore": f"exnihilosatellitium:block/ore_mask_{kind}"},
@@ -114,7 +115,7 @@ def main():
             write_json(RES / f"data/exnihilosatellitium/loot_tables/blocks/{bid}.json",
                        loot_table(mid, kind))
             lang_en[f"block.exnihilosatellitium.{bid}"] = f"{en} Ore {kind.capitalize()}"
-            lang_zh[f"block.exnihilosatellitium.{bid}"] = f"{zh}{KIND_ZH[kind]}"
+            lang_zh[f"block.exnihilosatellitium.{bid}"] = f"{zh}矿{KIND_ZH[kind]}"
 
     write_json(RES / "data/minecraft/tags/blocks/mineable/shovel.json",
                {"replace": False, "values": sorted(shovel)})
