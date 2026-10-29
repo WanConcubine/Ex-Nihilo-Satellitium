@@ -27,11 +27,10 @@ import java.util.List;
  */
 public class SieveBlockEntity extends BlockEntity {
 
-    /** Ticks of work needed for one item; also the progress bar maximum. */
+    /** Work needed for one item; also the progress maximum. */
     public static final int WORK_MAX = 100;
-    /** Work added per tick while a material is loaded. */
-    public static final int WORK_PER_TICK = 2;
-    public static final int MAX_CONTENTS = 16;
+    /** Work added per right-click (four clicks per item). */
+    public static final int WORK_PER_CLICK = 25;
 
     private ItemStack mesh = ItemStack.EMPTY;
     private ItemStack contents = ItemStack.EMPTY;
@@ -68,27 +67,31 @@ public class SieveBlockEntity extends BlockEntity {
         return Math.min(1.0F, this.work / (float) WORK_MAX);
     }
 
-    /** Loads a held stack into the sieve; returns false when it does not fit. */
+    /** Puts exactly one siftable item in; returns false when it does not fit. */
     public boolean insert(final ItemStack stack) {
-        if (SieveRegistry.dropsFor(stack).isEmpty()) {
+        if (!this.contents.isEmpty() || SieveRegistry.dropsFor(stack).isEmpty()) {
             return false;
         }
-        if (!this.contents.isEmpty() && !ItemStack.isSameItem(this.contents, stack)) {
-            return false;
-        }
-        final int room = MAX_CONTENTS - (this.contents.isEmpty() ? 0 : this.contents.getCount());
-        if (room <= 0) {
-            return false;
-        }
-        final int moved = Math.min(room, stack.getCount());
-        if (this.contents.isEmpty()) {
-            this.contents = stack.copyWithCount(moved);
-        } else {
-            this.contents.grow(moved);
-        }
-        stack.shrink(moved);
+        this.contents = stack.copyWithCount(1);
+        this.work = 0;
+        stack.shrink(1);
         this.setChanged();
         this.sync();
+        return true;
+    }
+
+    /** One right-click of work; returns true when a sift completed. */
+    public boolean workOnce(final Player player) {
+        if (!this.hasMesh() || this.contents.isEmpty()) {
+            return false;
+        }
+        this.work += WORK_PER_CLICK;
+        if (this.work < WORK_MAX) {
+            this.setChanged();
+            this.sync();
+            return true;
+        }
+        this.completeSift();
         return true;
     }
 
@@ -113,48 +116,29 @@ public class SieveBlockEntity extends BlockEntity {
         }
     }
 
-    public static void serverTick(final Level level, final BlockPos pos, final BlockState state,
-                                  final SieveBlockEntity sieve) {
-        if (!sieve.hasMesh() || sieve.contents.isEmpty()) {
-            if (sieve.work != 0) {
-                sieve.work = 0;
-                sieve.sync();
-            }
+    private void completeSift() {
+        final Level level = this.level;
+        if (level == null) {
             return;
         }
-
-        sieve.work += WORK_PER_TICK;
-        if (sieve.work < WORK_MAX) {
-            if (sieve.work % 10 == 0) {
-                sieve.sync();
-            }
-            return;
-        }
-
-        sieve.completeSift(level, pos);
-    }
-
-    private void completeSift(final Level level, final BlockPos pos) {
-        final ItemStack input = this.contents;
-        final List<SieveDrop> drops = SieveRegistry.dropsFor(input);
+        final BlockPos pos = this.worldPosition;
+        final List<SieveDrop> drops = SieveRegistry.dropsFor(this.contents);
         this.work = 0;
 
         for (final SieveDrop drop : drops) {
             if (level.random.nextFloat() < drop.chance()) {
                 final ItemEntity entity = new ItemEntity(level,
-                        pos.getX() + 0.5D, pos.getY() + 0.9D, pos.getZ() + 0.5D,
+                        pos.getX() + 0.5D, pos.getY() + 1.1D, pos.getZ() + 0.5D,
                         new ItemStack(drop.item()));
-                entity.setDeltaMovement(0.0D, 0.1D, 0.0D);
+                entity.setDeltaMovement((level.random.nextDouble() - 0.5D) * 0.05D, 0.12D,
+                        (level.random.nextDouble() - 0.5D) * 0.05D);
                 level.addFreshEntity(entity);
             }
         }
         level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS,
                 0.4F, 0.9F + level.random.nextFloat() * 0.2F);
 
-        this.contents.shrink(1);
-        if (this.contents.isEmpty()) {
-            this.contents = ItemStack.EMPTY;
-        }
+        this.contents = ItemStack.EMPTY;
         this.damageMesh(level, pos);
         this.setChanged();
         this.sync();

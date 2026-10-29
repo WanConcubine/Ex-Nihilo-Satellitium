@@ -82,7 +82,7 @@ public class SieveBlock extends BaseEntityBlock {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(final Level level, final BlockState state,
                                                                   final BlockEntityType<T> type) {
-        return createTickerHelper(type, ModBlockEntities.SIEVE.get(), SieveBlockEntity::serverTick);
+        return null;
     }
 
     @Override
@@ -122,8 +122,11 @@ public class SieveBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
 
-        // Load the material; the block entity then works through it over time.
+        // Load one item, or add a click of work to the item already in the sieve.
         if (sieve.insert(stack)) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        if (sieve.workOnce(player)) {
             return ItemInteractionResult.SUCCESS;
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
