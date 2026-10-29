@@ -37,7 +37,7 @@ public class SieveBlock extends BaseEntityBlock {
     public static final IntegerProperty MESH = IntegerProperty.create("mesh", 0, 3);
 
     private static final MapCodec<SieveBlock> CODEC = simpleCodec(SieveBlock::new);
-    private static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D);
+    private static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D);
 
     public SieveBlock(final Properties properties) {
         super(properties);

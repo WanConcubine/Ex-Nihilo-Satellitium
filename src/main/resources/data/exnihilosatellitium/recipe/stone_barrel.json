@@ -1,13 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "PPP",
-    "P P",
-    "PPP"
+    "x x",
+    "x x",
+    "xyx"
   ],
   "key": {
-    "P": {
+    "x": {
       "item": "minecraft:stone"
+    },
+    "y": {
+      "item": "minecraft:smooth_stone_slab"
     }
   },
   "result": {
