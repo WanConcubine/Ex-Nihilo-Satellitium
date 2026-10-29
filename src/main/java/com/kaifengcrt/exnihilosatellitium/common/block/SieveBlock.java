@@ -82,7 +82,7 @@ public class SieveBlock extends BaseEntityBlock {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(final Level level, final BlockState state,
                                                                   final BlockEntityType<T> type) {
-        return null;
+        return createTickerHelper(type, ModBlockEntities.SIEVE.get(), SieveBlockEntity::serverTick);
     }
 
     @Override
@@ -99,20 +99,11 @@ public class SieveBlock extends BaseEntityBlock {
         }
 
         // Install a mesh.
-        if (stack.getItem() instanceof MeshItem meshItem && !sieve.hasMesh()) {
+        if (stack.getItem() instanceof MeshItem && !sieve.hasMesh()) {
             sieve.setMesh(new ItemStack(stack.getItem()));
-            sieve.updateBlockMeshState();
             if (!player.isCreative()) {
                 stack.shrink(1);
             }
-            return ItemInteractionResult.SUCCESS;
-        }
-
-        // Sneak + empty hand: take the mesh back out.
-        if (sieve.hasMesh() && stack.isEmpty() && player.isShiftKeyDown()) {
-            player.getInventory().placeItemBackInInventory(sieve.getMesh().copy());
-            sieve.setMesh(ItemStack.EMPTY);
-            sieve.updateBlockMeshState();
             return ItemInteractionResult.SUCCESS;
         }
 
@@ -121,7 +112,18 @@ public class SieveBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
 
-        if (sieve.sift(player, stack)) {
+        // Sneak + empty hand: take the mesh back, or empty the contents.
+        if (stack.isEmpty() && player.isShiftKeyDown()) {
+            if (sieve.hasMesh()) {
+                sieve.dropMesh(player);
+            } else {
+                sieve.ejectContents(player);
+            }
+            return ItemInteractionResult.SUCCESS;
+        }
+
+        // Load the material; the block entity then works through it over time.
+        if (sieve.insert(stack)) {
             return ItemInteractionResult.SUCCESS;
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
