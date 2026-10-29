@@ -6,12 +6,12 @@ import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -23,7 +23,7 @@ import java.util.Map;
  * the model's {@code render_type}, not from code. Items keep their pre-coloured
  * textures, so only block items (whose model is the block model) need a colour.
  */
-@Mod.EventBusSubscriber(modid = ExNihiloSatellitium.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ExNihiloSatellitium.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class OreColors {
 
     private static final Map<Block, Integer> BLOCK_COLORS = new IdentityHashMap<>();
@@ -39,7 +39,7 @@ public final class OreColors {
         }
         for (final OreMaterial material : OreMaterials.all()) {
             for (final String kind : ModOreBlocks.KINDS) {
-                final RegistryObject<Block> holder = ModOreBlocks.byMaterial().get(material.id()).get(kind);
+                final DeferredHolder<Block, Block> holder = ModOreBlocks.byMaterial().get(material.id()).get(kind);
                 final Block block = holder.get();
                 BLOCK_COLORS.put(block, material.color());
                 ITEM_COLORS.put(block.asItem(), material.color());
