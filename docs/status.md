@@ -12,9 +12,9 @@
 ## 现在停在哪
 
 - 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium`。
-- **2026-10-29 定位入档**：DESIGN 写明项目是「1.7.10 版 Ex Nihilo 1 经典复刻 + 融入
-  Ex Astris（星辉生万物）」；新增 [parity.md](parity.md) 逐项对照表，
-  Ex Astris 分档（独立复刻 / 可选软联动 / 不复刻）待定。**代码未改动。**
+- **2026-10-29 定位入档**：DESIGN 写明项目是「1.7.10 版 Ex Nihilo 1 经典复刻」，
+  **联动是本职**（§6.1），承自 Ex Astris 的是**自动化思路**（§6.2：判定单一来源、
+  FE 能源、升级插件）。新增 [parity.md](parity.md) 逐项对照表。**代码未改动。**
 - **2026-10-28 正式改名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；
   mod id、Java 包、assets/data 命名空间改为 `exnihilosatellitium`。
   改名前的旧世界不兼容，需要新世界（目前没有发布，影响只在本地测试档）。
