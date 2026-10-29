@@ -8,8 +8,8 @@ Outputs (all under src/main/resources):
   assets/exnihilosatellitium/blockstates/<m>_ore_<kind>.json
   assets/exnihilosatellitium/models/item/<m>_ore_<kind>.json
   assets/exnihilosatellitium/models/item/<m>_<stage>.json
-  data/exnihilosatellitium/loot_tables/blocks/<m>_ore_<kind>.json
-  data/minecraft/tags/blocks/mineable/shovel.json
+  data/exnihilosatellitium/loot_table/blocks/<m>_ore_<kind>.json
+  data/minecraft/tags/block/mineable/shovel.json
   lang entries merged into en_us.json / zh_cn.json
 
     python3 scripts/generate_ore_variants.py
@@ -108,12 +108,12 @@ def main():
                        {"variants": {"": {"model": f"exnihilosatellitium:block/ore_{kind}_block"}}})
             write_json(ASSETS / f"models/item/{bid}.json",
                        {"parent": f"exnihilosatellitium:block/ore_{kind}_block"})
-            write_json(RES / f"data/exnihilosatellitium/loot_tables/blocks/{bid}.json",
+            write_json(RES / f"data/exnihilosatellitium/loot_table/blocks/{bid}.json",
                        loot_table(mid, kind))
             lang_en[f"block.exnihilosatellitium.{bid}"] = f"{en} Ore {kind.capitalize()}"
             lang_zh[f"block.exnihilosatellitium.{bid}"] = f"{zh}矿{KIND_ZH[kind]}"
 
-    write_json(RES / "data/minecraft/tags/blocks/mineable/shovel.json",
+    write_json(RES / "data/minecraft/tags/block/mineable/shovel.json",
                {"replace": False, "values": sorted(shovel)})
     write_json(ASSETS / "lang/en_us.json", dict(sorted(lang_en.items())))
     write_json(ASSETS / "lang/zh_cn.json", dict(sorted(lang_zh.items())))
