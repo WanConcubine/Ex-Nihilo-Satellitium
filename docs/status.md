@@ -15,6 +15,10 @@ tag `legacy/1.20.1-forge`。桶（七材质）与矿物六态（12 材料 × 3 �
   旧版打 tag `legacy/1.20.1-forge`（`e0bc177`）。工具链：ModDevGradle 2.0.148 + JDK 21。
   本地构建需要代理访问 `maven.neoforged.net`（本机用 SakuraCat 的 `127.0.0.1:12450`，
   配在 `~/.gradle/gradle.properties`，不进仓库）。
+- **2026-10-29 1.21 数据包路径**：`recipes`/`loot_tables`/`tags/items`/`tags/blocks` 全部改单数
+  （`recipe`/`loot_table`/`tags/item`/`tags/block`），配方 `result.item` 改 `result.id`。
+  这就是「木桶没配方」「桶里放不进植物」的原因（标签在老路径下等于不存在）。
+  服务端验证：`Loaded 1297 recipes`、`[compost] loaded 65 entries`。
 - **2026-10-29 迁移中修掉的两个渲染坑**：① 双层模型（底图+遮罩）在物品栏图标里叠加层不出现，
   改单层 tint；② 底块内缩会留缝，恢复 0..16。相关记录见 [textures.md](textures.md)。
 

@@ -28,7 +28,7 @@ python3 scripts/check-textures.py
 - 改完**至少**跑 `build` + `check-textures.py`。
 - 服务端逻辑用 RCON 验（`/setblock`、`/data merge`、`/execute if block`）。
 - **测试绿 ≠ 画面/手感验过**；没进游戏看过就不要在 status.md 写“已验证”。
-- 不要在 dev 的 `run/mods` 里塞生产 jar（Jade/月光魔法）做测试；SRG 名会 `NoSuchFieldError`。
+- NeoForge 1.21 运行时用官方名，生产 jar 可以直接放进 `run/mods` 测（已验证 Jade 15 / JEI 19 / Just Enough Characters）；`run/` 已 gitignore，别提交。
 
 ## 3. 硬规则
 
@@ -57,13 +57,12 @@ com/kaifengcrt/exnihilosatellitium/
 ├── common/
 │   ├── block/BarrelBlock.java   # 形状、交互分发、ticker、比较器
 │   ├── blockentity/             # 状态机、FluidTank、NBT、粒子/音效
+│   ├── material/                # 材料表读取（materials.json，注册期决定内容）
 │   ├── compost/                # JSON 注册表 + reload listener
-│   ├── event/CommonEvents.java # AddReloadListenerEvent
+│   ├── event/                   # CommonEvents（reload）、CapabilityEvents（流体能力）
 │   └── tag/ModTags.java
-├── client/                      # BarrelRenderer、BER 注册
-└── compat/
-    ├── MoonlightCompat.java     # 可选软依赖，只按注册名查找
-    └── jade/                    # 可选 Jade 插件
+├── client/                      # BarrelRenderer、OreColors（染色）、BER 注册
+└── compat/MoonlightCompat.java  # 可选软依赖，只按注册名查找
 ```
 
 - 方块状态尽量少；自定义进度放 BE，`getUpdateTag`/`getUpdatePacket` 同步。
@@ -77,6 +76,7 @@ com/kaifengcrt/exnihilosatellitium/
 | [docs/status.md](docs/status.md) | **当前状态**：停在哪、验证表、下一步、坑 |
 | [docs/DESIGN.md](docs/DESIGN.md) | 原则、目标、核心循环、架构、里程碑、决策记录 |
 | [docs/parity.md](docs/parity.md) | **复刻对照表**：经典项与 Ex Astris 的逐项状态、分档 |
+| [docs/ex-nihilo-basics.md](docs/ex-nihilo-basics.md) | **原版机制基础**：桶/筛/锤/钩/坩埚/矿链怎么运作，含待核清单 |
 | [docs/data-format.md](docs/data-format.md) | 堆肥 JSON、物品标签、NBT 键、命令、比较器 |
 | [docs/textures.md](docs/textures.md) | 纹理路线、色板、引用规则、AI 政策、检查 |
 | [README.md](README.md) | 面向玩家/贡献者的入口 |
