@@ -36,11 +36,16 @@ public final class SieveRenderer implements BlockEntityRenderer<SieveBlockEntity
             return;
         }
 
-        // 原版把料画成贴在网面上的平面：底 0.70，随进度略微抬升
-        final float y = 0.70F + 0.14F * Math.min(1.0F, sieve.progress());
+        // 原版：底面固定 0.70，顶面 = 0.70 + 0.20 * 剩余量
+        // 装进去是满的，越筛越薄（不是越筛越涨）
+        final float remaining = 1.0F - Math.min(1.0F, sieve.progress());
+        final float thickness = 0.20F * remaining;
+        if (thickness <= 0.002F) {
+            return;
+        }
         pose.pushPose();
-        pose.translate(0.0625F, y, 0.0625F);
-        pose.scale(0.875F, 0.02F, 0.875F);
+        pose.translate(0.0625F, 0.70F, 0.0625F);
+        pose.scale(0.875F, thickness, 0.875F);
         Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, pose, buffers, light, overlay,
                 ModelData.EMPTY, RenderType.solid());
         pose.popPose();
