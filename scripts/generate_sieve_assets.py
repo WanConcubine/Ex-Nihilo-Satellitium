@@ -15,6 +15,8 @@ MATS = json.load(open(RES / "exnihilosatellitium/materials.json", encoding="utf-
 
 MESH_COLORS = {"wood": (122, 88, 52), "silk": (232, 232, 228), "iron": (188, 190, 196)}
 MESH_NO = {"wood": 1, "silk": 2, "iron": 3}
+# 档位不是换色：编织密度不同。pitch=网格间距，strand=线宽
+MESH_WEAVE = {"wood": (6, 2), "silk": (4, 2), "iron": (3, 1)}
 
 
 def write_json(path, data):
@@ -23,24 +25,25 @@ def write_json(path, data):
 
 
 def mesh_texture(name):
-    """Woven screen: 2px strands on a 4px pitch, alternating over/under, holes between."""
+    """Woven screen; pitch and strand width differ per tier, not just hue."""
     colour = MESH_COLORS[name]
+    pitch, strand = MESH_WEAVE[name]
     dark = tuple(max(0, c - 48) for c in colour)
     light = tuple(min(255, c + 26) for c in colour)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            strand_h = (y % 4) < 2
-            strand_v = (x % 4) < 2
-            if not (strand_h or strand_v):
+            h_strand = (y % pitch) < strand
+            v_strand = (x % pitch) < strand
+            if not (h_strand or v_strand):
                 continue
-            if strand_h and strand_v:
-                over = ((x // 4) + (y // 4)) % 2 == 0
+            if h_strand and v_strand:
+                over = ((x // pitch) + (y // pitch)) % 2 == 0
                 c = light if over else dark
-            elif strand_h:
-                c = colour if (y % 4) == 0 else dark
+            elif h_strand:
+                c = colour if (y % pitch) == 0 else dark
             else:
-                c = colour if (x % 4) == 0 else dark
+                c = colour if (x % pitch) == 0 else dark
             img.putpixel((x, y), c + (255,))
     img.save(ASSETS / f"textures/block/sieve_mesh_{name}.png")
 

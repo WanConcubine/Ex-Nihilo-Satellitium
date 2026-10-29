@@ -1,5 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.common.blockentity;
 
+import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
+import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveDrop;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveRegistry;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
@@ -19,12 +21,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 /**
- * Sieve state: the installed mesh (with its own durability) and the sifting
- * action. The sift table itself is data-driven; see {@link SieveRegistry}.
+ * Sieve state: the installed mesh, the material being sifted, and a continuous
+ * progress bar (like Omnia's work / workMax) instead of one click = one result.
  */
 public class SieveBlockEntity extends BlockEntity {
 
+    /** Ticks of work needed for one item; also the progress bar maximum. */
+    public static final int WORK_MAX = 100;
+    /** Work added per tick while a material is loaded. */
+    public static final int WORK_PER_TICK = 2;
+    public static final int MAX_CONTENTS = 16;
+
     private ItemStack mesh = ItemStack.EMPTY;
+    private ItemStack contents = ItemStack.EMPTY;
+    private int work;
 
     public SieveBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.SIEVE.get(), pos, state);
@@ -42,55 +52,123 @@ public class SieveBlockEntity extends BlockEntity {
         this.mesh = stack;
         this.setChanged();
         this.sync();
+        this.updateBlockMeshState();
     }
 
-    /** @return true when the sift produced at least one drop. */
-    public boolean sift(final Player player, final ItemStack input) {
+    public ItemStack getContents() {
+        return this.contents;
+    }
+
+    public int getWork() {
+        return this.work;
+    }
+
+    public float progress() {
+        return Math.min(1.0F, this.work / (float) WORK_MAX);
+    }
+
+    /** Loads a held stack into the sieve; returns false when it does not fit. */
+    public boolean insert(final ItemStack stack) {
+        if (SieveRegistry.dropsFor(stack).isEmpty()) {
+            return false;
+        }
+        if (!this.contents.isEmpty() && !ItemStack.isSameItem(this.contents, stack)) {
+            return false;
+        }
+        final int room = MAX_CONTENTS - (this.contents.isEmpty() ? 0 : this.contents.getCount());
+        if (room <= 0) {
+            return false;
+        }
+        final int moved = Math.min(room, stack.getCount());
+        if (this.contents.isEmpty()) {
+            this.contents = stack.copyWithCount(moved);
+        } else {
+            this.contents.grow(moved);
+        }
+        stack.shrink(moved);
+        this.setChanged();
+        this.sync();
+        return true;
+    }
+
+    /** Empties the contents back to the player (sneak + empty hand). */
+    public void ejectContents(final Player player) {
+        if (!this.contents.isEmpty()) {
+            player.getInventory().placeItemBackInInventory(this.contents.copy());
+            this.contents = ItemStack.EMPTY;
+            this.work = 0;
+            this.setChanged();
+            this.sync();
+        }
+    }
+
+    public void dropMesh(final Player player) {
+        if (this.hasMesh()) {
+            player.getInventory().placeItemBackInInventory(this.mesh.copy());
+            this.mesh = ItemStack.EMPTY;
+            this.setChanged();
+            this.sync();
+            this.updateBlockMeshState();
+        }
+    }
+
+    public static void serverTick(final Level level, final BlockPos pos, final BlockState state,
+                                  final SieveBlockEntity sieve) {
+        if (!sieve.hasMesh() || sieve.contents.isEmpty()) {
+            if (sieve.work != 0) {
+                sieve.work = 0;
+                sieve.sync();
+            }
+            return;
+        }
+
+        sieve.work += WORK_PER_TICK;
+        if (sieve.work < WORK_MAX) {
+            if (sieve.work % 10 == 0) {
+                sieve.sync();
+            }
+            return;
+        }
+
+        sieve.completeSift(level, pos);
+    }
+
+    private void completeSift(final Level level, final BlockPos pos) {
+        final ItemStack input = this.contents;
         final List<SieveDrop> drops = SieveRegistry.dropsFor(input);
-        if (drops.isEmpty()) {
-            return false;
-        }
-        if (!player.isCreative()) {
-            input.shrink(1);
-        }
+        this.work = 0;
 
-        final Level level = this.level;
-        if (level == null) {
-            return false;
-        }
-
-        boolean produced = false;
         for (final SieveDrop drop : drops) {
             if (level.random.nextFloat() < drop.chance()) {
-                produced = true;
-                final ItemStack out = new ItemStack(drop.item());
                 final ItemEntity entity = new ItemEntity(level,
-                        this.worldPosition.getX() + 0.5D, this.worldPosition.getY() + 0.75D,
-                        this.worldPosition.getZ() + 0.5D, out);
-                entity.setDeltaMovement(0.0D, 0.15D, 0.0D);
+                        pos.getX() + 0.5D, pos.getY() + 0.9D, pos.getZ() + 0.5D,
+                        new ItemStack(drop.item()));
+                entity.setDeltaMovement(0.0D, 0.1D, 0.0D);
                 level.addFreshEntity(entity);
             }
         }
+        level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS,
+                0.4F, 0.9F + level.random.nextFloat() * 0.2F);
 
-        this.damageMesh(player);
+        this.contents.shrink(1);
+        if (this.contents.isEmpty()) {
+            this.contents = ItemStack.EMPTY;
+        }
+        this.damageMesh(level, pos);
         this.setChanged();
         this.sync();
-        return produced;
     }
 
-    /** One sift costs one durability; a broken mesh disappears. */
-    private void damageMesh(final Player player) {
-        if (player.isCreative() || !this.hasMesh()) {
+    /** One completed sift costs one durability; a broken mesh disappears. */
+    private void damageMesh(final Level level, final BlockPos pos) {
+        if (!this.hasMesh()) {
             return;
         }
         final ItemStack current = this.mesh;
         final int damage = current.getDamageValue() + 1;
         if (damage >= current.getMaxDamage()) {
             this.mesh = ItemStack.EMPTY;
-            if (this.level != null) {
-                this.level.playSound(null, this.worldPosition, SoundEvents.ITEM_BREAK,
-                        SoundSource.BLOCKS, 0.8F, 1.0F);
-            }
+            level.playSound(null, pos, SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
             this.updateBlockMeshState();
         } else {
             current.setDamageValue(damage);
@@ -101,13 +179,10 @@ public class SieveBlockEntity extends BlockEntity {
         if (this.level == null || this.level.isClientSide) {
             return;
         }
-        final int tier = this.hasMesh() ? this.mesh.getItem() instanceof com.kaifengcrt.exnihilosatellitium.common.item.MeshItem meshItem
-                ? meshItem.tier() : 1 : 0;
+        final int tier = this.mesh.getItem() instanceof MeshItem meshItem ? meshItem.tier() : 0;
         final BlockState state = this.getBlockState();
-        if (state.hasProperty(com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock.MESH)
-                && state.getValue(com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock.MESH) != tier) {
-            this.level.setBlock(this.worldPosition, state.setValue(
-                    com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock.MESH, tier), Block.UPDATE_ALL);
+        if (state.hasProperty(SieveBlock.MESH) && state.getValue(SieveBlock.MESH) != tier) {
+            this.level.setBlock(this.worldPosition, state.setValue(SieveBlock.MESH, tier), Block.UPDATE_ALL);
         }
     }
 
@@ -124,14 +199,18 @@ public class SieveBlockEntity extends BlockEntity {
         if (this.hasMesh()) {
             tag.put("Mesh", this.mesh.save(registries));
         }
+        if (!this.contents.isEmpty()) {
+            tag.put("Contents", this.contents.save(registries));
+        }
+        tag.putInt("Work", this.work);
     }
 
     @Override
     protected void loadAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        this.mesh = tag.contains("Mesh")
-                ? ItemStack.parseOptional(registries, tag.getCompound("Mesh"))
-                : ItemStack.EMPTY;
+        this.mesh = tag.contains("Mesh") ? ItemStack.parseOptional(registries, tag.getCompound("Mesh")) : ItemStack.EMPTY;
+        this.contents = tag.contains("Contents") ? ItemStack.parseOptional(registries, tag.getCompound("Contents")) : ItemStack.EMPTY;
+        this.work = tag.getInt("Work");
     }
 
     @Override
