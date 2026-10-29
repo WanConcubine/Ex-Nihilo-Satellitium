@@ -59,6 +59,9 @@ public final class OreColors {
 
     @SubscribeEvent
     public static void baked(final ModelEvent.BakingCompleted event) {
+        if (!Boolean.getBoolean("exnihilo.debugScreenshot")) {
+            return;
+        }
         final ResourceLocation id = ResourceLocation.fromNamespaceAndPath(ExNihiloSatellitium.MOD_ID, "iron_ore_gravel");
         final BakedModel block = event.getModelManager().getModel(new ModelResourceLocation(id, ""));
         final BakedModel item = event.getModelManager().getModel(new ModelResourceLocation(id, "inventory"));
