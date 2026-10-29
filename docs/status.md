@@ -12,6 +12,10 @@
 ## 现在停在哪
 
 - 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium`。
+- **2026-10-29 矿物六态入游**：按 `materials.json` 动态注册 36 个方块（矿砾/矿砂/矿尘）
+  + 36 个物品（破碎/粉碎/粉末），12 种材料，创意标签 72 条。方块 = vanilla 底 +
+  遮罩 + `BlockColor`，模型带 `parent: block/block` 才有 3D 物品图标。
+  **但它们目前没有任何配方，也拿不到**——纯展示，等 M2 接上筛子与合成。
 - **2026-10-29 定位入档**：DESIGN 写明项目是「1.7.10 版 Ex Nihilo 1 经典复刻」，
   **联动是本职**（§6.1），承自 Ex Astris 的是**自动化思路**（§6.2：判定单一来源、
   FE 能源、升级插件）。新增 [parity.md](parity.md) 逐项对照表；DESIGN §6.4 定义
@@ -46,6 +50,9 @@
 | 比较器 | ⚠️ | 逻辑未改，仍未实测 |
 | Jade tooltip | ⚠️ | 编译通过、无 Jade 启动通过；**未装 Jade 实测** |
 | 合成配方 | ⚠️ | 7 个 JSON 都加载成功；没有玩家实测合成格 |
+| 矿物六态注册 | ✅ | 客户端 `/give` 与创意标签可见 72 条；`[materials] loaded 12 entries` |
+| 矿物六态纹理 | ✅ | 作者目视通过：原版底 + 遮罩 + 罩色，物品栏为 3D 方块 |
+| 矿物链配方 | ❌ | 无筛子/锤子/合成/熔炼，36 个方块与 36 个物品目前不可获得 |
 | 改名完整性 | ✅ | `git grep` 无旧 id/旧类名；jar 内 `mods.toml` 为 `exnihilosatellitium` / `Ex Nihilo: Satellitium` |
 
 ## 下一步（按价值排序）
