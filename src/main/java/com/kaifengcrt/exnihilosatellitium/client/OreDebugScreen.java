@@ -36,6 +36,12 @@ public final class OreDebugScreen extends Screen {
                 index++;
             }
         }
+        int sx = 20;
+        graphics.renderItem(new ItemStack(ModItems.SIEVE.get()), sx, 24 + 5 * 22);
+        for (final var mesh : ModItems.MESHES) {
+            sx += 22;
+            graphics.renderItem(new ItemStack(mesh.get()), sx, 24 + 5 * 22);
+        }
         int bx = 20;
         for (final var barrel : ModItems.BARREL_ITEMS) {
             graphics.renderItem(new ItemStack(barrel.get()), bx, 24 + 4 * 22);
