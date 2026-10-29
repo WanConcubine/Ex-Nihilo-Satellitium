@@ -1,6 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -37,6 +38,18 @@ public final class ModItems {
             registerBarrelItem("dark_oak_barrel", ModBlocks.DARK_OAK_BARREL);
     public static final DeferredHolder<Item, Item> STONE_BARREL =
             registerBarrelItem("stone_barrel", ModBlocks.STONE_BARREL);
+
+    public static final DeferredHolder<Item, Item> SIEVE =
+            ITEMS.register("sieve", () -> new BlockItem(ModBlocks.SIEVE.get(), new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> WOOD_MESH =
+            ITEMS.register("wood_mesh", () -> new MeshItem(new Item.Properties().durability(10), 1));
+    public static final DeferredHolder<Item, Item> SILK_MESH =
+            ITEMS.register("silk_mesh", () -> new MeshItem(new Item.Properties().durability(64), 2));
+    public static final DeferredHolder<Item, Item> IRON_MESH =
+            ITEMS.register("iron_mesh", () -> new MeshItem(new Item.Properties().durability(256), 3));
+
+    public static final List<DeferredHolder<Item, Item>> MESHES = List.of(WOOD_MESH, SILK_MESH, IRON_MESH);
 
     public static final List<DeferredHolder<Item, Item>> BARREL_ITEMS = List.of(
             BARREL,

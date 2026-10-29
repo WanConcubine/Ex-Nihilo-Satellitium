@@ -1,0 +1,73 @@
+{
+  "input": "minecraft:gravel",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:iron_broken",
+      "chance": 0.2
+    },
+    {
+      "item": "exnihilosatellitium:gold_broken",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:copper_broken",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:tin_broken",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:silver_broken",
+      "chance": 0.02222
+    },
+    {
+      "item": "exnihilosatellitium:lead_broken",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:nickel_broken",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:platinum_broken",
+      "chance": 0.00781
+    },
+    {
+      "item": "exnihilosatellitium:aluminum_broken",
+      "chance": 0.125
+    },
+    {
+      "item": "exnihilosatellitium:osmium_broken",
+      "chance": 0.1
+    },
+    {
+      "item": "exnihilosatellitium:zinc_broken",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:uranium_broken",
+      "chance": 0.01111
+    },
+    {
+      "item": "minecraft:flint",
+      "chance": 0.25
+    },
+    {
+      "item": "minecraft:coal",
+      "chance": 0.125
+    },
+    {
+      "item": "minecraft:lapis_lazuli",
+      "chance": 0.05
+    },
+    {
+      "item": "minecraft:diamond",
+      "chance": 0.00781
+    },
+    {
+      "item": "minecraft:emerald",
+      "chance": 0.00667
+    }
+  ]
+}

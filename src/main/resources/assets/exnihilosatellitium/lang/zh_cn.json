@@ -28,6 +28,7 @@
   "block.exnihilosatellitium.platinum_ore_dust": "铂矿粉尘",
   "block.exnihilosatellitium.platinum_ore_gravel": "铂矿沙砾",
   "block.exnihilosatellitium.platinum_ore_sand": "铂矿沙子",
+  "block.exnihilosatellitium.sieve": "筛子",
   "block.exnihilosatellitium.silver_ore_dust": "银矿粉尘",
   "block.exnihilosatellitium.silver_ore_gravel": "银矿沙砾",
   "block.exnihilosatellitium.silver_ore_sand": "银矿沙子",
@@ -53,6 +54,7 @@
   "item.exnihilosatellitium.gold_powdered": "粉末金矿",
   "item.exnihilosatellitium.iron_broken": "破碎铁矿",
   "item.exnihilosatellitium.iron_crushed": "粉碎铁矿",
+  "item.exnihilosatellitium.iron_mesh": "铁筛网",
   "item.exnihilosatellitium.iron_powdered": "粉末铁矿",
   "item.exnihilosatellitium.lead_broken": "破碎铅矿",
   "item.exnihilosatellitium.lead_crushed": "粉碎铅矿",
@@ -67,6 +69,7 @@
   "item.exnihilosatellitium.platinum_crushed": "粉碎铂矿",
   "item.exnihilosatellitium.platinum_powdered": "粉末铂矿",
   "item.exnihilosatellitium.porcelain": "瓷土",
+  "item.exnihilosatellitium.silk_mesh": "丝网",
   "item.exnihilosatellitium.silver_broken": "破碎银矿",
   "item.exnihilosatellitium.silver_crushed": "粉碎银矿",
   "item.exnihilosatellitium.silver_powdered": "粉末银矿",
@@ -76,6 +79,7 @@
   "item.exnihilosatellitium.uranium_broken": "破碎铀矿",
   "item.exnihilosatellitium.uranium_crushed": "粉碎铀矿",
   "item.exnihilosatellitium.uranium_powdered": "粉末铀矿",
+  "item.exnihilosatellitium.wood_mesh": "木网",
   "item.exnihilosatellitium.zinc_broken": "破碎锌矿",
   "item.exnihilosatellitium.zinc_crushed": "粉碎锌矿",
   "item.exnihilosatellitium.zinc_powdered": "粉末锌矿",
@@ -83,5 +87,6 @@
   "jade.exnihilosatellitium.barrel.compost": "堆肥：%s%%（%s / %s）",
   "jade.exnihilosatellitium.barrel.fluid": "%s：%s / %s mB",
   "jade.exnihilosatellitium.barrel.ready": "泥土已就绪（右键取出）",
-  "jade.exnihilosatellitium.barrel.timer": "成型中：还需 %s 秒"
+  "jade.exnihilosatellitium.barrel.timer": "成型中：还需 %s 秒",
+  "message.exnihilosatellitium.need_mesh": "需要先放入筛网"
 }

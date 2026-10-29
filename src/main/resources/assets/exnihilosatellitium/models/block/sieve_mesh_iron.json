@@ -1,0 +1,29 @@
+{
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "exnihilosatellitium:block/sieve_mesh_iron",
+    "mesh": "exnihilosatellitium:block/sieve_mesh_iron"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        5,
+        2
+      ],
+      "to": [
+        14,
+        5.02,
+        14
+      ],
+      "faces": {
+        "up": {
+          "texture": "#mesh"
+        },
+        "down": {
+          "texture": "#mesh"
+        }
+      }
+    }
+  ]
+}
