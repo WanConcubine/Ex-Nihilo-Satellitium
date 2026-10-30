@@ -18,5 +18,7 @@ public final class CapabilityEvents {
     public static void registerCapabilities(final RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.BARREL.get(),
                 (barrel, side) -> barrel.getTank());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.CRUCIBLE.get(),
+                (crucible, side) -> crucible.getTank());
     }
 }

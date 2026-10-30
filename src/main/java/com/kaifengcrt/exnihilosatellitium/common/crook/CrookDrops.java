@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ public final class CrookDrops {
 
     private static final String DIR = "crook";
     private static volatile Map<Block, List<Drop>> table = Map.of();
+    private static volatile Map<Block, List<Drop>> clientTable = Map.of();
 
     private CrookDrops() {
     }
@@ -44,7 +46,19 @@ public final class CrookDrops {
         return table.getOrDefault(block, List.of());
     }
 
+    /** JEI view, sorted by leaves block id for a stable page order. */
+    public static List<Map.Entry<Block, List<Drop>>> all() {
+        final Map<Block, List<Drop>> source = table.isEmpty() ? clientTable : table;
+        final List<Map.Entry<Block, List<Drop>>> list = new ArrayList<>(source.entrySet());
+        list.sort(Comparator.comparing(entry -> BuiltInRegistries.BLOCK.getKey(entry.getKey()).toString()));
+        return list;
+    }
+
     public static void load(final ResourceManager manager) {
+        load(manager, false);
+    }
+
+    public static void load(final ResourceManager manager, final boolean clientView) {
         final Map<Block, List<Drop>> built = new HashMap<>();
         int files = 0;
         for (final Map.Entry<ResourceLocation, Resource> entry
@@ -83,7 +97,13 @@ public final class CrookDrops {
                 ExNihiloSatellitium.LOGGER.error("[crook] failed to read {}: {}", id, exception.toString());
             }
         }
-        table = Map.copyOf(built);
-        ExNihiloSatellitium.LOGGER.info("[crook] loaded {} leaves tables", files);
+        final Map<Block, List<Drop>> snapshot = Map.copyOf(built);
+        if (clientView) {
+            clientTable = snapshot;
+        } else {
+            table = snapshot;
+        }
+        ExNihiloSatellitium.LOGGER.info("[crook] loaded {} leaves tables{}", files,
+                clientView ? " (client)" : "");
     }
 }

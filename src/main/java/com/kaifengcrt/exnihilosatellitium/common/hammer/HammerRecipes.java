@@ -16,7 +16,10 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,7 +37,8 @@ import java.util.Optional;
  * ore dust      → the ore dust block itself (no further crushing)
  * </pre>
  *
- * <p>The table is server-side only; it is not shown in a recipe browser yet.</p>
+ * <p>Gameplay always reads the server table; the client keeps a copy loaded
+ * from the mirrored assets so JEI works when connected to a dedicated server.</p>
  */
 public final class HammerRecipes {
 
@@ -42,6 +46,7 @@ public final class HammerRecipes {
     private static final int MAX_COUNT = 64;
 
     private static volatile Map<Block, Rule> recipes = Map.of();
+    private static volatile Map<Block, Rule> clientRecipes = Map.of();
 
     /** One hammer rule: the dropped item and the inclusive drop-count range. */
     public record Rule(Item item, int min, int max) {
@@ -60,7 +65,19 @@ public final class HammerRecipes {
         return recipes.get(state.getBlock());
     }
 
+    /** JEI view, sorted by block id for a stable page order. */
+    public static List<Map.Entry<Block, Rule>> all() {
+        final Map<Block, Rule> source = recipes.isEmpty() ? clientRecipes : recipes;
+        final List<Map.Entry<Block, Rule>> list = new ArrayList<>(source.entrySet());
+        list.sort(Comparator.comparing(entry -> BuiltInRegistries.BLOCK.getKey(entry.getKey()).toString()));
+        return list;
+    }
+
     public static void load(final ResourceManager manager) {
+        load(manager, false);
+    }
+
+    public static void load(final ResourceManager manager, final boolean clientView) {
         final Map<Block, Rule> built = new HashMap<>();
         int files = 0;
         for (final Map.Entry<ResourceLocation, Resource> entry
@@ -98,7 +115,13 @@ public final class HammerRecipes {
                 ExNihiloSatellitium.LOGGER.error("[hammer] failed to read {}: {}", id, exception.toString());
             }
         }
-        recipes = Map.copyOf(built);
-        ExNihiloSatellitium.LOGGER.info("[hammer] loaded {} recipes", files);
+        final Map<Block, Rule> snapshot = Map.copyOf(built);
+        if (clientView) {
+            clientRecipes = snapshot;
+        } else {
+            recipes = snapshot;
+        }
+        ExNihiloSatellitium.LOGGER.info("[hammer] loaded {} recipes{}", files,
+                clientView ? " (client)" : "");
     }
 }

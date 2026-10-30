@@ -20,7 +20,7 @@ Minecraft 是 Mojang Studios 的商标。Minecraft 与 Forge 不随本仓库分�
 ## Ex Nihilo 系列（参考，不含 GPLv3 代码/资源）
 
 本项目是独立实现，**没有复制**原版 / Omnia 等 GPLv3 分支的代码、贴图、模型或音效。
-唯一的例外是 **Ex Nihilo: Creatio（MIT）** 的少量贴图，见下一节。
+唯一的例外是 **Ex Nihilo: Creatio（MIT）** 的少量贴图与坩埚模型几何，见下一节。
 
 设计阶段以只读方式参考了原版 Ex Nihilo（Erasmus_Crowley，GPLv3）的公开仓库，
 用于理解桶类方块的**功能性思路**（例如内缩的桶身轮廓、在桶内渲染内容物）。
@@ -50,9 +50,9 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 混入 GPLv3 代码，再整体只标 MIT”是走不通的。只有将来真的引入 GPLv3 组件或决定转协议时，
 才需要把 GPLv3 全文放进仓库并逐项满足这些条件。
 
-## Ex Nihilo: Creatio（MIT，贴图直接采用）
+## Ex Nihilo: Creatio（MIT，贴图/模型直接采用）
 
-M3 的工具与尘土贴图直接采用 **Ex Nihilo: Creatio**（1.12.2 分支，
+M3 的工具/尘土/熟蚕贴图与 M4 的坩埚贴图、坩埚模型几何直接采用 **Ex Nihilo: Creatio**（1.12.2 分支，
 <https://github.com/BloodyMods/ExNihiloCreatio>）。该项目按 **MIT** 授权，
 允许复制、修改、再分发；许可证全文与版权声明见
 [third-party/MIT-ExNihiloCreatio.txt](third-party/MIT-ExNihiloCreatio.txt)
@@ -71,6 +71,10 @@ SirLyle 2017 / Wolforce 2019 textures）。
 | `textures/item/golden_hammer.png` | `textures/items/hammergold.png` |
 | `textures/item/diamond_hammer.png` | `textures/items/hammerdiamond.png` |
 | `textures/block/dust.png` | `textures/blocks/blockdust.png` |
+| `textures/item/cooked_silkworm.png` | `textures/items/silkwormcooked.png` |
+| `textures/block/crucible.png` | `textures/blocks/blockcrucible.png` |
+| `textures/block/unfired_crucible.png` | `textures/blocks/blockcrucibleunfired.png` |
+| `models/block/crucible_base.json` | `models/block/block_crucible_big.json`（几何；cullface 已修正） |
 
 派生（不是直接复制）：
 
@@ -81,8 +85,8 @@ SirLyle 2017 / Wolforce 2019 textures）。
 
 后续如再采用 Creatio 的资源，必须同步扩充本表和许可证文件。
 以上 PNG 在 `src/main/.../textures/` 里经过了**颜色微调**（1.21 风格的方向光、描边、
-暖金/下界合金色板与色阶收敛）；原始采用图只读保存在 `art/items/tools/creatio/`，
-微调规则见 `art/items/tools/restyle.py`。MIT 允许修改与再分发，微调版仍按 MIT 授权，
+暖金/下界合金色板与色阶收敛）；原始采用图只读保存在 `art/items/tools/creatio/`
+与 `art/blocks/crucible/creatio/`，微调规则见两个 `restyle.py`。MIT 允许修改与再分发，微调版仍按 MIT 授权，
 版权仍归原作者。
 **Ex Nihilo: Sequentia（传承）1.21 的许可证是 CC BY-NC-SA 4.0**（非 MIT，
 带非商业与相同方式共享条款），因此本项目**不采用**其任何贴图，只作玩法/数值对照。
@@ -94,7 +98,8 @@ SirLyle 2017 / Wolforce 2019 textures）。
 1. **本项目逐像素生成（MIT）**：`art/barrel/generate.py`、`art/items/ore_pieces/generate.py`、
    `art/items/ingots/generate.py` 生成的桶面、矿物碎块与锭。
 2. **Ex Nihilo: Creatio 直接采用（MIT）**：M3 的 6 种锤（下界合金锤为换色衍生）、
-   木/骨钩、尘土方块；蚕是 Creatio 原图的 4 帧位移动画。见上一节的对照表。
+   木/骨钩、尘土方块、熟蚕；蚕是 Creatio 原图的 4 帧位移动画。M4 坩埚的
+   16×16 贴图与 13 元素模型几何（cullface 清洗 + 模糊/5 色现代化）。见上一节对照表。
 3. **运行时引用原版方块贴图（不打包）**：木桶、矿砾/矿砂/矿尘方块的 vanilla-sampled 底图。
 
 没有使用 AI 生图，也没有引用 GPLv3 项目的贴图。
@@ -114,5 +119,5 @@ Jade 的许可证与版权归其作者所有，见其项目页。
 
 JEI 是可选依赖，**不随本项目分发**。本项目只以 `compileOnly` 方式引用其 API
 （`mezz.jei:jei-1.21.1-neoforge:19.27.0.340`，来自 `maven.blamejared.com`）来编译
-筛子分类插件；用户需要自行安装 JEI。JEI 的许可证与版权归其作者所有，见其项目页。
+JEI 分类插件；用户需要自行安装 JEI。JEI 的许可证与版权归其作者所有，见其项目页。
 构建时不会把 JEI 的类或资源打进本项目的 jar。

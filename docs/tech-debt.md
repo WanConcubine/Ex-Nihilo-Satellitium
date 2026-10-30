@@ -1,4 +1,4 @@
-# 技术债清单（2026-10-30 审计）
+# 技术债清单（2026-10-30 审计，2026-10-31 更新）
 
 > 范围：`src/main/java`、`src/main/resources`、`scripts/`、`build.gradle`、CI、文档与元数据。
 > 方法：通读代码 + 数据/资源一致性脚本 + 构建/服务端日志对照。本文件同时记录审计与修复状态（见下方修复记录）。
@@ -13,7 +13,8 @@
 - P0 #4 `grass`→`short_grass`，53+12 标签对齐；Sieve/Compost/Moonlight 用 `getOptional`；
 - P0 #5 文档改为“只有 jar 内表”，不再承诺 config/自动发现/骨架行；
 - P0 #6 材料表逐条容错；P0 #7 创造标签图标固定用桶；
-- P1 #8 服务端 gameplay 表与客户端 JEI 快照分离；
+- P1 #8 服务端 gameplay 表与客户端 JEI 快照分离（2026-10-31 七个表全部完成；JEI 优先服务端表，
+  专用服客户端回退 `assets/` 镜像）；
 - P1 #9–#11、#14、#18、#19、#22、#23（`enabled` 过滤）已修；
 - P2 #25 加了纹理检查步骤（仍无客户端/JEI/数据测试）；#29 `mod_description`；#30 关键过期文档；
   #32 删了 `OreDebugScreen`/`OreDebugScreenshot` 与 `OreColors` debug 分支。
@@ -38,7 +39,7 @@
 
 | # | 问题 | 证据 | 影响 | 建议 |
 |---|---|---|---|---|
-| 8 | **客户端 reload 与服务端共用同一张静态表**：`ClientEvents` 在客户端也注册 Sieve/Barrel/Compost listener | `ClientEvents.java:33-36`；三个 registry 都是 `static volatile` 单例 | 单人按 F3+T / 资源重载时，客户端会用自己的 `assets/` 副本覆盖服务端表；若世界带数据包覆盖了 `barrel`/`sieve`/`compost`，重载后游戏逻辑会退回内置值 | 服务端表与 JEI 视图分开（例如 client 侧用 `clientSnapshot`）；或客户端 reload 时只更新 JEI 数据，不写 gameplay 表 |
+| 8 | ~~**客户端 reload 与服务端共用同一张静态表**~~（已修） | `SieveRegistry` / `BarrelRecipes` / `CompostRegistry` / `HammerRecipes` / `CrookDrops` / `CrucibleRecipes` / `CrucibleHeat` 都有 server/client 两份；`ClientEvents` 只写 client 副本 | 已消除 F3+T 覆盖服务端规则的问题 | 保持 `clientView` 分离；JEI 读服务端表（为空时回退 client） |
 | 9 | **defaulted registry 让“未知 id”检查失效**：`BuiltInRegistries.ITEM.get` 对未知 id 返回 AIR | `SieveRegistry.java:58,68`；`CompostRegistry.java:80`；`MoonlightCompat.java:52` | 未知筛输入/掉落、未知堆肥物品、月光物品都会静默变成空气；日志里的 `unknown ...` 永远不打；坏数据被隐藏 | 统一改用 `getOptional()`；对 `air` 结果额外拒绝 |
 | 10 | **筛网耐久可以重置**：安装筛网时 `new ItemStack(stack.getItem())` 新建满耐久栈 | `SieveBlock.java:103`；`SieveBlockEntity.java:54-59` | 玩家把用过的筛网取回再放回，耐久回满，等于无限筛网 | 用 `stack.copyWithCount(1)` 安装，保留 damage |
 | 11 | **筛网可堆叠**：`Item.Properties().durability(...)` 没配 `stacksTo(1)` | `ModItems.java:45-50` | 一叠 64 个筛网，安装/取回语义混乱；JEI/创造标签也显示成叠 | 三档筛网都加 `.stacksTo(1)` |
@@ -71,7 +72,7 @@
 | 33 | **`MoonlightCompat` 实际未被调用，且 `item()` 返回 AIR 而不是 null** | `MoonlightCompat.java:48-58`；全仓无 `logStatus`/`item` 调用 | M8 之前是死代码；一旦使用 `hasItem()` 永远为 true | 先修 `getOptional`；在 M8 实现前保留但标注“未接线” |
 | 34 | **生成脚本与文档命令不一致**：`generate_sieve_assets.py` 不在常用命令里，`generate_barrel_variants.py` 却是坏的 | `docs/status.md` 常用命令；`docs/data-format.md:183` | 维护者不知道哪个脚本该跑，容易跑到旧脚本 | 统一脚本清单；给每个脚本加 `--check`（只校验不写） |
 | 35 | **`check-textures.py` 只查 models/textures，不查 blockstates 引用和 data JSON** | `scripts/check-textures.py:40-52` | 生成器写错 blockstate 路径/模型名时，纹理检查仍通过 | 增加 blockstates → models、loot/recipe id 的基础存在性检查 |
-| 36 | **`processResources` 把 data 表复制进 assets，jar 内有两份** | `build.gradle:72-84` | 包体增大；服务端数据包覆盖与客户端 JEI 视图可能不一致（已在文档提过 sieve，barrel/compost 未展开） | 接受现状则写清“客户端 JEI 永远显示内置表”；否则改为运行期同步/自定义包 |
+| 36 | **`processResources` 把 data 表复制进 assets，jar 内有两份** | `build.gradle` 的 `processResources` | 包体增大；专用服客户端读不到服务端数据包，JEI 只能显示内置镜像 | 已接受并在 data-format §14 写清；单人/局域网 JEI 优先服务端表，专用服客户端需同装数据包 |
 
 ## P3：清理与路线图（潜在债）
 
@@ -79,7 +80,7 @@
 |---|---|---|
 | 37 | **零自动化测试** | `src/test` 不存在；`build` 的 `test` 是 NO-SOURCE。最值得补：`SieveRegistry`/`BarrelRecipes`/`CompostRegistry` 的解析、重复/坏 id、`BarrelBlockEntity.fill` 状态机、`SieveBlockEntity` 结算 |
 | 38 | **数据格式没有 schema/版本** | `sieve`/`barrel`/`compost`/`materials` 都是 de facto API；字段改名/新增无版本号、无迁移、无 `--check`。建议给每个格式写 JSON Schema 或 Java 校验器 |
-| 39 | **无 datagen / config** | M7 未做；当前靠 Python 脚本 + 手写 JSON；材料表靠 jar 内资源，config 层未实现（P0 #5） |
+| 39 | **无 datagen / 通用 config** | M7 未做；材料表/筛/锤等仍靠 Python 脚本 + 手写 JSON；目前只有坩埚三项 config（`capacity` / `meltCapacity` / `heatSpeedMultiplier`） |
 | 40 | **BE NBT 没有 `DataVersion`** | 桶有 `CompostScale` 迁移，筛子只有 `Work`/`Contents`/`Mesh`；未来改字段只能猜。建议加 `DataVersion` 或 `SieveVersion` |
 | 41 | **`BarrelBlockEntity` 单类 489 行，职责过多** | 流体/堆肥/降雨/固体/比较器/NBT 都在一个类；拆出 `BarrelTank`/`CompostState`/`SolidState` 后，P0 #3 这类状态互斥更容易守住 |
 | 42 | **`getSolid()`/`getMesh()`/`getContents()` 直接返回内部 ItemStack** | `BarrelBlockEntity:132`、`SieveBlockEntity:46,61`；渲染器只读所以现在没事，但外部一改就穿透 BE 状态 | 返回 `copy()` 或只读视图 |

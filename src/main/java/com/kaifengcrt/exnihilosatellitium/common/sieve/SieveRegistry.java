@@ -44,7 +44,7 @@ public final class SieveRegistry {
 
     /** Immutable snapshot for recipe browsers (JEI); key order is not meaningful. */
     public static Map<Item, List<SieveDrop>> all() {
-        return clientTable.isEmpty() ? table : clientTable;
+        return table.isEmpty() ? clientTable : table;
     }
 
     public static void load(final ResourceManager manager, final boolean clientView) {

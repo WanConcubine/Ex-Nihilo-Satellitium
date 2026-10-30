@@ -7,9 +7,15 @@ import net.minecraft.util.profiling.ProfilerFiller;
 /** Server-side reload hook for the hammer table. */
 public final class HammerRecipeReloadListener extends SimplePreparableReloadListener<Void> {
 
+    private final boolean clientView;
+
+    public HammerRecipeReloadListener(final boolean clientView) {
+        this.clientView = clientView;
+    }
+
     @Override
     protected Void prepare(final ResourceManager manager, final ProfilerFiller profiler) {
-        HammerRecipes.load(manager);
+        HammerRecipes.load(manager, this.clientView);
         return null;
     }
 

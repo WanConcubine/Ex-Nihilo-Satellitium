@@ -1,6 +1,6 @@
 # 设计文档：无中生有：众星捧月
 
-> 状态：M1（木桶 + 材质变体）/ 最后更新：2026-10-28
+> 状态：M1–M4 已实现（M3 收尾 + M4 待验收）/ 最后更新：2026-10-31
 
 ## 1. 独立实现原则
 
@@ -564,7 +564,7 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
    **只有左键正常破坏**一条路径（`BlockDropsEvent` 替换掉落），**没有右键快捷方式**——
    经典 Ex Nihilo 同样只走破坏方块；早期实现里的 `HammerItem.useOn` 已删除。
 2. **锤表数据驱动**：`data/<ns>/hammer/*.json`（`input` 方块 → `result` 物品 + 可选
-   `min`/`max` 数量区间），共 39 条：圆石→砂砾、砂砾→沙子、沙子→尘土；
+   `min`/`max` 数量区间），共 39 条（§16 再补 8 条砂岩，当前 47）：圆石→砂砾、砂砾→沙子、沙子→尘土；
    12 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；12 种矿物粉尘→**它自己**。
    服务端专用；没有装 JEI 也能用。
 3. **尘土**：新增 `exnihilosatellitium:dust` 方块（`cube_all`，自有 `block/dust.png` 贴图）+ 物品；
@@ -586,8 +586,8 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 
 **验证**
 
-- 服务端：`[hammer] loaded 39 recipes`、`[crook] loaded 10 leaves tables`、
-  `[sieve] loaded 3 inputs, 44 drops`、`our recipes=91`（原 88 + 金/钻石/下界合金锤 3 条）。
+- 服务端：`[hammer] loaded 39 recipes`（§16 补砂岩后应为 47）、`[crook] loaded 10 leaves tables`、
+  `[sieve] loaded 3 inputs, 44 drops`、`our recipes=91`（原 88 + 3 锤；熟蚕 3 条后应为 94）。
 - 客户端：JEI `registered 3 sieve recipes`，无 missing model/texture。
 - **未验证**：玩家实际锤/钩/筛尘土、六档锤与两档钩合成、尘土纹理/掉落手感。
 
@@ -604,3 +604,83 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
   `removeBlock` 直接返回），所以另挂 `BlockEvent.BreakEvent` 给创造模式补掉落，
   方便在创造测试世界里敲方块。生存模式仍只走 `BlockDropsEvent`，不会双掉。
 - 尘土方块贴图用更浅的灰米色；原版 `gray_concrete_powder` 会和沙子视觉混淆。
+
+## 16. M3 收尾：粘土 / 砂岩 / 熟蚕（2026-10-30）
+
+**决策**
+
+1. **粘土走经典木桶**：满水 + 尘土 → `minecraft:clay`，一条
+   `barrel/water_dust_clay.json`。尘土由 M3 的“沙子→尘土”提供，至此经典 M1.5 的粘土链闭合。
+2. **砂岩锤规则**：普通 / 红砂岩的 4 种变体（原版、雕纹、切制、平滑）各一条，
+   共 8 条，普通 → 沙子、红 → 红沙，各 1 个。砂岩需要镐才能正常掉落，
+   锤子靠已有的 `HarvestCheck` / `BreakSpeed` 走同一条破坏路径。
+3. **熟蚕**：`cooked_silkworm`，食物 2 饥饿 / 0.6 饱和度；熔炉（200 t）、烟熏（100 t）、
+   营火（600 t）三种烤法。贴图沿用 Creatio `silkwormcooked.png`，只做和生蚕同款调色。
+
+**验证**
+
+- `[hammer] loaded 47 recipes`、`[barrel] loaded 5 transforms`（待启动日志确认；
+  客户端资源加载时 `[barrel] loaded 4 transforms` 的旧记录是加粘土之前的）。
+- `./gradlew build` + `check-textures.py` 通过；三种烤制配方 JSON 已解析校验。
+- **未验证**：粘土在桶里能否正常取出、砂岩锤击、熟蚕食用/烤制。
+
+## 17. M4 坩埚（2026-10-30）
+
+**目标**
+
+坩埚 + 正下方热源，把圆石 / 石头 / 砂砾熔成熔岩；下界岩产出更多，雪/冰熔成水。
+
+**决策**
+
+1. **两个方块**：`unfired_crucible`（未烧制）+ `crucible`（带 BE）。
+   瓷土 = 粘土球 + 骨粉，7 瓷土 → 未烧制坩埚，熔炉烧成坩埚；这同时补上了
+   `porcelain` 物品从 M1 起的“有物品没用途”。
+   模型和贴图采用 Creatio（MIT）的 `block_crucible_big` + 两块 16×16，
+   `art/blocks/crucible/restyle.py` 做模糊/5 色量化，并把非边界面的 `cullface` 去掉。
+2. **容量可配置**：`common` 配置有 `crucible.capacity`（默认 8000，1000–64000）、
+   `crucible.meltCapacity`（默认 2000，250–64000）、`crucible.heatSpeedMultiplier`
+   （默认 1.0，0.1–10.0）。BE 每 tick 读配置并夹紧 tank；不需要重启。
+3. **热源数据表** `data/<ns>/crucible_heat/*.json`：火把 0.1、熔岩 0.2、火 0.3、
+   燃烧的熔炉/高炉/烟熏炉 0.15、**篝火 0.25、灵魂篝火 0.35、灵魂火 0.4**
+   （后三者是本项目新增，1.7.10 原版没有）。支持 `properties` 精确匹配
+   （例如 `lit=true`，未点燃的篝火不算热源）。
+4. **熔点表** `data/<ns>/crucible_melt/*.json`：圆石/石头/砂砾/花岗岩/闪长岩/安山岩
+   （含磨制、深板岩、凝灰岩、方解石）250 mB 熔岩；下界岩 1000 mB；雪块 500 mB 水；
+   冰 1000 mB 水；**沙子/红沙/尘土各 100 mB 熔岩**。`amount` 同时是熔料体积（1:1）。
+   熔化速度 = 热源 mB/tick × `heatSpeedMultiplier`；熔料上限可配（默认 2000 = 8 块圆石）。
+5. **交互**：右键放入可熔方块；右键桶/容器抽流体；管道走 `IFluidHandler`；
+   比较器输出液位；BE 每 10 tick 同步一次客户端用于渲染。
+6. **JEI 两个分类**：`crucible`（方块 → 流体 + 产量）和 `crucible_heat`
+   （热源 → 速度），都使用 JEI 原生槽位/流体槽，不自绘背景。
+7. **熔料可视**：BE 同时维护 `solidVolume`（熔料，默认上限 **2000 mB**，可配）和流体量；
+   **固体体积 > 流体体积**时，BER 用该方块的贴图填充整个内腔；反之渲染流体。
+   BE 存 `PendingStack` 并同步；Jade 显示 `熔料：<方块> 剩余 N mB` 和下方热源速度。
+8. **数据包**：`crucible_melt/` 与 `crucible_heat/` 和其他玩法表一样可覆盖/新增；
+   单人 JEI 优先读服务端表（包含数据包），专用服客户端回退 `assets/` 镜像。
+
+**验证**
+
+- 启动日志应出现 `[crucible] loaded 19 meltables`、`[crucible] loaded 9 heat sources`、
+  `[jei] registered 19 crucible meltables, 9 heat sources`。
+- `./gradlew build` + `check-textures.py` 通过；19 个熔点 / 9 个热源 JSON 已解析校验。
+- **未验证**：进游戏放方块/加热/抽流体、熔料比例、配置改容量、Jade、JEI 两页目视。
+
+## 18. M3 补 JEI：锤子 / 钩子（2026-10-30）
+
+**决策**
+
+- 锤子/钩子的数据表保留**客户端镜像表**（`HammerRecipes.clientRecipes` /
+  `CrookDrops.clientTable`），客户端 reload listener 用 `clientView=true` 读
+  `assets/.../hammer`、`assets/.../crook`；游戏逻辑（`ruleFor`/`dropsFor`）只读服务端表，
+  避免 F3+T 把服务端规则换掉。JEI 优先读服务端表（单人/局域网会包含数据包），
+  服务端表为空时回退客户端镜像。
+- JEI 新增两个分类：
+  - `hammer`：76×26，方块 → 产物；tooltip 写 `掉落 N` 或 `掉落 4–6`；6 种锤作 catalyst。
+  - `crook`：104×26，树叶 → 最多 3 个追加掉落；每个 tooltip 写概率，骨钩 ×1.5 只写提示。
+- 两个分类都使用 JEI 原生槽位/箭头，不自绘背景。
+
+**验证**
+
+- 启动日志应出现 `[jei] registered 35 hammer recipes`（玩法 47 条，12 条粉尘自掉不进 JEI）、
+  `[jei] registered 10 crook recipes`。
+- build + 纹理检查通过；**未进游戏目视**。

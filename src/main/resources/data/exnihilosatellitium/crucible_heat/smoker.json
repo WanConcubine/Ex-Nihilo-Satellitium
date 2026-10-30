@@ -1,0 +1,5 @@
+{
+  "block": "minecraft:smoker",
+  "properties": { "lit": "true" },
+  "speed": 0.15
+}

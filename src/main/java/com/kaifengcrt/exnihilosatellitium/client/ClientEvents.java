@@ -3,6 +3,9 @@ package com.kaifengcrt.exnihilosatellitium.client;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import net.neoforged.api.distmarker.Dist;
@@ -22,6 +25,7 @@ public final class ClientEvents {
     public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.BARREL.get(), BarrelRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.SIEVE.get(), SieveRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
     }
 
     /**
@@ -34,5 +38,8 @@ public final class ClientEvents {
         event.registerReloadListener(new SieveReloadListener(true));
         event.registerReloadListener(new BarrelRecipeReloadListener(true));
         event.registerReloadListener(new CompostReloadListener(true));
+        event.registerReloadListener(new CrucibleReloadListener(true));
+        event.registerReloadListener(new HammerRecipeReloadListener(true));
+        event.registerReloadListener(new CrookDropsReloadListener(true));
     }
 }

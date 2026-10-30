@@ -349,17 +349,22 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
-- 当前 4 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→地狱岩、熔岩+荧石粉→末地石。
+- 当前 5 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→地狱岩、
+  熔岩+荧石粉→末地石、**水+尘土→粘土块**（`water_dust_clay.json`）。
 - **删掉 JSON 桶就不反应**：不会退回硬编码。
 
 ## 11. JEI 分类
 
-- 插件：`compat/jei/SieveJeiPlugin`（筛子）和 `compat/jei/BarrelJeiPlugin`（桶），
-  都是 `@JeiPlugin`；JEI 不装时类不加载，也不打包。
+- 插件：`compat/jei/SieveJeiPlugin`（筛子）、`compat/jei/BarrelJeiPlugin`（桶）、
+  `compat/jei/CrucibleJeiPlugin`（坩埚），都是 `@JeiPlugin`；JEI 不装时类不加载，也不打包。
 - 分类 id：
   - `exnihilosatellitium:sieve`，标题键 `jei.exnihilosatellitium.sieve`；
   - `exnihilosatellitium:barrel`，标题键 `jei.exnihilosatellitium.barrel`；
-  - `exnihilosatellitium:barrel_compost`，标题键 `jei.exnihilosatellitium.barrel_compost`。
+  - `exnihilosatellitium:barrel_compost`，标题键 `jei.exnihilosatellitium.barrel_compost`；
+  - `exnihilosatellitium:crucible`，标题键 `jei.exnihilosatellitium.crucible`；
+  - `exnihilosatellitium:crucible_heat`，标题键 `jei.exnihilosatellitium.crucible_heat`；
+  - `exnihilosatellitium:hammer`，标题键 `jei.exnihilosatellitium.hammer`；
+  - `exnihilosatellitium:crook`，标题键 `jei.exnihilosatellitium.crook`。
 - **筛子页**：左上材料、左下筛网、右边 7 列 × 3 行掉落槽；槽位整体居中（输入/筛网 x=6，
   输出 x=34..160），用 JEI 标准槽位背景；砂砾/沙子/尘土三条由 JEI 自动分页。
   三档筛网放进同一个输入槽轮换显示（筛网不影响掉落）。
@@ -374,10 +379,23 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   材料槽 tooltip 是 `jei...sieve.hint`（每筛一个材料，每个产物独立判定）；
   筛网槽 tooltip 是 `jei...sieve.mesh_hint`（只影响耐久，不改变掉落）。
   **不要再用底部 `addText` 提示**：JEI 会把窄宽度下的文字竖排到槽位上（2026-10-29 修）。
-- 筛子方块和三档筛网注册为筛子分类 catalyst；**七种桶**注册为两个桶分类的 catalyst。
-- 数据直接读 `SieveRegistry` / `BarrelRecipes` / `CompostRegistry`（不是 `RecipeManager`），
-  所以客户端必须注册 `SieveReloadListener`、`BarrelRecipeReloadListener`、
-  `CompostReloadListener`（`ClientEvents` 里）才能在连服务器时显示。
+- 筛子方块和三档筛网注册为筛子分类 catalyst；**七种桶**注册为两个桶分类的 catalyst；
+  `crucible` 同时是两个坩埚分类的 catalyst。
+- **坩埚页**：76×26，方块输入槽 + 箭头 + 流体输出槽（`setFluidRenderer(产物量, ...)`）；
+  **坩埚热源页**：92×26，热源物品槽 + 右侧速度文字；`fire`/`lava` 没有方块物品，
+  用打火石/熔岩桶作为图标。
+- **锤子页**：76×26，方块输入 + 箭头 + 产物；tooltip 写单次数量或 4–6 区间。
+  玩法表 47 条，JEI 只展示 35 条（12 条“矿物粉尘→自身”是安全兜底，不作为配方展示）。
+  6 种锤都注册为 catalyst。
+- **钩子页**：104×26，树叶输入 + 箭头 + 最多 3 个追加掉落槽，每个 tooltip 写概率
+  （骨钩 ×1.5 只写在 tooltip 里）；木/骨钩作 catalyst。
+- 锤/钩的客户端表来自镜像后的 `assets/.../hammer`、`assets/.../crook`；服务端玩法表
+  不会被客户端 `/reload` 覆盖（`HammerRecipes.ruleFor` / `CrookDrops.dropsFor` 只读服务端表）。
+- 数据直接读 `SieveRegistry` / `BarrelRecipes` / `CompostRegistry` / `CrucibleRecipes` /
+  `CrucibleHeat`（不是 `RecipeManager`），所以客户端必须注册对应 reload listener
+  （`ClientEvents` 里）才能在连服务器时显示。
+- JEI 的表**优先服务端**（单人/局域网主机会包含数据包覆盖），服务端表为空时回退到
+  `assets/` 里的客户端镜像；专用服客户端读不到服务端数据包，只能显示内置版。
 - 加/改 `sieve/*.json`、`barrel/*.json` 后 `/reload` 或重启即可；`compost` 走
   `SimpleJsonResourceReloadListener`，同样不需要改 JEI 代码。
 
@@ -407,8 +425,9 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - `min` / `max`（可选，默认都是 1）是**包含端点**的掉落数量区间，均匀随机。
   上限 64；`min < 1` 或 `max < min` 的文件会警告并跳过。
 - **锤子只有左键（正常破坏）一条路径**，没有右键快捷方式（经典 Ex Nihilo 也没有）。
-- 当前 39 条：
+- 当前 47 条：
   - 圆石→砂砾、砂砾→沙子、沙子→`exnihilosatellitium:dust`（各 1 个）；
+  - 8 种砂岩（含红砂岩）→沙子 / 红沙（各 1 个）；
   - 12 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
   - 12 种材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
 - 未知/重复输入、非法数量区间打 `[hammer]` 警告并跳过。
@@ -435,7 +454,126 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 ### 尘土
 
-- 新方块 `exnihilosatellitium:dust`，灰混凝土粉末贴图（vanilla-sampled）；
+- 新方块 `exnihilosatellitium:dust`，自有 `block/dust.png` 贴图（Creatio 噪点 4 色量化）；
   沙子用锤子砸出，放进筛子就是 `sieve/dust.json` 的输入。
 - 尘土表 15 条：12 种 `<material>_powdered` + 红石 / 荧石粉 / 火药。
 - 尘土方块有独立 loot table、`mineable/shovel` 标签和创造标签条目。
+
+## 13. 坩埚表与配置（M4，2026-10-30）
+
+### 熔点表
+
+**路径**：`data/<namespace>/crucible_melt/*.json`，一个方块一条。
+
+```json
+{
+  "input": "minecraft:cobblestone",
+  "fluid": "minecraft:lava",
+  "amount": 250
+}
+```
+
+- `input` 方块 → `fluid` 流体，`amount` 是**一块方块产出多少 mB**，同时也是它的熔料体积
+  （当前全部 1:1）；`solid` 可选，默认等于 `amount`。坩埚熔料上限 **2000 mB**：
+  8 块圆石/石头/砂砾，或 2 块下界岩，或 4 块雪块。
+- 渲染时熔料体积 > 流体体积就显示熔料方块贴图，反之显示流体。
+- `amount` / `solid` 必须在 1..64000；未知方块/流体、重复输入会打 `[crucible]` 警告并跳过。
+- 当前 19 条：
+  - 圆石 / 石头 / 砂砾 / 花岗岩 / 闪长岩 / 安山岩（含磨制、深板岩、凝灰岩、方解石）
+    → 250 mB 熔岩；
+  - 下界岩 → 1000 mB 熔岩；
+  - 雪块 → 500 mB 水；冰 → 1000 mB 水；
+  - **沙子 / 红沙 / 尘土 → 100 mB 熔岩**。
+- 熔化速度由**下方热源**决定（见下）。
+
+### 热源表
+
+**路径**：`data/<namespace>/crucible_heat/*.json`，一个热源一条。
+
+```json
+{ "block": "minecraft:torch", "speed": 0.1 }
+```
+
+```json
+{
+  "block": "minecraft:furnace",
+  "properties": { "lit": "true" },
+  "speed": 0.15
+}
+```
+
+- `speed` 是 mB/tick（0 < speed ≤ 4）。
+- `properties` 可选；列出的每个状态属性都必须匹配（大小写不敏感），
+  所以 `lit=true` 可以区分点燃/熄灭的熔炉、篝火。
+- 当前 9 条：火把 0.1、熔岩 0.2、火 0.3、燃烧的熔炉/高炉/烟熏炉 0.15、
+  篝火 0.25、灵魂篝火 0.35、灵魂火 0.4。
+- 热源必须在坩埚**正下方**（`pos.below()`）。
+
+### 配置
+
+- `config/exnihilosatellitium-common.toml`：
+
+  | 键 | 默认 | 范围 | 作用 |
+  |---|---|---|---|
+  | `crucible.capacity` | 8000 | 1000–64000 | 流体容量 mB |
+  | `crucible.meltCapacity` | 2000 | 250–64000 | 熔料（固体）容量 mB |
+  | `crucible.heatSpeedMultiplier` | 1.0 | 0.1–10.0 | 全局缩放所有热源速度 |
+
+- 运行时读取；改配置后 BE 下一 tick 生效，不需要重启。
+- 客户端 JEI 读 `capacity` 画流体槽。
+
+### 方块与配方
+
+- `unfired_crucible`：7 个 `porcelain`（`x x` / `x x` / `xxx`）→ 烧制成 `crucible`。
+- `porcelain`：粘土球 + 骨粉（无序合成）——这是 M4 才补上的前置链。
+- 两个方块都进 `mineable/pickaxe`，掉落自身。
+
+## 14. 数据包魔改指南（筛子 / 锤子 / 钩子 / 桶 / 堆肥 / 坩埚）
+
+所有玩法表都是**数据包资源**，路径固定：
+
+| 表 | 路径 | 一条 JSON 表示 |
+|---|---|---|
+| 筛子 | `data/<namespace>/sieve/*.json` | 一个输入 + 掉落列表 |
+| 锤子 | `data/<namespace>/hammer/*.json` | 一个方块 + 产物 + 数量区间 |
+| 钩子 | `data/<namespace>/crook/*.json` | 一种树叶 + 追加掉落 |
+| 桶转化 | `data/<namespace>/barrel/*.json` | base + added → 方块 |
+| 堆肥 | `data/<namespace>/compost/*.json` | 物品/标签 → 分值 |
+| 坩埚熔点 | `data/<namespace>/crucible_melt/*.json` | 方块 → 流体 + 量 |
+| 坩埚热源 | `data/<namespace>/crucible_heat/*.json` | 方块（可带状态）→ 速度 |
+
+**两种用法**：
+
+1. **覆盖内置条目**：在数据包里用同一路径，例如
+   `data/exnihilosatellitium/sieve/sand.json` 会替换 jar 内的 `sand.json`
+   （数据包优先级更高，同名资源只保留高优先级那份）。
+2. **新增条目**：用自己的命名空间，例如
+   `data/mypack/sieve/soul_sand.json`；加载器会扫描所有命名空间下的 `sieve/`、
+   `hammer/`、`crook/`、`barrel/`、`compost/`、`crucible_melt/`、`crucible_heat/`。
+   同一输入重复时按加载顺序后者覆盖并打警告。
+
+示例（给沙子加 2% 钻石，覆盖内置 sand.json 时要把原有条目一起抄全）：
+
+```json
+{
+  "input": "minecraft:sand",
+  "outputs": [
+    { "item": "exnihilosatellitium:iron_crushed", "chance": 0.2 },
+    { "item": "minecraft:diamond", "chance": 0.02 }
+  ]
+}
+```
+
+热源可带状态属性：
+
+```json
+{
+  "block": "minecraft:furnace",
+  "properties": { "lit": "true" },
+  "speed": 0.15
+}
+```
+
+**生效方式**：服务端 `/reload` 或重启；单人世界 JEI 现在优先读服务端表，
+所以覆盖会同步到 JEI。**专用服客户端**读不到服务端数据包，JEI 仍显示 jar 内置版
+（`assets/exnihilosatellitium/` 镜像），这是客户端限制，可在整合包里给客户端也装同一数据包。

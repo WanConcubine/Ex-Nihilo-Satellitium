@@ -82,6 +82,18 @@ tasks.named('processResources', ProcessResources).configure {
     from('src/main/resources/data/exnihilosatellitium/compost') {
         into 'assets/exnihilosatellitium/compost'
     }
+    from('src/main/resources/data/exnihilosatellitium/crucible_melt') {
+        into 'assets/exnihilosatellitium/crucible_melt'
+    }
+    from('src/main/resources/data/exnihilosatellitium/crucible_heat') {
+        into 'assets/exnihilosatellitium/crucible_heat'
+    }
+    from('src/main/resources/data/exnihilosatellitium/hammer') {
+        into 'assets/exnihilosatellitium/hammer'
+    }
+    from('src/main/resources/data/exnihilosatellitium/crook') {
+        into 'assets/exnihilosatellitium/crook'
+    }
 }
 
 tasks.named('jar', Jar).configure {
