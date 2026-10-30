@@ -2,7 +2,9 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.block.BarrelBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.CrucibleBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.UnfiredCrucibleBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -50,6 +52,16 @@ public final class ModBlocks {
     /** Generic dust block: hammered from sand, then sifted for powdered resources. */
     public static final DeferredHolder<Block, Block> DUST =
             BLOCKS.register("dust", () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.SAND)));
+
+    /** M4: unfired porcelain crucible (smelted into the working crucible). */
+    public static final DeferredHolder<Block, Block> UNFIRED_CRUCIBLE =
+            BLOCKS.register("unfired_crucible", () -> new UnfiredCrucibleBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.CLAY).noOcclusion()));
+
+    /** M4: fired crucible with a fluid tank and a heat-driven melt queue. */
+    public static final DeferredHolder<Block, Block> CRUCIBLE =
+            BLOCKS.register("crucible", () -> new CrucibleBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.QUARTZ_BLOCK).noOcclusion()));
 
     /** Registration order doubles as creative-tab order. */
     public static final List<DeferredHolder<Block, Block>> BARRELS = List.of(

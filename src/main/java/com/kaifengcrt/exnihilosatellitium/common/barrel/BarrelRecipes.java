@@ -59,7 +59,7 @@ public final class BarrelRecipes {
     }
 
     public static List<Recipe> all() {
-        return clientRecipes.isEmpty() ? recipes : clientRecipes;
+        return recipes.isEmpty() ? clientRecipes : recipes;
     }
 
     /** The block produced by pouring {@code incoming} into a full barrel of {@code base}. */

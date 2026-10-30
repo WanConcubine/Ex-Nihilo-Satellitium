@@ -47,7 +47,7 @@ public final class CompostRegistry {
 
     /** Immutable snapshot for recipe browsers (JEI). */
     public static List<Entry> all() {
-        return clientEntries.isEmpty() ? entries : clientEntries;
+        return entries.isEmpty() ? clientEntries : entries;
     }
 
     public static void reload(final Map<ResourceLocation, JsonElement> jsons, final boolean clientView) {

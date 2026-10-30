@@ -1,0 +1,5 @@
+{
+  "input": "minecraft:netherrack",
+  "fluid": "minecraft:lava",
+  "amount": 1000
+}

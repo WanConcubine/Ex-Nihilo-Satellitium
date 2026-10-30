@@ -1,0 +1,5 @@
+{
+  "block": "minecraft:soul_campfire",
+  "properties": { "lit": "true" },
+  "speed": 0.35
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    "x x",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:porcelain"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:unfired_crucible",
+    "count": 1
+  }
+}

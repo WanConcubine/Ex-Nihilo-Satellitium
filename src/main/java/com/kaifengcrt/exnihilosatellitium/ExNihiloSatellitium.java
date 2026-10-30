@@ -1,5 +1,6 @@
 package com.kaifengcrt.exnihilosatellitium;
 
+import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
@@ -31,6 +32,8 @@ public final class ExNihiloSatellitium {
         ModOreBlocks.register(modBus);
         ModOreItems.register(modBus);
         ModCreativeTabs.register(modBus);
+
+        modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON, ModConfig.SPEC);
 
         LOGGER.info("Ex Nihilo: Satellitium initialised on NeoForge (clean-room build).");
     }

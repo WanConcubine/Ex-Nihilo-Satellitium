@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:unfired_crucible"
+  },
+  "result": {
+    "id": "exnihilosatellitium:crucible",
+    "count": 1
+  },
+  "experience": 0.3,
+  "cookingtime": 200
+}

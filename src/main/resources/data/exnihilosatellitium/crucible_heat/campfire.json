@@ -1,0 +1,5 @@
+{
+  "block": "minecraft:campfire",
+  "properties": { "lit": "true" },
+  "speed": 0.25
+}

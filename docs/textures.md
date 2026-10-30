@@ -1,6 +1,6 @@
 # 纹理规范
 
-> 状态：M1–M3（木桶 / 筛子 / 锤钩尘土）/ 最后更新：2026-10-30
+> 状态：M1–M4（木桶 / 筛子 / 锤钩尘土 / 坩埚）/ 最后更新：2026-10-31
 
 ## 两条路线
 
@@ -12,6 +12,11 @@
   - 内壁/桶底 = `stripped_<wood>_log`，保留竖向木纹、比外壁深一档；
   - 石桶 = `stone` + `smooth_stone` 顶沿 + `deepslate_tiles` 深色箍；
   - 木桶的两道箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
+- **坩埚（M4）：采用 Creatio 的模型/贴图并现代化**：几何来自
+  `art/blocks/crucible/creatio/block_crucible_big.json`，贴图来自
+  `blockcrucible.png` / `blockcrucibleunfired.png`。`art/blocks/crucible/restyle.py`
+  先做 0.8px 高斯模糊把 1.12 的高频噪点压成柔和块面，再量化到 5 色（烧制暖白瓷、
+  未烧制陶土色）；模型的 `cullface` 只保留在方块边界，避免地板/短腿被相邻方块剔除。
 - **物品与特殊表面（瓷土、堆肥面）：自有 16×16 手绘像素 / 脚本生成。**
   放在 `assets/exnihilosatellitium/textures/`，由脚本逐像素生成，可复现。
 - **M3 工具、蚕、尘土：采用 Ex Nihilo: Creatio 的 MIT 贴图，再按 1.21 风格微调**
@@ -184,6 +189,7 @@ Creatio 是 MIT 授权，允许复制与再分发；完整版权/许可见
 | `textures/item/netherite_hammer.png` | 由 `hammerdiamond.png` 换色（自有衍生） |
 | `textures/block/dust.png` | `blocks/blockdust.png` |
 | `textures/item/silkworm.png` | Creatio `items/silkworm.png` + **4 帧动画**（原图只读，帧由脚本位移生成） |
+| `textures/item/cooked_silkworm.png` | `items/silkwormcooked.png`（同款轮廓，改为褐色） |
 
 - **锤/钩剪影不变，只改颜色**：由 `art/items/tools/restyle.py` 从
   `art/items/tools/creatio/` 里的原始采用图生成。原始 PNG 只读，不手改；
@@ -198,13 +204,14 @@ Creatio 是 MIT 授权，允许复制与再分发；完整版权/许可见
   | 钻石锤 | Creatio 已是 1.21 钻石色板，保持原样 |
   | 下界合金锤 | 钻石锤的青色系映射到原版下界合金的暗紫灰（`#231012`…`#867b86`），木柄不变 |
   | 蚕 | **4 帧蠕动动画**：保留 Creatio 原图的轮廓/绿眼，只把头、中段、尾分别上下移动 1px（第 1 帧就是原图） |
+  | 熟蚕 | 与生蚕同轮廓，黑描边 → 暖深棕，体色改成 `#a8845f` / `#8d6a4a` 褐 |
   | 尘土方块 | 保留 Creatio 噪点，110 色 → 4 色量化（原版沙子只有 6 色） |
 - **动画格式**：`silkworm.png` 是 16×64（4 帧 × 16），旁边 `silkworm.png.mcmeta`
   写 `{"animation":{"frametime":6}}`；`check-textures.py` 会按“有 mcmeta 的贴图”
   允许 16×(16n)，其余仍必须是 16×16。
-- 预览：[m3-textures.png](images/m3-textures.png)（物品 8×、尘土方块等轴、蚕取第 1 帧；
+- 预览：[m3-textures.png](images/m3-textures.png)（10 个物品 8×、尘土方块等轴、蚕取第 1 帧；
   由脚本生成）；蚕的循环见 [silkworm-animation.gif](images/silkworm-animation.gif)。
-- 6 个锤/钩的物品模型是 `item/handheld`（手持角度同原版工具）；蚕仍是 `item/generated`。
+- 6 个锤/钩的物品模型是 `item/handheld`（手持角度同原版工具）；蚕/熟蚕是 `item/generated`。
 - 尘土方块模型从 `minecraft:block/gray_concrete_powder` 改为自有
   `exnihilosatellitium:block/dust`（不再依赖原版粉状方块当占位）。
 - 旧的 `art/items/tools/generate.py`（完全自绘）已删除；现在的 `restyle.py` 做颜色映射，

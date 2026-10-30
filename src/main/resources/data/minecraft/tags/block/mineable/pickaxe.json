@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "exnihilosatellitium:stone_barrel"
+    "exnihilosatellitium:crucible",
+    "exnihilosatellitium:stone_barrel",
+    "exnihilosatellitium:unfired_crucible"
   ]
 }

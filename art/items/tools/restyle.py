@@ -208,6 +208,15 @@ def build() -> dict[str, Image.Image]:
         },
     )
     silkworm = silkworm_strip()
+    cooked_silkworm = recolor(
+        Image.open(BASE / "silkwormcooked.png").convert("RGBA"),
+        {
+            (0x00, 0x00, 0x00): WORM_OUTLINE,
+            (0x91, 0x73, 0x67): (0xA8, 0x84, 0x5F),
+            (0x90, 0x6A, 0x4E): (0x8D, 0x6A, 0x4A),
+            (0x57, 0x70, 0x46): (0x7F, 0x9D, 0x5D),
+        },
+    )
     dust = quantise_dust(
         Image.open(BASE / "dust.png").convert("RGB"),
         palette=[
@@ -227,6 +236,7 @@ def build() -> dict[str, Image.Image]:
         "item/diamond_hammer.png": diamond_hammer,
         "item/netherite_hammer.png": netherite_hammer,
         "item/silkworm.png": silkworm,
+        "item/cooked_silkworm.png": cooked_silkworm,
         "block/dust.png": dust,
     }
 
@@ -276,8 +286,9 @@ def render_preview(textures: dict[str, Image.Image]) -> None:
         ("Wooden Crook", textures["item/wooden_crook.png"]),
         ("Bone Crook", textures["item/bone_crook.png"]),
         ("Silkworm (4 frames)", silkworm_first),
+        ("Cooked Silkworm", textures["item/cooked_silkworm.png"]),
     ]
-    scale, pad, label_h, cols = 8, 18, 22, 3
+    scale, pad, label_h, cols = 8, 18, 22, 4
     cell = scale * 16
     cube = iso_cube(textures["block/dust.png"], 96)
     width = pad + cols * (cell + pad)

@@ -1,0 +1,5 @@
+{
+  "block": "minecraft:furnace",
+  "properties": { "lit": "true" },
+  "speed": 0.15
+}

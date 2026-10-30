@@ -4,6 +4,7 @@ import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -43,6 +44,12 @@ public final class ModItems {
 
     public static final DeferredHolder<Item, Item> DUST =
             ITEMS.register("dust", () -> new BlockItem(ModBlocks.DUST.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, Item> UNFIRED_CRUCIBLE =
+            ITEMS.register("unfired_crucible", () -> new BlockItem(ModBlocks.UNFIRED_CRUCIBLE.get(),
+                    new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CRUCIBLE =
+            ITEMS.register("crucible", () -> new BlockItem(ModBlocks.CRUCIBLE.get(),
+                    new Item.Properties()));
 
     public static final DeferredHolder<Item, Item> WOOD_MESH =
             ITEMS.register("wood_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(10), 1));
@@ -72,6 +79,9 @@ public final class ModItems {
             ITEMS.register("netherite_hammer", () -> new HammerItem(
                     new Item.Properties().stacksTo(1).durability(2031), 6));
 
+    public static final List<DeferredHolder<Item, Item>> HAMMERS = List.of(
+            WOODEN_HAMMER, STONE_HAMMER, IRON_HAMMER, GOLDEN_HAMMER, DIAMOND_HAMMER, NETHERITE_HAMMER);
+
     public static final DeferredHolder<Item, Item> WOODEN_CROOK =
             ITEMS.register("wooden_crook", () -> new CrookItem(
                     new Item.Properties().stacksTo(1).durability(64), 1));
@@ -79,8 +89,13 @@ public final class ModItems {
             ITEMS.register("bone_crook", () -> new CrookItem(
                     new Item.Properties().stacksTo(1).durability(128), 2));
 
+    public static final List<DeferredHolder<Item, Item>> CROOKS = List.of(WOODEN_CROOK, BONE_CROOK);
+
     public static final DeferredHolder<Item, Item> SILKWORM =
             ITEMS.register("silkworm", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> COOKED_SILKWORM =
+            ITEMS.register("cooked_silkworm", () -> new Item(new Item.Properties()
+                    .food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.6F).build())));
 
     public static final List<DeferredHolder<Item, Item>> BARREL_ITEMS = List.of(
             BARREL,

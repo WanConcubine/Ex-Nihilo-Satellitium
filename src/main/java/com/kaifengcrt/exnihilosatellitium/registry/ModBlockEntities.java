@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.BarrelBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.blockentity.CrucibleBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.SieveBlockEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -31,6 +32,11 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SieveBlockEntity>> SIEVE =
             BLOCK_ENTITIES.register("sieve", () -> BlockEntityType.Builder
                     .of(SieveBlockEntity::new, ModBlocks.SIEVE.get())
+                    .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrucibleBlockEntity>> CRUCIBLE =
+            BLOCK_ENTITIES.register("crucible", () -> BlockEntityType.Builder
+                    .of(CrucibleBlockEntity::new, ModBlocks.CRUCIBLE.get())
                     .build(null));
 
     private ModBlockEntities() {

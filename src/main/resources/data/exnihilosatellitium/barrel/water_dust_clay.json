@@ -1,0 +1,5 @@
+{
+  "base": "minecraft:water",
+  "added": { "item": "exnihilosatellitium:dust" },
+  "result": "minecraft:clay"
+}
