@@ -297,7 +297,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   其余 9 种熔到自有锭。
 - 锭贴图由 `art/items/ingots/generate.py` 用同一套 5 阶色板生成，16×16、自有像素。
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
-- 粉碎/粉末两档目前只有「4 块合成」这一条通路；锤子降档在 M3。
+- 粉碎/粉末现在有两条通路：4 块合成 + M3 锤子降档（矿砾→粉碎、矿砂→粉末）。
 
 ## 9. 筛子 JSON（M2）
 
@@ -319,7 +319,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前只有 `gravel.json` / `sand.json`（2 输入、29 掉落）；`dust` 输入要等通用尘土方块。
+- 当前有 `gravel.json` / `sand.json` / `dust.json`（3 输入、44 掉落）；`dust` 输入是 M3 的通用尘土方块。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。
 
 ## 10. 桶转化 JSON（2026-10-30）
@@ -361,7 +361,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   - `exnihilosatellitium:barrel`，标题键 `jei.exnihilosatellitium.barrel`；
   - `exnihilosatellitium:barrel_compost`，标题键 `jei.exnihilosatellitium.barrel_compost`。
 - **筛子页**：左上材料、左下筛网、右边 7 列 × 3 行掉落槽；槽位整体居中（输入/筛网 x=6，
-  输出 x=34..160），用 JEI 标准槽位背景；砂砾/沙子两条叠成一页（1/1）。
+  输出 x=34..160），用 JEI 标准槽位背景；砂砾/沙子/尘土三条由 JEI 自动分页。
   三档筛网放进同一个输入槽轮换显示（筛网不影响掉落）。
 - **桶内转化页**：116×26，三个标准槽——满桶流体（x=4）、加入的流体或物品（x=42）、
   产物（x=90）；中间画 JEI 原生的加号和箭头。流体槽用
@@ -380,3 +380,62 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   `CompostReloadListener`（`ClientEvents` 里）才能在连服务器时显示。
 - 加/改 `sieve/*.json`、`barrel/*.json` 后 `/reload` 或重启即可；`compost` 走
   `SimpleJsonResourceReloadListener`，同样不需要改 JEI 代码。
+
+## 12. M3：锤子 / 钩子 / 尘土（2026-10-30）
+
+### 锤子表
+
+**路径**：`data/<namespace>/hammer/*.json`，一个方块一条。
+
+```json
+{
+  "input": "minecraft:cobblestone",
+  "result": "minecraft:gravel"
+}
+```
+
+```json
+{
+  "input": "exnihilosatellitium:iron_ore_gravel",
+  "result": "exnihilosatellitium:iron_crushed",
+  "min": 4,
+  "max": 6
+}
+```
+
+- `input` 是方块 id；`result` 是物品 id；原方块不保留。
+- `min` / `max`（可选，默认都是 1）是**包含端点**的掉落数量区间，均匀随机。
+  上限 64；`min < 1` 或 `max < min` 的文件会警告并跳过。
+- **锤子只有左键（正常破坏）一条路径**，没有右键快捷方式（经典 Ex Nihilo 也没有）。
+- 当前 39 条：
+  - 圆石→砂砾、砂砾→沙子、沙子→`exnihilosatellitium:dust`（各 1 个）；
+  - 12 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
+  - 12 种材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
+- 未知/重复输入、非法数量区间打 `[hammer]` 警告并跳过。
+
+### 钩子表
+
+**路径**：`data/<namespace>/crook/*.json`，一个树叶方块一条。
+
+```json
+{
+  "input": "minecraft:oak_leaves",
+  "drops": [
+    { "item": "minecraft:oak_sapling", "chance": 0.25 },
+    { "item": "minecraft:apple", "chance": 0.05 },
+    { "item": "exnihilosatellitium:silkworm", "chance": 0.02 }
+  ]
+}
+```
+
+- 原版树叶掉落保留；钩子只**追加**表里的条目。
+- `chance` 是 0..1；骨钩把概率 ×1.5（封顶 1.0）。
+- 服务端专用；当前 10 张表（橡木/深色橡木/云杉/白桦/丛林/金合欢/红树/樱花/杜鹃/盛开的杜鹃）。
+- 蚕（`silkworm`）是 M6 丝线链的占位，暂时没有用途。
+
+### 尘土
+
+- 新方块 `exnihilosatellitium:dust`，灰混凝土粉末贴图（vanilla-sampled）；
+  沙子用锤子砸出，放进筛子就是 `sieve/dust.json` 的输入。
+- 尘土表 15 条：12 种 `<material>_powdered` + 红石 / 荧石粉 / 火药。
+- 尘土方块有独立 loot table、`mineable/shovel` 标签和创造标签条目。

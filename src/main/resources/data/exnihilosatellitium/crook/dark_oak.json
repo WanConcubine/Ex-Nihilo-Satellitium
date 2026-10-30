@@ -1,0 +1,17 @@
+{
+  "input": "minecraft:dark_oak_leaves",
+  "drops": [
+    {
+      "item": "minecraft:dark_oak_sapling",
+      "chance": 0.25
+    },
+    {
+      "item": "minecraft:apple",
+      "chance": 0.05
+    },
+    {
+      "item": "exnihilosatellitium:silkworm",
+      "chance": 0.02
+    }
+  ]
+}

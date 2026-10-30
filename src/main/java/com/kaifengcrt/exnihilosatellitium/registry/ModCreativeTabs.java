@@ -27,7 +27,17 @@ public final class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModItems.BARREL.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.SIEVE.get());
+                        output.accept(ModItems.DUST.get());
                         ModItems.MESHES.forEach(mesh -> output.accept(mesh.get()));
+                        output.accept(ModItems.WOODEN_HAMMER.get());
+                        output.accept(ModItems.STONE_HAMMER.get());
+                        output.accept(ModItems.IRON_HAMMER.get());
+                        output.accept(ModItems.GOLDEN_HAMMER.get());
+                        output.accept(ModItems.DIAMOND_HAMMER.get());
+                        output.accept(ModItems.NETHERITE_HAMMER.get());
+                        output.accept(ModItems.WOODEN_CROOK.get());
+                        output.accept(ModItems.BONE_CROOK.get());
+                        output.accept(ModItems.SILKWORM.get());
                         output.accept(ModItems.PORCELAIN.get());
                         ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
                         for (final OreMaterial material : OreMaterials.all()) {

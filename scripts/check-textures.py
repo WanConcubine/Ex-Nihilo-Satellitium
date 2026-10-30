@@ -6,6 +6,8 @@ Checks:
   - no model texture reference points at minecraft:item/* (vanilla block
     textures are allowed for the vanilla-sampled style)
   - every block/item texture is 16x16 (PNG header only, no Pillow needed)
+  - animated textures (a sibling .mcmeta with an "animation" block) are
+    16x(16*n) vertical sprite sheets
   - GUI textures under textures/gui/ are exempt (JEI backgrounds etc.)
 
 Usage:
@@ -89,7 +91,19 @@ def main() -> int:
             continue
         if png.parent.name == "gui":
             continue
-        if (width, height) != (16, 16):
+        meta = png.with_name(png.name + ".mcmeta")
+        if meta.exists():
+            # Animated sprite sheet: 16 wide, a vertical strip of 16 px frames.
+            if width != 16 or height % 16 != 0 or height == 0:
+                errors.append(f"{png}: animated texture must be 16x(16*n), got {width}x{height}")
+            try:
+                data = json.loads(meta.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exception:
+                errors.append(f"{meta}: invalid JSON ({exception})")
+                continue
+            if "animation" not in data:
+                errors.append(f"{meta}: missing \"animation\" block")
+        elif (width, height) != (16, 16):
             errors.append(f"{png}: expected 16x16, got {width}x{height}")
 
     if errors:

@@ -140,7 +140,7 @@ def main():
     for kind in KINDS:
         write_json(ASSETS / f"models/block/ore_{kind}_block.json", block_model(kind))
 
-    shovel = []
+    shovel = ["exnihilosatellitium:dust"]
     lang_en = json.load(open(ASSETS / "lang/en_us.json", encoding="utf-8"))
     lang_zh = json.load(open(ASSETS / "lang/zh_cn.json", encoding="utf-8"))
 
@@ -192,6 +192,22 @@ def main():
                        loot_table(mid, kind))
             write_json(RES / f"data/exnihilosatellitium/recipe/{bid}_smelting.json",
                        smelting_block_to_ingot(mid, kind, ingot_id))
+            if kind == "gravel":
+                write_json(RES / f"data/exnihilosatellitium/hammer/{mid}_ore_gravel.json",
+                           {"input": f"exnihilosatellitium:{mid}_ore_gravel",
+                            "result": f"exnihilosatellitium:{mid}_crushed",
+                            "min": 4, "max": 6})
+            elif kind == "sand":
+                write_json(RES / f"data/exnihilosatellitium/hammer/{mid}_ore_sand.json",
+                           {"input": f"exnihilosatellitium:{mid}_ore_sand",
+                            "result": f"exnihilosatellitium:{mid}_powdered",
+                            "min": 4, "max": 6})
+            elif kind == "dust":
+                # Hammering ore dust does not refine it further: the block
+                # simply drops itself instead of being lost to a wrong tool.
+                write_json(RES / f"data/exnihilosatellitium/hammer/{mid}_ore_dust.json",
+                           {"input": f"exnihilosatellitium:{mid}_ore_dust",
+                            "result": f"exnihilosatellitium:{mid}_ore_dust"})
             lang_en[f"block.exnihilosatellitium.{bid}"] = f"{en} Ore {kind.capitalize()}"
             lang_zh[f"block.exnihilosatellitium.{bid}"] = f"{zh}矿{KIND_ZH[kind]}"
 

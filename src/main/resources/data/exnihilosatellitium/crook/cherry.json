@@ -1,0 +1,13 @@
+{
+  "input": "minecraft:cherry_leaves",
+  "drops": [
+    {
+      "item": "minecraft:cherry_sapling",
+      "chance": 0.25
+    },
+    {
+      "item": "exnihilosatellitium:silkworm",
+      "chance": 0.02
+    }
+  ]
+}

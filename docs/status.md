@@ -8,10 +8,27 @@
 **主线是 Minecraft 1.21.1 / NeoForge 21.1.x**（1.20.1/Forge 版归档在 tag `legacy/1.20.1-forge`）。
 桶（七材质）、筛子、矿物六态（12 材料 × 3 方块 + 3 物品 + 9 锭）已迁移并编译通过；
 **M1.5 桶内转化已数据驱动并接入 JEI**，**M2 的筛子 + JEI + 矿物链前段已接上**；
-**M3 锤子/钩子、巫水、尘土筛料还没开始**。
+**M3（6 档锤/钩子/尘土/蚕动画）已实现，待进游戏验收**；巫水/蚕丝仍是后续。
 
 ## 现在停在哪（2026-10-30）
 
+- **2026-10-30 M3 首批**：2 档钩（木/骨）、`dust` 方块、
+  `silkworm`（M6 占位）；10 张 crook 叶表、3 输入 / 44 掉落筛表。
+- **2026-10-30 M3 第二批（数据已验证，玩法未验）**：锤子扩到 6 档（木/石/铁/金/钻石/下界合金，
+  耐久 64/128/256/32/1561/2031）；**删掉锤子右键**，只保留左键破坏路径；
+  锤表扩到 **39 条**：矿砾→粉碎、矿砂→粉末各掉 **4–6 个**，矿物粉尘→方块自身；
+  蚕改成 **4 帧蠕动动画**（`silkworm.png` 16×64 + `.mcmeta`，frametime 6；保留 Creatio 原图轮廓，只移动头/中/尾 1px）；
+  新增金/钻石/下界合金锤贴图（金/钻石采用 Creatio，下界合金由钻石锤换色）。
+  `art/items/tools/restyle.py` 生成全部贴图与预览。
+  客户端启动日志已确认 `[hammer] loaded 39 recipes`、`[crook] loaded 10 leaves tables`，
+  无 missing model/texture（2026-10-30 23:11）。
+- **2026-10-30 M3 贴图返工**：首版自绘验收不通过 → 改用 **Ex Nihilo: Creatio
+  1.12.2（MIT）** 的 16×16 PNG（木/石/铁/金/钻石锤、木/骨钩、尘土），
+  再按 1.21 风格微调：钩子加 1px 方向光、石/铁锤描边收成
+  `#181818`、金锤改暖金、蚕基于原图做 4 帧位移动画、尘土 110 色 → 4 色。原始采用图只读在
+  `art/items/tools/creatio/`。尘土方块模型不再引用 `minecraft:block/gray_concrete_powder`；
+  6 个工具模型改 `item/handheld`。许可证/来源登记在 [THIRD-PARTY.md](../THIRD-PARTY.md)。
+  Sequentia（传承）1.21 是 CC BY-NC-SA 4.0，**不能**采用，只作风格对照。
 - **2026-10-30 配方/命名修正**：筛子配方改为任意木板/木台阶/木棍（`#minecraft:planks` + `#minecraft:wooden_slabs` + `#c:rods/wooden`），不再用木网；
   橡木桶显示名改为「橡木木桶」/「Oak Barrel」，避免和原版「木桶 / Barrel」撞名。
 - 桶的“能产什么”不再硬编码：`data/exnihilosatellitium/barrel/*.json` 4 条，
@@ -27,8 +44,8 @@
 - 未验证：满熔岩桶右键红石/荧石（需要真实玩家）、两个分类的 tooltip 逐条、
   七种桶各自作为 catalyst 逐个点开、木桶拒热手感；玩家破坏返还、管道灌桶、F3+T 分离
   只有代码路径，未玩家实测。
-- 本批（自 10-29 起的 JEI / 桶内转化 / 桶 JEI / 技术债修复 + 配方/命名修正）已于
-  2026-10-30 提交，工作树干净；提交说明见 `git log`。
+- 上一批 `b952550`（JEI / 桶内转化 / 技术债修复 + 配方/命名）已提交并推送；
+  **M3 首批改动尚未提交**，见 `git status`。
 - 开发服 `run/server.properties` 的 `online-mode` / `enforce-secure-profile` 为 `true`；
   spawn 仍是 `0, 72, 0`；测试用的临时方块、force-load 已清掉，开发服/客户端已停。
 - **2026-10-30 技术债 P0/P1 修复**（本轮）：
@@ -46,13 +63,25 @@
 
 ## 交接清单（下次会话先做）
 
-- 本批已提交（见 `git log`），工作树干净；后续改动仍按“下一步 0”先验收，再提交，
+- 上一批 `b952550` 已提交并推送；**M3 两批都未提交**，先按“下一步 0”验收，再提交，
   不要提交 `build/`、`run/`。
 - 开发服/客户端已停，临时方块/force-load 已清；下一次先跑
   `./gradlew build` + `python3 scripts/check-textures.py`。
 - 设计/数据细节看 [DESIGN.md](DESIGN.md)、[data-format.md](data-format.md)；
   未修项和优先级看 [tech-debt.md](tech-debt.md)。
-- 当前“改完但没实测”的路径：破坏返还、管道灌桶、F3+T 分离、红石/荧石掺料。
+- 当前“改完但没实测”的路径：M3 六档锤/钩/尘土、蚕动画、破坏返还、管道灌桶、
+  F3+T 分离、红石/荧石掺料。
+- M3 未提交文件：`common/hammer/`、`common/crook/`、`HammerItem`、`CrookItem`、
+  `ToolEvents`、`dust` 方块/物品/语言/掉落、`hammer/*.json`（39 条）、`crook/*.json`、
+  `sieve/dust.json`、6 种锤 + 2 种钩的合成（金/钻石是工作台，下界合金是锻造台）、
+  9 张 Creatio 采用贴图 + 1 张换色下界合金锤 + 蚕动画 + mcmeta、
+  `art/items/tools/creatio/` 与 `art/items/tools/restyle.py`、`docs/images/m3-textures.png`。
+  改贴图风格请改 `restyle.py` 后重跑，不要直接手改 assets 里的 PNG。
+- 已知限制：**右键不再有任何锤击行为**；锤表内方块通过 `HarvestCheck`/`BreakSpeed`
+  标记为可收获并给 6.0 速度（不再是镐但也不慢），锤表外方块仍是徒手速度；
+  **创造模式破坏也会掉锤表结果**（`BlockEvent.BreakEvent`，方便测试，和经典行为一致）；
+  蚕是 M6 占位；锤/钩暂时没有独立 JEI 分类，但它们的合成配方会出现在原版
+  crafting / smithing 分类。
 
 ## 已完成的里程碑
 
@@ -62,13 +91,14 @@
 | M1.5 | 水/熔岩凝固、木桶限温 433 K、接雨水、熔岩掺红石/荧石；转化表已 JSON 化 | [DESIGN §13/§14](DESIGN.md) |
 | M2 | 筛子 + 三档筛网 + 数据驱动掉落 + JEI；4 碎块 → 矿方块 → 熔炼成锭 | [DESIGN §12](DESIGN.md) |
 | 桶 JEI | `barrel` / `barrel_compost` 两个分类，读同一张 `BarrelRecipes` / `CompostRegistry` | [DESIGN §14](DESIGN.md) |
+| M3 | 6 锤 / 2 钩 / `dust` / 蚕动画 / 10 张叶表 / 39 条锤表 / 尘土筛料 | 🚧 待验收（[DESIGN §15](DESIGN.md)） |
 
 ## 验证状态
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
 | `./gradlew build` | ✅ | 2026-10-30：`BUILD SUCCESSFUL`；JEI 依赖走 `maven.blamejared.com` |
-| `python3 scripts/check-textures.py` | ✅ | 七种子模型只引用 vanilla **block** 贴图；9 张自有锭贴图均为 16×16 |
+| `python3 scripts/check-textures.py` | ✅ | 七种子模型只引用 vanilla **block** 贴图；9 张自有锭贴图均为 16×16；蚕动画按 16×128 + mcmeta 放行 |
 | 服务端启动 / `/reload` | ✅ | `[barrel] loaded 4 transforms (2 fluid, 2 item)`、`[compost] loaded 65 entries`；`/reload` 后一致 |
 | 七种桶 BE | ✅ | RCON：桶堆肥→DIRT、`DirtReady=1b`；七种材质共享同一 BE 注册表 |
 | 堆肥容量/刻度 | ✅ | `data get` 读回 `Compost=1000`、`CompostScale=1000`；满后 1000 tick → DIRT |
@@ -106,32 +136,39 @@
 | 自有锭（9 种） | ⚠️ | `tin_ingot` 等已注册、可熔炼、创意标签可查；未目视贴图/未玩家实测 |
 | 矿物六态注册 | ✅ | 客户端 `/give` 与创意标签可见 72 条；`[materials] loaded 12 entries` |
 | 矿物六态纹理 | ✅ | 作者目视通过：原版底 + 遮罩 + 罩色，物品栏为 3D 方块 |
-| 矿物链配方 | 🚧 | 4 块 → 矿方块 → 熔炼成锭已通；锤子降档（矿砾→粉碎、矿砂→粉末）等 M3 |
+| 矿物链配方 | 🚧 | 4 块 → 矿方块 → 熔炼成锭已通；M3 锤表已接入矿砾→粉碎（4–6）、矿砂→粉末（4–6）、粉尘→自身，待玩家实测 |
+| M3 数据表 | ✅ | 39 条 hammer JSON（3 基础 + 24 条 4–6 + 12 条粉尘自身）、10 张 crook、3 输入 / 44 掉落筛表；客户端启动日志 `[hammer] loaded 39 recipes`、`[crook] loaded 10 leaves tables`（2026-10-30 23:11），JSON/ID 也已脚本校验 |
+| 锤子（6 档） | ⚠️ | 木/石/铁/金/钻石/下界合金 + 39 条 crush 表；**无右键**；耐久 64/128/256/32/1561/2031；未玩家实测 |
+| 锤子左键路径 | ⚠️ | `HarvestCheck` 标记可收获 + `BreakSpeed` 6.0；生存走 `BlockDropsEvent` 并扣 1 耐久，创造走 `BlockEvent.BreakEvent` 补掉落；**未实测** |
+| 金/钻石锤配方 | ⚠️ | 3 金锭 / 3 钻石 + 2 木棍；JSON 已写，未玩家实测合成格 |
+| 下界合金锤 | ⚠️ | 锻造台：模板 + 钻石锤 + 下界合金锭；JSON 已写，未玩家实测 |
+| 钩子（2 档） | ⚠️ | 木/骨钩 + 10 张叶表；骨钩概率 ×1.5；贴图已换 Creatio，未玩家实测 |
+| 尘土筛料 | ⚠️ | `sieve/dust.json` 15 条（12 粉末 + 红石/荧石/火药）；JEI `3 sieve recipes`，未玩家筛过 |
+| 尘土方块 | ⚠️ | `dust` 方块/物品/掉落/铲标签已注册；贴图改用 `block/dust.png`（Creatio），未进游戏目视 |
+| 蚕 | ⚠️ | `silkworm` 物品/掉落已注册；贴图是 4 帧蠕动动画（16×64 + mcmeta，原图 + 3 个位移帧）；**M6 才接丝线链** |
+| M3 贴图来源 | ✅ | 9 张 Creatio（MIT）采用图 + 1 张换色下界合金锤 + 蚕原图的 4 帧位移动画；`check-textures.py` 通过（含动画尺寸检查）；[预览](images/m3-textures.png)；尚待进游戏 4× 目视 |
 | 铁筛网配方 | ⚠️ | 3×3 铁栏杆；JSON 已加载，未玩家实测合成格 |
 | 矿物标签 | ⚠️ | 12 材料 × `c:ores` block/item + `c:raw_materials`；未用其它模组机器实测 |
 | 改名完整性 | ✅ | `git grep` 无旧 id/旧类名；jar 内 `mods.toml` 为 `exnihilosatellitium` / `Ex Nihilo: Satellitium` |
 
 ## 下一步（按价值排序）
 
-0. **补 P0/P1 修复的实测**：玩家破坏筛/桶的返还、管道灌桶状态互斥、F3+T 后 JEI/服务端表
-   分离、右键红石/荧石；剩余 P1（同步频率、`Fluid` 精确匹配、生成器旧文件清理）见
-   [tech-debt.md](tech-debt.md)。
-1. **进游戏补 5 分钟验收**（最便宜）：
-   - 放七种桶，看颜色/箍/内壁是否可区分，比例是否一致；物品栏图标是否是空心 3D 桶；
-   - 塞树苗看堆肥 box、粒子、50 秒颜色过渡；DIRT 后右键取泥土；
-   - 看木桶/筛子的 Jade tooltip；
-   - 用 4 个破碎矿合成一次矿砾方块，确认合成格与 JEI 显示；
-   - 用任意木板 + 任意木台阶 + 任意木棍合成筛子，确认 JEI 里筛子配方没有筛网；
-   - 看橡木桶物品名是否为「橡木木桶」，不是原版「木桶」；
-   - JEI 搜「桶」：确认「桶内转化」的 tooltip / 红石掺料提示 / 「桶：堆肥」分值；
-     再让玩家右键满熔岩桶放红石、荧石，确认地狱岩/末地石。
-2. **P1 硬化（半天）**：`Fluid` 匹配（still/flowing）、`ingot` 存在性校验、生成器旧文件清理、
+0. **M3 验收（当前优先级）**：
+   - 6 档锤合成 + 耐久（金锤 32 应最快坏；下界合金锻造台配方）；
+   - **左键**锤圆石→砂砾→沙子→尘土；确认**右键已无反应**；
+   - 锤矿砾→粉碎、矿砂→粉末（各掉 4–6 个）；锤矿物粉尘→掉方块自身；
+   - 把尘土放进筛子，确认 `dust` 输入和 15 条掉落；
+   - 木/骨钩合成；钩树叶看树苗/苹果/蚕追加掉落；
+   - 看尘土方块纹理/掉落、蚕物品是否可拾取、**蚕动画是否在物品栏里动**；
+   - **新贴图目视**：进游戏 4× 看 6 种锤/2 种钩手持角度、尘土方块接缝。
+1. **补上一批 P0/P1 修复的实测**：玩家破坏筛/桶返还、管道灌桶状态互斥、F3+T 后
+   JEI/服务端表分离、右键红石/荧石；剩余 P1 见 [tech-debt.md](tech-debt.md)。
+2. **进游戏补 5 分钟旧内容验收**：七种桶外观/堆肥/Jade、矿砾 4 块合成、筛子配方与木桶命名。
+3. **P1 硬化（半天）**：`Fluid` 匹配（still/flowing）、`ingot` 存在性校验、生成器旧文件清理、
    CI 客户端 smoke；对应 [tech-debt.md](tech-debt.md) #17/#21/#24/#25。
-3. **M3 锤子 + 钩子**：锤碎圆石→砂砾→沙子→尘土，锤矿砾→粉碎、矿砂→粉末，
-   接上尘土筛料；钩树叶出树苗/蚕。
 4. **M1.5 补完**：巫水（水 + 下方菌丝）→ 灵魂沙/末影人；生物人偶；粘土（等 M3 尘土）；
    以及玩家实测木桶拒热、红石/荧石掺料。
-5. **M2 余项**：给 `dust` 一个通用尘土方块，补沙子的宝石/杂物掉落。
+5. **M2 余项**：补沙子的宝石/杂物掉落；`dust` 通用方块已由 M3 接上。
 
 ## 已拍板的决策
 

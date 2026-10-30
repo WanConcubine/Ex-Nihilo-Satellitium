@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    " y ",
+    " y "
+  ],
+  "key": {
+    "x": {
+      "tag": "minecraft:planks"
+    },
+    "y": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:wooden_hammer"
+  }
+}

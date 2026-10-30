@@ -1,0 +1,13 @@
+{
+  "input": "minecraft:acacia_leaves",
+  "drops": [
+    {
+      "item": "minecraft:acacia_sapling",
+      "chance": 0.25
+    },
+    {
+      "item": "exnihilosatellitium:silkworm",
+      "chance": 0.02
+    }
+  ]
+}

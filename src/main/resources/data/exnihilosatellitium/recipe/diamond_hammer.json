@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    " y ",
+    " y "
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:diamond"
+    },
+    "y": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:diamond_hammer"
+  }
+}
