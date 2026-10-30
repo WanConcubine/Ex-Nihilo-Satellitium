@@ -86,6 +86,15 @@ public class SieveBlock extends BaseEntityBlock {
     }
 
     @Override
+    public BlockState playerWillDestroy(final Level level, final BlockPos pos, final BlockState state,
+                                        final Player player) {
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof SieveBlockEntity sieve) {
+            sieve.dropContentsOnBreak(level, pos);
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
     protected ItemInteractionResult useItemOn(final ItemStack stack, final BlockState state, final Level level,
                                               final BlockPos pos, final Player player,
                                               final InteractionHand hand, final BlockHitResult hit) {
@@ -100,7 +109,7 @@ public class SieveBlock extends BaseEntityBlock {
 
         // Install a mesh.
         if (stack.getItem() instanceof MeshItem && !sieve.hasMesh()) {
-            sieve.setMesh(new ItemStack(stack.getItem()));
+            sieve.setMesh(stack);
             if (!player.isCreative()) {
                 stack.shrink(1);
             }
@@ -112,12 +121,12 @@ public class SieveBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
 
-        // Sneak + empty hand: take the mesh back, or empty the contents.
+        // Sneak + empty hand: empty the contents first, otherwise take the mesh back.
         if (stack.isEmpty() && player.isShiftKeyDown()) {
-            if (sieve.hasMesh()) {
-                sieve.dropMesh(player);
-            } else {
+            if (!sieve.getContents().isEmpty()) {
                 sieve.ejectContents(player);
+            } else {
+                sieve.dropMesh(player);
             }
             return ItemInteractionResult.SUCCESS;
         }

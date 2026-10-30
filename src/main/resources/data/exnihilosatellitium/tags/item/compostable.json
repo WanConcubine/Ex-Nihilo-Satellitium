@@ -12,7 +12,7 @@
     "#c:crops/potato",
     "#c:crops/nether_wart",
     "#c:eggs",
-    "minecraft:string",
+    "#c:strings",
     "minecraft:ghast_tear",
     "minecraft:rotten_flesh",
     "minecraft:spider_eye",

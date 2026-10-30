@@ -39,6 +39,12 @@ public enum BarrelComponentProvider implements IBlockComponentProvider {
             return;
         }
 
+        if (barrel.hasSolid()) {
+            tooltip.add(Component.translatable("jade.exnihilosatellitium.barrel.solid",
+                    barrel.getSolid().getHoverName()));
+            return;
+        }
+
         final int progress = barrel.getCompostProgress();
         if (progress > 0) {
             final int percent = Math.min(100, progress * 100 / BarrelBlockEntity.COMPOST_MAX);

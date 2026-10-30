@@ -23,3 +23,18 @@ type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
+
+# Optional, client-side only: neither jar is bundled.
+[[dependencies.${mod_id}]]
+modId="jei"
+type="optional"
+versionRange="[19.27.0.340,)"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.${mod_id}]]
+modId="jade"
+type="optional"
+versionRange="[15,)"
+ordering="AFTER"
+side="CLIENT"

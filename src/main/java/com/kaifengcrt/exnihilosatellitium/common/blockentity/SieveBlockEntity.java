@@ -52,7 +52,7 @@ public class SieveBlockEntity extends BlockEntity {
     }
 
     public void setMesh(final ItemStack stack) {
-        this.mesh = stack;
+        this.mesh = stack.copyWithCount(1);
         this.setChanged();
         this.sync();
         this.updateBlockMeshState();
@@ -128,6 +128,19 @@ public class SieveBlockEntity extends BlockEntity {
         }
     }
 
+    /** Returns the mesh (with its damage) and the single input to the ground on break. */
+    public void dropContentsOnBreak(final Level level, final BlockPos pos) {
+        if (this.hasMesh()) {
+            Block.popResource(level, pos, this.mesh.copy());
+            this.mesh = ItemStack.EMPTY;
+        }
+        if (!this.contents.isEmpty()) {
+            Block.popResource(level, pos, this.contents.copy());
+            this.contents = ItemStack.EMPTY;
+        }
+        this.work = 0;
+    }
+
     public void dropMesh(final Player player) {
         if (this.hasMesh()) {
             player.getInventory().placeItemBackInInventory(this.mesh.copy());
@@ -146,6 +159,15 @@ public class SieveBlockEntity extends BlockEntity {
         final BlockPos pos = this.worldPosition;
         final List<SieveDrop> drops = SieveRegistry.dropsFor(this.contents);
         this.work = 0;
+        if (drops.isEmpty()) {
+            // A reload removed this input: hand it back instead of consuming it
+            // and damaging the mesh for an empty roll.
+            Block.popResource(level, pos, this.contents.copy());
+            this.contents = ItemStack.EMPTY;
+            this.setChanged();
+            this.sync();
+            return;
+        }
 
         for (final SieveDrop drop : drops) {
             if (level.random.nextFloat() < drop.chance()) {

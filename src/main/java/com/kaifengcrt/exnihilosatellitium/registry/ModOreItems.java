@@ -17,7 +17,9 @@ import java.util.Map;
 
 /**
  * Block items for the three ore-block states plus the three item stages
- * (broken / crushed / powdered) of every material.
+ * (broken / crushed / powdered) of every material. Materials without an
+ * {@code ingot} entry in {@code materials.json} also get their own ingot item,
+ * so the chain ends somewhere even when no other mod supplies that metal.
  */
 public final class ModOreItems {
 
@@ -38,6 +40,10 @@ public final class ModOreItems {
             }
             for (final String stage : STAGES) {
                 entries.put(stage, ITEMS.register(material.id() + "_" + stage,
+                        () -> new Item(new Item.Properties())));
+            }
+            if (material.hasOwnIngot()) {
+                entries.put("ingot", ITEMS.register(material.id() + "_ingot",
                         () -> new Item(new Item.Properties())));
             }
             BY_MATERIAL.put(material.id(), entries);

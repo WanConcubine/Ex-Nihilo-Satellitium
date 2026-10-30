@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:lead_ore_sand"
+  },
+  "result": {
+    "id": "exnihilosatellitium:lead_ingot"
+  },
+  "experience": 0.1,
+  "cookingtime": 200
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:lead_powdered"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:lead_ore_dust"
+  }
+}

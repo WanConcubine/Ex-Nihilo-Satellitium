@@ -1,7 +1,7 @@
-# 数据格式：堆肥、NBT、命令
+# 数据格式：堆肥、筛子、NBT、命令
 
-> 适用：M1 木桶 + 七种材质变体（NeoForge 1.21.1）。代码位置：
-> `common/compost/`、`common/blockentity/BarrelBlockEntity.java`。
+> 适用：M1 木桶 + M2 筛子（NeoForge 1.21.1）。代码位置：
+> `common/compost/`、`common/sieve/`、`common/blockentity/`、`compat/jei/`。
 >
 > 七种桶（`barrel` = 橡木、`spruce_barrel`、`birch_barrel`、`jungle_barrel`、
 > `acacia_barrel`、`dark_oak_barrel`、`stone_barrel`）共用同一个 BE 类型和同一套
@@ -79,25 +79,41 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
   - JSON 有、标签没有 → **不能堆肥**（服务端也会拒绝）。
 - 所以新增堆肥物品时，**两处都要加**。
 - 默认 JSON 有 **65 条**（12 个标签 + 53 个具体物品）；`#minecraft:crops` / `#minecraft:seeds`
-  不是 1.20.1 物品标签，别用；用 `#forge:crops/*` / `#forge:seeds`。
+  不是 1.21.1 物品标签，别用；NeoForge 1.21.1 用 `#c:crops/*` / `#c:seeds` / `#c:eggs` /
+  `#c:strings`。`#forge:*` 是旧命名空间，本环境里写了也不匹配。
 
 ## 2. 方块实体 NBT
 
-木桶 BE 的 NBT 是**顶层键**（不是 `{Fluid:{...}}`）：
+木桶 BE 的 NBT（**NeoForge 21.1 的 `FluidTank` 是嵌套 `Fluid`**，不是旧版的顶层
+`FluidName` / `Amount`）：
 
 | 键 | 类型 | 含义 |
 |---|---|---|
-| `FluidName` | string | 流体 id，空桶是 `minecraft:empty` |
-| `Amount` | int | 流体量，0–1000 mB |
+| `Fluid` | compound | `{id:"minecraft:water", amount:1000}`；空桶没有这个键 |
 | `Compost` | int | 堆肥进度，0–1000 |
 | `CompostTicks` | int | 剩余计时 tick；>0 表示正在腐熟 |
 | `DirtReady` | boolean | `1b` 表示泥土已就绪，右键可取 |
 | `CompostScale` | int | 进度刻度；新存档固定 `1000`，老存档没有这个键 |
+| `Solid` | compound | 凝固/掺料产物（`ItemStack`，如圆石/黑曜石/地狱岩/末地石）；空时没有这个键 |
 
 - 容量固定 `CAPACITY = 1000` mB，不依赖 NBT。
 - **老存档迁移**：没有 `CompostScale` 的桶按 0..100 旧刻度读取，进度 ×10、计时按 600→1000 缩放；新存档写入 `CompostScale:1000`。
 - 桶里有流体时不能堆肥；堆肥进度 > 0 时不能灌流体（互斥）。
-- DIRT 状态下右键**任意手持物**都会取出 1 个泥土并重置（原版 `ExtractMode.Always` 风格）。
+- DIRT / `Solid` 状态下右键**任意手持物**都会取出产物并重置（原版 `ExtractMode.Always` 风格）。
+
+### 桶内反应（M1.5）
+
+| 桶里 | 加入 | 结果 |
+|---|---|---|
+| 1000 mB 水 | 熔岩（桶倒或上方熔岩源） | 圆石（`Solid`，右键取出） |
+| 1000 mB 熔岩 | 水（桶倒或上方水源） | 黑曜石 |
+| 1000 mB 熔岩 | 红石（右键） | 地狱岩 |
+| 1000 mB 熔岩 | 荧石粉（右键） | 末地石 |
+
+- **温度**：木桶只能存 `≤433 K` 的流体；水 300 K 可以，熔岩 1300 K 不行 → 用石桶。
+  往满水木桶倒熔岩是允许的，因为熔岩会立刻变成圆石、不会留在桶里。
+- **雨水**：露天的桶（`isRainingAt(上方)`）按 biome rainfall 积水；0.5 降雨约 100 秒满。
+- 这些反应现在是数据驱动的：`data/<ns>/barrel/*.json`，表结构见 §10；BE 只保留“满桶”规则。
 
 ## 3. 测试命令
 
@@ -120,17 +136,21 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 # 确认还是桶（不是泥土）
 /execute if block ~ ~ ~ exnihilosatellitium:barrel
 
-# 灌流体（顶层 FluidName / Amount）
-/data merge block ~ ~ ~ {FluidName:"minecraft:lava",Amount:1000}
-/data get block ~ ~ ~ FluidName
-/data get block ~ ~ ~ Amount
+# 灌流体（NeoForge 21.1：嵌套 Fluid，不是顶层 FluidName/Amount）
+/data merge block ~ ~ ~ {Fluid:{id:"minecraft:lava",amount:1000}}
+/data get block ~ ~ ~ Fluid
+
+# 水 + 上方熔岩 -> 圆石（Solid）
+/data merge block ~ ~ ~ {Fluid:{id:"minecraft:water",amount:1000}}
+/setblock ~ ~1 ~ minecraft:lava
+/data get block ~ ~ ~ Solid
 ```
 
 `data merge` 会绕过正常交互和标签判断，**只用于测试**；正常玩法请右键塞堆肥/用桶装流体。
 
 ## 4. 比较器
 
-- DIRT 状态：固定 `15`。
+- DIRT / `Solid` 状态：固定 `15`。
 - 其他状态：`max(流体量 × 15 / 1000, Compost × 15 / 1000)`。
 
 ## 5. Jade tooltip 键
@@ -140,6 +160,7 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 | 键 | 用途 |
 |---|---|
 | `jade.exnihilosatellitium.barrel.ready` | 泥土已就绪 |
+| `jade.exnihilosatellitium.barrel.solid` | `内含：圆石（右键取出）` |
 | `jade.exnihilosatellitium.barrel.compost` | `堆肥：45%（450 / 1000）` —— 百分比 + 原始值 |
 | `jade.exnihilosatellitium.barrel.timer` | `成型中：还需 n 秒` —— 堆肥满后倒计时 |
 | `jade.exnihilosatellitium.barrel.fluid` | `流体：x / 1000 mB` |
@@ -160,8 +181,8 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 ## 7. 材质变体数据
 
 `scripts/generate_barrel_variants.py` 从一张表生成七种桶的
-`blockstates/`、`models/block/`、`models/item/`、`recipes/`、`loot_tables/blocks/`
-和 `data/minecraft/tags/blocks/mineable/{axe,pickaxe}.json`。几何只在
+`blockstates/`、`models/block/`、`models/item/`、`recipe/`、`loot_table/blocks/`
+和 `data/minecraft/tags/block/mineable/{axe,pickaxe}.json`。几何只在
 `models/block/barrel_base.json` 里维护，子模型只覆盖 `textures`。
 
 | block id | 桶身贴图 | 内壁/桶底 | 箍 | 配方键 | 工具 |
@@ -174,10 +195,11 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `dark_oak_barrel` | `dark_oak_planks` | `stripped_dark_oak_log` | `gray_concrete` | `dark_oak_planks` | 斧 |
 | `stone_barrel` | `stone` | `stone` | `deepslate_tiles` | `stone` | 镐 |
 
-- 所有桶配方都是 `PPP / P P / PPP`，只换 `P` 的物品；橡木配方不再接受 `#minecraft:planks`，
-  避免和具体木种配方冲突。
+- 所有桶配方都是 `x x / x x / xyx`：`x` 是木种木板（石桶用 `stone`），`y` 是对应台阶
+  （石桶用 `smooth_stone_slab`）；不再接受 `#minecraft:planks`，避免和具体木种配方冲突。
 - 石桶复制 `Blocks.STONE` 属性（需要镐、石质音效），木桶复制对应木板属性。
-- 行为、NBT、Jade tooltip 七种桶完全一致；石桶暂不做“只装熔岩”等差异化，留到 M1.5。
+- 行为、NBT、Jade tooltip 七种桶基本一致；**唯一的差异化是石桶能存熔岩、木桶不能**
+  （M1.5 起，按 433 K 温度阈值判定，见 §2「桶内反应」）。
 
 ## 8. 材料表（矿物链，M2 起用）
 
@@ -195,8 +217,11 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | 层 | 路径 | 说明 |
 |---|---|---|
 | 内置 | `src/main/resources/exnihilosatellitium/materials.json` | 我们手写，随 jar 发布 |
-| 扩展 | `config/exnihilosatellitium/materials.json` | 整合包作者/玩家补表外材料 |
-| 数据包 | `data/<ns>/...` | 只能覆盖概率/配方，**不能新增材料** |
+| 数据包 | `data/<ns>/...` | 覆盖概率/配方，**不能新增材料** |
+
+**当前没有 config 扩展表**：表外材料不会自动发现，也不会生成骨架行。新增材料要改 jar 内表、
+重跑 `scripts/generate_ore_variants.py`（以及需要的 `generate_sieve_assets.py`），然后重启。
+config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)）。
 
 **改材料表需要重启游戏**：物品与方块在注册期冻结，无法在 `/reload` 时新增。
 
@@ -211,7 +236,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
       "name": { "en_us": "Copper", "zh_cn": "铜" },
       "tier": "common",
       "rarity": 18,
-      "ingot": "forge:ingots/copper",
+      "ingot": "minecraft:copper_ingot",
       "owner_mod": "mymod",
       "source": "classic",
       "enabled": true
@@ -226,11 +251,11 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `color` | ✅ | `RRGGBB`，用于物品/方块染色；缺失则该条报错跳过 |
 | `name` | ✅ | 显示名，至少给 `en_us`；缺 `zh_cn` 时回退 `en_us` |
 | `tier` | ✅ | `common` / `uncommon` / `rare` / `epic`，校验数值区间用（见下） |
-| `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。需要分筛料微调时写成对象 `{"gravel":18,"sand":32,"dust":48}` |
-| `ingot` | ❌ | 已有锭：写物品名（`minecraft:iron_ingot`）或标签（`#forge:ingots/copper`，取标签里第一个物品）。填了就熔炼到它，不重复造锭；解析不到则该材料的熔炼配方跳过并报错 |
-| `owner_mod` | ❌ | 主要来源模组，只用于自检与文档 |
+| `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。**当前只支持整数**；对象写法未实现（读 `gravel` 并打警告） |
+| `ingot` | ❌ | 已有锭：写**具体物品 id**（`minecraft:iron_ingot`），熔炼就产出它，不重复造锭。省略时注册自有 `exnihilosatellitium:<id>_ingot`（9 种非原版金属走这条）。**暂不支持标签**（`#c:ingots/tin`）：材料表在标签加载前读取，写标签会打警告并按自有锭处理 |
+| `owner_mod` | ❌ | 主要来源模组；当前不解析，仅保留字段 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
-| `enabled` | ❌ | 默认 `true`；表外骨架行默认 `false` |
+| `enabled` | ❌ | 默认 `true`；设为 `false` 时该条跳过（当前没有自动骨架行） |
 
 `tier` 与 `rarity` 的对应（校验用，越界即报错跳过）：
 
@@ -243,9 +268,9 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 
 ### 规则
 
-- **同一 `id` 只能有一个生效来源**：扩展表覆盖内置表，数据包再覆盖两者。
-- **表外材料不注册**：启动时只处理表内条目；发现表外材料只写骨架行（`enabled: false`）。
-- **校验失败即跳过该条**（不拖垮启动）：`id` 非法、颜色格式错、`rarity <= 0`、重复 `id`。
+- **只有 jar 内这一份表**：同一 `id` 重复时后者跳过；没有 config/自动发现层。
+- **表外材料不注册**：只处理表内条目，不会自动扫描物品注册表。
+- **校验失败只跳过该条**（不拖垮启动）：`id` 非法、颜色格式错、`tier` 非法、`rarity` 越界、重复 `id`。
   日志用 `[materials] ...` 前缀，和 `[compost]` 保持一致的风格。
 - **注册名不可变**：`id` 改了就等于换了材料，旧存档里的物品会变成缺失——发布后不要改已用的 `id`。
 - **宝石不走材料链**：钻石、绿宝石、青金石、石英、红石、下界石英这类没有“锭”的东西，
@@ -253,3 +278,105 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - **维度变体暂缺**：1.7.10 有 overworld / nether / end 三套矿砾（碎下界岩、末地砾）。
   当前 schema 只有一件事（筛砂砾/沙子/尘土），下界与末地变体留到 M2 实现时再扩字段，
   现在不要在表里硬塞。
+
+### 生成的配方与标签
+
+`scripts/generate_ore_variants.py` 读材料表，除了方块/物品资源，还生成：
+
+| 文件 | 内容 |
+|---|---|
+| `data/exnihilosatellitium/recipe/<id>_<stage>_to_ore_<kind>.json` | 2×2：4 个破碎/粉碎/粉末 → 对应矿砾/矿砂/矿尘方块 |
+| `data/exnihilosatellitium/recipe/<id>_ore_<kind>_smelting.json` | 熔炼：矿砾/矿砂/矿尘 → 锭（0.1 xp，200 tick） |
+| `data/c/tags/item/ingots/<id>.json` | 自有锭加入 `c:ingots/<id>`，方便别的模组用标签接受它 |
+| `data/c/tags/block/ores/<id>.json` | 矿砾/矿砂/矿尘方块 → `c:ores/<id>`（方块标签） |
+| `data/c/tags/item/ores/<id>.json` | 同名方块物品 → `c:ores/<id>`（物品标签） |
+| `data/c/tags/item/raw_materials/<id>.json` | 3 个方块物品 + 破碎/粉碎/粉末 → `c:raw_materials/<id>` |
+| `data/c/tags/{block,item}/ores.json`、`data/c/tags/item/raw_materials.json` | 把本项目材料的子标签挂到根标签 |
+
+- 铁/金/铜的 `ingot` 指向原版锭，所以 36 个熔炼配方里它们熔到 `minecraft:*_ingot`；
+  其余 9 种熔到自有锭。
+- 锭贴图由 `art/items/ingots/generate.py` 用同一套 5 阶色板生成，16×16、自有像素。
+- **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
+- 粉碎/粉末两档目前只有「4 块合成」这一条通路；锤子降档在 M3。
+
+## 9. 筛子 JSON（M2）
+
+**路径**：`data/<namespace>/sieve/*.json`，一个输入一个文件。
+
+```json
+{
+  "input": "minecraft:gravel",
+  "outputs": [
+    { "item": "exnihilosatellitium:iron_broken", "chance": 0.2 },
+    { "item": "minecraft:flint", "chance": 0.25 }
+  ]
+}
+```
+
+- `input` 是物品 id；筛子一次只装 1 个该物品。
+- `outputs` 每条独立掷 `chance`（0..1），不是权重；一次结算可能同时出多个产物。
+- `chance <= 0` 或物品 id 解析不到：该条跳过并打 `[sieve]` 警告。
+- 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
+  `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
+  **仓库里只改 `data/` 这一份**，构建时自动复制。
+- 当前只有 `gravel.json` / `sand.json`（2 输入、29 掉落）；`dust` 输入要等通用尘土方块。
+- 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。
+
+## 10. 桶转化 JSON（2026-10-30）
+
+**路径**：`data/<namespace>/barrel/*.json`，一个转化一个文件。
+
+```json
+{
+  "base": "minecraft:water",
+  "added": { "fluid": "minecraft:lava" },
+  "result": "minecraft:cobblestone"
+}
+```
+
+```json
+{
+  "base": "minecraft:lava",
+  "added": { "item": "minecraft:redstone" },
+  "result": "minecraft:netherrack"
+}
+```
+
+- `base`：桶内必须**装满 1000 mB** 的流体；表只描述 `base + added -> result`，
+  “必须满桶”这条规则仍在 `BarrelBlockEntity` 里（BE 与 JEI 共用 `BarrelRecipes`）。
+- `added`：恰好一个 `fluid`（从上方倒入，或倒进满桶）或 `item`（满桶时右键）。
+  两个都有 / 都没有 → 跳过该文件并打 `[barrel]` 警告。
+- 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
+  不影响其它文件。
+- 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
+- 当前 4 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→地狱岩、熔岩+荧石粉→末地石。
+- **删掉 JSON 桶就不反应**：不会退回硬编码。
+
+## 11. JEI 分类
+
+- 插件：`compat/jei/SieveJeiPlugin`（筛子）和 `compat/jei/BarrelJeiPlugin`（桶），
+  都是 `@JeiPlugin`；JEI 不装时类不加载，也不打包。
+- 分类 id：
+  - `exnihilosatellitium:sieve`，标题键 `jei.exnihilosatellitium.sieve`；
+  - `exnihilosatellitium:barrel`，标题键 `jei.exnihilosatellitium.barrel`；
+  - `exnihilosatellitium:barrel_compost`，标题键 `jei.exnihilosatellitium.barrel_compost`。
+- **筛子页**：左上材料、左下筛网、右边 7 列 × 3 行掉落槽；槽位整体居中（输入/筛网 x=6，
+  输出 x=34..160），用 JEI 标准槽位背景；砂砾/沙子两条叠成一页（1/1）。
+  三档筛网放进同一个输入槽轮换显示（筛网不影响掉落）。
+- **桶内转化页**：116×26，三个标准槽——满桶流体（x=4）、加入的流体或物品（x=42）、
+  产物（x=90）；中间画 JEI 原生的加号和箭头。流体槽用
+  `setFluidRenderer(1000, false, 16, 16)` + `addFluidStack(fluid, 1000)`，
+  所以显示的是流体而不是桶物品。
+- **桶堆肥页**：74×26，输入槽（标签展开成物品列表）+ 箭头 + 泥土输出。
+  每个条目一页，tooltip 是 `jei...barrel_compost.value`（`堆肥值：+125 / 1000`）；
+  展开后为空的标签条目会跳过并打 `[jei]` 警告，避免空槽。
+- 每个掉落槽的 tooltip 追加 `jei.exnihilosatellitium.sieve.chance`（`概率：20%`）；
+  材料槽 tooltip 是 `jei...sieve.hint`（每筛一个材料，每个产物独立判定）；
+  筛网槽 tooltip 是 `jei...sieve.mesh_hint`（只影响耐久，不改变掉落）。
+  **不要再用底部 `addText` 提示**：JEI 会把窄宽度下的文字竖排到槽位上（2026-10-29 修）。
+- 筛子方块和三档筛网注册为筛子分类 catalyst；**七种桶**注册为两个桶分类的 catalyst。
+- 数据直接读 `SieveRegistry` / `BarrelRecipes` / `CompostRegistry`（不是 `RecipeManager`），
+  所以客户端必须注册 `SieveReloadListener`、`BarrelRecipeReloadListener`、
+  `CompostReloadListener`（`ClientEvents` 里）才能在连服务器时显示。
+- 加/改 `sieve/*.json`、`barrel/*.json` 后 `/reload` 或重启即可；`compost` 走
+  `SimpleJsonResourceReloadListener`，同样不需要改 JEI 代码。

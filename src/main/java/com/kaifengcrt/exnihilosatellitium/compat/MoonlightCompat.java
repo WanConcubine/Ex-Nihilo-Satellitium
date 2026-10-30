@@ -49,7 +49,7 @@ public final class MoonlightCompat {
         if (!isLoaded()) {
             return null;
         }
-        return BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(MOD_ID, path));
+        return BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath(MOD_ID, path)).orElse(null);
     }
 
     /** 对方是否存在该物品。 */

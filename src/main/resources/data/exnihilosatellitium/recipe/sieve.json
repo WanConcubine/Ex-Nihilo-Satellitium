@@ -1,19 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "xzx",
-    "xzx",
-    "y y"
+    "x x",
+    "xyx",
+    "z z"
   ],
   "key": {
     "x": {
-      "item": "minecraft:oak_planks"
-    },
-    "z": {
-      "item": "exnihilosatellitium:wood_mesh"
+      "tag": "minecraft:planks"
     },
     "y": {
-      "item": "minecraft:stick"
+      "tag": "minecraft:wooden_slabs"
+    },
+    "z": {
+      "tag": "c:rods/wooden"
     }
   },
   "result": {

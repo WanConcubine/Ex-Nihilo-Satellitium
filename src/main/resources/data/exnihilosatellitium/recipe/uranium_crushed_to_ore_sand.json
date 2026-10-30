@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:uranium_crushed"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:uranium_ore_sand"
+  }
+}

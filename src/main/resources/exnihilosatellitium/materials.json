@@ -35,7 +35,7 @@
       },
       "tier": "common",
       "rarity": 18,
-      "ingot": "#forge:ingots/copper",
+      "ingot": "minecraft:copper_ingot",
       "source": "classic",
       "enabled": true
     },
@@ -48,7 +48,6 @@
       },
       "tier": "common",
       "rarity": 18,
-      "ingot": "#forge:ingots/tin",
       "source": "classic",
       "enabled": true
     },
@@ -61,7 +60,6 @@
       },
       "tier": "uncommon",
       "rarity": 45,
-      "ingot": "#forge:ingots/silver",
       "source": "classic",
       "enabled": true
     },
@@ -74,7 +72,6 @@
       },
       "tier": "uncommon",
       "rarity": 32,
-      "ingot": "#forge:ingots/lead",
       "source": "classic",
       "enabled": true
     },
@@ -87,7 +84,6 @@
       },
       "tier": "uncommon",
       "rarity": 32,
-      "ingot": "#forge:ingots/nickel",
       "source": "classic",
       "enabled": true
     },
@@ -100,7 +96,6 @@
       },
       "tier": "epic",
       "rarity": 128,
-      "ingot": "#forge:ingots/platinum",
       "source": "classic",
       "enabled": true
     },
@@ -113,7 +108,6 @@
       },
       "tier": "common",
       "rarity": 8,
-      "ingot": "#forge:ingots/aluminum",
       "source": "classic",
       "enabled": true
     },
@@ -126,7 +120,6 @@
       },
       "tier": "common",
       "rarity": 10,
-      "ingot": "#forge:ingots/osmium",
       "source": "classic",
       "enabled": true
     },
@@ -139,7 +132,6 @@
       },
       "tier": "common",
       "rarity": 24,
-      "ingot": "#forge:ingots/zinc",
       "source": "estimate",
       "enabled": true
     },
@@ -152,7 +144,6 @@
       },
       "tier": "rare",
       "rarity": 90,
-      "ingot": "#forge:ingots/uranium",
       "source": "estimate",
       "enabled": true
     }

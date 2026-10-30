@@ -11,6 +11,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -29,17 +30,25 @@ import java.util.Map;
 public final class SieveRegistry {
 
     private static final String DIR = "sieve";
-    private static final Map<Item, List<SieveDrop>> TABLE = new HashMap<>();
+    /** Gameplay table (server); replaced wholesale on every reload. */
+    private static volatile Map<Item, List<SieveDrop>> table = Map.of();
+    /** Client-side copy for JEI; never used for server-side sifting. */
+    private static volatile Map<Item, List<SieveDrop>> clientTable = Map.of();
 
     private SieveRegistry() {
     }
 
     public static List<SieveDrop> dropsFor(final ItemStack stack) {
-        return TABLE.getOrDefault(stack.getItem(), List.of());
+        return table.getOrDefault(stack.getItem(), List.of());
     }
 
-    public static void load(final ResourceManager manager) {
-        TABLE.clear();
+    /** Immutable snapshot for recipe browsers (JEI); key order is not meaningful. */
+    public static Map<Item, List<SieveDrop>> all() {
+        return clientTable.isEmpty() ? table : clientTable;
+    }
+
+    public static void load(final ResourceManager manager, final boolean clientView) {
+        final Map<Item, List<SieveDrop>> built = new HashMap<>();
         int files = 0;
         int drops = 0;
         for (final Map.Entry<ResourceLocation, Resource> entry
@@ -49,8 +58,8 @@ public final class SieveRegistry {
                     entry.getValue().open(), StandardCharsets.UTF_8)) {
                 final JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
                 final ResourceLocation inputId = ResourceLocation.parse(root.get("input").getAsString());
-                final Item input = BuiltInRegistries.ITEM.get(inputId);
-                if (input == null) {
+                final Item input = BuiltInRegistries.ITEM.getOptional(inputId).orElse(null);
+                if (input == null || input == Items.AIR) {
                     ExNihiloSatellitium.LOGGER.warn("[sieve] unknown input {} in {}", inputId, id);
                     continue;
                 }
@@ -59,21 +68,32 @@ public final class SieveRegistry {
                 for (final JsonElement element : outputs) {
                     final JsonObject drop = element.getAsJsonObject();
                     final ResourceLocation itemId = ResourceLocation.parse(drop.get("item").getAsString());
-                    final Item item = BuiltInRegistries.ITEM.get(itemId);
+                    final Item item = BuiltInRegistries.ITEM.getOptional(itemId).orElse(null);
                     final float chance = drop.get("chance").getAsFloat();
-                    if (item == null || chance <= 0.0F) {
+                    if (item == null || item == Items.AIR || !Float.isFinite(chance)
+                            || chance <= 0.0F || chance > 1.0F) {
                         ExNihiloSatellitium.LOGGER.warn("[sieve] bad drop {} in {}", itemId, id);
                         continue;
                     }
                     list.add(new SieveDrop(item, chance));
                 }
-                TABLE.put(input, List.copyOf(list));
+                if (built.containsKey(input)) {
+                    ExNihiloSatellitium.LOGGER.warn("[sieve] duplicate input {} in {}, overwriting", inputId, id);
+                }
+                built.put(input, List.copyOf(list));
                 files++;
                 drops += list.size();
             } catch (Exception exception) {
                 ExNihiloSatellitium.LOGGER.error("[sieve] failed to read {}: {}", id, exception.toString());
             }
         }
-        ExNihiloSatellitium.LOGGER.info("[sieve] loaded {} inputs, {} drops", files, drops);
+        final Map<Item, List<SieveDrop>> snapshot = Map.copyOf(built);
+        if (clientView) {
+            clientTable = snapshot;
+        } else {
+            table = snapshot;
+        }
+        ExNihiloSatellitium.LOGGER.info("[sieve] loaded {} inputs, {} drops{}",
+                files, drops, clientView ? " (client)" : "");
     }
 }

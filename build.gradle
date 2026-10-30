@@ -17,12 +17,16 @@ java {
 repositories {
     maven { name = 'BMCLAPI'; url = uri('https://bmclapi2.bangbang93.com/maven/') }
     maven { name = 'Modrinth'; url = uri('https://api.modrinth.com/maven') }
+    maven { name = 'BlameJared'; url = uri('https://maven.blamejared.com') }
     mavenCentral()
 }
 
 dependencies {
     // Jade HUD integration: compile-time only, never shipped.
     compileOnly "maven.modrinth:jade:${jade_version}"
+    // JEI recipe display: compile-time only, never shipped. Modrinth's maven
+    // serves the Fabric jar for this version, so use BlameJared's JEI maven.
+    compileOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
 }
 
 neoForge {
@@ -62,6 +66,21 @@ tasks.withType(ProcessResources).configureEach {
     inputs.properties replaceProperties
     filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties
+    }
+}
+
+// The client resource manager only exposes assets/. Mirror the data tables into
+// assets/ so JEI can read them when the client is connected to a dedicated server
+// (the data/ copy stays the single source of truth for server-side behaviour).
+tasks.named('processResources', ProcessResources).configure {
+    from('src/main/resources/data/exnihilosatellitium/sieve') {
+        into 'assets/exnihilosatellitium/sieve'
+    }
+    from('src/main/resources/data/exnihilosatellitium/barrel') {
+        into 'assets/exnihilosatellitium/barrel'
+    }
+    from('src/main/resources/data/exnihilosatellitium/compost') {
+        into 'assets/exnihilosatellitium/compost'
     }
 }
 

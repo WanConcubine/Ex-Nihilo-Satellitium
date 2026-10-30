@@ -4,21 +4,12 @@ import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterial;
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
-import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
@@ -55,45 +46,6 @@ public final class OreColors {
             }
         }
         ready = true;
-    }
-
-    @SubscribeEvent
-    public static void baked(final ModelEvent.BakingCompleted event) {
-        if (!Boolean.getBoolean("exnihilo.debugScreenshot")) {
-            return;
-        }
-        final ResourceLocation id = ResourceLocation.fromNamespaceAndPath(ExNihiloSatellitium.MOD_ID, "iron_ore_gravel");
-        final BakedModel block = event.getModelManager().getModel(new ModelResourceLocation(id, ""));
-        final BakedModel item = event.getModelManager().getModel(new ModelResourceLocation(id, "inventory"));
-        int tinted = 0;
-        int total = 0;
-        final var rnd = net.minecraft.util.RandomSource.create(42L);
-        for (final BakedQuad quad : item.getQuads(null, null, rnd)) {
-            total++;
-            if (quad.getTintIndex() >= 0) {
-                tinted++;
-            }
-        }
-        for (final Direction dir : Direction.values()) {
-            for (final BakedQuad quad : item.getQuads(null, dir, rnd)) {
-                total++;
-                if (quad.getTintIndex() >= 0) {
-                    tinted++;
-                }
-            }
-        }
-        final ItemStack sample = new ItemStack(ModOreItems.byMaterial().get("iron").get("ore_gravel").get());
-        final int tint = Minecraft.getInstance().getItemColors().getColor(sample, 0);
-        ExNihiloSatellitium.LOGGER.info("[model-debug] block quads={} item quads={} tinted={} itemColor=#{}",
-                countQuads(block), total, tinted, Integer.toHexString(tint));
-    }
-
-    private static int countQuads(final BakedModel model) {
-        int total = model.getQuads(null, null, net.minecraft.util.RandomSource.create(42L)).size();
-        for (final Direction dir : Direction.values()) {
-            total += model.getQuads(null, dir, net.minecraft.util.RandomSource.create(42L)).size();
-        }
-        return total;
     }
 
     @SubscribeEvent

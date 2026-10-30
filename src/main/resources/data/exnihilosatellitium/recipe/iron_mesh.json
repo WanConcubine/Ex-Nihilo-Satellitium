@@ -1,16 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "x x",
-    " y ",
-    "x x"
+    "xxx",
+    "xxx",
+    "xxx"
   ],
   "key": {
     "x": {
-      "item": "minecraft:iron_ingot"
-    },
-    "y": {
-      "item": "minecraft:string"
+      "item": "minecraft:iron_bars"
     }
   },
   "result": {

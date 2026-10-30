@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:aluminum_ore_gravel"
+  },
+  "result": {
+    "id": "exnihilosatellitium:aluminum_ingot"
+  },
+  "experience": 0.1,
+  "cookingtime": 200
+}

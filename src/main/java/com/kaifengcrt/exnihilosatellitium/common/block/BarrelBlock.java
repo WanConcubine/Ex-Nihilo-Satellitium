@@ -31,11 +31,7 @@ import org.jetbrains.annotations.Nullable;
  * time. The actual state lives in {@link BarrelBlockEntity}; this class only
  * dispatches interactions and ticking.</p>
  *
- * <p>Forge 47.4.x marks {@code BlockBehaviour#use} and the analog-signal
- * methods as deprecated, but 1.20.1 exposes no replacement; suppressing the
- * warning keeps the build clean without changing behaviour.</p>
  */
-@SuppressWarnings("deprecation")
 public class BarrelBlock extends BaseEntityBlock {
 
     /** Inset body: 14x16x14, leaving a 1px gap on each side. */
@@ -82,6 +78,15 @@ public class BarrelBlock extends BaseEntityBlock {
         return level.isClientSide
                 ? null
                 : createTickerHelper(type, ModBlockEntities.BARREL.get(), BarrelBlockEntity::serverTick);
+    }
+
+    @Override
+    public BlockState playerWillDestroy(final Level level, final BlockPos pos, final BlockState state,
+                                        final Player player) {
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof BarrelBlockEntity barrel) {
+            barrel.dropContentsOnBreak(level, pos);
+        }
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
