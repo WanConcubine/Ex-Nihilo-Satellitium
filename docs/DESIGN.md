@@ -126,21 +126,19 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
 筛子 / 木桶 / 坩埚”。所以兼容层不是彩蛋，是主循环的一部分。四条硬约束：
 
 1. **机制归我们，条目归数据**：核心只暴露“输入 → 判定 → 输出”的通用注册表
-   （筛出物、堆肥值、坩埚熔炼、热源），具体模组的条目写在 JSON 里，配 `forge:mod_loaded` 条件。
+   （筛出物、堆肥值、坩埚熔炼、热源），具体模组的条目写在 JSON 里；自定义表按 id 覆盖，不解析条件。
 2. **数值走数据包，材料走表**：配方、概率、堆肥值这类**数值**用数据包就能覆盖；
-   但**新增材料**（要注册新物品链）在 1.20.1 必须发生在注册期，只能进扩展材料表 + 重启
+   但**新增材料**（要注册新物品链）在 1.21.1 必须发生在注册期，只能改 jar 内材料表 + 重启
    （§6.4）。需要自定义判定或特殊工具的，才由我们写 `compat/` 模块。
-3. **硬绑定必须可缺**：`compat/` 按模组分包，只按注册名查 `ForgeRegistries`，
+3. **硬绑定必须可缺**：`compat/` 按模组分包，只按注册名查 `BuiltInRegistries`，
    **不 import 对方任何类**；没装该模组时类不加载、不报错（做法见 §6.3）。
-4. **注册只认材料表，自动发现只负责补骨架**（2026-10-29 修订）：自动发现能力保留，但
-   “扫到即生效”不存在。内置材料表由我们手写（颜色、`tier`、`rarity` 人工定），表内材料
-   **真的在游戏里存在**（整套矿砾/碎矿/粉末链，见 §6.4）；表外材料只生成骨架行、
-   **默认关闭**，由整合包作者或玩家填写数值后开启。理由：概率必须是人调出来的手感，
-   自动推导（tag 或 worldgen 密度）会飘、会打穿整合包进度设计；但也不能让整合包作者
-   为了一个冷门模组等我们发版。
+4. **注册只认材料表，不做自动发现**（2026-10-30 修正）：内置材料表由我们手写
+   （颜色、`tier`、`rarity` 人工定），表内材料**真的在游戏里存在**（整套矿砾/碎矿/粉末链，
+   见 §6.4）；表外材料不自动扫描、不生成骨架行。新增材料要改 jar 内表、重跑生成脚本并重启。
+   理由：概率必须是人调出来的手感，自动推导（tag 或 worldgen 密度）会飘、会打穿整合包
+   进度设计；config 扩展层尚未实现（见 [tech-debt.md](tech-debt.md)）。
 
-   自动发现的合法用途只有两个：**① 给表外材料生成骨架行**（默认关闭）；
-   **② 开发期覆盖自检**（列出“有材料、没条目”，提醒维护者补）。
+   自动发现/骨架行目前未实现；以后若要做，先补 schema 与资源生成，不能只写表。
 
 ### 6.2 自动化（承自 Ex Astris）
 
@@ -158,14 +156,14 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
 
 ### 6.3 首个联动对象：月光魔法
 
-**对接对象**（本机 `Projects/Minecraft-Mod-(Neo)Forge/1.20.1`）：
+**对接对象**（本机 `Projects/Minecraft-Mod-(Neo)Forge/1.20.1`；1.21.1 端口待确认）：
 
 | 项 | 值 |
 |---|---|
 | mod id | `moonlight_magic` |
 | 版本 | 1.2.0 |
 | 包名 | `com.moonlight.magic` |
-| 加载器 / MC | Forge 47.4.x / 1.20.1 |
+| 加载器 / MC | Forge 47.4.x / 1.20.1（旧资料） |
 | 许可证 | MIT |
 | 公开 API | **没有独立 `api` 包**（有 `event` / `ritual` / `spell` / `energy`，但都是内部实现） |
 
@@ -174,8 +172,8 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
 - `mods.toml` 里声明 **optional** 依赖（`mandatory=false, ordering=AFTER`），
   不装月光魔法时本模组必须能独立启动。
 - 代码侧统一走 `compat/MoonlightCompat`：只检查 `ModList` + 按注册名查
-  `ForgeRegistries`，**不 import 对方任何类**，避免编译期耦合和版本脆断。
-- 内容联动优先用**数据包**（配方 / 掉落 / 堆肥值 + `forge:mod_loaded` 条件），
+  `BuiltInRegistries`，**不 import 对方任何类**，避免编译期耦合和版本脆断。
+- 内容联动优先用**数据包**（配方 / 掉落 / 堆肥值）；自定义表按 id 覆盖，不解析条件。
   代码只负责少量运行时判断。
 - 不碰对方内部类；如果将来对方提供正式 API，再替换 `MoonlightCompat` 的实现。
 
@@ -216,16 +214,15 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
 熔炼 矿砾 / 矿砂 / 矿尘 → 锭（可复用对方已有的锭，避免重复定义金属）
 ```
 
-**三层来源**：
+**两层来源**：
 
 | 层 | 位置 | 谁写 | 默认 |
 |---|---|---|---|
 | 内置材料表 | jar 内 `exnihilosatellitium/materials.json` | 我们 | 启用 |
-| 扩展材料表 | `config/exnihilosatellitium/materials.json` | 整合包作者 / 玩家 | 表外材料默认关闭，填值才开 |
 | 数据包 | `data/*/...` | 任何人 | 覆盖配方与概率；**不能新增材料** |
 
-**硬约束：新增材料必须重启。** 1.20.1 的物品/方块在注册期冻结，材料表必须在注册阶段读取，
-所以它不能是数据包，只能是 jar 内资源 + config。数据包能改的是概率与配方，
+**硬约束：新增材料必须重启。** 1.21.1 的物品/方块在注册期冻结，材料表必须在注册阶段读取，
+所以它不能是数据包，只能是 jar 内资源。数据包能改的是概率与配方，
 不能“让一个新物品凭空出现”。
 
 **贴图（两条线，都不手绘方块底图）**：
@@ -239,8 +236,12 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
   代价是整表面 100% 染色，原版 21% 斑块的观感丢了；要恢复得做运行期合成贴图。
 材料表因此必须带颜色；没有颜色的材料不给注册（宁可报错，也不要一堆灰方块）。
 
-**JEI**：筛子是自定义 `RecipeType`，JEI 直接读 `RecipeManager`，动态注册的配方会自动出现在
-JEI 里，不需要额外写分类。
+**JEI（2026-10-29 修正）**：筛料表**不是** vanilla `RecipeType`，所以 JEI 不会自动读到。
+我们写了一个可选分类 `exnihilosatellitium:sieve`，直接读 `SieveRegistry`（与结算共用同一张表），
+输入在左、全部掉落 + 独立概率在右；筛子方块与三档筛网注册为 catalyst。JEI 只 `compileOnly`，
+不打包；没装 JEI 时插件类不加载。客户端需要自己的 `SieveReloadListener`（见 §12）。
+桶的转化/堆肥在 2026-10-30 也接了 JEI：`BarrelRecipes` + `CompostRegistry` 直接喂给
+`barrel` / `barrel_compost` 两个分类，见 §14。
 
 
 
@@ -403,7 +404,8 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 - `COMPOST_MAX = 1000`、`COMPOST_TICKS = 1000`（50 秒，对齐原版 `MAX_COMPOSTING_TIME`）。
 - `default.json` 改为 **65 条**（12 个标签 + 53 个具体物品），`compostable.json` 同步；
   肉类按 1.20.1 的十种生/熟肉显式列出，鱼用 `#minecraft:fishes`，种子/作物/蛋/线用
-  `#forge:*` 标签。
+  `#c:*` 标签（2026-10-30 从 `#forge:*` 修正：1.21.1 的 NeoForge 只提供 `c:` 命名空间，
+  旧写法与标签文件不一致，导致这些条目此前只按 1 点堆肥）。
 - 老存档迁移：`saveAdditional` 写 `CompostScale:1000`；`load()` 发现没有这个键时把
   `Compost` ×10、`CompostTicks` 按 600→1000 缩放，旧测试桶不会变成 1/10 进度。
 - 150 的瓜类 7 个是 1050，桶会截到 1000，和 Omnia “多塞一点会溢出但不会浪费”一致。
@@ -414,3 +416,136 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 - 服务端 `/reload` 日志：`[compost] loaded 65 entries`，无 `unknown item` / `invalid tag`。
 - RCON：`data merge {Compost:1000,CompostTicks:1}` → 2 秒后仍是桶、`DirtReady=1b`。
 - 未验证：逐个物品右键塞桶的点数（需要玩家）；JSON 与标签的键已用脚本对齐。
+
+## 12. M2 收尾：JEI 与筛出物的去向（2026-10-29）
+
+**问题**
+
+M2 的筛子能出货，但两个缺口让循环看起来断掉：JEI 里搜不到“砂砾能筛出什么”；
+筛出来的破碎/粉碎/粉末没有任何配方，等于死物品。
+
+**决策**
+
+1. **JEI 不假装成 vanilla 配方**。筛料表是 `SieveRegistry` 里的 JSON，不是 `RecipeManager`
+   的 `RecipeType`；硬塞一个假的 `RecipeType` 会多一份要同步的数据。做法是写可选分类
+   `exnihilosatellitium:sieve`，直接读同一张表——结算与展示只有一个来源。
+   - 左上材料、左下筛网、右侧 7 列掉落；槽位在 166×60 页面里居中（x=6/34），两条筛料叠成一页。
+     概率放在每个产物槽的 tooltip 里（`概率：5.56%`），
+     因为 17 个产物同时铺在页面上放不下文字。
+   - 筛子方块 + 三档筛网都注册为 catalyst；查筛网也能看到分类。
+   - JEI 只 `compileOnly`；没装时 `@JeiPlugin` 类不会被加载。
+2. **客户端也要读筛表**。`AddReloadListenerEvent` 只覆盖服务端资源；单人时集成服会加载，
+   但连专用服时客户端不会读服务端数据包，JEI 会是空的。`ClientEvents` 在
+   `RegisterClientReloadListenersEvent` 里再挂一个 `SieveReloadListener`。客户端的
+   `ResourceManager` 是 `CLIENT_RESOURCES`，`listResources` 只找 `assets/`，所以
+   `processResources` 把 `data/.../sieve` 镜像到 `assets/.../sieve`（仓库里仍只有 data 一份）。
+   代价：专用服的**数据包覆盖**不会同步到客户端 JEI（显示内置表）；内置 JSON 永远一致。
+3. **筛出物接回矿物链**（复刻经典结构，不抄数值）：
+   - 4 个破碎/粉碎/粉末 → 对应矿砾/矿砂/矿尘方块（2×2）。
+   - 矿砾/矿砂/矿尘方块 → 熔炼 → 1 锭（0.1 xp，200 tick）。
+   - 铁/金/铜复用原版锭；其余材料在表里省略 `ingot` 时注册自有 `<id>_ingot`。
+     这是原版 `createOre(..., existingIngot, ...)` 的行为：有别的模组的锭就复用，
+     没有就自己造一个，保证单人空岛也有终点。
+   - 锭贴图 16×16、自有像素（`art/items/ingots/generate.py`，与矿粒同一套 5 阶色板）。
+4. **潜行空手**：有材料先倒出材料，没材料才取回筛网。原实现先判 `hasMesh()`，
+   `ejectContents` 永远走不到。
+
+**验证**
+
+- `./gradlew build` 通过；`check-textures.py` 通过（9 张锭贴图 16×16）。
+- 专用服启动：`Loaded 1373 recipes`、`[debug] our recipes=83`（11 旧 + 72 新）、
+  `[sieve] loaded 2 inputs, 29 drops`。
+- RCON 熔炉：`iron_ore_gravel → minecraft:iron_ingot`、`tin_ore_gravel → tin_ingot`，
+  `RecipesUsed` 命中本项目配方；原版铁矿石对照也正常。
+- 客户端：进单人世界，JEI 启动无异常，日志 `[jei] registered 2 sieve recipes`。
+- 未验证：JEI 页面实际排版/概率 tooltip 目视；2×2 合成由玩家实测。
+
+**坑**
+
+- Modrinth 的 maven 在“同版本号多 loader”时会返回 Fabric jar；JEI 必须用
+  `maven.blamejared.com` 的 `mezz.jei:jei-1.21.1-neoforge`。
+- RCON 用 `data merge` 往熔炉塞物品会绕过 `setItem()`，`CookTimeTotal` 停在 0，
+  进度永远不完成；测试时要手动写 `CookTimeTotal:200`。
+- `/tick step N` 仍按 20 TPS 跑，中间 `/tick unfreeze` 会取消剩余步进。
+
+## 13. M1.5 桶内转化（2026-10-29）
+
+**来源**：[MC百科 · 木桶（Ex Nihilo: Sequentia）](https://www.mcmod.cn/item/465510.html)
+补齐了 [ex-nihilo-basics.md](ex-nihilo-basics.md) 里的待核项：巫水来源、木/石桶温差、
+凝固与掺料表、雨水。数值仍用本项目的表，不搬 Sequentia 的重平衡。
+
+**决策**
+
+1. **木桶限温 433 K**：水 300 K、熔岩 1300 K。判定放在 `FluidTank.fill` 里，
+   所以桶、漏斗/管道、桶倒全走同一条路；消息在 `use` 里提前提示，不静默失败。
+   石桶是唯一不限温的变体（七种桶里只有它）。
+2. **凝固用 `Solid` 状态**：满水 + 熔岩 → 圆石；满熔岩 + 水 → 黑曜石。两种触发都支持：
+   - 玩家用桶倒（`FluidUtil` → `tank.fill`，满且异种流体时直接结算）；
+   - 桶上方放着熔岩/水源（`serverTick` 检查 `pos.above()`，对应经典玩法）。
+   产物存成 `ItemStack`，右键取出；不替换方块、不额外做 GUI。
+   往满水木桶倒熔岩是允许的——熔岩立刻变圆石，不会“存”在木桶里。
+3. **接雨水**：露天的桶（`isRainingAt`）按 biome rainfall 累积；每 20 mB 同步一次，
+   避免每 tick 发包。0.5 降雨约 100 秒满。
+4. **熔岩掺料**：满熔岩 + 红石 → 地狱岩；+ 荧石粉 → 末地石。
+   水 + 尘土 → 粘土块、巫水 + 沙子 → 灵魂沙、巫水 + 蘑菇 → 粘液块都**没做**
+   （尘土/巫水本身还没做），代码里不硬塞空配方。
+5. **Jade / 渲染 / 比较器**：`Solid` 用内容方块贴图画在桶内；Jade 显示
+   `内含：圆石（右键取出）`；比较器在 `Solid` 状态固定 15。
+
+**验证**
+
+- `./gradlew build` / `check-textures.py` 通过。
+- RCON：水桶上方放熔岩源 → `Solid: minecraft:cobblestone`、流体清空；
+  石桶装熔岩、上方放水 → `Solid: minecraft:obsidian`。
+- RCON：`/weather rain` 下 12 秒积水 80 mB（降雨 0.5）。
+- **未验证**：木桶拒热与右键掺料需要真实玩家（dispenser 不走流体 capability，测不了）。
+
+**坑**
+
+- **NeoForge 21.1 的 `FluidTank` NBT 是嵌套 `{Fluid:{id,amount}}`**。旧 1.20.1 文档里的
+  顶层 `FluidName` / `Amount` 在这里会被静默忽略；RCON 测试必须用嵌套格式。
+- `FluidUtil.getFluidContained` 要在 `FluidUtil.interactWithFluidHandler` 之前判断，
+  否则木桶拒热只能表现为“没反应”，玩家不知道要用石桶。
+- 熔岩凝固必须“满 + 异种流体”才结算；半桶时 `FluidTank` 默认不接受异种流体，正好。
+- 雨水用批量（20 mB）而不是每 tick `fill`，否则 `onContentsChanged` 会每 tick 同步。
+
+## 14. 桶转化数据驱动 + JEI（2026-10-30）
+
+**问题**
+
+桶的“能产什么”写在 `BarrelBlockEntity.solidResult` / `itemMixResult` 的两个 `if` 里：
+JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 JSON 里 8 条 `#forge:*`
+标签在 1.21.1 不存在，标签文件却写着 `#c:*`，于是这些物品只按 1 点堆肥。
+
+**决策**
+
+1. 建 `common/barrel/BarrelRecipes`，从 `data/<ns>/barrel/*.json` 读：
+   `base`（必须满桶的流体）+ `added`（fluid 或 item）+ `result`。
+   BE 只保留“满桶”规则，流体/物品判定都问这张表；结算与 JEI 共用一个快照。
+2. JEI 不再为桶写独立的“假配方”：`BarrelJeiPlugin` 直接读 `BarrelRecipes` 与
+   `CompostRegistry`，分两个分类 `barrel` / `barrel_compost`。
+   - 转化页三槽（满桶流体 / 加入物 / 产物），流体用 JEI 原生 fluid renderer；
+   - 堆肥页一个条目一页，标签展开成物品列表，tooltip 显示分值；
+   - 七种桶都是 catalyst（查任意桶都能看到）。
+3. 客户端镜像沿用筛子的做法：`processResources` 把 `barrel/`、`compost/` 复制到
+   `assets/`，`ClientEvents` 注册 `BarrelRecipeReloadListener` / `CompostReloadListener`。
+4. 堆肥标签改成 `#c:*` 与标签文件对齐；JEI 堆肥页注册 65 条（无空槽）反过来证明
+   12 个标签都能展开。
+
+**验证**
+
+- 服务端 `[barrel] loaded 4 transforms (2 fluid, 2 item)`；RCON（先 forceload）
+  水+熔岩→`cobblestone`、熔岩+水→`obsidian`。
+- 客户端进单人世界：`[jei] registered 4 barrel transforms, 65 compost entries`；
+  截图目视「桶内转化」1/2 页（3 条/页，流体槽/加号/箭头正常）与「桶：堆肥」1/22 页。
+- 未验证：右键红石/荧石掺料（需要真实玩家）；tooltip 逐条目视。
+
+**坑**
+
+- 转化表的流体按 `Fluid` 实例精确匹配；JSON 里写 `minecraft:water` 解析到 still 水，
+  上方源方块也是 still，所以能匹配。写 flowing 不会匹配。
+- JEI 会把小分类按页面可用高度打包：116×26 的一页会放 3 条，所以 4 条是 1/2 页，
+  不是“少画了一条”。
+- 桶的 JEI 分类在空服/无世界时不会注册（JEI 进世界时才 `addRecipes`）；看日志要进世界。
+- 专用服空服时区块不 tick：RCON 测桶前先 `forceload add`，否则 `data merge` 写进去也
+  不会出现 `Solid` / `DirtReady`。

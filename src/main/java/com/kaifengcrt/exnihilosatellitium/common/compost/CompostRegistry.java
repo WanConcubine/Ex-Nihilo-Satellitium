@@ -9,8 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +23,10 @@ import java.util.Map;
  * 1000 points fill the barrel. The scale is Ex Nihilo Omnia's 1000 mB table,
  * so 0.125 becomes 125 and the 1/6 melon/pumpkin value becomes 150.</p>
  *
- * <p>This registry is server-side only. The client uses the
- * {@code #exnihilosatellitium:compostable} item tag purely for interaction
- * prediction.</p>
+ * <p>The server reads it for barrel interactions. The client also reads the
+ * mirrored {@code assets/.../compost/} copy so JEI can show the table even
+ * when connected to a dedicated server; interaction prediction still uses the
+ * {@code #exnihilosatellitium:compostable} item tag.</p>
  */
 public final class CompostRegistry {
 
@@ -37,12 +37,20 @@ public final class CompostRegistry {
         }
     }
 
-    private static final List<Entry> ENTRIES = new ArrayList<>();
+    /** Gameplay table (server); replaced wholesale on every reload. */
+    private static volatile List<Entry> entries = List.of();
+    /** Client-side copy for JEI; never used for server-side composting. */
+    private static volatile List<Entry> clientEntries = List.of();
 
     private CompostRegistry() {
     }
 
-    public static void reload(final Map<ResourceLocation, JsonElement> jsons) {
+    /** Immutable snapshot for recipe browsers (JEI). */
+    public static List<Entry> all() {
+        return clientEntries.isEmpty() ? entries : clientEntries;
+    }
+
+    public static void reload(final Map<ResourceLocation, JsonElement> jsons, final boolean clientView) {
         final List<Entry> next = new ArrayList<>();
 
         for (final Map.Entry<ResourceLocation, JsonElement> file : jsons.entrySet()) {
@@ -72,8 +80,8 @@ public final class CompostRegistry {
                             ExNihiloSatellitium.LOGGER.warn("[compost] invalid item id '{}' in {}", key, file.getKey());
                             continue;
                         }
-                        final Item item = BuiltInRegistries.ITEM.get(id);
-                        if (item == null) {
+                        final Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(null);
+                        if (item == null || item == Items.AIR) {
                             ExNihiloSatellitium.LOGGER.warn("[compost] unknown item {}", id);
                             continue;
                         }
@@ -85,9 +93,14 @@ public final class CompostRegistry {
             }
         }
 
-        ENTRIES.clear();
-        ENTRIES.addAll(next);
-        ExNihiloSatellitium.LOGGER.info("[compost] loaded {} entries", ENTRIES.size());
+        final List<Entry> snapshot = List.copyOf(next);
+        if (clientView) {
+            clientEntries = snapshot;
+        } else {
+            entries = snapshot;
+        }
+        ExNihiloSatellitium.LOGGER.info("[compost] loaded {} entries{}",
+                snapshot.size(), clientView ? " (client)" : "");
     }
 
     /** @return the best matching compost value, or 0 if the stack is not compostable. */
@@ -97,7 +110,7 @@ public final class CompostRegistry {
         }
 
         int best = 0;
-        for (final Entry entry : ENTRIES) {
+        for (final Entry entry : entries) {
             if (entry.matches(stack)) {
                 best = Math.max(best, entry.value());
             }

@@ -11,13 +11,22 @@ from PIL import Image, ImageDraw
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RES = ROOT / "src/main/resources"
 ASSETS = RES / "assets/exnihilosatellitium"
-MATS = json.load(open(RES / "exnihilosatellitium/materials.json", encoding="utf-8"))["materials"]
+MATS = [m for m in json.load(open(RES / "exnihilosatellitium/materials.json", encoding="utf-8"))["materials"]
+        if m.get("enabled", True)]
 
 MESH_COLORS = {"wood": (122, 88, 52), "silk": (232, 232, 228), "iron": (188, 190, 196)}
 MESH_NO = {"wood": 1, "silk": 2, "iron": 3}
 # 档位不是换色：编织密度不同。pitch=网格间距，strand=线宽
 # 三档同结构（斜向编织），只换色；铁网没有单独贴图，按木网配色推
 MESH_PITCH, MESH_STRAND = 6, 2
+
+
+def rarity_of(material):
+    rarity = material["rarity"]
+    if isinstance(rarity, int):
+        return rarity
+    print(f"warning: {material['id']}: per-kind rarity object is not implemented; using rarity.gravel")
+    return rarity["gravel"]
 
 
 def write_json(path, data):
@@ -127,7 +136,7 @@ def main():
     count = 0
     for kind, suffix_name in suffix.items():
         outputs = [{"item": f"exnihilosatellitium:{m['id']}_{suffix_name}",
-                    "chance": round(1.0 / m["rarity"], 5)} for m in MATS]
+                    "chance": round(1.0 / rarity_of(m), 5)} for m in MATS]
         outputs += [{"item": item, "chance": round(1.0 / n, 5)} for item, n in vanilla[kind]]
         write_json(RES / f"data/exnihilosatellitium/sieve/{kind}.json",
                    {"input": inputs[kind], "outputs": outputs})
@@ -151,7 +160,7 @@ def main():
         d.update(entries)
         p.write_text(json.dumps(dict(sorted(d.items())), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    print(f"sieve assets written; drop tables: 3 inputs, {count} drops")
+    print(f"sieve assets written; drop tables: {len(inputs)} inputs, {count} drops")
 
 
 if __name__ == "__main__":

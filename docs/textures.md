@@ -103,8 +103,12 @@ assets/exnihilosatellitium/textures/
 - 风格：暗色 1px 边、透明背景、左上光源、4–5 阶；`broken` 的石体用共享深灰调，
   矿点用金属亮色；`crushed` / `powdered` 用金属色阶。颜色参考 1.20 原版矿物/锭，
   但**不复制**旧 Ex Nihilo 或原版 PNG。
-- 目前只在 `art/` 里做预览，没有进 `assets/`；M5 加 `broken_ore` / `crushed_ore` /
-  `powdered_ore` 物品时再提升为 `textures/item/*.png`，并保证 16×16。
+- 已经进 `assets/textures/item/<m>_<stage>.png`（由 `scripts/generate_ore_variants.py`
+  从 `art/` 复制/生成），并保证 16×16。
+- **自有锭**：`art/items/ingots/generate.py` 用同一套 5 阶色板生成
+  `<m>_ingot.png`，16×16；只给 `materials.json` 里没有 `ingot` 的 9 种材料生成
+  （铁/金/铜用原版锭贴图，不重复画）。锭的形状是斜置金属条：顶面受光、正面中间调、
+  左端面暗部，1px 内切边，不复制原版锭 PNG。
 - 如果以后要省文件，可以只保留三张灰度 base + `tintindex`，用 1.20 的 `ItemColor`
   按金属染色；当前先按每金属每阶段一张，便于逐个调色。
 

@@ -25,6 +25,9 @@ jobs:
       - name: Compile
         run: ./gradlew build --no-daemon --stacktrace
 
+      - name: Texture guard
+        run: python3 scripts/check-textures.py
+
       - name: Headless server smoke
         run: |
           set +e

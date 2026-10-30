@@ -22,8 +22,9 @@ public final class ModCreativeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN = TABS.register("main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + ExNihiloSatellitium.MOD_ID))
-                    .icon(() -> new ItemStack(ModOreItems.byMaterial().values().iterator().next()
-                            .get("ore_gravel").get()))
+                    // Barrel is always registered, so the tab cannot fail even if
+                    // materials.json is missing or every entry is disabled.
+                    .icon(() -> new ItemStack(ModItems.BARREL.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.SIEVE.get());
                         ModItems.MESHES.forEach(mesh -> output.accept(mesh.get()));
@@ -36,6 +37,10 @@ public final class ModCreativeTabs {
                             }
                             for (final String stage : ModOreItems.STAGES) {
                                 output.accept(entries.get(stage).get());
+                            }
+                            final var ingot = entries.get("ingot");
+                            if (ingot != null) {
+                                output.accept(ingot.get());
                             }
                         }
                     })

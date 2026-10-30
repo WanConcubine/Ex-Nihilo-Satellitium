@@ -13,6 +13,9 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
@@ -51,6 +54,11 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
 
         if (barrel.isDirtReady()) {
             this.renderDirt(poseStack, bufferSource, light);
+            return;
+        }
+
+        if (barrel.hasSolid()) {
+            this.renderSolid(barrel, poseStack, bufferSource, light);
             return;
         }
 
@@ -113,6 +121,20 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
         final VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
         contentBox(consumer, poseStack.last().pose(), sprite,
                 BOTTOM + HEIGHT * fill, light, red, green, blue);
+    }
+
+    private void renderSolid(final BarrelBlockEntity barrel, final PoseStack poseStack,
+                             final MultiBufferSource bufferSource, final int light) {
+        final ItemStack stack = barrel.getSolid();
+        if (!(stack.getItem() instanceof BlockItem blockItem)) {
+            return;
+        }
+        final BlockState state = blockItem.getBlock().defaultBlockState();
+        final TextureAtlasSprite sprite = Minecraft.getInstance().getBlockRenderer()
+                .getBlockModelShaper().getParticleIcon(state);
+        final VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
+        contentBox(consumer, poseStack.last().pose(), sprite,
+                BOTTOM + HEIGHT, light, 1.0F, 1.0F, 1.0F);
     }
 
     private void renderDirt(final PoseStack poseStack, final MultiBufferSource bufferSource, final int light) {

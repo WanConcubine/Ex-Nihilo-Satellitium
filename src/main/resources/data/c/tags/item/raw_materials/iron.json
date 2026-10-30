@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "exnihilosatellitium:iron_broken",
+    "exnihilosatellitium:iron_crushed",
+    "exnihilosatellitium:iron_ore_dust",
+    "exnihilosatellitium:iron_ore_gravel",
+    "exnihilosatellitium:iron_ore_sand",
+    "exnihilosatellitium:iron_powdered"
+  ]
+}

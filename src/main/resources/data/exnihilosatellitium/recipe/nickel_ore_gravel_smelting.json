@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:nickel_ore_gravel"
+  },
+  "result": {
+    "id": "exnihilosatellitium:nickel_ingot"
+  },
+  "experience": 0.1,
+  "cookingtime": 200
+}

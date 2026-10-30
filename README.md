@@ -1,6 +1,6 @@
 # 无中生有：众星捧月 / Ex Nihilo: Satellitium
 
-> 面向 Minecraft **1.20.1 Forge** 的空岛资源获取模组，从零重写。
+> 面向 Minecraft **1.21.1 NeoForge** 的空岛资源获取模组，从零重写。
 > **非官方作品**，与 Ex Nihilo 系列及其作者没有隶属关系。
 
 “众星捧月”取“群星环绕核心循环”的意思：木桶、筛子、锤子、坩埚都围绕同一条空岛资源链。
@@ -20,33 +20,35 @@
 
 | 项目 | 版本 |
 |---|---|
-| Minecraft | 1.20.1 |
-| Forge | 47.4.28 |
-| Java | 17 |
+| Minecraft | 1.21.1 |
+| NeoForge | 21.1.265 |
+| Java | 21 |
 | Gradle | 8.8（Wrapper） |
-| 构建插件 | ForgeGradle 6 |
+| 构建插件 | ModDevGradle 2.0.148 |
 
 ## 当前进度
 
-- [x] Gradle / Forge MDK 骨架，可编译
+- [x] Gradle / NeoForge 骨架，可编译
 - [x] 模组元数据、Creative Tab、中英文本地化
-- [x] 基础内容：`porcelain`（瓷土，自绘贴图）、`barrel`（橡木桶）
+- [x] 基础内容：`porcelain`（瓷土，自绘贴图）、`barrel`（橡木木桶）
 - [x] M1 木桶：堆肥→泥土（1000 分制，数值以 Omnia 1.10.2 为主、原版 1.7.10 校验；桶保留，右键取出）、1000 mB 流体、比较器、14×16 内缩模型、vanilla-sampled 贴图
 - [x] M1 材质变体：云杉/白桦/丛林/金合欢/深色橡木木桶 + 石桶，共享 BE 与行为
-- [ ] M1.5 桶内方块转化（水 + 熔岩 → 石/黑曜石）
-- [ ] M2 筛子 + 筛网 + 数据驱动掉落
+- [x] M1.5 桶内转化：水+熔岩→圆石、熔岩+水→黑曜石、木桶拒热（石桶可装熔岩）、接雨水、熔岩掺红石/荧石（巫水/人偶/粘土未做）
+- [x] M2 筛子 + 筛网 + 数据驱动掉落（JEI 展示输入/掉落/概率；4 碎块 → 矿方块 → 熔炼成锭）
+- [x] 桶的 JEI：桶内转化（`barrel/*.json`）+ 堆肥（`compost/*.json`）两个分类，七种桶都可查
 - [ ] M3 锤子 + 钩子
 - [ ] M4 坩埚 + 热源
-- [ ] M5 矿粒 / 粉碎矿 / 冶炼
+- [ ] M5 矿粒 / 粉碎矿 / 冶炼（熔炼成锭已通；锤子降档缺）
 - [ ] M6 瓷土 / 瓷桶 / 巫水 / 蚕
-- [ ] M7 JEI / 配置 / 数据生成
+- [ ] M7 JEI / 配置 / 数据生成（筛子 + 桶 JEI 分类已完成，其余待做）
 - [ ] M8 与「月光魔法」联动
 
 ## 文档
 
 - [docs/status.md](docs/status.md) —— 当前状态、验证表、下一步（交接先看这个）
+- [docs/tech-debt.md](docs/tech-debt.md) —— 技术债/潜在风险审计（P0–P3）
 - [docs/DESIGN.md](docs/DESIGN.md) —— 原则、架构、里程碑、M1 记录
-- [docs/data-format.md](docs/data-format.md) —— 堆肥 JSON、物品标签、NBT、命令
+- [docs/data-format.md](docs/data-format.md) —— 堆肥/筛子 JSON、材料表、NBT、命令、JEI
 - [docs/textures.md](docs/textures.md) —— 纹理路线、引用规则、检查脚本
 - [THIRD-PARTY.md](THIRD-PARTY.md) —— 第三方/参考来源
 - [AGENTS.md](AGENTS.md) —— 仓库规则（给协作者/AI）
@@ -61,14 +63,11 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶的 JSON
 ```
 
-首次构建会下载 Gradle、Forge、Minecraft 依赖并反编译，耗时较长（约 5–15 分钟），
+首次构建会下载 Gradle、NeoForge、Minecraft 依赖并反编译，耗时较长（约 5–15 分钟），
 之后会走缓存。
 
-如果构建卡在 `Checking server connections`（ForgeGradle 的 TLS 检查），可以加：
-
-```bash
-./gradlew build
-```
+如果构建卡在下载 `maven.neoforged.net`（国内网络），给 Gradle 配代理即可；
+本机用的是 `~/.gradle/gradle.properties` 里的 `systemProp.https.proxyHost/Port`，不进仓库。
 
 ## 纹理
 
@@ -80,11 +79,11 @@ python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶�
 
 ## 联动
 
-对「月光魔法」（`moonlight_magic`，1.20.1 Forge，1.2.0）做**软依赖**联动：
+对「月光魔法」（`moonlight_magic`）做**软依赖**占位（实际联动内容在 M8）：
 
 - `mods.toml` 里是 optional dependency（`mandatory=false`），没装月光魔法也能独立运行。
 - 代码走 `compat/MoonlightCompat`，只通过 mod id + 注册名查找，不直接引用对方类。
-- 联动内容用数据包实现（配方 / 掉落 / 堆肥值 + `forge:mod_loaded` 条件）。
+- 联动内容用数据包实现（配方 / 掉落 / 堆肥值；自定义表按 id 覆盖，不解析条件）。
 
 候选内容：月光线做筛网、池尘做稀有筛出物、月光植物进堆肥、本模组矿粒作为月光仪式材料。
 详见 [docs/DESIGN.md](docs/DESIGN.md) 第 6 节。
@@ -100,6 +99,22 @@ python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶�
 
 Jade 是**可选依赖**；没装时插件类不会被加载。API 只用于编译（`compileOnly`），
 不会打进我们的 jar。
+
+## JEI
+
+安装 [JEI](https://modrinth.com/mod/jei) 后，会多出三个分类：
+
+- **筛子**：左边是输入（砂砾 / 沙子），右边是全部可能的产物；
+  每个产物槽的 tooltip 显示独立概率（例如 `概率：5.56%`）；
+  查筛子方块或任意一档筛网都能打开这个分类。
+- **桶内转化**：满桶流体 + 加入的流体/物品 → 桶内方块
+  （水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→地狱岩、熔岩+荧石→末地石）；
+  查任意一种桶都能打开这个分类。
+- **桶：堆肥**：每个可堆肥物品 → 泥土，tooltip 显示堆肥值（如 `+125 / 1000`）。
+
+JEI 同样是**可选依赖**，只用于编译（`compileOnly`），不会打包；
+没装 JEI 时模组独立运行。数据与结算共用 `data/<ns>/sieve/*.json`、
+`data/<ns>/barrel/*.json` 和 `data/<ns>/compost/*.json`，改表即改 JEI。
 
 ## 许可证
 

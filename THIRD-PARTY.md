@@ -52,7 +52,8 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 ## 美术
 
 `src/main/resources/assets/exnihilosatellitium/textures/` 下的贴图由本项目的
-像素绘制脚本（`art/barrel/generate.py`）逐像素生成，按 MIT 授权。
+像素绘制脚本（`art/barrel/generate.py`、`art/items/ore_pieces/generate.py`、
+`art/items/ingots/generate.py`）逐像素生成，按 MIT 授权。
 没有使用 AI 生图，也没有直接引用原版或其他模组的贴图。
 
 ## 名称
@@ -63,5 +64,12 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 ## Jade（可选，不打包）
 
 Jade 是可选依赖，**不随本项目分发**。本项目只以 `compileOnly` 方式引用其 API
-（`maven.modrinth:jade:11.13.3+forge`）来编译 HUD 插件；用户需要自行安装 Jade。
+（`maven.modrinth:jade:15.10.6+neoforge`）来编译 HUD 插件；用户需要自行安装 Jade。
 Jade 的许可证与版权归其作者所有，见其项目页。
+
+## JEI（可选，不打包）
+
+JEI 是可选依赖，**不随本项目分发**。本项目只以 `compileOnly` 方式引用其 API
+（`mezz.jei:jei-1.21.1-neoforge:19.27.0.340`，来自 `maven.blamejared.com`）来编译
+筛子分类插件；用户需要自行安装 JEI。JEI 的许可证与版权归其作者所有，见其项目页。
+构建时不会把 JEI 的类或资源打进本项目的 jar。

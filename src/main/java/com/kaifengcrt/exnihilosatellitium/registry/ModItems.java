@@ -12,10 +12,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.List;
 
-/**
- * Item registry. Placeholder content lives here until the first gameplay
- * milestone introduces hammers, crooks, meshes and ore pieces.
- */
+/** Item registry: meshes, barrels, sieve and the plain porcelain item. */
 public final class ModItems {
 
     public static final DeferredRegister<Item> ITEMS =
@@ -43,11 +40,11 @@ public final class ModItems {
             ITEMS.register("sieve", () -> new BlockItem(ModBlocks.SIEVE.get(), new Item.Properties()));
 
     public static final DeferredHolder<Item, Item> WOOD_MESH =
-            ITEMS.register("wood_mesh", () -> new MeshItem(new Item.Properties().durability(10), 1));
+            ITEMS.register("wood_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(10), 1));
     public static final DeferredHolder<Item, Item> SILK_MESH =
-            ITEMS.register("silk_mesh", () -> new MeshItem(new Item.Properties().durability(64), 2));
+            ITEMS.register("silk_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(64), 2));
     public static final DeferredHolder<Item, Item> IRON_MESH =
-            ITEMS.register("iron_mesh", () -> new MeshItem(new Item.Properties().durability(256), 3));
+            ITEMS.register("iron_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(256), 3));
 
     public static final List<DeferredHolder<Item, Item>> MESHES = List.of(WOOD_MESH, SILK_MESH, IRON_MESH);
 

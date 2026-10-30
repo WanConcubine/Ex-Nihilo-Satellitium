@@ -6,6 +6,7 @@ Checks:
   - no model texture reference points at minecraft:item/* (vanilla block
     textures are allowed for the vanilla-sampled style)
   - every block/item texture is 16x16 (PNG header only, no Pillow needed)
+  - GUI textures under textures/gui/ are exempt (JEI backgrounds etc.)
 
 Usage:
     python3 scripts/check-textures.py
@@ -85,6 +86,8 @@ def main() -> int:
             width, height = png_size(png)
         except ValueError as exception:
             errors.append(f"{png}: {exception}")
+            continue
+        if png.parent.name == "gui":
             continue
         if (width, height) != (16, 16):
             errors.append(f"{png}: expected 16x16, got {width}x{height}")

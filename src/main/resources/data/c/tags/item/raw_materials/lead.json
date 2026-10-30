@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "exnihilosatellitium:lead_broken",
+    "exnihilosatellitium:lead_crushed",
+    "exnihilosatellitium:lead_ore_dust",
+    "exnihilosatellitium:lead_ore_gravel",
+    "exnihilosatellitium:lead_ore_sand",
+    "exnihilosatellitium:lead_powdered"
+  ]
+}

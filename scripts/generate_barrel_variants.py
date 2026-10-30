@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the per-material barrel assets.
+"""Generate the per-material barrel assets (1.21.1 data paths).
 
 The barrel geometry lives in `models/block/barrel_base.json`. Every material is
 a child model that only overrides the texture slots, so the cuboids and the
@@ -40,6 +40,18 @@ def write_json(path: Path, data: object) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def merge_tag(path: Path, values: list[str]) -> None:
+    """Keep tags written by other generators (e.g. the sieve's axe entry)."""
+    existing: list[str] = []
+    if path.exists():
+        data = json.loads(path.read_text(encoding="utf-8"))
+        existing = [value for value in data.get("values", []) if isinstance(value, str)]
+    for value in values:
+        if value not in existing:
+            existing.append(value)
+    write_json(path, {"replace": False, "values": existing})
+
+
 def wood_textures(wood: str) -> dict[str, str]:
     # Side/top are the vanilla-sampled planks; the inside and the bottom use the
     # stripped log, which keeps a vertical grain and reads darker than the sides.
@@ -66,7 +78,7 @@ def stone_textures() -> dict[str, str]:
     }
 
 
-def generate(name: str, textures: dict[str, str], ingredient: str) -> None:
+def generate(name: str, textures: dict[str, str], planks: str, slab: str) -> None:
     write_json(ASSETS / "blockstates" / f"{name}.json", {
         "variants": {
             "": {"model": f"{MOD_ID}:block/{name}"},
@@ -82,22 +94,24 @@ def generate(name: str, textures: dict[str, str], ingredient: str) -> None:
         "parent": f"{MOD_ID}:block/{name}",
     })
 
-    write_json(DATA / MOD_ID / "recipes" / f"{name}.json", {
+    # Classic barrel: four corner planks plus a slab floor.
+    write_json(DATA / MOD_ID / "recipe" / f"{name}.json", {
         "type": "minecraft:crafting_shaped",
         "pattern": [
-            "PPP",
-            "P P",
-            "PPP",
+            "x x",
+            "x x",
+            "xyx",
         ],
         "key": {
-            "P": {"item": ingredient},
+            "x": {"item": planks},
+            "y": {"item": slab},
         },
         "result": {
-            "item": f"{MOD_ID}:{name}",
+            "id": f"{MOD_ID}:{name}",
         },
     })
 
-    write_json(DATA / MOD_ID / "loot_tables" / "blocks" / f"{name}.json", {
+    write_json(DATA / MOD_ID / "loot_table" / "blocks" / f"{name}.json", {
         "type": "minecraft:block",
         "pools": [
             {
@@ -119,17 +133,22 @@ def main() -> None:
         raise SystemExit(f"missing shared geometry: {base}")
 
     for name, wood in WOOD_BARRELS:
-        generate(name, wood_textures(wood), f"minecraft:{wood}_planks")
-    generate(STONE_BARREL, stone_textures(), "minecraft:stone")
+        generate(
+            name,
+            wood_textures(wood),
+            f"minecraft:{wood}_planks",
+            f"minecraft:{wood}_slab",
+        )
+    generate(STONE_BARREL, stone_textures(), "minecraft:stone", "minecraft:smooth_stone_slab")
 
-    write_json(DATA / "minecraft" / "tags" / "blocks" / "mineable" / "axe.json", {
-        "replace": False,
-        "values": [f"{MOD_ID}:{name}" for name, _ in WOOD_BARRELS],
-    })
-    write_json(DATA / "minecraft" / "tags" / "blocks" / "mineable" / "pickaxe.json", {
-        "replace": False,
-        "values": [f"{MOD_ID}:{STONE_BARREL}"],
-    })
+    merge_tag(
+        DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json",
+        [f"{MOD_ID}:{name}" for name, _ in WOOD_BARRELS],
+    )
+    merge_tag(
+        DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json",
+        [f"{MOD_ID}:{STONE_BARREL}"],
+    )
 
     print(f"generated {len(WOOD_BARRELS)} wood barrels + 1 stone barrel")
 

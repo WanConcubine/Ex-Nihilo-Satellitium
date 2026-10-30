@@ -1,6 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -38,7 +39,8 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onAddReloadListeners(final AddReloadListenerEvent event) {
-        event.addListener(new CompostReloadListener());
-        event.addListener(new SieveReloadListener());
+        event.addListener(new CompostReloadListener(false));
+        event.addListener(new SieveReloadListener(false));
+        event.addListener(new BarrelRecipeReloadListener(false));
     }
 }

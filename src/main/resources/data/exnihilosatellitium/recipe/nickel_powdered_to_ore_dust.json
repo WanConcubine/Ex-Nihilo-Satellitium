@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:nickel_powdered"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:nickel_ore_dust"
+  }
+}

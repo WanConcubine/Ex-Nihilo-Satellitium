@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "exnihilosatellitium:zinc_broken",
+    "exnihilosatellitium:zinc_crushed",
+    "exnihilosatellitium:zinc_ore_dust",
+    "exnihilosatellitium:zinc_ore_gravel",
+    "exnihilosatellitium:zinc_ore_sand",
+    "exnihilosatellitium:zinc_powdered"
+  ]
+}

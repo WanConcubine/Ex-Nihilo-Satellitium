@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:gold_broken"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:gold_ore_gravel"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "base": "minecraft:lava",
+  "added": { "fluid": "minecraft:water" },
+  "result": "minecraft:obsidian"
+}
