@@ -3,6 +3,8 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
@@ -42,5 +44,7 @@ public final class CommonEvents {
         event.addListener(new CompostReloadListener(false));
         event.addListener(new SieveReloadListener(false));
         event.addListener(new BarrelRecipeReloadListener(false));
+        event.addListener(new HammerRecipeReloadListener());
+        event.addListener(new CrookDropsReloadListener());
     }
 }

@@ -1,6 +1,8 @@
 package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -39,6 +41,9 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> SIEVE =
             ITEMS.register("sieve", () -> new BlockItem(ModBlocks.SIEVE.get(), new Item.Properties()));
 
+    public static final DeferredHolder<Item, Item> DUST =
+            ITEMS.register("dust", () -> new BlockItem(ModBlocks.DUST.get(), new Item.Properties()));
+
     public static final DeferredHolder<Item, Item> WOOD_MESH =
             ITEMS.register("wood_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(10), 1));
     public static final DeferredHolder<Item, Item> SILK_MESH =
@@ -47,6 +52,35 @@ public final class ModItems {
             ITEMS.register("iron_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(256), 3));
 
     public static final List<DeferredHolder<Item, Item>> MESHES = List.of(WOOD_MESH, SILK_MESH, IRON_MESH);
+
+    public static final DeferredHolder<Item, Item> WOODEN_HAMMER =
+            ITEMS.register("wooden_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(64), 1));
+    public static final DeferredHolder<Item, Item> STONE_HAMMER =
+            ITEMS.register("stone_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(128), 2));
+    public static final DeferredHolder<Item, Item> IRON_HAMMER =
+            ITEMS.register("iron_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(256), 3));
+    public static final DeferredHolder<Item, Item> GOLDEN_HAMMER =
+            ITEMS.register("golden_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(32), 4));
+    public static final DeferredHolder<Item, Item> DIAMOND_HAMMER =
+            ITEMS.register("diamond_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(1561), 5));
+    public static final DeferredHolder<Item, Item> NETHERITE_HAMMER =
+            ITEMS.register("netherite_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(2031), 6));
+
+    public static final DeferredHolder<Item, Item> WOODEN_CROOK =
+            ITEMS.register("wooden_crook", () -> new CrookItem(
+                    new Item.Properties().stacksTo(1).durability(64), 1));
+    public static final DeferredHolder<Item, Item> BONE_CROOK =
+            ITEMS.register("bone_crook", () -> new CrookItem(
+                    new Item.Properties().stacksTo(1).durability(128), 2));
+
+    public static final DeferredHolder<Item, Item> SILKWORM =
+            ITEMS.register("silkworm", () -> new Item(new Item.Properties()));
 
     public static final List<DeferredHolder<Item, Item>> BARREL_ITEMS = List.of(
             BARREL,

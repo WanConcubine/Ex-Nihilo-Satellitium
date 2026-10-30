@@ -1,0 +1,65 @@
+{
+  "input": "exnihilosatellitium:dust",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:iron_powdered",
+      "chance": 0.2
+    },
+    {
+      "item": "exnihilosatellitium:gold_powdered",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:copper_powdered",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:tin_powdered",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:silver_powdered",
+      "chance": 0.02222
+    },
+    {
+      "item": "exnihilosatellitium:lead_powdered",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:nickel_powdered",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:platinum_powdered",
+      "chance": 0.00781
+    },
+    {
+      "item": "exnihilosatellitium:aluminum_powdered",
+      "chance": 0.125
+    },
+    {
+      "item": "exnihilosatellitium:osmium_powdered",
+      "chance": 0.1
+    },
+    {
+      "item": "exnihilosatellitium:zinc_powdered",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:uranium_powdered",
+      "chance": 0.01111
+    },
+    {
+      "item": "minecraft:redstone",
+      "chance": 0.125
+    },
+    {
+      "item": "minecraft:glowstone_dust",
+      "chance": 0.08333
+    },
+    {
+      "item": "minecraft:gunpowder",
+      "chance": 0.0625
+    }
+  ]
+}

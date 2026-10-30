@@ -549,3 +549,58 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 - 桶的 JEI 分类在空服/无世界时不会注册（JEI 进世界时才 `addRecipes`）；看日志要进世界。
 - 专用服空服时区块不 tick：RCON 测桶前先 `forceload add`，否则 `data merge` 写进去也
   不会出现 `Solid` / `DirtReady`。
+
+## 15. M3 首批：锤子 / 钩子 / 尘土（2026-10-30）
+
+**目标**
+
+把 M2 的“筛矿”接成完整的手动链：圆石 → 砂砾 → 沙子 → 尘土；尘土进筛出粉末；
+矿砾/矿砂用锤子降档；树叶用钩子多出树苗/蚕。数值仍用本项目的表，不搬 GPL 代码/资源。
+
+**决策**
+
+1. **锤子六档**：木 / 石 / 铁 / 金 / 钻石 / 下界合金，耐久
+   64 / 128 / 256 / 32 / 1561 / 2031（金最脆，钻石与下界合金最长）；档位只排序，不改变 crush 表。
+   **只有左键正常破坏**一条路径（`BlockDropsEvent` 替换掉落），**没有右键快捷方式**——
+   经典 Ex Nihilo 同样只走破坏方块；早期实现里的 `HammerItem.useOn` 已删除。
+2. **锤表数据驱动**：`data/<ns>/hammer/*.json`（`input` 方块 → `result` 物品 + 可选
+   `min`/`max` 数量区间），共 39 条：圆石→砂砾、砂砾→沙子、沙子→尘土；
+   12 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；12 种矿物粉尘→**它自己**。
+   服务端专用；没有装 JEI 也能用。
+3. **尘土**：新增 `exnihilosatellitium:dust` 方块（`cube_all`，自有 `block/dust.png` 贴图）+ 物品；
+   由沙子锤出，可放进筛子；`sieve/dust.json` 出 12 种粉末 + 红石/荧石粉/火药。
+4. **钩子两档**：木钩 / 骨钩，耐久 64 / 128；骨钩把叶表概率 ×1.5（封顶 100%）。
+   `data/<ns>/crook/*.json` 按树叶方块列出额外掉落（树苗/苹果/蚕），10 张表；
+   原版树叶掉落保留，钩子只追加。蚕物品是 M6 丝线链的占位。
+5. **蚕/丝线拆分**：M3 只给 `silkworm` 物品和掉落，不接丝线/羊毛；M6 再补。
+   蚕贴图是 **4 帧蠕动动画**（16×64，`frametime 6`）：以 Creatio 原图为基础，只把头/中/尾各移动 1px。
+6. **贴图改用 Creatio（MIT）+ 1.21 风格微调**：首版 5 个工具图标 + 蚕 + 尘土是自绘占位，
+   作者验收不通过；改为采用 **Ex Nihilo: Creatio 1.12.2** 的 16×16 PNG
+   （木/石/铁/金/钻石锤、木/骨钩、尘土）。
+   Creatio 是 MIT，可复制再分发；来源与版权登记在 [THIRD-PARTY.md](../THIRD-PARTY.md)。
+   随后按 1.21 原版工具/骨头的观感做微调（`art/items/tools/restyle.py`，原始图只读放在
+   `art/items/tools/creatio/`）：钩子加 1px 方向光斜切、石/铁锤描边收成近黑 `#181818`、
+   金锤改成 1.21 的暖金色、下界合金锤由钻石锤换色而来、蚕保留原图做 4 帧位移动画、
+   尘土从 110 色收敛到 4 色。Sequentia（传承）1.21 是 CC BY-NC-SA 4.0，**不能**采用，
+   只作风格对照。旧的 `art/items/tools/generate.py`（全自绘）已删除。
+
+**验证**
+
+- 服务端：`[hammer] loaded 39 recipes`、`[crook] loaded 10 leaves tables`、
+  `[sieve] loaded 3 inputs, 44 drops`、`our recipes=91`（原 88 + 金/钻石/下界合金锤 3 条）。
+- 客户端：JEI `registered 3 sieve recipes`，无 missing model/texture。
+- **未验证**：玩家实际锤/钩/筛尘土、六档锤与两档钩合成、尘土纹理/掉落手感。
+
+**坑**
+
+- `BlockDropsEvent` 是**服务端**事件；钩子/锤子的掉落不能在客户端改。
+- 锤子/钩子是普通 `Item`，没有 `DataComponents.TOOL`，原版**不会**在破坏方块时扣耐久；
+  耐久由 `ToolEvents` 手动扣 1。**`BlockDropsEvent#getTool()` 是 `ServerPlayerGameMode`
+  复制出来的栈**，直接扣它会丢失，必须扣 `player.getMainHandItem()`（并校验 item 一致）。
+- 锤子不是镐/锹：锤表内方块靠 `PlayerEvent.HarvestCheck` 标记为可收获、
+  `BreakSpeed` 给 6.0 速度（接近经典锤的 0.75× 效率），否则 `playerDestroy` 的
+  `canHarvestBlock` 闸门会让方块直接掉空。锤表外方块不加速。
+- **创造模式不经过 `BlockDropsEvent`**（`ServerPlayerGameMode.destroyBlock` 走
+  `removeBlock` 直接返回），所以另挂 `BlockEvent.BreakEvent` 给创造模式补掉落，
+  方便在创造测试世界里敲方块。生存模式仍只走 `BlockDropsEvent`，不会双掉。
+- 尘土方块贴图用更浅的灰米色；原版 `gray_concrete_powder` 会和沙子视觉混淆。

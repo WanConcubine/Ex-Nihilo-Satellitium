@@ -47,6 +47,10 @@ public final class ModBlocks {
                     .noOcclusion()
                     .isViewBlocking((state, level, pos) -> false)));
 
+    /** Generic dust block: hammered from sand, then sifted for powdered resources. */
+    public static final DeferredHolder<Block, Block> DUST =
+            BLOCKS.register("dust", () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.SAND)));
+
     /** Registration order doubles as creative-tab order. */
     public static final List<DeferredHolder<Block, Block>> BARRELS = List.of(
             BARREL,

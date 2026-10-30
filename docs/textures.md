@@ -1,6 +1,6 @@
 # 纹理规范
 
-> 状态：M1（木桶 + 七种材质）/ 最后更新：2026-10-28
+> 状态：M1–M3（木桶 / 筛子 / 锤钩尘土）/ 最后更新：2026-10-30
 
 ## 两条路线
 
@@ -12,8 +12,10 @@
   - 内壁/桶底 = `stripped_<wood>_log`，保留竖向木纹、比外壁深一档；
   - 石桶 = `stone` + `smooth_stone` 顶沿 + `deepslate_tiles` 深色箍；
   - 木桶的两道箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
-- **物品与特殊表面（瓷土、堆肥面）：自有 16×16 手绘像素。**
+- **物品与特殊表面（瓷土、堆肥面）：自有 16×16 手绘像素 / 脚本生成。**
   放在 `assets/exnihilosatellitium/textures/`，由脚本逐像素生成，可复现。
+- **M3 工具、蚕、尘土：采用 Ex Nihilo: Creatio 的 MIT 贴图，再按 1.21 风格微调**
+  （见文末「M3 工具图标」一节）。
 
 这样和 Ex Nihilo 的“采样自原版”是同一个思路，但不复制它的 GPLv3 PNG。
 
@@ -115,9 +117,12 @@ assets/exnihilosatellitium/textures/
 ## 引用规则
 
 - **允许**模型引用 `minecraft:block/*`：这是 vanilla-sampled 的正常做法，贴图不随 jar 分发。
-- **禁止**模型引用 `minecraft:item/*`：物品图标必须是自有的 `exnihilosatellitium:item/*`。
+- **禁止**模型引用 `minecraft:item/*`：物品图标必须是 `exnihilosatellitium:item/*`
+  （自有，或采用自 MIT 授权的 Creatio 后再落到本命名空间）。
 - 自有方块/物品引用 `exnihilosatellitium:*`，文件必须存在且为 16×16。
-- 不复制 Ex Nihilo 系列或其他 GPLv3 项目的 PNG。
+- 不复制 Ex Nihilo 系列中 **GPLv3（原版 / Omnia）或 CC BY-NC-SA（Sequentia）** 项目的 PNG；
+  只有 **MIT** 的 Ex Nihilo: Creatio 允许直接采用，采用时在
+  [THIRD-PARTY.md](../THIRD-PARTY.md) 登记来源与许可证。
 
 ## AI 政策
 
@@ -125,7 +130,7 @@ assets/exnihilosatellitium/textures/
 - 瓷土、堆肥面由 `art/items/generate.py` 与 `art/barrel/generate.py` 逐像素生成；
   也可由画师手绘后替换同名文件。
 - moodboard / 参考图可以用 AI，但**不进仓库**、不参与打包。
-- 每个新贴图在 PR/提交里注明来源（脚本、画师或 vanilla 引用）。
+- 每个新贴图在 PR/提交里注明来源（脚本、画师、vanilla 引用或 MIT 的 Creatio）。
 
 ## 检查
 
@@ -159,3 +164,50 @@ python3 scripts/check-textures.py
 - 流体侧面、流动纹理还没画；现在只有液面。
 - `art/barrel/barrel_side*.png` 等早期自绘图留作参考；如果将来要改用自有贴图，
   需要同时去掉模型里的外凸箍，避免和贴图里画好的箍叠在一起。
+
+## M3 工具图标（2026-10-30，Creatio 贴图 + 1.21 风格微调）
+
+6 种锤（木/石/铁/金/钻石）、木/骨钩、尘土方块**采用 Ex Nihilo: Creatio（1.12.2）的
+16×16 PNG**；下界合金锤由钻石锤换色，蚕是 Creatio 原图的 4 帧蠕动动画（只移动头/中/尾 1px）。
+Creatio 是 MIT 授权，允许复制与再分发；完整版权/许可见
+[THIRD-PARTY.md](../THIRD-PARTY.md) 的「Ex Nihilo: Creatio」一节。
+
+| 本仓库 | Creatio 源 |
+|---|---|
+| `textures/item/wooden_crook.png` | `items/tools/crook/crook_wood.png` |
+| `textures/item/bone_crook.png` | `items/tools/crook/crook_bone.png` |
+| `textures/item/wooden_hammer.png` | `items/hammerwood.png` |
+| `textures/item/stone_hammer.png` | `items/hammerstone.png` |
+| `textures/item/iron_hammer.png` | `items/hammeriron.png` |
+| `textures/item/golden_hammer.png` | `items/hammergold.png` |
+| `textures/item/diamond_hammer.png` | `items/hammerdiamond.png` |
+| `textures/item/netherite_hammer.png` | 由 `hammerdiamond.png` 换色（自有衍生） |
+| `textures/block/dust.png` | `blocks/blockdust.png` |
+| `textures/item/silkworm.png` | Creatio `items/silkworm.png` + **4 帧动画**（原图只读，帧由脚本位移生成） |
+
+- **锤/钩剪影不变，只改颜色**：由 `art/items/tools/restyle.py` 从
+  `art/items/tools/creatio/` 里的原始采用图生成。原始 PNG 只读，不手改；
+  要再调风格就改脚本重跑。
+- 微调规则（对标 1.21 原版工具/骨头）：
+  | 贴图 | 处理 |
+  |---|---|
+  | 木钩 / 骨钩 | 1px 方向光斜切：右下暗边、左上亮边（同原版骨/木剑） |
+  | 木锤 | 暗边 `#372910` → `#20180a` |
+  | 石锤 / 铁锤 | 描边改为原版工具近黑 `#181818`（石锤内圈 `#2e2e2e`） |
+  | 金锤 | 1.12 的黄绿色 → 1.21 暖金色（`#825d16` / `#e9b115` / `#eaee57` / `#fdff76`） |
+  | 钻石锤 | Creatio 已是 1.21 钻石色板，保持原样 |
+  | 下界合金锤 | 钻石锤的青色系映射到原版下界合金的暗紫灰（`#231012`…`#867b86`），木柄不变 |
+  | 蚕 | **4 帧蠕动动画**：保留 Creatio 原图的轮廓/绿眼，只把头、中段、尾分别上下移动 1px（第 1 帧就是原图） |
+  | 尘土方块 | 保留 Creatio 噪点，110 色 → 4 色量化（原版沙子只有 6 色） |
+- **动画格式**：`silkworm.png` 是 16×64（4 帧 × 16），旁边 `silkworm.png.mcmeta`
+  写 `{"animation":{"frametime":6}}`；`check-textures.py` 会按“有 mcmeta 的贴图”
+  允许 16×(16n)，其余仍必须是 16×16。
+- 预览：[m3-textures.png](images/m3-textures.png)（物品 8×、尘土方块等轴、蚕取第 1 帧；
+  由脚本生成）；蚕的循环见 [silkworm-animation.gif](images/silkworm-animation.gif)。
+- 6 个锤/钩的物品模型是 `item/handheld`（手持角度同原版工具）；蚕仍是 `item/generated`。
+- 尘土方块模型从 `minecraft:block/gray_concrete_powder` 改为自有
+  `exnihilosatellitium:block/dust`（不再依赖原版粉状方块当占位）。
+- 旧的 `art/items/tools/generate.py`（完全自绘）已删除；现在的 `restyle.py` 做颜色映射，
+  并负责从原图生成蚕动画帧。矿尘方块（`ore_dust_block`）仍走 vanilla-sampled + tint，未受影响。
+- **Sequentia（传承）1.21 是 CC BY-NC-SA 4.0**，只能看风格、不能采用其贴图。
+- 待办：进游戏 4× 目视 6 种锤/2 种钩、蚕动画、尘土方块接缝。

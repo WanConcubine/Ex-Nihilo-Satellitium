@@ -1,0 +1,13 @@
+{
+  "input": "minecraft:flowering_azalea_leaves",
+  "drops": [
+    {
+      "item": "minecraft:flowering_azalea",
+      "chance": 0.25
+    },
+    {
+      "item": "exnihilosatellitium:silkworm",
+      "chance": 0.02
+    }
+  ]
+}

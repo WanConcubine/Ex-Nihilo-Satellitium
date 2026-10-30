@@ -61,6 +61,8 @@ com/kaifengcrt/exnihilosatellitium/
 │   ├── material/                # 材料表读取（materials.json，注册期决定内容）
 │   ├── compost/                # JSON 注册表 + reload listener
 │   ├── sieve/                   # SieveRegistry + reload listener
+│   ├── hammer/                  # 锤子 crush 表 + reload listener
+│   ├── crook/                   # 钩子叶表 + reload listener
 │   ├── event/                   # CommonEvents（reload）、CapabilityEvents（流体能力）
 │   └── tag/ModTags.java
 ├── client/                      # BarrelRenderer、OreColors（染色）、BER 注册
@@ -68,7 +70,7 @@ com/kaifengcrt/exnihilosatellitium/
 ```
 
 - 方块状态尽量少；自定义进度放 BE，`getUpdateTag`/`getUpdatePacket` 同步。
-- 数据驱动优先：配方/掉落/堆肥值/桶内转化能进 JSON 就不要硬编码。
+- 数据驱动优先：配方/掉落/堆肥值/桶内转化/锤表/钩表能进 JSON 就不要硬编码。
 - 新方块默认 16×16 纹理；内缩模型要和 `getShape`/`getCollisionShape` 同步。
 
 ## 5. 文档分工

@@ -129,10 +129,12 @@ def main():
         "gravel": [("minecraft:flint", 4), ("minecraft:coal", 8), ("minecraft:lapis_lazuli", 20),
                    ("minecraft:diamond", 128), ("minecraft:emerald", 150)],
         "sand": [],
-        "dust": [],
+        "dust": [("minecraft:redstone", 8), ("minecraft:glowstone_dust", 12),
+                 ("minecraft:gunpowder", 16)],
     }
-    suffix = {"gravel": "broken", "sand": "crushed"}  # dust 输入等通用尘土方块；粉末暂由锤子产出
-    inputs = {"gravel": "minecraft:gravel", "sand": "minecraft:sand"}
+    suffix = {"gravel": "broken", "sand": "crushed", "dust": "powdered"}
+    inputs = {"gravel": "minecraft:gravel", "sand": "minecraft:sand",
+              "dust": "exnihilosatellitium:dust"}
     count = 0
     for kind, suffix_name in suffix.items():
         outputs = [{"item": f"exnihilosatellitium:{m['id']}_{suffix_name}",

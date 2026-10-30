@@ -17,9 +17,10 @@ Minecraft 是 Mojang Studios 的商标。Minecraft 与 Forge 不随本仓库分�
 木桶等方块模型会在运行时引用原版方块贴图（`oak_planks`、`spruce_planks`、
 `gray_concrete`）；这些贴图不随本项目的 jar 分发。
 
-## Ex Nihilo 系列（参考，不含代码/资源）
+## Ex Nihilo 系列（参考，不含 GPLv3 代码/资源）
 
-本项目是独立实现，**没有复制**任何现有 Ex Nihilo 分支的代码、贴图、模型或音效。
+本项目是独立实现，**没有复制**原版 / Omnia 等 GPLv3 分支的代码、贴图、模型或音效。
+唯一的例外是 **Ex Nihilo: Creatio（MIT）** 的少量贴图，见下一节。
 
 设计阶段以只读方式参考了原版 Ex Nihilo（Erasmus_Crowley，GPLv3）的公开仓库，
 用于理解桶类方块的**功能性思路**（例如内缩的桶身轮廓、在桶内渲染内容物）。
@@ -49,12 +50,54 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 混入 GPLv3 代码，再整体只标 MIT”是走不通的。只有将来真的引入 GPLv3 组件或决定转协议时，
 才需要把 GPLv3 全文放进仓库并逐项满足这些条件。
 
+## Ex Nihilo: Creatio（MIT，贴图直接采用）
+
+M3 的工具与尘土贴图直接采用 **Ex Nihilo: Creatio**（1.12.2 分支，
+<https://github.com/BloodyMods/ExNihiloCreatio>）。该项目按 **MIT** 授权，
+允许复制、修改、再分发；许可证全文与版权声明见
+[third-party/MIT-ExNihiloCreatio.txt](third-party/MIT-ExNihiloCreatio.txt)
+（版权：MikeLydeamore 2015 / Jacky1356400 2017 / BloodWorkXGaming 2017 /
+SirLyle 2017 / Wolforce 2019 textures）。
+
+采用的 PNG（16×16，取自 Creatio）：
+
+| 本仓库文件 | Creatio 源文件 |
+|---|---|
+| `textures/item/wooden_crook.png` | `textures/items/tools/crook/crook_wood.png` |
+| `textures/item/bone_crook.png` | `textures/items/tools/crook/crook_bone.png` |
+| `textures/item/wooden_hammer.png` | `textures/items/hammerwood.png` |
+| `textures/item/stone_hammer.png` | `textures/items/hammerstone.png` |
+| `textures/item/iron_hammer.png` | `textures/items/hammeriron.png` |
+| `textures/item/golden_hammer.png` | `textures/items/hammergold.png` |
+| `textures/item/diamond_hammer.png` | `textures/items/hammerdiamond.png` |
+| `textures/block/dust.png` | `textures/blocks/blockdust.png` |
+
+派生（不是直接复制）：
+
+| 本仓库文件 | 来源 |
+|---|---|
+| `textures/item/netherite_hammer.png` | 由 `hammerdiamond.png` 换色为下界合金色板（本项目衍生，MIT） |
+| `textures/item/silkworm.png` + `.mcmeta` | Creatio `items/silkworm.png` 的 4 帧位移动画（原图只读，帧由 `restyle.py` 生成） |
+
+后续如再采用 Creatio 的资源，必须同步扩充本表和许可证文件。
+以上 PNG 在 `src/main/.../textures/` 里经过了**颜色微调**（1.21 风格的方向光、描边、
+暖金/下界合金色板与色阶收敛）；原始采用图只读保存在 `art/items/tools/creatio/`，
+微调规则见 `art/items/tools/restyle.py`。MIT 允许修改与再分发，微调版仍按 MIT 授权，
+版权仍归原作者。
+**Ex Nihilo: Sequentia（传承）1.21 的许可证是 CC BY-NC-SA 4.0**（非 MIT，
+带非商业与相同方式共享条款），因此本项目**不采用**其任何贴图，只作玩法/数值对照。
+
 ## 美术
 
-`src/main/resources/assets/exnihilosatellitium/textures/` 下的贴图由本项目的
-像素绘制脚本（`art/barrel/generate.py`、`art/items/ore_pieces/generate.py`、
-`art/items/ingots/generate.py`）逐像素生成，按 MIT 授权。
-没有使用 AI 生图，也没有直接引用原版或其他模组的贴图。
+`src/main/resources/assets/exnihilosatellitium/textures/` 下的贴图分三类来源：
+
+1. **本项目逐像素生成（MIT）**：`art/barrel/generate.py`、`art/items/ore_pieces/generate.py`、
+   `art/items/ingots/generate.py` 生成的桶面、矿物碎块与锭。
+2. **Ex Nihilo: Creatio 直接采用（MIT）**：M3 的 6 种锤（下界合金锤为换色衍生）、
+   木/骨钩、尘土方块；蚕是 Creatio 原图的 4 帧位移动画。见上一节的对照表。
+3. **运行时引用原版方块贴图（不打包）**：木桶、矿砾/矿砂/矿尘方块的 vanilla-sampled 底图。
+
+没有使用 AI 生图，也没有引用 GPLv3 项目的贴图。
 
 ## 名称
 
