@@ -44,8 +44,8 @@
 - 未验证：满熔岩桶右键红石/荧石（需要真实玩家）、两个分类的 tooltip 逐条、
   七种桶各自作为 catalyst 逐个点开、木桶拒热手感；玩家破坏返还、管道灌桶、F3+T 分离
   只有代码路径，未玩家实测。
-- 上一批 `b952550`（JEI / 桶内转化 / 技术债修复 + 配方/命名）已提交并推送；
-  **M3 首批改动尚未提交**，见 `git status`。
+- `b952550`（JEI / 桶内转化 / 技术债修复 + 配方/命名）已推送；
+  **M3 全部内容已在 `797c110` 提交并推送（2026-10-30）**。
 - 开发服 `run/server.properties` 的 `online-mode` / `enforce-secure-profile` 为 `true`；
   spawn 仍是 `0, 72, 0`；测试用的临时方块、force-load 已清掉，开发服/客户端已停。
 - **2026-10-30 技术债 P0/P1 修复**（本轮）：
@@ -63,7 +63,7 @@
 
 ## 交接清单（下次会话先做）
 
-- 上一批 `b952550` 已提交并推送；**M3 两批都未提交**，先按“下一步 0”验收，再提交，
+- M3 已在 `797c110` 提交并推送；下一步是进游戏验收“下一步 0”，发现问题再开新提交，
   不要提交 `build/`、`run/`。
 - 开发服/客户端已停，临时方块/force-load 已清；下一次先跑
   `./gradlew build` + `python3 scripts/check-textures.py`。
@@ -71,7 +71,7 @@
   未修项和优先级看 [tech-debt.md](tech-debt.md)。
 - 当前“改完但没实测”的路径：M3 六档锤/钩/尘土、蚕动画、破坏返还、管道灌桶、
   F3+T 分离、红石/荧石掺料。
-- M3 未提交文件：`common/hammer/`、`common/crook/`、`HammerItem`、`CrookItem`、
+- `797c110` 已包含：`common/hammer/`、`common/crook/`、`HammerItem`、`CrookItem`、
   `ToolEvents`、`dust` 方块/物品/语言/掉落、`hammer/*.json`（39 条）、`crook/*.json`、
   `sieve/dust.json`、6 种锤 + 2 种钩的合成（金/钻石是工作台，下界合金是锻造台）、
   9 张 Creatio 采用贴图 + 1 张换色下界合金锤 + 蚕动画 + mcmeta、
