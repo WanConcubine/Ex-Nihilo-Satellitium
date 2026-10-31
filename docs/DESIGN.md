@@ -916,8 +916,9 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 **实现**
 
 - 三个物品 `doll` / `angry_doll` / `creepy_doll`：形状采用 Creatio（MIT）的 `doll.png`，
-  `art/items/dolls/restyle.py` 缩回 16×16、量化到 4 阶 + 1px 描边；愤怒/诡异换色板。
-  （先试过手绘 X 形人偶，被否掉，改成采用底稿 + 现代化。）
+  `art/items/dolls/restyle.py` 缩到 **64×64**（作者要求更高清）、量化到 4 阶 + 1px 描边；
+  愤怒/诡异换色板。（先试过手绘 X 形人偶，被否掉；16×16 也被嫌不够清楚。）
+  `check-textures.py` 因此放宽：物品贴图允许 16 或 64，方块仍是 16。
 - 6 条合成配方（钻石、绿宝石、愤怒正/反、诡异正/反）。
 - **`BarrelRecipes` 新规则类型**：`entity` + `peaceful_drop` + 可选 `cook_ticks`（默认 600）。
   - 命中后 `BarrelBlockEntity#startCooking` 清空流体、记录 `pendingEntity`，600 tick 后
