@@ -40,6 +40,16 @@ public final class ModItems {
             registerCrucibleItem("acacia_wooden_crucible", ModBlocks.ACACIA_WOODEN_CRUCIBLE);
     public static final DeferredHolder<Item, Item> DARK_OAK_WOODEN_CRUCIBLE =
             registerCrucibleItem("dark_oak_wooden_crucible", ModBlocks.DARK_OAK_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> MANGROVE_WOODEN_CRUCIBLE =
+            registerCrucibleItem("mangrove_wooden_crucible", ModBlocks.MANGROVE_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> CHERRY_WOODEN_CRUCIBLE =
+            registerCrucibleItem("cherry_wooden_crucible", ModBlocks.CHERRY_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> BAMBOO_WOODEN_CRUCIBLE =
+            registerCrucibleItem("bamboo_wooden_crucible", ModBlocks.BAMBOO_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> CRIMSON_WOODEN_CRUCIBLE =
+            registerCrucibleItem("crimson_wooden_crucible", ModBlocks.CRIMSON_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> WARPED_WOODEN_CRUCIBLE =
+            registerCrucibleItem("warped_wooden_crucible", ModBlocks.WARPED_WOODEN_CRUCIBLE);
 
     public static final List<DeferredHolder<Item, Item>> WOODEN_CRUCIBLES = List.of(
             WOODEN_CRUCIBLE,
@@ -47,7 +57,12 @@ public final class ModItems {
             BIRCH_WOODEN_CRUCIBLE,
             JUNGLE_WOODEN_CRUCIBLE,
             ACACIA_WOODEN_CRUCIBLE,
-            DARK_OAK_WOODEN_CRUCIBLE);
+            DARK_OAK_WOODEN_CRUCIBLE,
+            MANGROVE_WOODEN_CRUCIBLE,
+            CHERRY_WOODEN_CRUCIBLE,
+            BAMBOO_WOODEN_CRUCIBLE,
+            CRIMSON_WOODEN_CRUCIBLE,
+            WARPED_WOODEN_CRUCIBLE);
 
     /** M6: unfired porcelain bucket, smelted into the working bucket. */
     public static final DeferredHolder<Item, Item> UNFIRED_PORCELAIN_BUCKET =

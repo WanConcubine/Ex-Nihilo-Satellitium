@@ -82,6 +82,16 @@ public final class ModBlocks {
             registerWoodenCrucible("acacia_wooden_crucible", Blocks.ACACIA_PLANKS);
     public static final DeferredHolder<Block, Block> DARK_OAK_WOODEN_CRUCIBLE =
             registerWoodenCrucible("dark_oak_wooden_crucible", Blocks.DARK_OAK_PLANKS);
+    public static final DeferredHolder<Block, Block> MANGROVE_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("mangrove_wooden_crucible", Blocks.MANGROVE_PLANKS);
+    public static final DeferredHolder<Block, Block> CHERRY_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("cherry_wooden_crucible", Blocks.CHERRY_PLANKS);
+    public static final DeferredHolder<Block, Block> BAMBOO_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("bamboo_wooden_crucible", Blocks.BAMBOO_PLANKS);
+    public static final DeferredHolder<Block, Block> CRIMSON_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("crimson_wooden_crucible", Blocks.CRIMSON_PLANKS);
+    public static final DeferredHolder<Block, Block> WARPED_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("warped_wooden_crucible", Blocks.WARPED_PLANKS);
 
     public static final List<DeferredHolder<Block, Block>> WOODEN_CRUCIBLES = List.of(
             WOODEN_CRUCIBLE,
@@ -89,7 +99,12 @@ public final class ModBlocks {
             BIRCH_WOODEN_CRUCIBLE,
             JUNGLE_WOODEN_CRUCIBLE,
             ACACIA_WOODEN_CRUCIBLE,
-            DARK_OAK_WOODEN_CRUCIBLE);
+            DARK_OAK_WOODEN_CRUCIBLE,
+            MANGROVE_WOODEN_CRUCIBLE,
+            CHERRY_WOODEN_CRUCIBLE,
+            BAMBOO_WOODEN_CRUCIBLE,
+            CRIMSON_WOODEN_CRUCIBLE,
+            WARPED_WOODEN_CRUCIBLE);
 
     /** Registration order doubles as creative-tab order. */
     public static final List<DeferredHolder<Block, Block>> BARRELS = List.of(

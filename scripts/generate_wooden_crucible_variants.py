@@ -21,24 +21,34 @@ ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium"
 DATA = ROOT / "src" / "main" / "resources" / "data"
 MOD_ID = "exnihilosatellitium"
 
-# (block id, wood type, Chinese name). The public `wooden_crucible` stays oak.
+# (block id, log item, side texture, top texture, inside texture, zh, en).
+# `wooden_crucible` keeps the plain id but is named as the oak variant.
 WOODS = (
-    ("wooden_crucible", "oak", "木坩埚"),
-    ("spruce_wooden_crucible", "spruce", "云杉木坩埚"),
-    ("birch_wooden_crucible", "birch", "白桦木坩埚"),
-    ("jungle_wooden_crucible", "jungle", "丛林木坩埚"),
-    ("acacia_wooden_crucible", "acacia", "金合欢木坩埚"),
-    ("dark_oak_wooden_crucible", "dark_oak", "深色橡木坩埚"),
+    ("wooden_crucible", "minecraft:oak_log", "oak_log", "oak_log_top",
+     "stripped_oak_log", "橡木坩埚", "Oak Crucible"),
+    ("spruce_wooden_crucible", "minecraft:spruce_log", "spruce_log", "spruce_log_top",
+     "stripped_spruce_log", "云杉木坩埚", "Spruce Crucible"),
+    ("birch_wooden_crucible", "minecraft:birch_log", "birch_log", "birch_log_top",
+     "stripped_birch_log", "白桦木坩埚", "Birch Crucible"),
+    ("jungle_wooden_crucible", "minecraft:jungle_log", "jungle_log", "jungle_log_top",
+     "stripped_jungle_log", "丛林木坩埚", "Jungle Crucible"),
+    ("acacia_wooden_crucible", "minecraft:acacia_log", "acacia_log", "acacia_log_top",
+     "stripped_acacia_log", "金合欢木坩埚", "Acacia Crucible"),
+    ("dark_oak_wooden_crucible", "minecraft:dark_oak_log", "dark_oak_log", "dark_oak_log_top",
+     "stripped_dark_oak_log", "深色橡木坩埚", "Dark Oak Crucible"),
+    # 1.20+ woods.
+    ("mangrove_wooden_crucible", "minecraft:mangrove_log", "mangrove_log", "mangrove_log_top",
+     "stripped_mangrove_log", "红树木坩埚", "Mangrove Crucible"),
+    ("cherry_wooden_crucible", "minecraft:cherry_log", "cherry_log", "cherry_log_top",
+     "stripped_cherry_log", "樱花木坩埚", "Cherry Crucible"),
+    ("bamboo_wooden_crucible", "minecraft:bamboo_block", "bamboo_block", "bamboo_block_top",
+     "stripped_bamboo_block", "竹坩埚", "Bamboo Crucible"),
+    # Nether stems (1.16).
+    ("crimson_wooden_crucible", "minecraft:crimson_stem", "crimson_stem", "crimson_stem_top",
+     "stripped_crimson_stem", "绯红木坩埚", "Crimson Crucible"),
+    ("warped_wooden_crucible", "minecraft:warped_stem", "warped_stem", "warped_stem_top",
+     "stripped_warped_stem", "诡异木坩埚", "Warped Crucible"),
 )
-
-EN = {
-    "oak": "Wooden Crucible",
-    "spruce": "Spruce Crucible",
-    "birch": "Birch Crucible",
-    "jungle": "Jungle Crucible",
-    "acacia": "Acacia Crucible",
-    "dark_oak": "Dark Oak Crucible",
-}
 
 
 def write_json(path: Path, data: object) -> None:
@@ -57,43 +67,39 @@ def merge_tag(path: Path, values: list[str]) -> None:
     write_json(path, {"replace": False, "values": existing})
 
 
-def textures(wood: str) -> dict[str, str]:
+def textures(side: str, top: str, inside: str) -> dict[str, str]:
     return {
-        "particle": f"minecraft:block/{wood}_log",
-        "side": f"minecraft:block/{wood}_log",
-        "top": f"minecraft:block/{wood}_log_top",
-        "bottom": f"minecraft:block/{wood}_log",
-        "inside": f"minecraft:block/stripped_{wood}_log",
+        "particle": f"minecraft:block/{side}",
+        "side": f"minecraft:block/{side}",
+        "top": f"minecraft:block/{top}",
+        "bottom": f"minecraft:block/{side}",
+        "inside": f"minecraft:block/{inside}",
     }
 
 
-def update_lang(entries: dict[str, str]) -> None:
+def update_lang() -> None:
     for lang in ("en_us", "zh_cn"):
         path = ASSETS / "lang" / f"{lang}.json"
         data = json.loads(path.read_text(encoding="utf-8"))
-        data.update(entries if lang == "zh_cn" else {})
-        if lang == "en_us":
-            for block_id, wood, _ in WOODS:
-                data[f"block.{MOD_ID}.{block_id}"] = EN[wood]
-                data[f"item.{MOD_ID}.{block_id}"] = EN[wood]
+        for block_id, _, _, _, _, zh, en in WOODS:
+            name = zh if lang == "zh_cn" else en
+            data[f"block.{MOD_ID}.{block_id}"] = name
+            data[f"item.{MOD_ID}.{block_id}"] = name
         path.write_text(json.dumps(dict(sorted(data.items())), indent=2, ensure_ascii=False) + "\n",
                         encoding="utf-8")
 
 
 def main() -> None:
     ids = []
-    zh: dict[str, str] = {}
-    for block_id, wood, name in WOODS:
+    for block_id, log_item, side, top, inside, _, _ in WOODS:
         ids.append(f"{MOD_ID}:{block_id}")
-        zh[f"block.{MOD_ID}.{block_id}"] = name
-        zh[f"item.{MOD_ID}.{block_id}"] = name
 
         write_json(ASSETS / "blockstates" / f"{block_id}.json", {
             "variants": {"": {"model": f"{MOD_ID}:block/{block_id}"}}
         })
         write_json(ASSETS / "models" / "block" / f"{block_id}.json", {
             "parent": f"{MOD_ID}:block/crucible_base",
-            "textures": textures(wood),
+            "textures": textures(side, top, inside),
         })
         write_json(ASSETS / "models" / "item" / f"{block_id}.json",
                    {"parent": f"{MOD_ID}:block/{block_id}"})
@@ -111,13 +117,13 @@ def main() -> None:
             "type": "minecraft:crafting_shaped",
             "pattern": ["x x", "x x", "xyx"],
             "key": {
-                "x": {"item": f"minecraft:{wood}_log"},
+                "x": {"item": log_item},
                 "y": {"tag": "minecraft:wooden_slabs"},
             },
             "result": {"id": f"{MOD_ID}:{block_id}"},
         })
 
-    update_lang(zh)
+    update_lang()
     write_json(DATA / MOD_ID / "tags" / "block" / "wooden_crucibles.json",
                {"replace": False, "values": ids})
     merge_tag(DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json", ids)

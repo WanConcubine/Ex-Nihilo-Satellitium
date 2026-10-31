@@ -43,7 +43,12 @@ public final class ModBlockEntities {
                             ModBlocks.BIRCH_WOODEN_CRUCIBLE.get(),
                             ModBlocks.JUNGLE_WOODEN_CRUCIBLE.get(),
                             ModBlocks.ACACIA_WOODEN_CRUCIBLE.get(),
-                            ModBlocks.DARK_OAK_WOODEN_CRUCIBLE.get())
+                            ModBlocks.DARK_OAK_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.MANGROVE_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.CHERRY_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.BAMBOO_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.CRIMSON_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.WARPED_WOODEN_CRUCIBLE.get())
                     .build(null));
 
     private ModBlockEntities() {
