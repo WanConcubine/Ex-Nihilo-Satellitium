@@ -790,7 +790,7 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
   配方 7 瓷土 + 1 砖（`x x / x x / xyx`），镐挖，掉落自身。
 - `BarrelBlockEntity.isStoneBarrel()` 改名 `allowsHotFluids()`，把瓷桶和石桶并列：
   两者都不受 433 K 限制，木桶仍然拒熔岩。
-- 模型 vanilla-sampled：`quartz_block_side` 桶身、`smooth_quartz` 顶沿、`quartz_pillar` 内壁、
+- 模型 vanilla-sampled：`quartz_block_side` 桶身、`quartz_block_bottom`（平滑石英）顶沿、`quartz_pillar` 内壁、
   `light_gray_concrete` 箍；不新增 PNG。
 - JEI 桶分类的 catalyst 走 `ModItems.BARREL_ITEMS`，瓷桶自动出现在里面。
 
