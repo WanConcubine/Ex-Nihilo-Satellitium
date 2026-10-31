@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.block.BarrelBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.CrucibleBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.InfestedLeavesBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.UnfiredCrucibleBlock;
 import net.minecraft.world.level.block.Block;
@@ -60,6 +61,12 @@ public final class ModBlocks {
             BLOCKS.register("sieve", () -> new SieveBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)
                     .noOcclusion()
                     .isViewBlocking((state, level, pos) -> false)));
+
+    /** M6: infested leaves (silkworm); the block entity renders the original leaves. */
+    public static final DeferredHolder<Block, Block> INFESTED_LEAVES =
+            BLOCKS.register("infested_leaves", () -> new InfestedLeavesBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES).noOcclusion()
+                            .randomTicks()));
 
     /** M6: hammered netherrack / end stone, sifted as blocks for nether/end loot. */
     public static final DeferredHolder<Block, Block> CRUSHED_NETHERRACK =

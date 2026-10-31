@@ -37,6 +37,7 @@ public final class ClientEvents {
         event.registerBlockEntityRenderer(ModBlockEntities.BARREL.get(), BarrelRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.SIEVE.get(), SieveRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.INFESTED_LEAVES.get(), InfestedLeavesRenderer::new);
     }
 
     /** Item model predicate: the porcelain bucket switches to the filled model. */
