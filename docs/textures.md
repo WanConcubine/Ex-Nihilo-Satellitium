@@ -184,6 +184,9 @@ python3 scripts/check-textures.py
   现在 11 种木桶 + 石桶；竹和下界菌柄的「内壁」贴图在生成脚本里单独指定。
 - 筛子、坩埚的 vanilla-sampled 模型与贴图待做。
 - 巫水有 still/flow 两套；水/熔岩仍走原版流体渲染。
+- **人偶（M6）**：采用 Creatio（MIT）的 `doll.png` 作为形状底稿（存在 `art/items/dolls/creatio/`），
+  `art/items/dolls/restyle.py` 缩回 16×16、按亮度量化成 4 阶并补 1px 描边；
+  愤怒/诡异只用同一轮廓换色板（暗红 / 巫水紫）。
 - **粉碎下界岩 / 粉碎末地石（M6）**：方块贴图从原版 `netherrack` / `end_stone` 派生
   （`art/blocks/crushed_stone/generate.py`：保留原版像素 + 2×2 棋盘明暗 + 噪点）。
   注意别用大色块 + 连续接缝，会看成木板。
