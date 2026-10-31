@@ -186,15 +186,20 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 和 `data/minecraft/tags/block/mineable/{axe,pickaxe}.json`。几何只在
 `models/block/barrel_base.json` 里维护，子模型只覆盖 `textures`。
 
-| block id | 桶身贴图 | 内壁/桶底 | 箍 | 配方键 | 工具 |
-|---|---|---|---|---|---|
-| `barrel` | `oak_planks` | `stripped_oak_log` | `gray_concrete` | `oak_planks` | 斧 |
-| `spruce_barrel` | `spruce_planks` | `stripped_spruce_log` | `gray_concrete` | `spruce_planks` | 斧 |
-| `birch_barrel` | `birch_planks` | `stripped_birch_log` | `gray_concrete` | `birch_planks` | 斧 |
-| `jungle_barrel` | `jungle_planks` | `stripped_jungle_log` | `gray_concrete` | `jungle_planks` | 斧 |
-| `acacia_barrel` | `acacia_planks` | `stripped_acacia_log` | `gray_concrete` | `acacia_planks` | 斧 |
-| `dark_oak_barrel` | `dark_oak_planks` | `stripped_dark_oak_log` | `gray_concrete` | `dark_oak_planks` | 斧 |
-| `stone_barrel` | `stone` | `stone` | `deepslate_tiles` | `stone` | 镐 |
+| block id | 桶身贴图 | 内壁/桶底 | 配方键 | 工具 |
+|---|---|---|---|---|
+| `barrel` | `oak_planks` | `stripped_oak_log` | `oak_planks` | 斧 |
+| `spruce_barrel` | `spruce_planks` | `stripped_spruce_log` | `spruce_planks` | 斧 |
+| `birch_barrel` | `birch_planks` | `stripped_birch_log` | `birch_planks` | 斧 |
+| `jungle_barrel` | `jungle_planks` | `stripped_jungle_log` | `jungle_planks` | 斧 |
+| `acacia_barrel` | `acacia_planks` | `stripped_acacia_log` | `acacia_planks` | 斧 |
+| `dark_oak_barrel` | `dark_oak_planks` | `stripped_dark_oak_log` | `dark_oak_planks` | 斧 |
+| `mangrove_barrel` | `mangrove_planks` | `stripped_mangrove_log` | `mangrove_planks` | 斧 |
+| `cherry_barrel` | `cherry_planks` | `stripped_cherry_log` | `cherry_planks` | 斧 |
+| `bamboo_barrel` | `bamboo_planks` | `stripped_bamboo_block` | `bamboo_planks` | 斧 |
+| `crimson_barrel` | `crimson_planks` | `stripped_crimson_stem` | `crimson_planks` | 斧 |
+| `warped_barrel` | `warped_planks` | `stripped_warped_stem` | `warped_planks` | 斧 |
+| `stone_barrel` | `stone` | `stone` | `stone` | 镐 |
 
 - 所有桶配方都是 `x x / x x / xyx`：`x` 是木种木板（石桶用 `stone`），`y` 是对应台阶
   （石桶用 `smooth_stone_slab`）；不再接受 `#minecraft:planks`，避免和具体木种配方冲突。

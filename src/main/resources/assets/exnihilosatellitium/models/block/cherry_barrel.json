@@ -5,7 +5,6 @@
     "side": "minecraft:block/cherry_planks",
     "top": "minecraft:block/cherry_planks",
     "inner": "minecraft:block/stripped_cherry_log",
-    "bottom": "minecraft:block/stripped_cherry_log",
-    "hoop": "minecraft:block/gray_concrete"
+    "bottom": "minecraft:block/stripped_cherry_log"
   }
 }

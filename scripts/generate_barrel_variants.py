@@ -72,7 +72,6 @@ def wood_textures(wood: str, stripped: str | None = None) -> dict[str, str]:
         "top": f"minecraft:block/{wood}_planks",
         "inner": f"minecraft:block/{inner}",
         "bottom": f"minecraft:block/{inner}",
-        "hoop": "minecraft:block/gray_concrete",
     }
 
 
@@ -85,7 +84,6 @@ def stone_textures() -> dict[str, str]:
         "top": "minecraft:block/smooth_stone",
         "inner": "minecraft:block/stone",
         "bottom": "minecraft:block/stone",
-        "hoop": "minecraft:block/deepslate_tiles",
     }
 
 
