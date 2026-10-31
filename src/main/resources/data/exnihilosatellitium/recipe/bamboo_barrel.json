@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    "x x",
+    "xyx"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:bamboo_planks"
+    },
+    "y": {
+      "item": "minecraft:bamboo_slab"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:bamboo_barrel"
+  }
+}

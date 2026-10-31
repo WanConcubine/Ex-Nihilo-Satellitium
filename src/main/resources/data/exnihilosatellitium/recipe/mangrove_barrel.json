@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    "x x",
+    "xyx"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:mangrove_planks"
+    },
+    "y": {
+      "item": "minecraft:mangrove_slab"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:mangrove_barrel"
+  }
+}

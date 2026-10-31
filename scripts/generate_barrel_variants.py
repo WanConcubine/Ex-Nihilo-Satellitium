@@ -34,6 +34,16 @@ WOOD_BARRELS = (
 
 STONE_BARREL = "stone_barrel"
 
+# 1.16/1.20 woods. Bamboo has no stripped log and the nether woods use stems,
+# so each entry carries its own stripped texture.
+EXTRA_BARRELS = (
+    ("mangrove_barrel", "mangrove", "stripped_mangrove_log", "红树木桶", "Mangrove Barrel"),
+    ("cherry_barrel", "cherry", "stripped_cherry_log", "樱花木桶", "Cherry Barrel"),
+    ("bamboo_barrel", "bamboo", "stripped_bamboo_block", "竹桶", "Bamboo Barrel"),
+    ("crimson_barrel", "crimson", "stripped_crimson_stem", "绯红木桶", "Crimson Barrel"),
+    ("warped_barrel", "warped", "stripped_warped_stem", "诡异木桶", "Warped Barrel"),
+)
+
 
 def write_json(path: Path, data: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -52,15 +62,16 @@ def merge_tag(path: Path, values: list[str]) -> None:
     write_json(path, {"replace": False, "values": existing})
 
 
-def wood_textures(wood: str) -> dict[str, str]:
+def wood_textures(wood: str, stripped: str | None = None) -> dict[str, str]:
     # Side/top are the vanilla-sampled planks; the inside and the bottom use the
     # stripped log, which keeps a vertical grain and reads darker than the sides.
+    inner = stripped or f"stripped_{wood}_log"
     return {
         "particle": f"minecraft:block/{wood}_planks",
         "side": f"minecraft:block/{wood}_planks",
         "top": f"minecraft:block/{wood}_planks",
-        "inner": f"minecraft:block/stripped_{wood}_log",
-        "bottom": f"minecraft:block/stripped_{wood}_log",
+        "inner": f"minecraft:block/{inner}",
+        "bottom": f"minecraft:block/{inner}",
         "hoop": "minecraft:block/gray_concrete",
     }
 
@@ -139,18 +150,22 @@ def main() -> None:
             f"minecraft:{wood}_planks",
             f"minecraft:{wood}_slab",
         )
+    for name, wood, stripped, _, _ in EXTRA_BARRELS:
+        generate(name, wood_textures(wood, stripped),
+                 f"minecraft:{wood}_planks", f"minecraft:{wood}_slab")
     generate(STONE_BARREL, stone_textures(), "minecraft:stone", "minecraft:smooth_stone_slab")
 
     merge_tag(
         DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json",
-        [f"{MOD_ID}:{name}" for name, _ in WOOD_BARRELS],
+        [f"{MOD_ID}:{name}" for name, _ in WOOD_BARRELS]
+        + [f"{MOD_ID}:{name}" for name, _, _, _, _ in EXTRA_BARRELS],
     )
     merge_tag(
         DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json",
         [f"{MOD_ID}:{STONE_BARREL}"],
     )
 
-    print(f"generated {len(WOOD_BARRELS)} wood barrels + 1 stone barrel")
+    print(f"generated {len(WOOD_BARRELS) + len(EXTRA_BARRELS)} wood barrels + 1 stone barrel")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 > 适用：M1 木桶 + M2 筛子（NeoForge 1.21.1）。代码位置：
 > `common/compost/`、`common/sieve/`、`common/blockentity/`、`compat/jei/`。
 >
-> 七种桶（`barrel` = 橡木、`spruce_barrel`、`birch_barrel`、`jungle_barrel`、
+> 十二种桶（`barrel` = 橡木、`spruce_barrel`、`birch_barrel`、`jungle_barrel`、
 > `acacia_barrel`、`dark_oak_barrel`、`stone_barrel`）共用同一个 BE 类型和同一套
 > NBT/行为；区别只有方块属性、模型贴图和配方。`barrel` 保持原名是为了兼容旧存档。
 
@@ -181,7 +181,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 
 ## 7. 材质变体数据
 
-`scripts/generate_barrel_variants.py` 从一张表生成六种木桶 + 石桶的
+`scripts/generate_barrel_variants.py` 从一张表生成 11 种木桶 + 石桶的
 `blockstates/`、`models/block/`、`models/item/`、`recipe/`、`loot_table/blocks/`
 和 `data/minecraft/tags/block/mineable/{axe,pickaxe}.json`。几何只在
 `models/block/barrel_base.json` 里维护，子模型只覆盖 `textures`。
@@ -199,7 +199,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - 所有桶配方都是 `x x / x x / xyx`：`x` 是木种木板（石桶用 `stone`），`y` 是对应台阶
   （石桶用 `smooth_stone_slab`）；不再接受 `#minecraft:planks`，避免和具体木种配方冲突。
 - 石桶复制 `Blocks.STONE` 属性（需要镐、石质音效），木桶复制对应木板属性。
-- 行为、NBT、Jade tooltip 七种桶基本一致；**唯一的差异化是石桶能存熔岩、木桶不能**
+- 行为、NBT、Jade tooltip 十二种桶基本一致；**唯一的差异化是石桶能存熔岩、木桶不能**
   （M1.5 起，按 433 K 温度阈值判定，见 §2「桶内反应」）。
 
 ## 8. 材料表（矿物链，M2 起用）
@@ -383,7 +383,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   材料槽 tooltip 是 `jei...sieve.hint`（每筛一个材料，每个产物独立判定）；
   筛网槽 tooltip 是 `jei...sieve.mesh_hint`（只影响耐久，不改变掉落）。
   **不要再用底部 `addText` 提示**：JEI 会把窄宽度下的文字竖排到槽位上（2026-10-29 修）。
-- 筛子方块和三档筛网注册为筛子分类 catalyst；**七种桶**注册为两个桶分类的 catalyst；
+- 筛子方块和三档筛网注册为筛子分类 catalyst；**十二种桶**注册为两个桶分类的 catalyst；
   `crucible` 同时是两个坩埚分类的 catalyst。
 - **坩埚页**：76×26，方块输入槽 + 箭头 + 流体输出槽（`setFluidRenderer(产物量, ...)`）；
   **坩埚热源页**：92×26，热源物品槽 + 右侧速度文字；`fire`/`lava` 没有方块物品，

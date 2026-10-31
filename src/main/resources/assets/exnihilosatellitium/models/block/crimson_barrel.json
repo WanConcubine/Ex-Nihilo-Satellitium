@@ -1,0 +1,11 @@
+{
+  "parent": "exnihilosatellitium:block/barrel_base",
+  "textures": {
+    "particle": "minecraft:block/crimson_planks",
+    "side": "minecraft:block/crimson_planks",
+    "top": "minecraft:block/crimson_planks",
+    "inner": "minecraft:block/stripped_crimson_stem",
+    "bottom": "minecraft:block/stripped_crimson_stem",
+    "hoop": "minecraft:block/gray_concrete"
+  }
+}
