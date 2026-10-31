@@ -37,6 +37,8 @@
     "exnihilosatellitium:uranium_ore_sand",
     "exnihilosatellitium:zinc_ore_dust",
     "exnihilosatellitium:zinc_ore_gravel",
-    "exnihilosatellitium:zinc_ore_sand"
+    "exnihilosatellitium:zinc_ore_sand",
+    "exnihilosatellitium:crushed_netherrack",
+    "exnihilosatellitium:crushed_end_stone"
   ]
 }

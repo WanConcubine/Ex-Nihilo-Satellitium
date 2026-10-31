@@ -15,7 +15,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
-TEX = ROOT / "src/main/resources/assets/exnihilosatellitium/textures/item"
+ASSETS = ROOT / "src/main/resources/assets/exnihilosatellitium/textures"
 
 # Per sprite: 16 rows of 16 chars, plus a 4-step palette (outline, shadow, base, light).
 SPRITES = {
@@ -81,9 +81,16 @@ SPRITES = {
 CHARS = {"#": 0, "b": 1, "l": 2, "p": 3}
 
 
+# Crushed netherrack / end stone are sieve *blocks*, so their textures live in
+# textures/block; grass seeds stay an item.
+BLOCK_TEXTURES = {"crushed_netherrack", "crushed_end_stone"}
+
+
 def main() -> None:
-    TEX.mkdir(parents=True, exist_ok=True)
     for name, (rows, palette) in SPRITES.items():
+        folder = "block" if name in BLOCK_TEXTURES else "item"
+        TEX = ASSETS / folder
+        TEX.mkdir(parents=True, exist_ok=True)
         image = Image.new("RGBA", (16, 16))
         pixels = image.load()
         for y, row in enumerate(rows):
@@ -92,7 +99,7 @@ def main() -> None:
                     continue
                 pixels[x, y] = (*palette[CHARS[key]], 255)
         image.save(TEX / f"{name}.png")
-        print(f"wrote {name}.png")
+        print(f"wrote {folder}/{name}.png")
 
 
 if __name__ == "__main__":

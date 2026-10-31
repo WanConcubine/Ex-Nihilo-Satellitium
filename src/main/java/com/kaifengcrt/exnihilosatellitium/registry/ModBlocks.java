@@ -61,6 +61,14 @@ public final class ModBlocks {
                     .noOcclusion()
                     .isViewBlocking((state, level, pos) -> false)));
 
+    /** M6: hammered netherrack / end stone, sifted as blocks for nether/end loot. */
+    public static final DeferredHolder<Block, Block> CRUSHED_NETHERRACK =
+            BLOCKS.register("crushed_netherrack", () -> new Block(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.NETHERRACK)));
+    public static final DeferredHolder<Block, Block> CRUSHED_END_STONE =
+            BLOCKS.register("crushed_end_stone", () -> new Block(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.END_STONE)));
+
     /** Generic dust block: hammered from sand, then sifted for powdered resources. */
     public static final DeferredHolder<Block, Block> DUST =
             BLOCKS.register("dust", () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.SAND)));
