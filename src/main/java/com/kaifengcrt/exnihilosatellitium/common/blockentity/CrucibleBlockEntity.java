@@ -4,6 +4,7 @@ import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
+import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -41,7 +42,7 @@ import org.jetbrains.annotations.Nullable;
 public class CrucibleBlockEntity extends BlockEntity {
 
     /** Wooden crucibles melt without a heat source, slowly (classic Creatio). */
-    public static final float WOODEN_PASSIVE_SPEED = 0.2F;
+    public static final float WOODEN_PASSIVE_SPEED = 0.5F;
     /** Wooden crucibles are not hot-fluid rated; same limit as wooden barrels. */
     public static final int WOOD_MAX_TEMPERATURE = 433;
 
@@ -119,7 +120,7 @@ public class CrucibleBlockEntity extends BlockEntity {
 
     /** True for the wooden variant: passive melting, water only. */
     public boolean isWooden() {
-        return this.getBlockState().is(ModBlocks.WOODEN_CRUCIBLE.get());
+        return this.getBlockState().is(ModTags.Blocks.WOODEN_CRUCIBLES);
     }
 
     public boolean canAccept(final CrucibleRecipes.Melt melt) {

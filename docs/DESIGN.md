@@ -824,10 +824,13 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 **实现**
 
-- 新方块 `wooden_crucible`：复用 `CrucibleBlock` + `CrucibleBlockEntity`（同一 BE 类型，
-  所以 `CrucibleRenderer`、Jade、比较器都直接可用），只是方块属性走木板。
+- 6 种木材变种（`wooden_crucible` 橡木 + spruce/birch/jungle/acacia/dark_oak）：
+  `scripts/generate_wooden_crucible_variants.py` 生成 blockstate/模型/掉落/配方/lang/标签，
+  配方 = 该木材原木 ×6 + `#minecraft:wooden_slabs` ×1（台阶任意木材）。
+- 方块复用 `CrucibleBlock` + `CrucibleBlockEntity`（同一 BE 类型，所以 `CrucibleRenderer`、
+  Jade、比较器都直接可用），`isWooden()` 查方块标签 `#exnihilosatellitium:wooden_crucibles`。
 - 行为差异都由 `CrucibleBlockEntity#isWooden()` 分支：
-  - 熔化速度固定 `WOODEN_PASSIVE_SPEED = 0.2 mB/t`，**不看下方热源**（有篝火也一样快）；
+  - 熔化速度固定 `WOODEN_PASSIVE_SPEED = 0.5 mB/t`，**不看下方热源**（有篝火也一样快）；
   - `canAccept` 只收 `fluid == water` 的熔料，熔岩类配方直接被拒；
   - `fill` 拒绝 > 433 K 的流体（和木桶同一条温度线），右键倒熔岩会提示
     `message.exnihilosatellitium.crucible.hot_fluid`。

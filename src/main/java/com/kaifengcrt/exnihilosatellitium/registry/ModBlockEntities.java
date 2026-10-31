@@ -36,7 +36,14 @@ public final class ModBlockEntities {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrucibleBlockEntity>> CRUCIBLE =
             BLOCK_ENTITIES.register("crucible", () -> BlockEntityType.Builder
-                    .of(CrucibleBlockEntity::new, ModBlocks.CRUCIBLE.get(), ModBlocks.WOODEN_CRUCIBLE.get())
+                    .of(CrucibleBlockEntity::new,
+                            ModBlocks.CRUCIBLE.get(),
+                            ModBlocks.WOODEN_CRUCIBLE.get(),
+                            ModBlocks.SPRUCE_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.BIRCH_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.JUNGLE_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.ACACIA_WOODEN_CRUCIBLE.get(),
+                            ModBlocks.DARK_OAK_WOODEN_CRUCIBLE.get())
                     .build(null));
 
     private ModBlockEntities() {

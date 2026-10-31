@@ -8,6 +8,11 @@
     "exnihilosatellitium:acacia_barrel",
     "exnihilosatellitium:dark_oak_barrel",
     "exnihilosatellitium:sieve",
-    "exnihilosatellitium:wooden_crucible"
+    "exnihilosatellitium:wooden_crucible",
+    "exnihilosatellitium:spruce_wooden_crucible",
+    "exnihilosatellitium:birch_wooden_crucible",
+    "exnihilosatellitium:jungle_wooden_crucible",
+    "exnihilosatellitium:acacia_wooden_crucible",
+    "exnihilosatellitium:dark_oak_wooden_crucible"
   ]
 }

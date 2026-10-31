@@ -1,0 +1,10 @@
+{
+  "parent": "exnihilosatellitium:block/crucible_base",
+  "textures": {
+    "particle": "minecraft:block/spruce_log",
+    "side": "minecraft:block/spruce_log",
+    "top": "minecraft:block/spruce_log_top",
+    "bottom": "minecraft:block/spruce_log",
+    "inside": "minecraft:block/stripped_spruce_log"
+  }
+}

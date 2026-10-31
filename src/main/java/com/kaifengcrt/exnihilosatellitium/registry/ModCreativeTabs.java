@@ -30,7 +30,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.DUST.get());
                         output.accept(ModItems.UNFIRED_CRUCIBLE.get());
                         output.accept(ModItems.CRUCIBLE.get());
-                        output.accept(ModItems.WOODEN_CRUCIBLE.get());
+                        ModItems.WOODEN_CRUCIBLES.forEach(item -> output.accept(item.get()));
                         ModItems.MESHES.forEach(mesh -> output.accept(mesh.get()));
                         output.accept(ModItems.WOODEN_HAMMER.get());
                         output.accept(ModItems.STONE_HAMMER.get());
