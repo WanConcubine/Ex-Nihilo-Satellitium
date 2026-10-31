@@ -364,6 +364,13 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - `base`：桶内必须**装满 1000 mB** 的流体；表只描述 `base + added -> result`，
   “必须满桶”这条规则仍在 `BarrelBlockEntity` 里（BE 与 JEI 共用 `BarrelRecipes`）。
 - `added`：恰好一个 `fluid`（从上方倒入，或倒进满桶）或 `item`（满桶时右键）。
+- **生成实体规则**（人偶）：用 `entity` 代替 `result`，并给 `peaceful_drop`，可选 `cook_ticks`（默认 600）：
+  ```json
+  { "base": "minecraft:lava", "added": { "item": "exnihilosatellitium:angry_doll" },
+    "entity": "minecraft:blaze", "peaceful_drop": "minecraft:blaze_rod", "cook_ticks": 600 }
+  ```
+  满桶 + 人偶 → 清空流体、倒计时；结束时非和平模式在桶上方生成实体，和平模式掉 `peaceful_drop`，
+  桶恢复空桶。JEI 里显示 `peaceful_drop` 作为结果。
   两个都有 / 都没有 → 跳过该文件并打 `[barrel]` 警告。
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
