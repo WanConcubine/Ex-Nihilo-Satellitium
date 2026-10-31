@@ -94,7 +94,7 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 | `CompostTicks` | int | 剩余计时 tick；>0 表示正在腐熟 |
 | `DirtReady` | boolean | `1b` 表示泥土已就绪，右键可取 |
 | `CompostScale` | int | 进度刻度；新存档固定 `1000`，老存档没有这个键 |
-| `Solid` | compound | 凝固/掺料产物（`ItemStack`，如圆石/黑曜石/地狱岩/末地石）；空时没有这个键 |
+| `Solid` | compound | 凝固/掺料产物（`ItemStack`，如圆石/黑曜石/下界岩/末地石）；空时没有这个键 |
 | `Spore` | int | 巫水发酵进度（0 = 未开始）；满 `1000` 时整桶水变巫水 |
 
 - 容量固定 `CAPACITY = 1000` mB，不依赖 NBT。
@@ -108,7 +108,7 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 |---|---|---|
 | 1000 mB 水 | 熔岩（桶倒或上方熔岩源） | 圆石（`Solid`，右键取出） |
 | 1000 mB 熔岩 | 水（桶倒或上方水源） | 黑曜石 |
-| 1000 mB 熔岩 | 红石（右键） | 地狱岩 |
+| 1000 mB 熔岩 | 红石（右键） | 下界岩 |
 | 1000 mB 熔岩 | 荧石粉（右键） | 末地石 |
 
 - **温度**：木桶只能存 `≤433 K` 的流体；水 300 K 可以，熔岩 1300 K 不行 → 用石桶。
@@ -360,7 +360,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
-- 当前 7 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→地狱岩、
+- 当前 7 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
   熔岩+荧石粉→末地石、水+尘土→粘土块（`water_dust_clay.json`）；
   M6 巫水两条：巫水+沙子→灵魂沙（`witch_water_sand_soul_sand.json`）、
   巫水+橡树苗→深色橡树苗（`witch_water_sapling_dark_oak.json`）。
