@@ -56,6 +56,10 @@
     {
       "item": "minecraft:sugar_cane",
       "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:spores",
+      "chance": 0.0078
     }
   ]
 }

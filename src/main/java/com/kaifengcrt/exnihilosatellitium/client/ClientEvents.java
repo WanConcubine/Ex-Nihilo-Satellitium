@@ -8,11 +8,13 @@ import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
+import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 /** Client-only block entity renderers and client resource reload hooks. */
 @EventBusSubscriber(modid = ExNihiloSatellitium.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -26,6 +28,12 @@ public final class ClientEvents {
         event.registerBlockEntityRenderer(ModBlockEntities.BARREL.get(), BarrelRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.SIEVE.get(), SieveRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
+    }
+
+    /** Witch water needs explicit still/flowing textures on the client. */
+    @SubscribeEvent
+    public static void registerClientExtensions(final RegisterClientExtensionsEvent event) {
+        event.registerFluidType(new WitchWaterClientExtensions(), ModFluids.WITCH_WATER_TYPE);
     }
 
     /**

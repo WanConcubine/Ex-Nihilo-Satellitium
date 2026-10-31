@@ -5,6 +5,7 @@ import com.kaifengcrt.exnihilosatellitium.common.compost.CompostRegistry;
 import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
+import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -114,6 +116,11 @@ public class BarrelBlockEntity extends BlockEntity {
     private ItemStack solid = ItemStack.EMPTY;
     /** Fractional rain accumulation, reset when it cannot be added. */
     private float rainBuffer;
+    /**
+     * Witch-water spore progress: 0 = not sporing. Reaching {@link #COMPOST_TICKS}
+     * turns the full water tank into witch water (M6).
+     */
+    private int sporeProgress;
 
     public BarrelBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.BARREL.get(), pos, state);
@@ -200,6 +207,9 @@ public class BarrelBlockEntity extends BlockEntity {
         if (!this.itemMixResult(stack).isEmpty()) {
             return true;
         }
+        if (stack.is(Items.MUSHROOM_STEW) && this.isFullWater()) {
+            return true;
+        }
         return this.tank.getFluidAmount() == 0
                 && this.compostProgress < COMPOST_MAX
                 && stack.is(ModTags.Items.COMPOSTABLE);
@@ -242,6 +252,25 @@ public class BarrelBlockEntity extends BlockEntity {
                 stack.shrink(1);
             }
             this.setSolid(mixed);
+            return InteractionResult.SUCCESS;
+        }
+
+        // Mushroom stew seeds a full water barrel (classic "throw it in" recipe).
+        if (stack.is(Items.MUSHROOM_STEW) && this.isFullWater()) {
+            if (!player.isCreative()) {
+                stack.shrink(1);
+                final ItemStack bowl = new ItemStack(Items.BOWL);
+                if (!player.getInventory().add(bowl)) {
+                    player.drop(bowl, false);
+                }
+            }
+            this.sporeProgress = Math.max(1, this.sporeProgress);
+            if (this.level != null) {
+                this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                        SoundSource.BLOCKS, 0.8F, 0.6F);
+            }
+            this.setChanged();
+            this.sync();
             return InteractionResult.SUCCESS;
         }
 
@@ -363,6 +392,10 @@ public class BarrelBlockEntity extends BlockEntity {
             return;
         }
 
+        if (barrel.tickSpores(level, pos)) {
+            return;
+        }
+
         // A full barrel with the opposite fluid directly above solidifies
         // (the classic "put a lava/water source on top" setup).
         if (barrel.tank.getFluidAmount() >= CAPACITY && !barrel.tank.getFluid().isEmpty()) {
@@ -378,6 +411,64 @@ public class BarrelBlockEntity extends BlockEntity {
         }
 
         barrel.tickRain(level, pos);
+    }
+
+    /** True when the tank holds a full 1000 mB of plain water. */
+    private boolean isFullWater() {
+        return this.tank.getFluidAmount() >= CAPACITY
+                && this.tank.getFluid().getFluid() == Fluids.WATER;
+    }
+
+    /** Mycelium in the 3x3x3 around the barrel, like the original getNearbyBlocks. */
+    private static int countMycelium(final Level level, final BlockPos pos) {
+        int count = 0;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (level.getBlockState(pos.offset(x, y, z)).is(Blocks.MYCELIUM)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Witch water: a full water barrel next to mycelium (or seeded with mushroom
+     * stew) ferments. Original timing: {@code timer += 1 + mycelium / 2} per tick
+     * against MAX_COMPOSTING_TIME, so one mycelium takes 50 s.
+     *
+     * @return true when the tank became witch water this tick
+     */
+    private boolean tickSpores(final Level level, final BlockPos pos) {
+        if (this.compostProgress > 0 || this.hasSolid() || this.dirtReady) {
+            return false;
+        }
+        if (!this.isFullWater()) {
+            this.sporeProgress = 0;
+            return false;
+        }
+        final int mycelium = countMycelium(level, pos);
+        if (this.sporeProgress <= 0 && mycelium <= 0) {
+            return false;
+        }
+        this.sporeProgress += 1 + mycelium / 2;
+        if (this.sporeProgress < COMPOST_TICKS) {
+            return false;
+        }
+
+        this.sporeProgress = 0;
+        this.tank.setFluid(new FluidStack(ModFluids.WITCH_WATER.get(), CAPACITY));
+        this.setChanged();
+        this.sync();
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.WITCH,
+                    pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
+                    16, 0.35D, 0.15D, 0.35D, 0.02D);
+        }
+        level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.5F);
+        return true;
     }
 
     /** Open-to-sky barrels catch rain; ~100 s at rainfall 0.5 for a full barrel. */
@@ -450,6 +541,7 @@ public class BarrelBlockEntity extends BlockEntity {
         tag.putInt("Compost", this.compostProgress);
         tag.putInt("CompostTicks", this.compostTicks);
         tag.putBoolean("DirtReady", this.dirtReady);
+        tag.putInt("Spore", this.sporeProgress);
         if (this.hasSolid()) {
             tag.put("Solid", this.solid.save(registries));
         }
@@ -465,6 +557,7 @@ public class BarrelBlockEntity extends BlockEntity {
         this.compostProgress = tag.getInt("Compost");
         this.compostTicks = tag.getInt("CompostTicks");
         this.dirtReady = tag.getBoolean("DirtReady");
+        this.sporeProgress = tag.getInt("Spore");
         this.solid = tag.contains("Solid")
                 ? ItemStack.parseOptional(registries, tag.getCompound("Solid"))
                 : ItemStack.EMPTY;

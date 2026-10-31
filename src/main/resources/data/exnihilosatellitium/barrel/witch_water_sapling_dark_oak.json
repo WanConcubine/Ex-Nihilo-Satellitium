@@ -1,0 +1,5 @@
+{
+  "base": "exnihilosatellitium:witch_water",
+  "added": { "item": "minecraft:oak_sapling" },
+  "result": "minecraft:dark_oak_sapling"
+}

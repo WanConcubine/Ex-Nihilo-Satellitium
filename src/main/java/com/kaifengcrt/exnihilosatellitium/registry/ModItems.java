@@ -4,9 +4,12 @@ import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.SporeItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -23,6 +26,15 @@ public final class ModItems {
 
     public static final DeferredHolder<Item, Item> PORCELAIN =
             ITEMS.register("porcelain", () -> new Item(new Item.Properties()));
+
+    /** M6: spores turn dirt into mycelium (the witch water chain start). */
+    public static final DeferredHolder<Item, Item> SPORES =
+            ITEMS.register("spores", () -> new SporeItem(new Item.Properties()));
+
+    /** M6: witch water bucket (fluid id lives in {@link ModFluids}). */
+    public static final DeferredHolder<Item, Item> WITCH_WATER_BUCKET =
+            ITEMS.register("witch_water_bucket", () -> new BucketItem(ModFluids.WITCH_WATER.get(),
+                    new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
 
     public static final DeferredHolder<Item, Item> BARREL =
             registerBarrelItem("barrel", ModBlocks.BARREL);

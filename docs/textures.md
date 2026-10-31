@@ -46,10 +46,17 @@
 ```
 assets/exnihilosatellitium/textures/
 ├── block/
-│   └── barrel_compost.png   # 堆肥表面（自有）
+│   ├── barrel_compost.png       # 堆肥表面（自有）
+│   ├── witch_water_still.png    # 巫水液面（M6，脚本生成）
+│   └── witch_water_flow.png     # 巫水流动（M6，脚本生成）
 └── item/
-    └── porcelain.png        # 瓷土（自有）
+    ├── porcelain.png            # 瓷土（自有）
+    ├── spores.png               # 孢子（M6，脚本生成）
+    └── witch_water_bucket.png   # 巫水桶（M6，脚本生成）
 ```
+
+M6 的两套贴图由 `art/blocks/witch_water/generate.py` 与 `art/items/spores/generate.py`
+逐像素生成（5 阶紫色板 + 铁灰桶身），要改就改脚本重跑，不要手改 PNG。
 
 木桶没有自有 PNG；`art/barrel/*` 是早期自绘实验，不参与游戏。
 七种材质的 blockstate、子模型、物品模型、配方和掉落表由
@@ -166,7 +173,7 @@ python3 scripts/check-textures.py
 - 桶身切角八边形还没做；当前是 14×16 内缩方桶 + 外凸箍。
 - 1.20 新增木种（mangrove / cherry / bamboo）没有做；现有六种经典木 + 石桶。
 - 筛子、坩埚的 vanilla-sampled 模型与贴图待做。
-- 流体侧面、流动纹理还没画；现在只有液面。
+- 巫水有 still/flow 两套；水/熔岩仍走原版流体渲染。
 - `art/barrel/barrel_side*.png` 等早期自绘图留作参考；如果将来要改用自有贴图，
   需要同时去掉模型里的外凸箍，避免和贴图里画好的箍叠在一起。
 
