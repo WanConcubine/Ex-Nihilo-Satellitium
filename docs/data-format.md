@@ -319,7 +319,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 `gravel.json` / `sand.json` / `dust.json`（3 输入、44 掉落）；`dust` 输入是 M3 的通用尘土方块。
+- 当前有 `gravel.json` / `sand.json` / `dirt.json` / `dust.json`（4 输入、52 掉落）；`dust` 输入是 M3 的通用尘土方块，
+  `dirt` 是空岛农业起点（种子/作物），`sand` 额外给仙人掌与甘蔗。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。
 
 ## 10. 桶转化 JSON（2026-10-30）

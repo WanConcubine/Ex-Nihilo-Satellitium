@@ -1,6 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.common.block;
 
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.CrucibleBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -83,14 +85,26 @@ public class CrucibleBlock extends BaseEntityBlock {
         if (!(blockEntity instanceof CrucibleBlockEntity crucible)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
+        // A meltable block must never fall through to "place it on top of the crucible":
+        // a full crucible simply swallows the right-click (classic Ex Nihilo behaviour).
+        // Sneak-placing still works, because sneaking skips useItemOn entirely.
+        final boolean meltable = !stack.isEmpty()
+                && CrucibleRecipes.meltFor(Block.byItem(stack.getItem())) != null;
         if (level.isClientSide) {
             return stack.isEmpty()
                     ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
                     : ItemInteractionResult.SUCCESS;
         }
         final InteractionResult result = crucible.use(player, hand);
-        return result.consumesAction()
-                ? ItemInteractionResult.SUCCESS
+        if (result.consumesAction()) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        // Rejected. FAIL would NOT stop vanilla: FAIL is not "consuming", so
+        // ServerPlayerGameMode#useItemOn falls through to ItemStack#useOn and places the
+        // block (or spills the bucket). CONSUME stops the chain without any visible effect.
+        final boolean container = !stack.isEmpty() && FluidUtil.getFluidHandler(stack).isPresent();
+        return meltable || container
+                ? ItemInteractionResult.CONSUME
                 : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 

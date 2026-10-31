@@ -1,0 +1,29 @@
+{
+  "input": "minecraft:dirt",
+  "outputs": [
+    {
+      "item": "minecraft:wheat_seeds",
+      "chance": 0.15
+    },
+    {
+      "item": "minecraft:beetroot_seeds",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:potato",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:carrot",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:melon_seeds",
+      "chance": 0.05
+    },
+    {
+      "item": "minecraft:pumpkin_seeds",
+      "chance": 0.05
+    }
+  ]
+}
