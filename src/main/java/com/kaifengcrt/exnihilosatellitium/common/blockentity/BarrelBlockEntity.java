@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.core.HolderLookup;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -397,9 +398,10 @@ public class BarrelBlockEntity extends BlockEntity {
         }
 
         // A full barrel with the opposite fluid directly above solidifies
-        // (the classic "put a lava/water source on top" setup).
+        // (the classic "put a lava/water source on top" setup). Flowing water
+        // counts too: it is the same fluid as its source for the recipe lookup.
         if (barrel.tank.getFluidAmount() >= CAPACITY && !barrel.tank.getFluid().isEmpty()) {
-            final Fluid above = level.getFluidState(pos.above()).getType();
+            final Fluid above = normalizeFluid(level.getFluidState(pos.above()).getType());
             if (!above.isSame(Fluids.EMPTY)) {
                 final ItemStack result = BarrelRecipes.resultForFluid(
                         barrel.tank.getFluid().getFluid(), above);
@@ -411,6 +413,11 @@ public class BarrelBlockEntity extends BlockEntity {
         }
 
         barrel.tickRain(level, pos);
+    }
+
+    /** Flowing water/lava map to their source fluid so the recipe table matches. */
+    private static Fluid normalizeFluid(final Fluid fluid) {
+        return fluid instanceof FlowingFluid flowing ? flowing.getSource() : fluid;
     }
 
     /** True when the tank holds a full 1000 mB of plain water. */
