@@ -60,8 +60,9 @@ M4（坩埚 + 热源 + JEI + 配置）都已实现，已提交 `c1899d0`；
 - **发酵**：满水桶 + 3×3×3 内有菌丝，每 tick 进度 `+1 + 菌丝数/2`，满 1000 tick（1 个菌丝 50 秒）
   整桶变巫水；直接递蘑菇煲可无菌丝起酵（同样 50 秒，退回碗）。
 - **巫水转化**两条：+沙子 → 灵魂沙；+橡树苗 → 深色橡树苗（`barrel/witch_water_*.json`）。
-- **木坩埚**（`wooden_crucible`，Creatio 的 Wooden Crucible）：6 橡木原木 + 1 橡木台阶；
-  **不需要热源**，按 0.2 mB/t 被动熔化，只收水类熔料（树叶 100 mB、树苗 250 mB）；
+- **木坩埚**（Creatio 的 Wooden Crucible）：6 种木材变种（`wooden_crucible` 橡木 +
+  `spruce/birch/jungle/acacia/dark_oak_wooden_crucible`），各用**自己的原木** + **任意木台阶** 合成；
+  **不需要热源**，按 0.5 mB/t 被动熔化（一块树叶 ~10 秒），只收水类熔料（树叶 100 mB、树苗 250 mB）；
   底下有没有热源都一样，装熔岩会被拒（433 K 上限，和木桶一致）。
 - **瓷桶**（`porcelain_bucket`，物品）：通用 1000 mB 容器，能装熔岩/巫水/牛奶；
   内容存 `exnihilosatellitium:fluid_contents` 组件，`IFluidHandlerItem` 已接。
@@ -127,7 +128,8 @@ M4（坩埚 + 热源 + JEI + 配置）都已实现，已提交 `c1899d0`；
 | 古代孢子：沙筛 | ⚠️ | `sieve/sand.json` 1/128；未实测 |
 | 古代孢子：泥土→菌丝 / 牛→哞菇 | ⚠️ | 逻辑已写；未实测 |
 | 巫水：画面/桶纹理 | ⚠️ | 流体用原版 water_still/flow + 紫色 tint；桶图标由原版水桶重着色；未进游戏目视 |
-| 木坩埚：被动熔化 | ✅ | RCON：放树叶，6 秒 100 → 76.6 固体 / 23 mB 水；底下加篝火速率不变 |
+| 木坩埚：被动熔化 | ✅ | RCON：放树叶 10 秒 100 → 1.0 固体 / 99 mB 水（≈0.5 mB/t）；底下加篝火速率不变 |
+| 木坩埚：6 种木材变种 | ✅ | RCON：6 个变种 `setblock` 都能建出 BE；生成脚本 `scripts/generate_wooden_crucible_variants.py` |
 | 木坩埚：水类限定 | ⚠️ | `canAccept` 拒非水熔料、`fill` 拒 >433 K；未用熔岩桶实测 |
 | 瓷桶：物品/组件 | ✅ | RCON：`summon item` 带 `fluid_contents` 可读回熔岩 1000 / 巫水 1000 |
 | 瓷桶：画面/舀水/倒液体 | ⚠️ | 模型 predicate、tint、右键舀水、倒进木桶/坩埚均未玩家实测 |

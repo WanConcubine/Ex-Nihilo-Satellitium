@@ -1,0 +1,10 @@
+{
+  "parent": "exnihilosatellitium:block/crucible_base",
+  "textures": {
+    "particle": "minecraft:block/jungle_log",
+    "side": "minecraft:block/jungle_log",
+    "top": "minecraft:block/jungle_log_top",
+    "bottom": "minecraft:block/jungle_log",
+    "inside": "minecraft:block/stripped_jungle_log"
+  }
+}

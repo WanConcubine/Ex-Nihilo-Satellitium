@@ -29,8 +29,25 @@ public final class ModItems {
             ITEMS.register("porcelain", () -> new Item(new Item.Properties()));
 
     public static final DeferredHolder<Item, Item> WOODEN_CRUCIBLE =
-            ITEMS.register("wooden_crucible", () -> new BlockItem(ModBlocks.WOODEN_CRUCIBLE.get(),
-                    new Item.Properties()));
+            registerCrucibleItem("wooden_crucible", ModBlocks.WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> SPRUCE_WOODEN_CRUCIBLE =
+            registerCrucibleItem("spruce_wooden_crucible", ModBlocks.SPRUCE_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> BIRCH_WOODEN_CRUCIBLE =
+            registerCrucibleItem("birch_wooden_crucible", ModBlocks.BIRCH_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> JUNGLE_WOODEN_CRUCIBLE =
+            registerCrucibleItem("jungle_wooden_crucible", ModBlocks.JUNGLE_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> ACACIA_WOODEN_CRUCIBLE =
+            registerCrucibleItem("acacia_wooden_crucible", ModBlocks.ACACIA_WOODEN_CRUCIBLE);
+    public static final DeferredHolder<Item, Item> DARK_OAK_WOODEN_CRUCIBLE =
+            registerCrucibleItem("dark_oak_wooden_crucible", ModBlocks.DARK_OAK_WOODEN_CRUCIBLE);
+
+    public static final List<DeferredHolder<Item, Item>> WOODEN_CRUCIBLES = List.of(
+            WOODEN_CRUCIBLE,
+            SPRUCE_WOODEN_CRUCIBLE,
+            BIRCH_WOODEN_CRUCIBLE,
+            JUNGLE_WOODEN_CRUCIBLE,
+            ACACIA_WOODEN_CRUCIBLE,
+            DARK_OAK_WOODEN_CRUCIBLE);
 
     /** M6: unfired porcelain bucket, smelted into the working bucket. */
     public static final DeferredHolder<Item, Item> UNFIRED_PORCELAIN_BUCKET =
@@ -133,6 +150,11 @@ public final class ModItems {
             STONE_BARREL);
 
     private ModItems() {
+    }
+
+    private static DeferredHolder<Item, Item> registerCrucibleItem(final String name,
+                                                            final DeferredHolder<Block, ? extends Block> block) {
+        return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 
     private static DeferredHolder<Item, Item> registerBarrelItem(final String name,

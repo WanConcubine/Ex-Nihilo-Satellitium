@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    "x x",
+    "xyx"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:birch_log"
+    },
+    "y": {
+      "tag": "minecraft:wooden_slabs"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:birch_wooden_crucible"
+  }
+}

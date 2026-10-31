@@ -69,10 +69,27 @@ public final class ModBlocks {
             BLOCKS.register("witch_water", () -> new LiquidBlock(ModFluids.WITCH_WATER.get(),
                     BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)));
 
-    /** M6: wooden crucible, melts leaves/saplings into water without a heat source. */
+    /** M6: wooden crucibles, melt leaves/saplings into water without a heat source. */
     public static final DeferredHolder<Block, Block> WOODEN_CRUCIBLE =
-            BLOCKS.register("wooden_crucible", () -> new CrucibleBlock(
-                    BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion()));
+            registerWoodenCrucible("wooden_crucible", Blocks.OAK_PLANKS);
+    public static final DeferredHolder<Block, Block> SPRUCE_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("spruce_wooden_crucible", Blocks.SPRUCE_PLANKS);
+    public static final DeferredHolder<Block, Block> BIRCH_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("birch_wooden_crucible", Blocks.BIRCH_PLANKS);
+    public static final DeferredHolder<Block, Block> JUNGLE_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("jungle_wooden_crucible", Blocks.JUNGLE_PLANKS);
+    public static final DeferredHolder<Block, Block> ACACIA_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("acacia_wooden_crucible", Blocks.ACACIA_PLANKS);
+    public static final DeferredHolder<Block, Block> DARK_OAK_WOODEN_CRUCIBLE =
+            registerWoodenCrucible("dark_oak_wooden_crucible", Blocks.DARK_OAK_PLANKS);
+
+    public static final List<DeferredHolder<Block, Block>> WOODEN_CRUCIBLES = List.of(
+            WOODEN_CRUCIBLE,
+            SPRUCE_WOODEN_CRUCIBLE,
+            BIRCH_WOODEN_CRUCIBLE,
+            JUNGLE_WOODEN_CRUCIBLE,
+            ACACIA_WOODEN_CRUCIBLE,
+            DARK_OAK_WOODEN_CRUCIBLE);
 
     /** Registration order doubles as creative-tab order. */
     public static final List<DeferredHolder<Block, Block>> BARRELS = List.of(
@@ -85,6 +102,11 @@ public final class ModBlocks {
             STONE_BARREL);
 
     private ModBlocks() {
+    }
+
+    private static DeferredHolder<Block, Block> registerWoodenCrucible(final String name, final Block planks) {
+        return BLOCKS.register(name, () -> new CrucibleBlock(
+                BlockBehaviour.Properties.ofFullCopy(planks).noOcclusion()));
     }
 
     private static DeferredHolder<Block, Block> registerWoodBarrel(final String name, final Block planks) {

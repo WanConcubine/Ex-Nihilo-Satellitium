@@ -10,7 +10,7 @@
       "item": "minecraft:oak_log"
     },
     "y": {
-      "item": "minecraft:oak_slab"
+      "tag": "minecraft:wooden_slabs"
     }
   },
   "result": {

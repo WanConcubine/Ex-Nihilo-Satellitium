@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    "x x",
+    "xyx"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:jungle_log"
+    },
+    "y": {
+      "tag": "minecraft:wooden_slabs"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:jungle_wooden_crucible"
+  }
+}
