@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Crushed netherrack / end stone block textures (M6).
 
-Sequentia's crushed blocks read as the vanilla material broken into coarse
-chunks: the vanilla texture is averaged down to a 4x4 grid and scaled back up
-with nearest-neighbour, so every 4x4 pixel cell is one flat colour. We keep the
-vanilla source (read from the ModDevGradle client jar, nothing stored here),
-apply that down/up-sampling, then slightly darken and add a thin seam between
-chunks.
+The vanilla texture is kept as-is and a fine 2x2 checker of brightness is
+imprinted on top, plus a little deterministic grain. That reads as a crushed
+mosaic without the long seams that made the earlier 4x4 version look like
+planks. Source: vanilla block/netherrack and block/end_stone, read out of the
+ModDevGradle client jar (nothing stored in the repo).
 
     <python-with-pillow> art/blocks/crushed_stone/generate.py
 """
@@ -22,11 +21,10 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTIFACTS = ROOT / "build/moddev/artifacts"
 OUT = ROOT / "src/main/resources/assets/exnihilosatellitium/textures/block"
 
-# Cells per axis in the crushed grid, and how the grid is expressed.
-CELLS = 4
-SEAM = 0.88      # darker right/bottom edge of every cell
-CHECKER = 0.93   # alternate chunks read slightly darker
-NOISE = 6        # deterministic +/- per channel so the chunks are not flat
+# 2x2 checker cells: tight enough to read as crushed stone, not as planks.
+CELLS = 2
+CHECKER = 0.9    # every other 2x2 cell is 10% darker
+NOISE = 6        # deterministic +/- per channel so the cells are not flat
 
 
 def read_vanilla(path: str) -> Image.Image:
@@ -39,26 +37,15 @@ def read_vanilla(path: str) -> Image.Image:
 
 
 def crushed(source: Image.Image) -> Image.Image:
-    """Crush the vanilla material into a 4x4 grid of chunks.
-
-    Average the 16x16 texture down to 4x4 and scale it back up, so each chunk is
-    one flat colour taken from the vanilla pixels; then add a thin seam and a
-    little deterministic grain so the result is not a perfect checkerboard.
-    """
-    size = source.width // CELLS
-    chunks = source.resize((size, size), Image.BOX).resize(
-        (source.width, source.height), Image.NEAREST)
-
-    pixels = chunks.load()
-    for y in range(chunks.height):
-        for x in range(chunks.width):
+    """Keep the vanilla pixels, imprint a fine 2x2 checker and a little grain."""
+    image = source.copy()
+    pixels = image.load()
+    for y in range(image.height):
+        for x in range(image.width):
             red, green, blue, alpha = pixels[x, y]
             if alpha == 0:
                 continue
-            cell_x, cell_y = x // CELLS, y // CELLS
-            scale = CHECKER if (cell_x + cell_y) % 2 == 0 else 1.0
-            if x % CELLS == CELLS - 1 or y % CELLS == CELLS - 1:
-                scale *= SEAM
+            scale = CHECKER if ((x // CELLS) + (y // CELLS)) % 2 == 0 else 1.0
             grain = ((x * 7 + y * 13) % (NOISE * 2 + 1)) - NOISE
             pixels[x, y] = (
                 max(0, min(255, int(red * scale) + grain)),
@@ -66,7 +53,7 @@ def crushed(source: Image.Image) -> Image.Image:
                 max(0, min(255, int(blue * scale) + grain)),
                 255,
             )
-    return chunks
+    return image
 
 
 def main() -> None:
