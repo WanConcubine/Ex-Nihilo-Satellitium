@@ -867,7 +867,9 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   - 粉碎末地石 → 末地石 20%、紫颂果 6%、末影珍珠 5%。
 - 粉碎地狱岩/末地石是方块类筛料，走原来的方块堆渲染；`SieveRenderer` 仍然保留了
   非方块输入的图标兜底（`ItemRenderer.renderStatic` 平铺），以后再有纯物品筛料也看得到。
-- 图标：`art/items/sieve_extras/generate.py` 逐像素生成（草种子绿、地狱岩暗红、末地石米黄）。
+- 图标：草种子还是 `art/items/sieve_extras/generate.py` 手绘；**粉碎地狱岩/末地石的方块贴图**由
+  `art/blocks/crushed_stone/generate.py` 从原版 `netherrack` / `end_stone` 派生——保留原版材质纹理，
+  压暗到 0.78、饱和度降 0.8，再点几道确定性裂纹；不在仓库里存原版 PNG。
 
 **验证**
 
