@@ -781,3 +781,26 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 
 - 瓷桶（可装熔岩）→ 蚕（侵染树叶 → 线）→ 娃娃（烈焰人/末影人）。
 - 娃娃和「牛奶→粘液球」需要给 `BarrelRecipes` 加**产出物品/生成实体**的规则类型。
+
+## 22. M6 第二刀：瓷桶（2026-10-31）
+
+**做什么**
+
+- 新方块 `porcelain_barrel`：复用 `BarrelBlock` + `BarrelBlockEntity`，不新增 BE 类型；
+  配方 7 瓷土 + 1 砖（`x x / x x / xyx`），镐挖，掉落自身。
+- `BarrelBlockEntity.isStoneBarrel()` 改名 `allowsHotFluids()`，把瓷桶和石桶并列：
+  两者都不受 433 K 限制，木桶仍然拒熔岩。
+- 模型 vanilla-sampled：`quartz_block_side` 桶身、`smooth_quartz` 顶沿、`quartz_pillar` 内壁、
+  `light_gray_concrete` 箍；不新增 PNG。
+- JEI 桶分类的 catalyst 走 `ModItems.BARREL_ITEMS`，瓷桶自动出现在里面。
+
+**验证**
+
+- RCON：`setblock` 成功、NBT 熔岩 1000 mB 可读回、满桶比较器 15、loot table 掉自身。
+- **未验**：合成、拿桶真的把熔岩倒进去（要玩家）。
+
+**注意**
+
+- `scripts/generate_barrel_variants.py` 的 `merge_tag` 只追加不覆盖，重跑不会把瓷桶从
+  `minecraft:tags/block/mineable/pickaxe` 里删掉；但瓷桶的 blockstate/model/loot/recipe 是手写的，
+  脚本不负责生成。

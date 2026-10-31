@@ -50,6 +50,8 @@ public final class ModItems {
             registerBarrelItem("dark_oak_barrel", ModBlocks.DARK_OAK_BARREL);
     public static final DeferredHolder<Item, Item> STONE_BARREL =
             registerBarrelItem("stone_barrel", ModBlocks.STONE_BARREL);
+    public static final DeferredHolder<Item, Item> PORCELAIN_BARREL =
+            registerBarrelItem("porcelain_barrel", ModBlocks.PORCELAIN_BARREL);
 
     public static final DeferredHolder<Item, Item> SIEVE =
             ITEMS.register("sieve", () -> new BlockItem(ModBlocks.SIEVE.get(), new Item.Properties()));
@@ -116,7 +118,8 @@ public final class ModItems {
             JUNGLE_BARREL,
             ACACIA_BARREL,
             DARK_OAK_BARREL,
-            STONE_BARREL);
+            STONE_BARREL,
+            PORCELAIN_BARREL);
 
     private ModItems() {
     }
