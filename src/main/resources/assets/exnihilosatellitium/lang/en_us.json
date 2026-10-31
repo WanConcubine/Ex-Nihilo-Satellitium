@@ -44,6 +44,7 @@
   "block.exnihilosatellitium.uranium_ore_gravel": "Uranium Ore Gravel",
   "block.exnihilosatellitium.uranium_ore_sand": "Uranium Ore Sand",
   "block.exnihilosatellitium.witch_water": "Witch Water",
+  "block.exnihilosatellitium.wooden_crucible": "Wooden Crucible",
   "block.exnihilosatellitium.zinc_ore_dust": "Zinc Ore Dust",
   "block.exnihilosatellitium.zinc_ore_gravel": "Zinc Ore Gravel",
   "block.exnihilosatellitium.zinc_ore_sand": "Zinc Ore Sand",
@@ -111,6 +112,7 @@
   "item.exnihilosatellitium.witch_water_bucket": "Witch Water Bucket",
   "item.exnihilosatellitium.wood_mesh": "Wooden Mesh",
   "item.exnihilosatellitium.wooden_crook": "Wooden Crook",
+  "item.exnihilosatellitium.wooden_crucible": "Wooden Crucible",
   "item.exnihilosatellitium.wooden_hammer": "Wooden Hammer",
   "item.exnihilosatellitium.zinc_broken": "Zinc Broken Ore",
   "item.exnihilosatellitium.zinc_crushed": "Zinc Crushed Ore",
@@ -158,5 +160,6 @@
   "jei.exnihilosatellitium.sieve.hint": "One item per sift; every drop is rolled independently.",
   "jei.exnihilosatellitium.sieve.mesh_hint": "The mesh only sets durability; it does not change the drop table.",
   "message.exnihilosatellitium.barrel.hot_fluid": "Wooden barrels cannot hold hot fluids (use a stone barrel for lava)",
+  "message.exnihilosatellitium.crucible.hot_fluid": "A wooden crucible cannot hold lava",
   "message.exnihilosatellitium.need_mesh": "Needs a mesh"
 }

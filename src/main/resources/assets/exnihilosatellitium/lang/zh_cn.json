@@ -44,6 +44,7 @@
   "block.exnihilosatellitium.uranium_ore_gravel": "铀矿沙砾",
   "block.exnihilosatellitium.uranium_ore_sand": "铀矿沙子",
   "block.exnihilosatellitium.witch_water": "巫水",
+  "block.exnihilosatellitium.wooden_crucible": "木坩埚",
   "block.exnihilosatellitium.zinc_ore_dust": "锌矿粉尘",
   "block.exnihilosatellitium.zinc_ore_gravel": "锌矿沙砾",
   "block.exnihilosatellitium.zinc_ore_sand": "锌矿沙子",
@@ -111,6 +112,7 @@
   "item.exnihilosatellitium.witch_water_bucket": "巫水桶",
   "item.exnihilosatellitium.wood_mesh": "木筛网",
   "item.exnihilosatellitium.wooden_crook": "木钩",
+  "item.exnihilosatellitium.wooden_crucible": "木坩埚",
   "item.exnihilosatellitium.wooden_hammer": "木锤",
   "item.exnihilosatellitium.zinc_broken": "破碎锌矿",
   "item.exnihilosatellitium.zinc_crushed": "粉碎锌矿",
@@ -158,5 +160,6 @@
   "jei.exnihilosatellitium.sieve.hint": "每筛一个材料；每个产物独立判定。",
   "jei.exnihilosatellitium.sieve.mesh_hint": "筛网只决定耐久，不改变掉落。",
   "message.exnihilosatellitium.barrel.hot_fluid": "木桶装不了高温流体（熔岩要用石桶）",
+  "message.exnihilosatellitium.crucible.hot_fluid": "木坩埚装不了熔岩",
   "message.exnihilosatellitium.need_mesh": "需要先放入筛网"
 }

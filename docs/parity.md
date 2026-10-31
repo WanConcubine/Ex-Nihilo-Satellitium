@@ -26,6 +26,7 @@
 | 11 | 瓷土 → 瓷桶（可装熔岩） | `unfired_porcelain_bucket`（3 瓷土，原版桶形）→ 烧制 → `porcelain_bucket`：通用 1000 mB 物品桶，`fluid_contents` 组件 + `IFluidHandlerItem` | 🚧 | 2026-10-31 组件读写已 RCON 验过；合成/烧制/舀水/上色待实测 |
 | 12 | 巫水（水 + 有机物发酵）→ 转化方块得下界 / 末地资源 | 自定义流体 `exnihilosatellitium:witch_water`（still/flowing + 桶 + 方块）；满水桶 + 菌丝/蘑菇煲 → 巫水；巫水+沙→灵魂沙、巫水+树苗→深色橡树苗 | 🚧 | 2026-10-31：流体/发酵/两条转化已实现（服务端 RCON 验过发酵）；娃娃→烈焰人/末影人未做 |
 | 13 | 蚕 + 侵染树叶 → 丝线 → 线 / 羊毛 | — | ❌ | M6 |
+| 16 | 木坩埚（Creatio / Sequentia）：树叶/树苗 → 水，无需热源 | `wooden_crucible` + 20 条水熔料；0.2 mB/t 被动速率 | 🚧 | 2026-10-31 被动熔化已 RCON 验过；合成/画面/拒熔岩待实测 |
 | 13a | 古代孢子：沙筛 → 古代孢子 → 泥土变菌丝 / 牛变哞菇 | `common/item/AncientSporesItem`（`ancient_spores`，紫色）；沙筛 1/128 | 🚧 | 巫水链的前置；未进游戏实测 |
 | 14 | 泥土过筛 → 种子 / 作物（空岛农业的起点） | `data/<ns>/sieve/dirt.json`（小麦 15% / 甜菜·土豆·胡萝卜 6% / 西瓜·南瓜 5%） | 🚧 | 2026-10-31 加表并确认 `[sieve] loaded 4 inputs`；数值待作者试玩再调 |
 | 15 | 流动熔岩热源 0.1（源方块 0.2） | 只实现了 0.2 | ⚠️ | `crucible_heat` 的 `properties` 只支持等值匹配，表达不了 `level > 0`；要么加范围内匹配，要么接受流动熔岩按 0.2 算 |

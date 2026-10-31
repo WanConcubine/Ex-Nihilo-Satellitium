@@ -51,5 +51,7 @@ public final class CrucibleJeiPlugin implements IModPlugin {
         final ItemStack crucible = new ItemStack(ModItems.CRUCIBLE.get());
         registration.addRecipeCatalyst(crucible, MELT_TYPE);
         registration.addRecipeCatalyst(crucible, HEAT_TYPE);
+        final ItemStack wooden = new ItemStack(ModItems.WOODEN_CRUCIBLE.get());
+        registration.addRecipeCatalyst(wooden, MELT_TYPE);
     }
 }
