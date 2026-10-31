@@ -51,6 +51,12 @@ public class InfestedLeavesBlockEntity extends BlockEntity {
         return this.progress;
     }
 
+    public void setProgress(final float progress) {
+        this.progress = Math.max(0.0F, Math.min(1.0F, progress));
+        this.setChanged();
+        this.sync();
+    }
+
     /** Called by the silkworm and by the spread logic. */
     public void setMimic(final BlockState state) {
         this.mimic = state;

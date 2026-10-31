@@ -6,6 +6,7 @@ import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.GrassSeedsItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
 import net.minecraft.world.food.FoodProperties;
@@ -84,6 +85,11 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> CRUSHED_END_STONE =
             ITEMS.register("crushed_end_stone", () -> new BlockItem(ModBlocks.CRUSHED_END_STONE.get(),
                     new Item.Properties()));
+
+    /** M6: infested leaves item; the infestation component picks 0 % or mature. */
+    public static final DeferredHolder<Item, Item> INFESTED_LEAVES =
+            ITEMS.register("infested_leaves", () -> new InfestedLeavesBlockItem(
+                    ModBlocks.INFESTED_LEAVES.get(), new Item.Properties()));
 
     /** M6: ancient spores turn dirt into mycelium (the witch water chain start). */
     public static final DeferredHolder<Item, Item> ANCIENT_SPORES =

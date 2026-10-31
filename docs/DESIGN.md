@@ -890,9 +890,11 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   扩散只在 3×3×3 里**真实存在的树叶**中随机挑一个（一开始用 3×3×3 随机偏移，大部分落在空气上，
   20 秒只长 1 个，改成先收集候选再挑，20 秒能长 4 个）。
 - 破坏时按 `Progress` 掷 `线`：`rand < progress` 掉一个，再 `rand < progress * 0.25` 可能再掉一个。
-- 视觉：BER 画回原树叶，再叠一层白色遮罩——`LevelRenderer.renderVoxelShape` +
-  `RenderType.DEBUG_QUADS`，alpha = `min(0.8, progress * 0.8)`，所以越熟越白；另有每 tick 1/24 概率的
-  白灰粒子。`Progress` 同步给客户端（update tag）。
+- 视觉：BER 画回原树叶，用 `WhiteningVertexConsumer` 把顶点色按 `min(0.85, progress * 0.9)`
+  混向白色——保留树叶纹理，不会出现白盒子（第一版用 `DEBUG_QUADS` 画白方块，被指出渲染异常）；
+  另有每 tick 1/24 概率的白灰粒子。`Progress` 同步给客户端（update tag）。
+- **创造模式**：`playerWillDestroy` 里跳过掉线；补了 `infested_leaves` 物品形态 +
+  `infestation` 组件，创造栏给两个堆叠（0% / 100%），放下时由 `InfestedLeavesBlock#setPlacedBy` 设进度。
 - **Jade**：`InfestedLeavesComponentProvider` 显示 `原树叶：<方块名>` 和 `侵染：xx%`，
   成熟（progress = 1）时改成「已成熟（会向周围扩散）」；配置键
   `config.jade.plugin_exnihilosatellitium.infested_leaves` 已补。

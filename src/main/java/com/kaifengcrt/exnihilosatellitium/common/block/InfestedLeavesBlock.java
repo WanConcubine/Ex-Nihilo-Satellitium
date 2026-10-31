@@ -2,6 +2,9 @@ package com.kaifengcrt.exnihilosatellitium.common.block;
 
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.InfestedLeavesBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
+import com.kaifengcrt.exnihilosatellitium.registry.ModDataComponents;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -61,9 +64,20 @@ public class InfestedLeavesBlock extends BaseEntityBlock {
     }
 
     @Override
+    public void setPlacedBy(final Level level, final BlockPos pos, final BlockState state,
+                            final LivingEntity placer, final ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        final Float progress = stack.get(ModDataComponents.INFESTATION.get());
+        if (progress != null && level.getBlockEntity(pos) instanceof InfestedLeavesBlockEntity leaves) {
+            leaves.setProgress(progress);
+        }
+    }
+
+    @Override
     public BlockState playerWillDestroy(final Level level, final BlockPos pos, final BlockState state,
                                         final Player player) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof InfestedLeavesBlockEntity leaves) {
+        if (!level.isClientSide && (player == null || !player.isCreative())
+                && level.getBlockEntity(pos) instanceof InfestedLeavesBlockEntity leaves) {
             leaves.dropString(level, pos);
         }
         return super.playerWillDestroy(level, pos, state, player);
