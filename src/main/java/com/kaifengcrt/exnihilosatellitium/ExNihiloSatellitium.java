@@ -4,6 +4,7 @@ import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
+import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
@@ -26,6 +27,7 @@ public final class ExNihiloSatellitium {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public ExNihiloSatellitium(final IEventBus modBus, final ModContainer modContainer) {
+        ModFluids.register(modBus);
         ModBlocks.register(modBus);
         ModBlockEntities.register(modBus);
         ModItems.register(modBus);

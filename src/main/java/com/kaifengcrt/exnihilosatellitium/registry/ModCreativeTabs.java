@@ -42,6 +42,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.SILKWORM.get());
                         output.accept(ModItems.COOKED_SILKWORM.get());
                         output.accept(ModItems.PORCELAIN.get());
+                        output.accept(ModItems.SPORES.get());
+                        output.accept(ModItems.WITCH_WATER_BUCKET.get());
                         ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
                         for (final OreMaterial material : OreMaterials.all()) {
                             final var entries = ModOreItems.byMaterial().get(material.id());

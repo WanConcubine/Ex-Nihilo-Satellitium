@@ -1,0 +1,5 @@
+{
+  "base": "exnihilosatellitium:witch_water",
+  "added": { "item": "minecraft:sand" },
+  "result": "minecraft:soul_sand"
+}

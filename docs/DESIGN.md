@@ -738,3 +738,42 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 
 - `./gradlew build` + 纹理检查通过；服务端 `[debug] our recipes=97`，无 recipe 解析错误。
 - **未进游戏复测**：新形状能不能合成、JEI 是否显示斜向配方、坩埚满时右键是否彻底无反应。
+
+## 21. M6 第一刀：巫水 + 孢子（2026-10-31）
+
+**问题**
+
+巫水是 M6 的起点，但空岛没有菌丝来源：原版靠**沙筛出孢子**（1/128）→ 右键泥土变菌丝 /
+右键牛变哞菇，再用满水桶挨着菌丝发酵。少了孢子这一环，巫水在空岛里永远做不出来。
+
+**做法**
+
+- **流体**：`exnihilosatellitium:witch_water` still/flowing 一对 + `FluidType`
+  （density 1100 / viscosity 1500 / 300 K / 不可乘船 / 可灭火）+ `LiquidBlock` + 桶。
+  流动参数比水懒：`slopeFindDistance 3`、`levelDecreasePerBlock 2`、`tickRate 15`，
+  避免手滑一桶把岛淹了。客户端外观在 `WitchWaterClientExtensions`（紫色 still/flow）。
+- **孢子**（`common/item/SporeItem`）：右键泥土 → 菌丝；右键牛 → 哞菇（保留血量/名字/幼年）。
+  沙筛 1/128。
+- **发酵状态机**（`BarrelBlockEntity`）：满 1000 mB 水 + 3×3×3 内有菌丝时，
+  每 tick `Spore += 1 + 菌丝数/2`，满 1000 变巫水并清零。
+  - 1 个菌丝 ≈ 50 秒，2 个 ≈ 25 秒（和原版 `MAX_COMPOSTING_TIME` 同量级）。
+  - 递**蘑菇煲**可以无菌丝起酵（消耗煲、退回碗），同样 50 秒。
+  - 发酵进度存 NBT `Spore`；巫水本身不会再被发酵成别的东西。
+- **转化**走既有 `BarrelRecipes`，不写 Java：巫水+沙子→灵魂沙、巫水+橡树苗→深色橡树苗。
+
+**美术**
+
+- `art/blocks/witch_water/generate.py`：16×16 紫水 still/flow + 巫水桶图标（5 阶紫 + 铁灰桶身），
+  可复现；`check-textures.py` 通过。
+
+**验证**
+
+- 服务端：`[barrel] loaded 7 transforms (2 fluid, 5 item)`、`[sieve] 4 inputs, 53 drops`。
+- RCON：满水 + 2 菌丝 25 秒变巫水、`Spore` 归零；只写 `Spore:1` 无菌丝 50 秒后变巫水；
+  `setblock` 巫水方块可命中。
+- **未验**：客户端流体/桶纹理、桶装倒、两条转化、孢子右键（要玩家）。
+
+**下一步**
+
+- 瓷桶（可装熔岩）→ 蚕（侵染树叶 → 线）→ 娃娃（烈焰人/末影人）。
+- 娃娃和「牛奶→粘液球」需要给 `BarrelRecipes` 加**产出物品/生成实体**的规则类型。

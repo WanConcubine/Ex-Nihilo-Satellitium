@@ -7,6 +7,7 @@ import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.UnfiredCrucibleBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -62,6 +63,11 @@ public final class ModBlocks {
     public static final DeferredHolder<Block, Block> CRUCIBLE =
             BLOCKS.register("crucible", () -> new CrucibleBlock(
                     BlockBehaviour.Properties.ofFullCopy(Blocks.QUARTZ_BLOCK).noOcclusion()));
+
+    /** M6: witch water source block (fluid rendering comes from the FluidType). */
+    public static final DeferredHolder<Block, LiquidBlock> WITCH_WATER =
+            BLOCKS.register("witch_water", () -> new LiquidBlock(ModFluids.WITCH_WATER.get(),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)));
 
     /** Registration order doubles as creative-tab order. */
     public static final List<DeferredHolder<Block, Block>> BARRELS = List.of(

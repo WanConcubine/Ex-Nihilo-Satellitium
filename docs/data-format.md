@@ -95,6 +95,7 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 | `DirtReady` | boolean | `1b` 表示泥土已就绪，右键可取 |
 | `CompostScale` | int | 进度刻度；新存档固定 `1000`，老存档没有这个键 |
 | `Solid` | compound | 凝固/掺料产物（`ItemStack`，如圆石/黑曜石/地狱岩/末地石）；空时没有这个键 |
+| `Spore` | int | 巫水发酵进度（0 = 未开始）；满 `1000` 时整桶水变巫水 |
 
 - 容量固定 `CAPACITY = 1000` mB，不依赖 NBT。
 - **老存档迁移**：没有 `CompostScale` 的桶按 0..100 旧刻度读取，进度 ×10、计时按 600→1000 缩放；新存档写入 `CompostScale:1000`。
@@ -319,8 +320,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 `gravel.json` / `sand.json` / `dirt.json` / `dust.json`（4 输入、52 掉落）；`dust` 输入是 M3 的通用尘土方块，
-  `dirt` 是空岛农业起点（种子/作物），`sand` 额外给仙人掌与甘蔗。
+- 当前有 `gravel.json` / `sand.json` / `dirt.json` / `dust.json`（4 输入、53 掉落）；`dust` 输入是 M3 的通用尘土方块，
+  `dirt` 是空岛农业起点（种子/作物），`sand` 额外给仙人掌、甘蔗与**孢子**（1/128，M6 巫水链起点）。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。
 
 ## 10. 桶转化 JSON（2026-10-30）
@@ -350,8 +351,10 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
-- 当前 5 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→地狱岩、
-  熔岩+荧石粉→末地石、**水+尘土→粘土块**（`water_dust_clay.json`）。
+- 当前 7 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→地狱岩、
+  熔岩+荧石粉→末地石、水+尘土→粘土块（`water_dust_clay.json`）；
+  M6 巫水两条：巫水+沙子→灵魂沙（`witch_water_sand_soul_sand.json`）、
+  巫水+橡树苗→深色橡树苗（`witch_water_sapling_dark_oak.json`）。
 - **删掉 JSON 桶就不反应**：不会退回硬编码。
 
 ## 11. JEI 分类
