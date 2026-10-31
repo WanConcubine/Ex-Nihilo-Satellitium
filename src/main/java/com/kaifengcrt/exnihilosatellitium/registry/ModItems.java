@@ -78,9 +78,11 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> GRASS_SEEDS =
             ITEMS.register("grass_seeds", () -> new GrassSeedsItem(new Item.Properties()));
     public static final DeferredHolder<Item, Item> CRUSHED_NETHERRACK =
-            ITEMS.register("crushed_netherrack", () -> new Item(new Item.Properties()));
+            ITEMS.register("crushed_netherrack", () -> new BlockItem(ModBlocks.CRUSHED_NETHERRACK.get(),
+                    new Item.Properties()));
     public static final DeferredHolder<Item, Item> CRUSHED_END_STONE =
-            ITEMS.register("crushed_end_stone", () -> new Item(new Item.Properties()));
+            ITEMS.register("crushed_end_stone", () -> new BlockItem(ModBlocks.CRUSHED_END_STONE.get(),
+                    new Item.Properties()));
 
     /** M6: ancient spores turn dirt into mycelium (the witch water chain start). */
     public static final DeferredHolder<Item, Item> ANCIENT_SPORES =

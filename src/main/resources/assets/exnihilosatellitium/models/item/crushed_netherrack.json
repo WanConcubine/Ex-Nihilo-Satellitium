@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "exnihilosatellitium:item/crushed_netherrack"
-  }
+  "parent": "exnihilosatellitium:block/crushed_netherrack"
 }

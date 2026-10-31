@@ -857,17 +857,16 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 - 新物品：
   - `grass_seeds`（草种子）：右键泥土 → 草方块（`GrassSeedsItem`），空岛不靠流浪商人也能量产草；
-  - `crushed_netherrack` / `crushed_end_stone`：锤下界岩 / 末地石得到（`hammer/netherrack.json`、
-    `hammer/end_stone.json`，1–2 个），再作为筛输入。
+  - `crushed_netherrack` / `crushed_end_stone`：**方块**（不是物品），锤下界岩 / 末地石得到
+    （`hammer/netherrack.json`、`hammer/end_stone.json`，1–2 个），再作为筛料。铲子挖掘、掉落自身。
 - 筛表（全部独立判定，数值是本项目自己的）：
   - 泥土 + 草种子 6%、甜浆果 5%；
-  - 沙 + 可可豆 3%、海带 4%、管珊瑚 2%、海晶砂粒 2%；
+  - 沙 + 可可豆 3%、海带 4%、5 种珊瑚各 1%、海晶砂粒 2%、海晶碎片 2%；
   - 砂砾 + 海晶碎片 2%；
   - 粉碎地狱岩 → 石英 20%、荧石粉 12%、下界疣 10%、烈焰粉 6%、岩浆膏 4%、灵魂沙 2%；
   - 粉碎末地石 → 末地石 20%、紫颂果 6%、末影珍珠 5%。
-- **筛子渲染**：粉碎类输入是纯物品、没有方块模型，原来 `SieveRenderer` 会直接跳过不画。
-  现在非 BlockItem 的输入会用 `ItemRenderer.renderStatic` 把图标平铺在筛面上当料层
-  （P1 #13 的临时解法）。
+- 粉碎地狱岩/末地石是方块类筛料，走原来的方块堆渲染；`SieveRenderer` 仍然保留了
+  非方块输入的图标兜底（`ItemRenderer.renderStatic` 平铺），以后再有纯物品筛料也看得到。
 - 图标：`art/items/sieve_extras/generate.py` 逐像素生成（草种子绿、地狱岩暗红、末地石米黄）。
 
 **验证**
