@@ -904,3 +904,28 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 服务端：`setblock infested_leaves` + `data merge` 写入 `Mimic/Progress` 后，20 秒 `0.65 → 0.849`，
   8 个相邻树叶里 4 个变侵染。
 - **未验**：右键树叶转化、破坏掉线、游戏内渲染。
+
+## 26. M6 第六刀：人偶（2026-10-31）
+
+**来源**
+
+1.7.10 `Recipes.java`：人偶 = 7 瓷土 + 钻石/绿宝石（`xyx / x / x x`）；愤怒/诡异人偶用同一张
+`xyx / zwz / xvx`，中心是普通人偶，四周换材料，并且各有一个「红石 ↔ 下界疣」互换的镜像配方。
+作者确认：叫「人偶」、保留双配方与镜像、和平模式改为掉烈焰棒/末影珍珠、生成后桶恢复空桶。
+
+**实现**
+
+- 三个物品 `doll` / `angry_doll` / `creepy_doll`，16×16 自绘（瓷白 / 暗红 / 巫水紫三套色板）。
+- 6 条合成配方（钻石、绿宝石、愤怒正/反、诡异正/反）。
+- **`BarrelRecipes` 新规则类型**：`entity` + `peaceful_drop` + 可选 `cook_ticks`（默认 600）。
+  - 命中后 `BarrelBlockEntity#startCooking` 清空流体、记录 `pendingEntity`，600 tick 后
+    非和平在桶上方生成实体，和平模式掉 `peaceful_drop`，然后清字段（空的桶）。
+  - NBT：`CookEntity` / `PeacefulDrop` / `CookTicks`；烹饪期间比较器 15。
+  - JEI 的桶分类把 `peaceful_drop` 当作结果展示（`result` 字段镜像它）。
+- 两条桶规则：熔岩 + 愤怒人偶 → 烈焰人；巫水 + 诡异人偶 → 末影人。
+
+**验证**
+
+- 服务端：`[barrel] loaded 9 transforms (2 fluid, 7 item)`。
+- RCON：写入 `CookEntity=blaze` 后，Normal 难度刷出烈焰人；Peaceful 难度掉烈焰棒。
+- **未验**：6 条配方的摆放、玩家右键人偶、JEI 展示。

@@ -7,16 +7,22 @@ import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -122,6 +128,10 @@ public class BarrelBlockEntity extends BlockEntity {
      * turns the full water tank into witch water (M6).
      */
     private int sporeProgress;
+    /** Doll rules: entity to spawn when cooking finishes, or null. */
+    private ResourceLocation pendingEntity;
+    private Item peacefulDrop;
+    private int cookTicks;
 
     public BarrelBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.BARREL.get(), pos, state);
@@ -179,11 +189,11 @@ public class BarrelBlockEntity extends BlockEntity {
     }
 
     /** A full barrel accepts the add-on from {@link BarrelRecipes} (item or second fluid). */
-    private ItemStack itemMixResult(final ItemStack held) {
+    private BarrelRecipes.Recipe itemMixRule(final ItemStack held) {
         if (this.tank.getFluidAmount() < CAPACITY || this.tank.getFluid().isEmpty()) {
-            return ItemStack.EMPTY;
+            return null;
         }
-        return BarrelRecipes.resultForItem(this.tank.getFluid().getFluid(), held);
+        return BarrelRecipes.ruleForItem(this.tank.getFluid().getFluid(), held);
     }
 
     private boolean wouldSolidify(final FluidStack incoming) {
@@ -205,7 +215,7 @@ public class BarrelBlockEntity extends BlockEntity {
         if (isFluidContainer(stack)) {
             return this.compostProgress == 0;
         }
-        if (!this.itemMixResult(stack).isEmpty()) {
+        if (this.itemMixRule(stack) != null) {
             return true;
         }
         if (stack.is(Items.MUSHROOM_STEW) && this.isFullWater()) {
@@ -247,12 +257,16 @@ public class BarrelBlockEntity extends BlockEntity {
             return InteractionResult.PASS;
         }
 
-        final ItemStack mixed = this.itemMixResult(stack);
-        if (!mixed.isEmpty()) {
+        final BarrelRecipes.Recipe rule = this.itemMixRule(stack);
+        if (rule != null) {
             if (!player.isCreative()) {
                 stack.shrink(1);
             }
-            this.setSolid(mixed);
+            if (rule.spawnsEntity()) {
+                this.startCooking(rule);
+            } else {
+                this.setSolid(rule.result().copy());
+            }
             return InteractionResult.SUCCESS;
         }
 
@@ -364,6 +378,9 @@ public class BarrelBlockEntity extends BlockEntity {
 
     public static void serverTick(final Level level, final BlockPos pos, final BlockState state,
                                   final BarrelBlockEntity barrel) {
+        if (barrel.tickCooking(level, pos)) {
+            return;
+        }
         if (barrel.dirtReady || barrel.hasSolid()) {
             return;
         }
@@ -418,6 +435,64 @@ public class BarrelBlockEntity extends BlockEntity {
     /** Flowing water/lava map to their source fluid so the recipe table matches. */
     private static Fluid normalizeFluid(final Fluid fluid) {
         return fluid instanceof FlowingFluid flowing ? flowing.getSource() : fluid;
+    }
+
+    /** Dolls: consume the fluid and start a cooking timer that spawns an entity. */
+    private void startCooking(final BarrelRecipes.Recipe rule) {
+        this.pendingEntity = rule.entity();
+        this.peacefulDrop = rule.peacefulDrop();
+        this.cookTicks = rule.cookTicks();
+        this.tank.setFluid(FluidStack.EMPTY);
+        this.dirtReady = false;
+        this.compostProgress = 0;
+        this.compostTicks = 0;
+        this.setChanged();
+        this.sync();
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                    SoundSource.BLOCKS, 1.0F, 0.6F);
+        }
+    }
+
+    /** @return true while cooking (the normal barrel tick must not run) */
+    private boolean tickCooking(final Level level, final BlockPos pos) {
+        if (this.pendingEntity == null) {
+            return false;
+        }
+        if (this.cookTicks > 0) {
+            this.cookTicks--;
+            if (this.cookTicks % 20 == 0 && level instanceof ServerLevel serverLevel) {
+                final boolean blaze = this.pendingEntity.getPath().contains("blaze");
+                serverLevel.sendParticles(blaze ? ParticleTypes.FLAME : ParticleTypes.PORTAL,
+                        pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
+                        6, 0.3D, 0.2D, 0.3D, 0.01D);
+            }
+            return true;
+        }
+
+        if (!level.isClientSide) {
+            if (level.getDifficulty() != Difficulty.PEACEFUL) {
+                final EntityType<?> type = BuiltInRegistries.ENTITY_TYPE
+                        .getOptional(this.pendingEntity).orElse(null);
+                if (type != null) {
+                    final Entity entity = type.create(level);
+                    if (entity != null) {
+                        entity.moveTo(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
+                                level.random.nextFloat() * 360.0F, 0.0F);
+                        level.addFreshEntity(entity);
+                    }
+                }
+            } else if (this.peacefulDrop != null) {
+                Block.popResource(level, pos.above(), new ItemStack(this.peacefulDrop));
+            }
+            level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.4F);
+        }
+        this.pendingEntity = null;
+        this.peacefulDrop = null;
+        this.cookTicks = 0;
+        this.setChanged();
+        this.sync();
+        return true;
     }
 
     /** True when the tank holds a full 1000 mB of plain water. */
@@ -526,7 +601,7 @@ public class BarrelBlockEntity extends BlockEntity {
     }
 
     public int getComparatorOutput() {
-        if (this.dirtReady || this.hasSolid()) {
+        if (this.dirtReady || this.hasSolid() || this.pendingEntity != null) {
             return 15;
         }
         final int fluid = this.tank.getFluidAmount() * 15 / this.tank.getCapacity();
@@ -549,6 +624,13 @@ public class BarrelBlockEntity extends BlockEntity {
         tag.putInt("CompostTicks", this.compostTicks);
         tag.putBoolean("DirtReady", this.dirtReady);
         tag.putInt("Spore", this.sporeProgress);
+        if (this.pendingEntity != null) {
+            tag.putString("CookEntity", this.pendingEntity.toString());
+        }
+        if (this.peacefulDrop != null) {
+            tag.putString("PeacefulDrop", BuiltInRegistries.ITEM.getKey(this.peacefulDrop).toString());
+        }
+        tag.putInt("CookTicks", this.cookTicks);
         if (this.hasSolid()) {
             tag.put("Solid", this.solid.save(registries));
         }
@@ -565,6 +647,13 @@ public class BarrelBlockEntity extends BlockEntity {
         this.compostTicks = tag.getInt("CompostTicks");
         this.dirtReady = tag.getBoolean("DirtReady");
         this.sporeProgress = tag.getInt("Spore");
+        this.pendingEntity = tag.contains("CookEntity")
+                ? ResourceLocation.tryParse(tag.getString("CookEntity")) : null;
+        this.peacefulDrop = tag.contains("PeacefulDrop")
+                ? BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(tag.getString("PeacefulDrop")))
+                        .orElse(null)
+                : null;
+        this.cookTicks = tag.getInt("CookTicks");
         this.solid = tag.contains("Solid")
                 ? ItemStack.parseOptional(registries, tag.getCompound("Solid"))
                 : ItemStack.EMPTY;

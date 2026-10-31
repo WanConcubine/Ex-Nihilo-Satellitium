@@ -54,6 +54,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.CRUSHED_NETHERRACK.get());
                         output.accept(ModItems.CRUSHED_END_STONE.get());
                         output.accept(ModItems.ANCIENT_SPORES.get());
+                        output.accept(ModItems.DOLL.get());
+                        output.accept(ModItems.ANGRY_DOLL.get());
+                        output.accept(ModItems.CREEPY_DOLL.get());
                         output.accept(ModItems.WITCH_WATER_BUCKET.get());
                         ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
                         for (final OreMaterial material : OreMaterials.all()) {
