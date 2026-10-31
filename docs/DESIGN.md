@@ -805,8 +805,9 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 - 客户端：模型用 predicate `exnihilosatellitium:filled` 在空桶/满桶模型之间切换；满桶模型的
   layer1 是白色液体遮罩，`RegisterColorHandlersEvent.Item` 按流体上色（水 0xFF3F76E4、
   熔岩 0xFFFF8A2A、巫水用流体的 tint）。
-- 贴图 `art/items/porcelain_bucket/generate.py`：读原版 `water_bucket.png`，金属部分按亮度映射到
-  瓷白色阶、水体部分输出成白色遮罩；仓库不存原版 PNG。
+- 贴图 `art/items/porcelain_bucket/generate.py`：桶身读原版 **`bucket.png`**（空桶，带桶沿/内壁），
+  按亮度映射到瓷白 / 陶土色阶；液体遮罩从 `water_bucket.png` 的水体像素提取成白色。
+  第一版拿 `water_bucket` 当桶身，把水体像素挖空后桶口是镂空的——已修正。仓库不存原版 PNG。
 
 **验证**
 

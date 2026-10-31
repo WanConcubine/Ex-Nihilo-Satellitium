@@ -61,35 +61,37 @@ def porcelain_index(value: int) -> int:
 
 
 def main() -> None:
-    source = read_vanilla("assets/minecraft/textures/item/water_bucket.png")
-    pixels = list(source.getdata())
+    # The empty bucket keeps the rim/interior drawn; the water bucket only
+    # contributes the fluid silhouette. Using the water bucket for the body would
+    # punch a hole through the opening (the "hollow top" bug).
+    body_source = read_vanilla("assets/minecraft/textures/item/bucket.png")
+    water_source = read_vanilla("assets/minecraft/textures/item/water_bucket.png")
 
-    body = Image.new("RGBA", source.size)
-    unfired = Image.new("RGBA", source.size)
-    mask = Image.new("RGBA", source.size)
+    body = Image.new("RGBA", body_source.size)
+    unfired = Image.new("RGBA", body_source.size)
+    mask = Image.new("RGBA", body_source.size)
     body_px = body.load()
     unfired_px = unfired.load()
     mask_px = mask.load()
 
-    for y in range(source.height):
-        for x in range(source.width):
-            pixel = pixels[y * source.width + x]
+    for y in range(body_source.height):
+        for x in range(body_source.width):
+            pixel = body_source.getpixel((x, y))
             if pixel[3] == 0:
                 body_px[x, y] = (0, 0, 0, 0)
                 unfired_px[x, y] = (0, 0, 0, 0)
-                mask_px[x, y] = (0, 0, 0, 0)
-                continue
-            if is_water(pixel):
-                body_px[x, y] = (0, 0, 0, 0)
-                unfired_px[x, y] = (0, 0, 0, 0)
+            else:
+                red, green, blue, _ = pixel
+                level = (red + green + blue) // 3
+                index = porcelain_index(level)
+                body_px[x, y] = (*PORCELAIN[index], 255)
+                unfired_px[x, y] = (*CLAY[index], 255)
+
+            water = water_source.getpixel((x, y))
+            if water[3] > 0 and is_water(water):
                 mask_px[x, y] = (255, 255, 255, 255)
-                continue
-            red, green, blue, _ = pixel
-            level = (red + green + blue) // 3
-            index = porcelain_index(level)
-            body_px[x, y] = (*PORCELAIN[index], 255)
-            unfired_px[x, y] = (*CLAY[index], 255)
-            mask_px[x, y] = (0, 0, 0, 0)
+            else:
+                mask_px[x, y] = (0, 0, 0, 0)
 
     TEX.mkdir(parents=True, exist_ok=True)
     body.save(TEX / "porcelain_bucket.png")
