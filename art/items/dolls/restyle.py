@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Restyle Creatio's doll icon for this project (MIT, see THIRD-PARTY.md).
 
-Source: `art/items/dolls/creatio/doll.png` (128x128 = the 16x16 icon at 8x).
-The pipeline mirrors `art/blocks/crucible/restyle.py`: drop back to 16x16, add a
-1 px outline, and quantise to a 4-step palette so it matches the 1.21 item style.
+Source: `art/items/dolls/creatio/doll.png` (128x128). The doll icons ship at
+**64x64** (the author asked for the clearer variant), so the source is downscaled
+to 64 with Lanczos, quantised to a 4-step palette by luminance and given a 1 px
+outline. `scripts/check-textures.py` allows 64x64 for `textures/item/` folders.
 `doll`, `angry_doll` and `creepy_doll` share the silhouette and only differ in
 palette.
 
@@ -19,6 +20,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[3]
 SRC = Path(__file__).resolve().parent / "creatio" / "doll.png"
 TEX = ROOT / "src/main/resources/assets/exnihilosatellitium/textures/item"
+SIZE = 64
 
 # outline, shadow, base, light
 PALETTES = {
@@ -30,14 +32,14 @@ PALETTES = {
 
 def main() -> None:
     source = Image.open(SRC).convert("RGBA")
-    sprite = source.resize((16, 16), Image.NEAREST)
+    sprite = source.resize((SIZE, SIZE), Image.LANCZOS)
     pixels = sprite.load()
 
     # Silhouette mask and per-pixel luminance (0..1).
     solid: set[tuple[int, int]] = set()
     level: dict[tuple[int, int], float] = {}
-    for y in range(16):
-        for x in range(16):
+    for y in range(SIZE):
+        for x in range(SIZE):
             red, green, blue, alpha = pixels[x, y]
             if alpha < 40:
                 continue
@@ -52,7 +54,7 @@ def main() -> None:
 
     for name, palette in PALETTES.items():
         palette_outline, palette_shadow, palette_base, palette_light = palette
-        image = Image.new("RGBA", (16, 16))
+        image = Image.new("RGBA", (SIZE, SIZE))
         out = image.load()
 
         for x, y in solid:
@@ -70,15 +72,15 @@ def main() -> None:
             for dx in (-1, 0, 1):
                 for dy in (-1, 0, 1):
                     px, py = x + dx, y + dy
-                    if 0 <= px < 16 and 0 <= py < 16 and (px, py) not in solid:
+                    if 0 <= px < SIZE and 0 <= py < SIZE and (px, py) not in solid:
                         out[px, py] = (*palette_outline, 255)
 
         image.save(TEX / f"{name}.png")
 
-    preview = Image.new("RGBA", (60, 16), (24, 24, 24, 255))
+    preview = Image.new("RGBA", (SIZE * 3 + 16, SIZE), (24, 24, 24, 255))
     for index, name in enumerate(("doll", "angry_doll", "creepy_doll")):
-        preview.paste(Image.open(TEX / f"{name}.png"), (index * 20, 0))
-    preview.resize((preview.width * 8, preview.height * 8), Image.NEAREST).save(
+        preview.paste(Image.open(TEX / f"{name}.png"), (index * (SIZE + 8), 0))
+    preview.resize((preview.width * 4, preview.height * 4), Image.NEAREST).save(
         Path(__file__).with_name("preview.png"))
     print("wrote doll / angry_doll / creepy_doll")
 
