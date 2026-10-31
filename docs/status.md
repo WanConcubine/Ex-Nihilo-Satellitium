@@ -123,6 +123,7 @@ M4（坩埚 + 热源 + JEI + 配置）都已实现，已提交 `c1899d0`；
 | 桶：接雨水 | ✅ | `/weather rain` 12 秒积水 80 mB |
 | 桶：木桶拒热 | ⚠️ | `tank.fill` 按 433 K 拒绝；消息/手感未实测 |
 | 桶：红石/荧石掺料 | ⚠️ | 已进 `barrel/*.json`；未玩家实测 |
+| 桶：流动水 → 黑曜石 | ✅ | RCON：满熔岩桶，上方放水源、桶顶格是 `water[level=8]` 流动水，1.5 秒后 `Solid=obsidian`（`FlowingFluid#getSource()` 归一化） |
 | 桶：水+尘土→粘土 | ⚠️ | JSON 已写；未实测 |
 | 巫水：满水 + 菌丝发酵 | ✅ | RCON：满水木桶 + 2 菌丝，约 25 秒变 `exnihilosatellitium:witch_water`，`Spore` 归零 |
 | 巫水：蘑菇煲起酵 | ✅ | RCON：只写 `Spore:1` 无菌丝，约 50 秒后变巫水 |
