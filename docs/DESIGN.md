@@ -868,9 +868,9 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 粉碎地狱岩/末地石是方块类筛料，走原来的方块堆渲染；`SieveRenderer` 仍然保留了
   非方块输入的图标兜底（`ItemRenderer.renderStatic` 平铺），以后再有纯物品筛料也看得到。
 - 图标：草种子还是 `art/items/sieve_extras/generate.py` 手绘；**粉碎地狱岩/末地石的方块贴图**由
-  `art/blocks/crushed_stone/generate.py` 从原版 `netherrack` / `end_stone` 派生：把 16×16 平均缩小到
-  4×4 再放大回来（把材质碎成 4×4 个色块），加 0.88 的接缝、交替色块 0.93 的明暗和 ±6 的确定性噪点。
-  参考 Sequentia 的粉碎方块观感；不在仓库里存原版 PNG。
+  `art/blocks/crushed_stone/generate.py` 从原版 `netherrack` / `end_stone` 派生：保留原版像素，
+  叠 2×2 细棋盘（交替 0.9 亮度）+ ±6 确定性噪点。试过 4×4 大色块 + 连续接缝，被指出像木板，已废弃。
+  不在仓库里存原版 PNG。
 
 **验证**
 

@@ -185,8 +185,8 @@ python3 scripts/check-textures.py
 - 筛子、坩埚的 vanilla-sampled 模型与贴图待做。
 - 巫水有 still/flow 两套；水/熔岩仍走原版流体渲染。
 - **粉碎地狱岩 / 粉碎末地石（M6）**：方块贴图从原版 `netherrack` / `end_stone` 派生
-  （`art/blocks/crushed_stone/generate.py`：16×16 → 4×4 平均 → 放大，再叠接缝/棋盘明暗/噪点），
-  观感对齐 Sequentia 的粉碎方块。
+  （`art/blocks/crushed_stone/generate.py`：保留原版像素 + 2×2 棋盘明暗 + 噪点）。
+  注意别用大色块 + 连续接缝，会看成木板。
 - `art/barrel/barrel_side*.png` 等早期自绘图留作参考；外凸箍已经从模型里删除，
   以后如果要给桶身画自有贴图，可以直接把箍画进贴图里，不会再和体素叠在一起。
 
