@@ -3,7 +3,7 @@
   "textures": {
     "particle": "minecraft:block/quartz_block_side",
     "side": "minecraft:block/quartz_block_side",
-    "top": "minecraft:block/smooth_quartz",
+    "top": "minecraft:block/quartz_block_bottom",
     "inner": "minecraft:block/quartz_pillar",
     "bottom": "minecraft:block/quartz_block_side",
     "hoop": "minecraft:block/light_gray_concrete"

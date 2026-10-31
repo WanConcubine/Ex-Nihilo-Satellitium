@@ -124,6 +124,7 @@ M4（坩埚 + 热源 + JEI + 配置）都已实现，已提交 `c1899d0`；
 | 古代孢子：泥土→菌丝 / 牛→哞菇 | ⚠️ | 逻辑已写；未实测 |
 | 巫水：画面/桶纹理 | ⚠️ | 流体用原版 water_still/flow + 紫色 tint；桶图标由原版水桶重着色；未进游戏目视 |
 | 瓷桶：方块 / NBT / 比较器 | ✅ | RCON：`setblock porcelain_barrel` 成功、塞 1000 mB 熔岩可读回、满桶比较器 15、loot 掉自身 |
+| 瓷桶：模型贴图 | ⚠️ | 首次启动报 `smooth_quartz` 不存在，已改用 `quartz_block_bottom`；**未再目视确认** |
 | 瓷桶：能装熔岩 | ⚠️ | `allowsHotFluids()` 已把瓷桶并入石桶分支；未用桶实测 |
 | 瓷桶：合成 / JEI | ⚠️ | 7 瓷土 + 1 砖；JEI 桶分类已自动多一个 catalyst；未目视 |
 | 桶 JEI | ✅ | 转化 1/2 页、堆肥 1/22 页已目视；[截图](images/jei-barrel-transform.png) |
