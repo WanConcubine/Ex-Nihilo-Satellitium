@@ -799,8 +799,9 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
     在 `CapabilityEvents` 里注册；因此桶可以给桶、桶给坩埚/木桶倒液体，木桶的“拒热”检查也认它。
   - 右键流体源可以舀满（`Item#use` + `BucketItem#getPlayerPOVHitResult`）。
   - tooltip 显示内含流体与 mB 数。
-- 合成：7 瓷土（`x x / x x / xxx`）。Omnia 还有一步「未烧制桶 → 烧制」，本项目先直接合成，
-  等有手感反馈再补。
+- 合成：**3 瓷土**按原版桶的形状（`x x` / ` x `）→ `unfired_porcelain_bucket`，再熔炉烧成
+  `porcelain_bucket`（200 tick / 0.3 经验）。和坩埚的 7 瓷土配方不冲突，也照 Omnia 的
+  Unfired Bucket → 烧制 两步走。未烧制的桶没有流体 capability，不能装液体。
 - 客户端：模型用 predicate `exnihilosatellitium:filled` 在空桶/满桶模型之间切换；满桶模型的
   layer1 是白色液体遮罩，`RegisterColorHandlersEvent.Item` 按流体上色（水 0xFF3F76E4、
   熔岩 0xFFFF8A2A、巫水用流体的 tint）。

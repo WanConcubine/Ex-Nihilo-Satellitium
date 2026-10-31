@@ -61,7 +61,8 @@ M4（坩埚 + 热源 + JEI + 配置）都已实现，已提交 `c1899d0`；
   整桶变巫水；直接递蘑菇煲可无菌丝起酵（同样 50 秒，退回碗）。
 - **巫水转化**两条：+沙子 → 灵魂沙；+橡树苗 → 深色橡树苗（`barrel/witch_water_*.json`）。
 - **瓷桶**（`porcelain_bucket`，物品）：通用 1000 mB 容器，能装熔岩/巫水/牛奶；
-  内容存 `exnihilosatellitium:fluid_contents` 组件，`IFluidHandlerItem` 已接，7 瓷土合成。
+  内容存 `exnihilosatellitium:fluid_contents` 组件，`IFluidHandlerItem` 已接。
+  3 瓷土按原版桶形（`x x` / ` x `）→ 未烧制瓷桶 → 熔炉烧 200 tick → 可用瓷桶。
 
 ### 配置与 JEI
 
@@ -125,7 +126,7 @@ M4（坩埚 + 热源 + JEI + 配置）都已实现，已提交 `c1899d0`；
 | 巫水：画面/桶纹理 | ⚠️ | 流体用原版 water_still/flow + 紫色 tint；桶图标由原版水桶重着色；未进游戏目视 |
 | 瓷桶：物品/组件 | ✅ | RCON：`summon item` 带 `fluid_contents` 可读回熔岩 1000 / 巫水 1000 |
 | 瓷桶：画面/舀水/倒液体 | ⚠️ | 模型 predicate、tint、右键舀水、倒进木桶/坩埚均未玩家实测 |
-| 瓷桶：合成 | ⚠️ | 7 瓷土（`x x / x x / xxx`）；未实测 |
+| 瓷桶：合成/烧制 | ⚠️ | 3 瓷土（`x x` / ` x `）→ 未烧制瓷桶 → 烧制；未实测 |
 | 桶 JEI | ✅ | 转化 1/2 页、堆肥 1/22 页已目视；[截图](images/jei-barrel-transform.png) |
 | 筛子（1.21.1） | ✅ | 作者已实际筛出产物；2026-10-31 服务端日志 `[sieve] loaded 4 inputs, 52 drops`（泥土/沙两档新增未实测） |
 | 筛子 JEI | ✅ | 7×3 + 166×60 已目视；[截图](images/jei-sieve.png)（还是 3 输入时的样子） |

@@ -19,13 +19,21 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTIFACTS = ROOT / "build/moddev/artifacts"
 TEX = ROOT / "src/main/resources/assets/exnihilosatellitium/textures/item"
 
-# Luminance -> porcelain ramp. The vanilla bucket silhouette is kept as-is.
+# Luminance -> fired porcelain ramp. The vanilla bucket silhouette is kept as-is.
 PORCELAIN = {
     0: (110, 106, 97),    # outline
     1: (168, 162, 150),   # shadow
     2: (201, 195, 184),   # base
     3: (221, 216, 207),   # light
     4: (242, 239, 233),   # highlight
+}
+# Unfired clay ramp, same silhouette.
+CLAY = {
+    0: (94, 79, 63),
+    1: (150, 128, 106),
+    2: (201, 174, 146),
+    3: (222, 201, 174),
+    4: (239, 224, 201),
 }
 # Vanilla bucket greys, ordered by brightness.
 STEPS = [53, 114, 150, 168, 216]
@@ -57,8 +65,10 @@ def main() -> None:
     pixels = list(source.getdata())
 
     body = Image.new("RGBA", source.size)
+    unfired = Image.new("RGBA", source.size)
     mask = Image.new("RGBA", source.size)
     body_px = body.load()
+    unfired_px = unfired.load()
     mask_px = mask.load()
 
     for y in range(source.height):
@@ -66,35 +76,41 @@ def main() -> None:
             pixel = pixels[y * source.width + x]
             if pixel[3] == 0:
                 body_px[x, y] = (0, 0, 0, 0)
+                unfired_px[x, y] = (0, 0, 0, 0)
                 mask_px[x, y] = (0, 0, 0, 0)
                 continue
             if is_water(pixel):
                 body_px[x, y] = (0, 0, 0, 0)
+                unfired_px[x, y] = (0, 0, 0, 0)
                 mask_px[x, y] = (255, 255, 255, 255)
                 continue
             red, green, blue, _ = pixel
             level = (red + green + blue) // 3
-            body_px[x, y] = (*PORCELAIN[porcelain_index(level)], 255)
+            index = porcelain_index(level)
+            body_px[x, y] = (*PORCELAIN[index], 255)
+            unfired_px[x, y] = (*CLAY[index], 255)
             mask_px[x, y] = (0, 0, 0, 0)
 
     TEX.mkdir(parents=True, exist_ok=True)
     body.save(TEX / "porcelain_bucket.png")
+    unfired.save(TEX / "unfired_porcelain_bucket.png")
     mask.save(TEX / "porcelain_bucket_fluid.png")
 
-    preview = Image.new("RGBA", (40, 16), (24, 24, 24, 255))
-    preview.paste(body, (0, 0))
+    preview = Image.new("RGBA", (60, 16), (24, 24, 24, 255))
+    preview.paste(unfired, (0, 0))
+    preview.paste(body, (20, 0))
     tinted = mask.copy()
     tint_px = tinted.load()
     for y in range(tinted.height):
         for x in range(tinted.width):
             if tint_px[x, y][3] > 0:
                 tint_px[x, y] = (107, 68, 168, 255)  # witch water purple for the preview
-    preview.alpha_composite(tinted, (0, 0))
-    preview.paste(mask, (24, 0))
+    preview.alpha_composite(tinted, (20, 0))
+    preview.paste(mask, (44, 0))
     preview.resize((preview.width * 8, preview.height * 8), Image.NEAREST).save(
         Path(__file__).with_name("preview.png")
     )
-    print("wrote porcelain_bucket.png / porcelain_bucket_fluid.png")
+    print("wrote unfired_porcelain_bucket.png / porcelain_bucket.png / porcelain_bucket_fluid.png")
 
 
 if __name__ == "__main__":

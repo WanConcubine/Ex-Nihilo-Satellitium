@@ -42,6 +42,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.SILKWORM.get());
                         output.accept(ModItems.COOKED_SILKWORM.get());
                         output.accept(ModItems.PORCELAIN.get());
+                        output.accept(ModItems.UNFIRED_PORCELAIN_BUCKET.get());
                         output.accept(ModItems.PORCELAIN_BUCKET.get());
                         output.accept(ModItems.ANCIENT_SPORES.get());
                         output.accept(ModItems.WITCH_WATER_BUCKET.get());

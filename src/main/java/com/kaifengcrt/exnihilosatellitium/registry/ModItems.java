@@ -28,6 +28,10 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> PORCELAIN =
             ITEMS.register("porcelain", () -> new Item(new Item.Properties()));
 
+    /** M6: unfired porcelain bucket, smelted into the working bucket. */
+    public static final DeferredHolder<Item, Item> UNFIRED_PORCELAIN_BUCKET =
+            ITEMS.register("unfired_porcelain_bucket", () -> new Item(new Item.Properties().stacksTo(1)));
+
     /** M6: universal 1000 mB bucket, accepts lava and witch water. */
     public static final DeferredHolder<Item, Item> PORCELAIN_BUCKET =
             ITEMS.register("porcelain_bucket", () -> new PorcelainBucketItem(
