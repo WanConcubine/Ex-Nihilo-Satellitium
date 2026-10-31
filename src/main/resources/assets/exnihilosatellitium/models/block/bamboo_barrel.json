@@ -1,0 +1,11 @@
+{
+  "parent": "exnihilosatellitium:block/barrel_base",
+  "textures": {
+    "particle": "minecraft:block/bamboo_planks",
+    "side": "minecraft:block/bamboo_planks",
+    "top": "minecraft:block/bamboo_planks",
+    "inner": "minecraft:block/stripped_bamboo_block",
+    "bottom": "minecraft:block/stripped_bamboo_block",
+    "hoop": "minecraft:block/gray_concrete"
+  }
+}

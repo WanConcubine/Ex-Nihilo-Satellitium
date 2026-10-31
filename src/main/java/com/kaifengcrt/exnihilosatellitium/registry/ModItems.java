@@ -94,6 +94,17 @@ public final class ModItems {
             registerBarrelItem("acacia_barrel", ModBlocks.ACACIA_BARREL);
     public static final DeferredHolder<Item, Item> DARK_OAK_BARREL =
             registerBarrelItem("dark_oak_barrel", ModBlocks.DARK_OAK_BARREL);
+    public static final DeferredHolder<Item, Item> MANGROVE_BARREL =
+            registerBarrelItem("mangrove_barrel", ModBlocks.MANGROVE_BARREL);
+    public static final DeferredHolder<Item, Item> CHERRY_BARREL =
+            registerBarrelItem("cherry_barrel", ModBlocks.CHERRY_BARREL);
+    public static final DeferredHolder<Item, Item> BAMBOO_BARREL =
+            registerBarrelItem("bamboo_barrel", ModBlocks.BAMBOO_BARREL);
+    public static final DeferredHolder<Item, Item> CRIMSON_BARREL =
+            registerBarrelItem("crimson_barrel", ModBlocks.CRIMSON_BARREL);
+    public static final DeferredHolder<Item, Item> WARPED_BARREL =
+            registerBarrelItem("warped_barrel", ModBlocks.WARPED_BARREL);
+
     public static final DeferredHolder<Item, Item> STONE_BARREL =
             registerBarrelItem("stone_barrel", ModBlocks.STONE_BARREL);
 
@@ -162,6 +173,11 @@ public final class ModItems {
             JUNGLE_BARREL,
             ACACIA_BARREL,
             DARK_OAK_BARREL,
+            MANGROVE_BARREL,
+            CHERRY_BARREL,
+            BAMBOO_BARREL,
+            CRIMSON_BARREL,
+            WARPED_BARREL,
             STONE_BARREL);
 
     private ModItems() {

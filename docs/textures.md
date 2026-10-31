@@ -180,7 +180,8 @@ python3 scripts/check-textures.py
 ## 已知待办
 
 - 桶身切角八边形还没做；当前是 14×16 内缩方桶 + 外凸箍。
-- 1.20 新增木种（mangrove / cherry / bamboo）没有做；现有六种经典木 + 石桶。
+- 已补齐 1.16/1.20 木材：红树 / 樱花 / 竹（`stripped_bamboo_block`）/ 绯红 / 诡异（菌柄），
+  现在 11 种木桶 + 石桶；竹和下界菌柄的「内壁」贴图在生成脚本里单独指定。
 - 筛子、坩埚的 vanilla-sampled 模型与贴图待做。
 - 巫水有 still/flow 两套；水/熔岩仍走原版流体渲染。
 - `art/barrel/barrel_side*.png` 等早期自绘图留作参考；如果将来要改用自有贴图，

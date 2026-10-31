@@ -41,6 +41,17 @@ public final class ModBlocks {
             registerWoodBarrel("acacia_barrel", Blocks.ACACIA_PLANKS);
     public static final DeferredHolder<Block, Block> DARK_OAK_BARREL =
             registerWoodBarrel("dark_oak_barrel", Blocks.DARK_OAK_PLANKS);
+    public static final DeferredHolder<Block, Block> MANGROVE_BARREL =
+            registerWoodBarrel("mangrove_barrel", Blocks.MANGROVE_PLANKS);
+    public static final DeferredHolder<Block, Block> CHERRY_BARREL =
+            registerWoodBarrel("cherry_barrel", Blocks.CHERRY_PLANKS);
+    public static final DeferredHolder<Block, Block> BAMBOO_BARREL =
+            registerWoodBarrel("bamboo_barrel", Blocks.BAMBOO_PLANKS);
+    public static final DeferredHolder<Block, Block> CRIMSON_BARREL =
+            registerWoodBarrel("crimson_barrel", Blocks.CRIMSON_PLANKS);
+    public static final DeferredHolder<Block, Block> WARPED_BARREL =
+            registerWoodBarrel("warped_barrel", Blocks.WARPED_PLANKS);
+
     public static final DeferredHolder<Block, Block> STONE_BARREL =
             BLOCKS.register("stone_barrel",
                     () -> new BarrelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
@@ -114,6 +125,11 @@ public final class ModBlocks {
             JUNGLE_BARREL,
             ACACIA_BARREL,
             DARK_OAK_BARREL,
+            MANGROVE_BARREL,
+            CHERRY_BARREL,
+            BAMBOO_BARREL,
+            CRIMSON_BARREL,
+            WARPED_BARREL,
             STONE_BARREL);
 
     private ModBlocks() {

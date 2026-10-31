@@ -1,0 +1,11 @@
+{
+  "parent": "exnihilosatellitium:block/barrel_base",
+  "textures": {
+    "particle": "minecraft:block/mangrove_planks",
+    "side": "minecraft:block/mangrove_planks",
+    "top": "minecraft:block/mangrove_planks",
+    "inner": "minecraft:block/stripped_mangrove_log",
+    "bottom": "minecraft:block/stripped_mangrove_log",
+    "hoop": "minecraft:block/gray_concrete"
+  }
+}
