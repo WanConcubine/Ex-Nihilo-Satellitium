@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.GrassSeedsItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
@@ -72,6 +73,14 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> PORCELAIN_BUCKET =
             ITEMS.register("porcelain_bucket", () -> new PorcelainBucketItem(
                     new Item.Properties().stacksTo(1)));
+
+    /** M6: grass seeds turn dirt into grass; hammered netherrack / end stone. */
+    public static final DeferredHolder<Item, Item> GRASS_SEEDS =
+            ITEMS.register("grass_seeds", () -> new GrassSeedsItem(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CRUSHED_NETHERRACK =
+            ITEMS.register("crushed_netherrack", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CRUSHED_END_STONE =
+            ITEMS.register("crushed_end_stone", () -> new Item(new Item.Properties()));
 
     /** M6: ancient spores turn dirt into mycelium (the witch water chain start). */
     public static final DeferredHolder<Item, Item> ANCIENT_SPORES =

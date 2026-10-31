@@ -60,6 +60,22 @@
     {
       "item": "exnihilosatellitium:ancient_spores",
       "chance": 0.0078
+    },
+    {
+      "item": "minecraft:cocoa_beans",
+      "chance": 0.03
+    },
+    {
+      "item": "minecraft:kelp",
+      "chance": 0.04
+    },
+    {
+      "item": "minecraft:tube_coral",
+      "chance": 0.02
+    },
+    {
+      "item": "minecraft:prismarine_crystals",
+      "chance": 0.02
     }
   ]
 }

@@ -45,6 +45,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PORCELAIN.get());
                         output.accept(ModItems.UNFIRED_PORCELAIN_BUCKET.get());
                         output.accept(ModItems.PORCELAIN_BUCKET.get());
+                        output.accept(ModItems.GRASS_SEEDS.get());
+                        output.accept(ModItems.CRUSHED_NETHERRACK.get());
+                        output.accept(ModItems.CRUSHED_END_STONE.get());
                         output.accept(ModItems.ANCIENT_SPORES.get());
                         output.accept(ModItems.WITCH_WATER_BUCKET.get());
                         ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));

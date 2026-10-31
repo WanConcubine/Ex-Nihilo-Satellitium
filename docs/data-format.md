@@ -325,8 +325,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 `gravel.json` / `sand.json` / `dirt.json` / `dust.json`（4 输入、53 掉落）；`dust` 输入是 M3 的通用尘土方块，
-  `dirt` 是空岛农业起点（种子/作物），`sand` 额外给仙人掌、甘蔗与**古代孢子**（`ancient_spores`，1/128，M6 巫水链起点）。
+- 当前有 6 个输入、69 掉落：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
+  `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
+  `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
+  管珊瑚、海晶砂粒与**古代孢子**（`ancient_spores`，1/128，M6 巫水链起点），`gravel` 额外给海晶碎片；
+  `crushed_netherrack` 出石英/荧石/下界疣/烈焰粉/岩浆膏/灵魂沙，`crushed_end_stone` 出末地石/紫颂果/末影珍珠。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。
 
 ## 10. 桶转化 JSON（2026-10-30）

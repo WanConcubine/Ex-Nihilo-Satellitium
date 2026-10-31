@@ -2,12 +2,14 @@ package com.kaifengcrt.exnihilosatellitium.client;
 
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.SieveBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -28,7 +30,20 @@ public final class SieveRenderer implements BlockEntityRenderer<SieveBlockEntity
     public void render(final SieveBlockEntity sieve, final float partialTick, final PoseStack pose,
                        final MultiBufferSource buffers, final int light, final int overlay) {
         final ItemStack contents = sieve.getContents();
-        if (contents.isEmpty() || !(contents.getItem() instanceof BlockItem blockItem)) {
+        if (contents.isEmpty()) {
+            return;
+        }
+        if (!(contents.getItem() instanceof BlockItem blockItem)) {
+            // Dust-like inputs (crushed netherrack / end stone) have no block
+            // model, so lay the item sprite flat on the sieve instead of drawing
+            // nothing at all.
+            pose.pushPose();
+            pose.translate(0.5F, 0.71F, 0.5F);
+            pose.mulPose(Axis.XP.rotationDegrees(90.0F));
+            pose.scale(0.5F, 0.5F, 0.5F);
+            Minecraft.getInstance().getItemRenderer().renderStatic(contents, ItemDisplayContext.FIXED,
+                    light, overlay, pose, buffers, sieve.getLevel(), 0);
+            pose.popPose();
             return;
         }
         final BlockState state = blockItem.getBlock().defaultBlockState();
