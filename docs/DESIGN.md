@@ -814,3 +814,30 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 - 服务端：`[debug] our recipes=98`；`summon item` 带组件可读回
   `{"exnihilosatellitium:fluid_contents": {amount: 1000, id: "minecraft:lava"}}`，巫水同样通过。
 - **未验**：进游戏看空桶/满桶模型与颜色、右键舀水、倒进木桶/坩埚、合成。
+
+## 23. M6 第三刀：木坩埚（2026-10-31）
+
+**来源**
+
+Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版。往里放入树叶/树苗可缓慢变为水，
+不需要热源，减少等雨的麻烦。」配方 6 橡木原木 + 1 橡木台阶。
+
+**实现**
+
+- 新方块 `wooden_crucible`：复用 `CrucibleBlock` + `CrucibleBlockEntity`（同一 BE 类型，
+  所以 `CrucibleRenderer`、Jade、比较器都直接可用），只是方块属性走木板。
+- 行为差异都由 `CrucibleBlockEntity#isWooden()` 分支：
+  - 熔化速度固定 `WOODEN_PASSIVE_SPEED = 0.2 mB/t`，**不看下方热源**（有篝火也一样快）；
+  - `canAccept` 只收 `fluid == water` 的熔料，熔岩类配方直接被拒；
+  - `fill` 拒绝 > 433 K 的流体（和木桶同一条温度线），右键倒熔岩会提示
+    `message.exnihilosatellitium.crucible.hot_fluid`。
+- 数据：新增 20 条水熔料（10 树叶 100 mB、10 树苗 250 mB），走既有 `crucible_melt` 表；
+  瓷坩埚也能用，只是要热源。
+- 模型 vanilla-sampled：`oak_log` 桶身 / `oak_log_top` 顶沿 / `stripped_oak_log` 内壁，
+  不新增 PNG；斧挖，掉落自身；JEI 坩埚分类多一个 catalyst。
+
+**验证**
+
+- 服务端：`[crucible] loaded 39 meltables`（19 + 20）。
+- RCON：木坩埚放树叶，6 秒 100 → 76.6 固体 / 23 mB 水，速率 0.2 mB/t；底下换成篝火后速率不变。
+- **未验**：合成、进游戏看模型/液体显示、熔岩桶被拒的提示、JEI 新条目。

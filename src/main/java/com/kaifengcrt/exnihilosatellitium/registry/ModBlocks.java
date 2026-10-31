@@ -69,6 +69,11 @@ public final class ModBlocks {
             BLOCKS.register("witch_water", () -> new LiquidBlock(ModFluids.WITCH_WATER.get(),
                     BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)));
 
+    /** M6: wooden crucible, melts leaves/saplings into water without a heat source. */
+    public static final DeferredHolder<Block, Block> WOODEN_CRUCIBLE =
+            BLOCKS.register("wooden_crucible", () -> new CrucibleBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion()));
+
     /** Registration order doubles as creative-tab order. */
     public static final List<DeferredHolder<Block, Block>> BARRELS = List.of(
             BARREL,

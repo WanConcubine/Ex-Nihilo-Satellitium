@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    "x x",
+    "xyx"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:oak_log"
+    },
+    "y": {
+      "item": "minecraft:oak_slab"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:wooden_crucible"
+  }
+}

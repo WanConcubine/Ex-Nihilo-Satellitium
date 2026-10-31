@@ -4,10 +4,12 @@ import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
+import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -38,11 +40,25 @@ import org.jetbrains.annotations.Nullable;
  */
 public class CrucibleBlockEntity extends BlockEntity {
 
+    /** Wooden crucibles melt without a heat source, slowly (classic Creatio). */
+    public static final float WOODEN_PASSIVE_SPEED = 0.2F;
+    /** Wooden crucibles are not hot-fluid rated; same limit as wooden barrels. */
+    public static final int WOOD_MAX_TEMPERATURE = 433;
+
     /** Default solid (melt) capacity; the live value comes from the config. */
     public static final int DEFAULT_MELT_CAPACITY = 2000;
     private static final int SYNC_INTERVAL = 10;
 
     private final FluidTank tank = new FluidTank(ModConfig.crucibleCapacity()) {
+        @Override
+        public int fill(final FluidStack resource, final FluidAction action) {
+            if (CrucibleBlockEntity.this.isWooden() && !resource.isEmpty()
+                    && resource.getFluidType().getTemperature() > WOOD_MAX_TEMPERATURE) {
+                return 0;
+            }
+            return super.fill(resource, action);
+        }
+
         @Override
         protected void onContentsChanged() {
             CrucibleBlockEntity.this.setChanged();
@@ -101,7 +117,15 @@ public class CrucibleBlockEntity extends BlockEntity {
         return this.pendingStack;
     }
 
+    /** True for the wooden variant: passive melting, water only. */
+    public boolean isWooden() {
+        return this.getBlockState().is(ModBlocks.WOODEN_CRUCIBLE.get());
+    }
+
     public boolean canAccept(final CrucibleRecipes.Melt melt) {
+        if (this.isWooden() && melt.fluid() != Fluids.WATER) {
+            return false;
+        }
         if (!this.tank.getFluid().isEmpty() && this.tank.getFluid().getFluid() != melt.fluid()) {
             return false;
         }
@@ -139,6 +163,15 @@ public class CrucibleBlockEntity extends BlockEntity {
                 }
                 this.setChanged();
                 this.sync();
+                return InteractionResult.SUCCESS;
+            }
+        }
+        if (this.isWooden()) {
+            final FluidStack contained = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY);
+            if (!contained.isEmpty()
+                    && contained.getFluidType().getTemperature() > WOOD_MAX_TEMPERATURE) {
+                player.displayClientMessage(
+                        Component.translatable("message.exnihilosatellitium.crucible.hot_fluid"), true);
                 return InteractionResult.SUCCESS;
             }
         }
@@ -180,8 +213,10 @@ public class CrucibleBlockEntity extends BlockEntity {
                 || crucible.fluidTotal <= 0 || crucible.solidTotal <= 0) {
             return;
         }
-        final float speed = CrucibleHeat.speedFor(level.getBlockState(pos.below()))
-                * ModConfig.crucibleHeatMultiplier();
+        final float speed = crucible.isWooden()
+                ? WOODEN_PASSIVE_SPEED
+                : CrucibleHeat.speedFor(level.getBlockState(pos.below()))
+                        * ModConfig.crucibleHeatMultiplier();
         if (speed <= 0.0F) {
             return;
         }
