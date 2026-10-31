@@ -2,8 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "x x",
-    "x x",
-    "xxx"
+    " x "
   ],
   "key": {
     "x": {
@@ -11,6 +10,6 @@
     }
   },
   "result": {
-    "id": "exnihilosatellitium:porcelain_bucket"
+    "id": "exnihilosatellitium:unfired_porcelain_bucket"
   }
 }

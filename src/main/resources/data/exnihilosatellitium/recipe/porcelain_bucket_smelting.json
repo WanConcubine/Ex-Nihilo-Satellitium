@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:unfired_porcelain_bucket"
+  },
+  "result": {
+    "id": "exnihilosatellitium:porcelain_bucket",
+    "count": 1
+  },
+  "experience": 0.3,
+  "cookingtime": 200
+}
