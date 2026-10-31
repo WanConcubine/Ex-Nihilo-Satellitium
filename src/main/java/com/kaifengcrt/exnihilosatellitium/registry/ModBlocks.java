@@ -45,6 +45,11 @@ public final class ModBlocks {
             BLOCKS.register("stone_barrel",
                     () -> new BarrelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
 
+    /** M6: glazed porcelain barrel, the only wooden-tier barrel that may hold lava. */
+    public static final DeferredHolder<Block, Block> PORCELAIN_BARREL =
+            BLOCKS.register("porcelain_barrel",
+                    () -> new BarrelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.QUARTZ_BLOCK)));
+
     public static final DeferredHolder<Block, Block> SIEVE =
             BLOCKS.register("sieve", () -> new SieveBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)
                     .noOcclusion()
@@ -77,7 +82,8 @@ public final class ModBlocks {
             JUNGLE_BARREL,
             ACACIA_BARREL,
             DARK_OAK_BARREL,
-            STONE_BARREL);
+            STONE_BARREL,
+            PORCELAIN_BARREL);
 
     private ModBlocks() {
     }
