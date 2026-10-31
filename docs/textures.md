@@ -10,8 +10,8 @@
   **子模型**，只覆盖贴图变量：
   - 桶身/顶沿 = 该木种的 `<wood>_planks`（侧面 `rotation: 90` 让木纹竖起来）；
   - 内壁/桶底 = `stripped_<wood>_log`，保留竖向木纹、比外壁深一档；
-  - 石桶 = `stone` + `smooth_stone` 顶沿 + `deepslate_tiles` 深色箍；
-  - 木桶的两道箍 = 8 个外凸 0.5px 的体素 + `gray_concrete`。
+  - 石桶 = `stone` + `smooth_stone` 顶沿；
+  - 木桶 = 木板桶身 + 去皮原木内壁（2026-10-31 **去掉了两道外凸箍**，模型现在是干净的 14×16 方桶）。
 - **坩埚（M4）：采用 Creatio 的模型/贴图并现代化**：几何来自
   `art/blocks/crucible/creatio/block_crucible_big.json`，贴图来自
   `blockcrucible.png` / `blockcrucibleunfired.png`。`art/blocks/crucible/restyle.py`
@@ -179,13 +179,13 @@ python3 scripts/check-textures.py
 
 ## 已知待办
 
-- 桶身切角八边形还没做；当前是 14×16 内缩方桶 + 外凸箍。
+- 桶身切角八边形还没做；当前是 14×16 内缩方桶（2026-10-31 去掉外凸箍，只剩方桶身）。
 - 已补齐 1.16/1.20 木材：红树 / 樱花 / 竹（`stripped_bamboo_block`）/ 绯红 / 诡异（菌柄），
   现在 11 种木桶 + 石桶；竹和下界菌柄的「内壁」贴图在生成脚本里单独指定。
 - 筛子、坩埚的 vanilla-sampled 模型与贴图待做。
 - 巫水有 still/flow 两套；水/熔岩仍走原版流体渲染。
-- `art/barrel/barrel_side*.png` 等早期自绘图留作参考；如果将来要改用自有贴图，
-  需要同时去掉模型里的外凸箍，避免和贴图里画好的箍叠在一起。
+- `art/barrel/barrel_side*.png` 等早期自绘图留作参考；外凸箍已经从模型里删除，
+  以后如果要给桶身画自有贴图，可以直接把箍画进贴图里，不会再和体素叠在一起。
 
 ## M3 工具图标（2026-10-30，Creatio 贴图 + 1.21 风格微调）
 

@@ -5,7 +5,6 @@
     "side": "minecraft:block/spruce_planks",
     "top": "minecraft:block/spruce_planks",
     "inner": "minecraft:block/stripped_spruce_log",
-    "bottom": "minecraft:block/stripped_spruce_log",
-    "hoop": "minecraft:block/gray_concrete"
+    "bottom": "minecraft:block/stripped_spruce_log"
   }
 }
