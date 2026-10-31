@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """Crushed netherrack / end stone block textures (M6).
 
-They are derived from the vanilla block textures (read out of the ModDevGradle
-client jar, so no Mojang PNG is stored here): the material stays recognisable,
-then get the "crushed" treatment — darkened, slightly desaturated and crossed by
-a few short cracks.
+Sequentia's crushed blocks read as the vanilla material broken into coarse
+chunks: the vanilla texture is averaged down to a 4x4 grid and scaled back up
+with nearest-neighbour, so every 4x4 pixel cell is one flat colour. We keep the
+vanilla source (read from the ModDevGradle client jar, nothing stored here),
+apply that down/up-sampling, then slightly darken and add a thin seam between
+chunks.
 
     <python-with-pillow> art/blocks/crushed_stone/generate.py
 """
 
 from __future__ import annotations
 
-import colorsys
 import zipfile
 from pathlib import Path
 
@@ -21,13 +22,11 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTIFACTS = ROOT / "build/moddev/artifacts"
 OUT = ROOT / "src/main/resources/assets/exnihilosatellitium/textures/block"
 
-# Deterministic crack pixels (x, y) — short diagonal gashes, 16x16.
-CRACKS = {
-    "crushed_netherrack": ((3, 4), (4, 5), (5, 6), (6, 6), (10, 3), (11, 4),
-                           (6, 11), (7, 12), (8, 12), (12, 9), (13, 10)),
-    "crushed_end_stone": ((2, 10), (3, 11), (4, 12), (9, 4), (10, 5), (10, 6),
-                          (5, 5), (6, 6), (12, 12), (13, 13)),
-}
+# Cells per axis in the crushed grid, and how the grid is expressed.
+CELLS = 4
+SEAM = 0.88      # darker right/bottom edge of every cell
+CHECKER = 0.93   # alternate chunks read slightly darker
+NOISE = 6        # deterministic +/- per channel so the chunks are not flat
 
 
 def read_vanilla(path: str) -> Image.Image:
@@ -39,26 +38,35 @@ def read_vanilla(path: str) -> Image.Image:
             return Image.open(handle).convert("RGBA")
 
 
-def crushed(source: Image.Image, cracks: tuple[tuple[int, int], ...]) -> Image.Image:
-    image = source.copy()
-    pixels = image.load()
-    for y in range(16):
-        for x in range(16):
+def crushed(source: Image.Image) -> Image.Image:
+    """Crush the vanilla material into a 4x4 grid of chunks.
+
+    Average the 16x16 texture down to 4x4 and scale it back up, so each chunk is
+    one flat colour taken from the vanilla pixels; then add a thin seam and a
+    little deterministic grain so the result is not a perfect checkerboard.
+    """
+    size = source.width // CELLS
+    chunks = source.resize((size, size), Image.BOX).resize(
+        (source.width, source.height), Image.NEAREST)
+
+    pixels = chunks.load()
+    for y in range(chunks.height):
+        for x in range(chunks.width):
             red, green, blue, alpha = pixels[x, y]
             if alpha == 0:
                 continue
-            hue, saturation, value = colorsys.rgb_to_hsv(red / 255.0, green / 255.0, blue / 255.0)
-            # Keep the material's hue, dim it and flatten the contrast a little.
-            saturation *= 0.8
-            value *= 0.78
-            rgb = colorsys.hsv_to_rgb(hue, saturation, value)
-            pixels[x, y] = (int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255), 255)
-
-    # Cracks: pick the darkest variant of each crack pixel's own hue.
-    for x, y in cracks:
-        red, green, blue, _ = pixels[x, y]
-        pixels[x, y] = (int(red * 0.45), int(green * 0.45), int(blue * 0.45), 255)
-    return image
+            cell_x, cell_y = x // CELLS, y // CELLS
+            scale = CHECKER if (cell_x + cell_y) % 2 == 0 else 1.0
+            if x % CELLS == CELLS - 1 or y % CELLS == CELLS - 1:
+                scale *= SEAM
+            grain = ((x * 7 + y * 13) % (NOISE * 2 + 1)) - NOISE
+            pixels[x, y] = (
+                max(0, min(255, int(red * scale) + grain)),
+                max(0, min(255, int(green * scale) + grain)),
+                max(0, min(255, int(blue * scale) + grain)),
+                255,
+            )
+    return chunks
 
 
 def main() -> None:
@@ -69,7 +77,7 @@ def main() -> None:
     }
     preview = Image.new("RGBA", (16 * 2 + 4, 16), (24, 24, 24, 255))
     for index, (name, path) in enumerate(pairs.items()):
-        image = crushed(read_vanilla(path), CRACKS[name])
+        image = crushed(read_vanilla(path))
         image.save(OUT / f"{name}.png")
         preview.paste(image, (index * 20, 0))
         print(f"wrote block/{name}.png")
