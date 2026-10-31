@@ -16,6 +16,13 @@ public final class ModDataComponents {
     public static final DeferredRegister<DataComponentType<?>> COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, ExNihiloSatellitium.MOD_ID);
 
+    /** Infestation progress carried by the infested-leaves item (creative only). */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Float>> INFESTATION =
+            COMPONENTS.register("infestation", () -> DataComponentType.<Float>builder()
+                    .persistent(Codec.FLOAT)
+                    .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.FLOAT)
+                    .build());
+
     /** Contents of the portable porcelain bucket. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<FluidContents>> FLUID_CONTENTS =
             COMPONENTS.register("fluid_contents", () -> DataComponentType.<FluidContents>builder()

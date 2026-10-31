@@ -40,6 +40,11 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.NETHERITE_HAMMER.get());
                         output.accept(ModItems.WOODEN_CROOK.get());
                         output.accept(ModItems.BONE_CROOK.get());
+                        output.accept(ModItems.INFESTED_LEAVES.get());
+                        final net.minecraft.world.item.ItemStack matureLeaves =
+                                new net.minecraft.world.item.ItemStack(ModItems.INFESTED_LEAVES.get());
+                        matureLeaves.set(ModDataComponents.INFESTATION.get(), 1.0F);
+                        output.accept(matureLeaves);
                         output.accept(ModItems.SILKWORM.get());
                         output.accept(ModItems.COOKED_SILKWORM.get());
                         output.accept(ModItems.PORCELAIN.get());

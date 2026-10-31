@@ -70,8 +70,10 @@ M4（坩埚 + 热源 + JEI + 配置）都已实现，已提交 `c1899d0`；
   底下有没有热源都一样，装熔岩会被拒（433 K 上限，和木桶一致）。
 - **蚕 / 侵染树叶**（M6）：`silkworm` 右键树叶 → `infested_leaves`（BE 记住原树叶外观）；
   进度 0.0005/tick（100 秒满），超过 60% 后每 100 tick 向 3×3×3 内的树叶扩散一次；
-  破坏时按进度掷 `线`（progress 概率 + 1/4 再次判定）。渲染 = BER 画回原树叶 + 按进度叠加白色
-  遮罩（`DEBUG_QUADS`，alpha = 0.8 × progress）+ 白灰粒子；**Jade** 显示原树叶名与侵染百分比。
+  破坏时按进度掷 `线`（progress 概率 + 1/4 再次判定；**创造模式不掉落**）。渲染 = BER 画回原树叶，
+  用 `WhiteningVertexConsumer` 把顶点色按进度混向白色（保留树叶纹理，不再盖白盒）+ 白灰粒子；
+  **Jade** 显示原树叶名与侵染百分比。物品形态 `infested_leaves` 带 `infestation` 组件：
+  创造栏里 0% 是「侵染中的树叶」、100% 是「被侵染的树叶」，放下即按组件设进度。
 - **瓷桶**（`porcelain_bucket`，物品）：通用 1000 mB 容器，能装熔岩/巫水/牛奶；
   内容存 `exnihilosatellitium:fluid_contents` 组件，`IFluidHandlerItem` 已接。
   3 瓷土按原版桶形（`x x` / ` x `）→ 未烧制瓷桶 → 熔炉烧 200 tick → 可用瓷桶。
