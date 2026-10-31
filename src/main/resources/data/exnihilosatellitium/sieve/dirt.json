@@ -24,6 +24,14 @@
     {
       "item": "minecraft:pumpkin_seeds",
       "chance": 0.05
+    },
+    {
+      "item": "exnihilosatellitium:grass_seeds",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:sweet_berries",
+      "chance": 0.05
     }
   ]
 }

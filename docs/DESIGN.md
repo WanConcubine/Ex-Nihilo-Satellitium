@@ -845,3 +845,33 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 服务端：`[crucible] loaded 39 meltables`（19 + 20）。
 - RCON：木坩埚放树叶，6 秒 100 → 76.6 固体 / 23 mB 水，速率 0.2 mB/t；底下换成篝火后速率不变。
 - **未验**：合成、进游戏看模型/液体显示、熔岩桶被拒的提示、JEI 新条目。
+
+## 24. M6 第四刀：筛出物补齐（2026-10-31）
+
+**问题**
+
+作者指出筛表缺了一批高版本资源：草种子、海晶碎片/砂粒、可可豆、甜浆果、海带、珊瑚，
+以及「粉碎地狱岩 / 粉碎末地石」这两条下界/末地资源链。
+
+**做法**
+
+- 新物品：
+  - `grass_seeds`（草种子）：右键泥土 → 草方块（`GrassSeedsItem`），空岛不靠流浪商人也能量产草；
+  - `crushed_netherrack` / `crushed_end_stone`：锤下界岩 / 末地石得到（`hammer/netherrack.json`、
+    `hammer/end_stone.json`，1–2 个），再作为筛输入。
+- 筛表（全部独立判定，数值是本项目自己的）：
+  - 泥土 + 草种子 6%、甜浆果 5%；
+  - 沙 + 可可豆 3%、海带 4%、管珊瑚 2%、海晶砂粒 2%；
+  - 砂砾 + 海晶碎片 2%；
+  - 粉碎地狱岩 → 石英 20%、荧石粉 12%、下界疣 10%、烈焰粉 6%、岩浆膏 4%、灵魂沙 2%；
+  - 粉碎末地石 → 末地石 20%、紫颂果 6%、末影珍珠 5%。
+- **筛子渲染**：粉碎类输入是纯物品、没有方块模型，原来 `SieveRenderer` 会直接跳过不画。
+  现在非 BlockItem 的输入会用 `ItemRenderer.renderStatic` 把图标平铺在筛面上当料层
+  （P1 #13 的临时解法）。
+- 图标：`art/items/sieve_extras/generate.py` 逐像素生成（草种子绿、地狱岩暗红、末地石米黄）。
+
+**验证**
+
+- 服务端：`[sieve] loaded 6 inputs, 69 drops`、`[hammer] loaded 49 recipes`；修掉了
+  `minecraft:nether_quartz` 这个不存在的 id（1.21 是 `minecraft:quartz`），修完无 `bad drop` 警告。
+- **未验**：草种子右键、粉碎物平铺渲染、掉落手感（要玩家）。

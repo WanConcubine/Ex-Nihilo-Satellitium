@@ -1,0 +1,17 @@
+{
+  "input": "exnihilosatellitium:crushed_end_stone",
+  "outputs": [
+    {
+      "item": "minecraft:end_stone",
+      "chance": 0.2
+    },
+    {
+      "item": "minecraft:chorus_fruit",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:ender_pearl",
+      "chance": 0.05
+    }
+  ]
+}
