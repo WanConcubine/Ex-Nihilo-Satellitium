@@ -739,12 +739,12 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 - `./gradlew build` + 纹理检查通过；服务端 `[debug] our recipes=97`，无 recipe 解析错误。
 - **未进游戏复测**：新形状能不能合成、JEI 是否显示斜向配方、坩埚满时右键是否彻底无反应。
 
-## 21. M6 第一刀：巫水 + 孢子（2026-10-31）
+## 21. M6 第一刀：巫水 + 古代孢子（2026-10-31）
 
 **问题**
 
-巫水是 M6 的起点，但空岛没有菌丝来源：原版靠**沙筛出孢子**（1/128）→ 右键泥土变菌丝 /
-右键牛变哞菇，再用满水桶挨着菌丝发酵。少了孢子这一环，巫水在空岛里永远做不出来。
+巫水是 M6 的起点，但空岛没有菌丝来源：原版靠**沙筛出古代孢子**（1/128）→ 右键泥土变菌丝 /
+右键牛变哞菇，再用满水桶挨着菌丝发酵。少了这一环，巫水在空岛里永远做不出来。
 
 **做法**
 
@@ -752,8 +752,8 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
   （density 1100 / viscosity 1500 / 300 K / 不可乘船 / 可灭火）+ `LiquidBlock` + 桶。
   流动参数比水懒：`slopeFindDistance 3`、`levelDecreasePerBlock 2`、`tickRate 15`，
   避免手滑一桶把岛淹了。客户端外观在 `WitchWaterClientExtensions`（紫色 still/flow）。
-- **孢子**（`common/item/SporeItem`）：右键泥土 → 菌丝；右键牛 → 哞菇（保留血量/名字/幼年）。
-  沙筛 1/128。
+- **古代孢子**（`common/item/AncientSporesItem`，`ancient_spores`）：紫色，右键泥土 → 菌丝；
+  右键牛 → 哞菇（保留血量/名字/幼年）。沙筛 1/128。
 - **发酵状态机**（`BarrelBlockEntity`）：满 1000 mB 水 + 3×3×3 内有菌丝时，
   每 tick `Spore += 1 + 菌丝数/2`，满 1000 变巫水并清零。
   - 1 个菌丝 ≈ 50 秒，2 个 ≈ 25 秒（和原版 `MAX_COMPOSTING_TIME` 同量级）。
@@ -763,15 +763,19 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 
 **美术**
 
-- `art/blocks/witch_water/generate.py`：16×16 紫水 still/flow + 巫水桶图标（5 阶紫 + 铁灰桶身），
-  可复现；`check-textures.py` 通过。
+- **不再自绘流体**：客户端直接用原版 `minecraft:block/water_still` / `water_flow`
+  （灰度）乘紫色 tint `0xFF6B44A8`，动画/流动与原版水一致；自绘的 still/flow 已删。
+- **巫水桶**：`art/items/witch_water_bucket/generate.py` 读原版 `water_bucket.png`，
+  按亮度把蓝色水体映射到紫色色阶，桶身保持原版；脚本从 ModDevGradle 的
+  client-extra jar 里取图，仓库不存 Mojang PNG。
+- 古代孢子：`art/items/ancient_spores/generate.py` 逐像素生成（紫色，与巫水同一套色板）。
 
 **验证**
 
 - 服务端：`[barrel] loaded 7 transforms (2 fluid, 5 item)`、`[sieve] 4 inputs, 53 drops`。
 - RCON：满水 + 2 菌丝 25 秒变巫水、`Spore` 归零；只写 `Spore:1` 无菌丝 50 秒后变巫水；
   `setblock` 巫水方块可命中。
-- **未验**：客户端流体/桶纹理、桶装倒、两条转化、孢子右键（要玩家）。
+- **未验**：客户端流体/桶纹理、桶装倒、两条转化、古代孢子右键（要玩家）。
 
 **下一步**
 

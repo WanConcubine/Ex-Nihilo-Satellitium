@@ -4,7 +4,7 @@ import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
-import com.kaifengcrt.exnihilosatellitium.common.item.SporeItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
@@ -27,9 +27,9 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> PORCELAIN =
             ITEMS.register("porcelain", () -> new Item(new Item.Properties()));
 
-    /** M6: spores turn dirt into mycelium (the witch water chain start). */
-    public static final DeferredHolder<Item, Item> SPORES =
-            ITEMS.register("spores", () -> new SporeItem(new Item.Properties()));
+    /** M6: ancient spores turn dirt into mycelium (the witch water chain start). */
+    public static final DeferredHolder<Item, Item> ANCIENT_SPORES =
+            ITEMS.register("ancient_spores", () -> new AncientSporesItem(new Item.Properties()));
 
     /** M6: witch water bucket (fluid id lives in {@link ModFluids}). */
     public static final DeferredHolder<Item, Item> WITCH_WATER_BUCKET =
