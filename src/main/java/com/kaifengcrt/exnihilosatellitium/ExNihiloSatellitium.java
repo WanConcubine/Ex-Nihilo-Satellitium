@@ -4,6 +4,7 @@ import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
+import com.kaifengcrt.exnihilosatellitium.registry.ModDataComponents;
 import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
@@ -31,6 +32,7 @@ public final class ExNihiloSatellitium {
         ModBlocks.register(modBus);
         ModBlockEntities.register(modBus);
         ModItems.register(modBus);
+        ModDataComponents.register(modBus);
         ModOreBlocks.register(modBus);
         ModOreItems.register(modBus);
         ModCreativeTabs.register(modBus);

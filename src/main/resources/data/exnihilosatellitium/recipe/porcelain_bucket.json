@@ -3,17 +3,14 @@
   "pattern": [
     "x x",
     "x x",
-    "xyx"
+    "xxx"
   ],
   "key": {
     "x": {
       "item": "exnihilosatellitium:porcelain"
-    },
-    "y": {
-      "item": "minecraft:brick"
     }
   },
   "result": {
-    "id": "exnihilosatellitium:porcelain_barrel"
+    "id": "exnihilosatellitium:porcelain_bucket"
   }
 }

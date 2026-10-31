@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "exnihilosatellitium:item/porcelain_bucket"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "exnihilosatellitium:filled": 0.5
+      },
+      "model": "exnihilosatellitium:item/porcelain_bucket_filled"
+    }
+  ]
+}

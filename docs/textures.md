@@ -64,8 +64,9 @@ assets/exnihilosatellitium/textures/
 要改就改脚本重跑，不要手改 PNG。
 
 木桶没有自有 PNG；`art/barrel/*` 是早期自绘实验，不参与游戏。
-瓷桶（M6）是手写的 vanilla-sampled 模型：`quartz_block_side` 桶身 / `quartz_block_bottom`（平滑石英）顶沿 /
-`quartz_pillar` 内壁 / `light_gray_concrete` 箍；它不在生成脚本的表里，改形状要手动改。
+瓷桶（M6）是物品桶：`art/items/porcelain_bucket/generate.py` 读原版 `water_bucket.png`，
+金属部分映射成瓷白色阶、水体部分输出成白色遮罩 `porcelain_bucket_fluid.png`；
+模型用 `exnihilosatellitium:filled` predicate 在空桶/满桶之间切换，遮罩由 `ItemColor` 按流体上色。
 七种材质的 blockstate、子模型、物品模型、配方和掉落表由
 `python3 scripts/generate_barrel_variants.py` 从同一张表生成，几何仍只维护
 `models/block/barrel_base.json`。新增木种 = 在脚本表里加一行 + 补 lang。
