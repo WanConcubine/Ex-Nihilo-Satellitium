@@ -46,17 +46,22 @@
 ```
 assets/exnihilosatellitium/textures/
 ├── block/
-│   ├── barrel_compost.png       # 堆肥表面（自有）
-│   ├── witch_water_still.png    # 巫水液面（M6，脚本生成）
-│   └── witch_water_flow.png     # 巫水流动（M6，脚本生成）
+│   └── barrel_compost.png       # 堆肥表面（自有）
 └── item/
     ├── porcelain.png            # 瓷土（自有）
-    ├── spores.png               # 孢子（M6，脚本生成）
-    └── witch_water_bucket.png   # 巫水桶（M6，脚本生成）
+    ├── ancient_spores.png       # 古代孢子（M6，脚本生成，紫色）
+    └── witch_water_bucket.png   # 巫水桶（M6，原版水桶重着色）
 ```
 
-M6 的两套贴图由 `art/blocks/witch_water/generate.py` 与 `art/items/spores/generate.py`
-逐像素生成（5 阶紫色板 + 铁灰桶身），要改就改脚本重跑，不要手改 PNG。
+- **巫水流体不再自绘**：直接复用原版 `minecraft:block/water_still` / `water_flow`
+  （灰度图），运行时乘 `IClientFluidTypeExtensions#getTintColor` 的紫色
+  `0xFF6B44A8`。这样流动/动画全部跟原版水一致，只是颜色不同。
+- **巫水桶**：`art/items/witch_water_bucket/generate.py` 读原版 `water_bucket.png`，
+  只把蓝色水体按亮度映射到紫色色阶，桶身金属保持不变，生成
+  `exnihilosatellitium:item/witch_water_bucket`（仓库里不存原版 PNG）。
+
+古代孢子图标由 `art/items/ancient_spores/generate.py` 逐像素生成（紫色系，和巫水同一套色板），
+要改就改脚本重跑，不要手改 PNG。
 
 木桶没有自有 PNG；`art/barrel/*` 是早期自绘实验，不参与游戏。
 七种材质的 blockstate、子模型、物品模型、配方和掉落表由

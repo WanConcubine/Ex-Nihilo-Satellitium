@@ -18,15 +18,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * Spores (M6): the in-world route to mycelium, and the mycelium route to witch
- * water. Right-click dirt to turn it into mycelium; right-click a cow to turn it
- * into a mooshroom (which drops mushrooms and can be milked for stew).
+ * Ancient Spores (古代孢子, M6): the in-world route to mycelium, and the mycelium
+ * route to witch water. Right-click dirt to turn it into mycelium; right-click a
+ * cow to turn it into a mooshroom (which drops mushrooms and can be milked).
  *
- * <p>Spores come from sieving sand, like the original rarity 1/128 entry.</p>
+ * <p>Ancient Spores come from sieving sand, like the original 1/128 entry.</p>
  */
-public class SporeItem extends Item {
+public class AncientSporesItem extends Item {
 
-    public SporeItem(final Properties properties) {
+    public AncientSporesItem(final Properties properties) {
         super(properties);
     }
 

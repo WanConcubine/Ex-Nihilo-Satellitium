@@ -321,7 +321,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
 - 当前有 `gravel.json` / `sand.json` / `dirt.json` / `dust.json`（4 输入、53 掉落）；`dust` 输入是 M3 的通用尘土方块，
-  `dirt` 是空岛农业起点（种子/作物），`sand` 额外给仙人掌、甘蔗与**孢子**（1/128，M6 巫水链起点）。
+  `dirt` 是空岛农业起点（种子/作物），`sand` 额外给仙人掌、甘蔗与**古代孢子**（`ancient_spores`，1/128，M6 巫水链起点）。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。
 
 ## 10. 桶转化 JSON（2026-10-30）
