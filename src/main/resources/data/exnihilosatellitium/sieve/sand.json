@@ -48,6 +48,14 @@
     {
       "item": "exnihilosatellitium:uranium_crushed",
       "chance": 0.01111
+    },
+    {
+      "item": "minecraft:cactus",
+      "chance": 0.03125
+    },
+    {
+      "item": "minecraft:sugar_cane",
+      "chance": 0.04167
     }
   ]
 }

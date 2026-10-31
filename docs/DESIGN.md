@@ -684,3 +684,57 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 - 启动日志应出现 `[jei] registered 35 hammer recipes`（玩法 47 条，12 条粉尘自掉不进 JEI）、
   `[jei] registered 10 crook recipes`。
 - build + 纹理检查通过；**未进游戏目视**。
+
+## 19. M2 余项：泥土筛与沙筛杂物（2026-10-31）
+
+**问题**
+
+空岛跑完 M1–M4 之后仍然**没有任何种子来源**：`wheat_seeds` 只出现在堆肥表的输入里，
+筛表只有 `gravel` / `sand` / `dust` 三档。结果是「堆肥 → 泥土」这条链没有出口，农业、
+繁殖、纸/书、绿染料全部断在起点。
+
+**做法**
+
+- 纯数据，不动 Java：新增 `data/exnihilosatellitium/sieve/dirt.json`，输入 `minecraft:dirt`，
+  6 条独立判定：
+  - 小麦种子 0.15、甜菜种子 0.06、土豆 0.06、胡萝卜 0.06、西瓜种子 0.05、南瓜种子 0.05。
+- `sieve/sand.json` 补两条杂物：仙人掌 1/32（绿染料/仙人掌绿）、甘蔗 1/24（纸、书、附魔台）。
+- 为什么放在泥土：泥土是堆肥产物，本身就消耗有机物；让「堆肥 → 泥土 → 过筛」形成闭环，
+  而不是让种子从石头/沙子里凭空冒出来。甘蔗/仙人掌放在沙，是给“沙子除了矿没有别的”补出口。
+
+**数值口径**
+
+- 概率是本项目自己定的，不抄 1.7.10 / Omnia 的具体值；按“期望 3–4 次筛出第一颗小麦种子”起步。
+- 沙筛仍全部独立判定，一次结算可能同时出矿粉和杂物；`JEI` 最多 21 槽，沙筛 14 条、泥土 6 条，没触顶。
+
+**验证**
+
+- `./gradlew build` + `check-textures.py` 通过；服务端日志 `[sieve] loaded 4 inputs, 52 drops`。
+- **未进游戏实测**：`dirt` 能不能放进筛子、种子掉率手感、JEI 第 4 个输入页。
+
+## 20. 修正：锤/钩配方形状 + 坩埚满时的右键（2026-10-31）
+
+**问题（作者试玩反馈）**
+
+1. 木钩、骨钩、六档锤的合成配方与原版不一致：我们写成了正十字（`"xxx"/" y "/" y "`）
+   与单列对角棍（`"  x"/" x "/"x  "`），看起来像普通工具。
+2. 坩埚装满后再按住右键递熔料，因为 `useItemOn` 返回 `PASS_TO_DEFAULT_BLOCK_INTERACTION`，
+   交互落到默认放置，**在坩埚顶上放了一个方块**；原版是直接无视。
+
+**修正**
+
+- 配方按原版斜向形状重写（对照 `reference/` 的 `Recipes.java`，只取形状，不复制代码/资源）：
+  - 锤：`" x "` / `" yx"` / `"y  "`，`x` = 材质（木板/圆石/铁锭/金锭/钻石），`y` = `#c:rods/wooden`。
+  - 钩：`"xx "` / `" x "` / `" x "`，木钩用木棍、骨钩用骨头。
+  - 下界合金锤仍是锻造台升级（1.7.10 没有下界合金，这是本项目扩展）。
+- `CrucibleBlock#useItemOn`：先判 `meltable`；`crucible.use()` 没消耗动作时返回
+  **`ItemInteractionResult.CONSUME`**，把右键吃掉而不是落到放置方块。潜行放置仍然有效
+  （潜行会跳过 `useItemOn`）。非熔料方块（泥土、机器等）不受影响。
+- **坑**：`ItemInteractionResult.FAIL` 的 `InteractionResult.FAIL.consumesAction()` 是 `false`，
+  所以 `ServerPlayerGameMode#useItemOn` 会继续走到 `ItemStack#useOn` 把方块放下去——
+  想“拒绝但不做事”必须返回 `CONSUME`。流体容器同理（否则满罐时拿桶右键会把流体倒出来）。
+
+**验证**
+
+- `./gradlew build` + 纹理检查通过；服务端 `[debug] our recipes=97`，无 recipe 解析错误。
+- **未进游戏复测**：新形状能不能合成、JEI 是否显示斜向配方、坩埚满时右键是否彻底无反应。
