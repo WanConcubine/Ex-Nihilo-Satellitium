@@ -4,6 +4,7 @@ import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
@@ -26,6 +27,11 @@ public final class ModItems {
 
     public static final DeferredHolder<Item, Item> PORCELAIN =
             ITEMS.register("porcelain", () -> new Item(new Item.Properties()));
+
+    /** M6: universal 1000 mB bucket, accepts lava and witch water. */
+    public static final DeferredHolder<Item, Item> PORCELAIN_BUCKET =
+            ITEMS.register("porcelain_bucket", () -> new PorcelainBucketItem(
+                    new Item.Properties().stacksTo(1)));
 
     /** M6: ancient spores turn dirt into mycelium (the witch water chain start). */
     public static final DeferredHolder<Item, Item> ANCIENT_SPORES =
@@ -50,8 +56,6 @@ public final class ModItems {
             registerBarrelItem("dark_oak_barrel", ModBlocks.DARK_OAK_BARREL);
     public static final DeferredHolder<Item, Item> STONE_BARREL =
             registerBarrelItem("stone_barrel", ModBlocks.STONE_BARREL);
-    public static final DeferredHolder<Item, Item> PORCELAIN_BARREL =
-            registerBarrelItem("porcelain_barrel", ModBlocks.PORCELAIN_BARREL);
 
     public static final DeferredHolder<Item, Item> SIEVE =
             ITEMS.register("sieve", () -> new BlockItem(ModBlocks.SIEVE.get(), new Item.Properties()));
@@ -118,8 +122,7 @@ public final class ModItems {
             JUNGLE_BARREL,
             ACACIA_BARREL,
             DARK_OAK_BARREL,
-            STONE_BARREL,
-            PORCELAIN_BARREL);
+            STONE_BARREL);
 
     private ModItems() {
     }

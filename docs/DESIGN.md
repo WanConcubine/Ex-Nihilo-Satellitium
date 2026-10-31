@@ -782,25 +782,33 @@ JEI 看不到，加一条转化要改 Java；`compost` 虽然数据驱动，但 
 - 瓷桶（可装熔岩）→ 蚕（侵染树叶 → 线）→ 娃娃（烈焰人/末影人）。
 - 娃娃和「牛奶→粘液球」需要给 `BarrelRecipes` 加**产出物品/生成实体**的规则类型。
 
-## 22. M6 第二刀：瓷桶（2026-10-31）
+## 22. M6 第二刀：瓷桶（2026-10-31，重做）
 
-**做什么**
+**做错了一次**
 
-- 新方块 `porcelain_barrel`：复用 `BarrelBlock` + `BarrelBlockEntity`，不新增 BE 类型；
-  配方 7 瓷土 + 1 砖（`x x / x x / xyx`），镐挖，掉落自身。
-- `BarrelBlockEntity.isStoneBarrel()` 改名 `allowsHotFluids()`，把瓷桶和石桶并列：
-  两者都不受 433 K 限制，木桶仍然拒熔岩。
-- 模型 vanilla-sampled：`quartz_block_side` 桶身、`quartz_block_bottom`（平滑石英）顶沿、`quartz_pillar` 内壁、
-  `light_gray_concrete` 箍；不新增 PNG。
-- JEI 桶分类的 catalyst 走 `ModItems.BARREL_ITEMS`，瓷桶自动出现在里面。
+第一版把「瓷桶」做成了 **`porcelain_barrel` 方块**（复用 BarrelBlock）。作者指出：Omnia 的瓷桶是
+**物品桶**（`ItemBucketPorcelain` / `UniversalPorcelainBucket`，lang 里是 Unfired Bucket →
+%s Bucket），不是方块。已把方块整套删掉，改成物品。
+
+**现在的实现**
+
+- `porcelain_bucket`：通用 1000 mB 容器，能装任何流体（熔岩、巫水、水、奶）。
+  - 内容存 data component `exnihilosatellitium:fluid_contents`（`{id, amount}`，纯 `ResourceLocation`
+    + int codec，不依赖 registry ops）。
+  - `PorcelainBucketFluidHandler` 实现 `IFluidHandlerItem`（1 罐 / 1000 mB / 一次只能一种流体），
+    在 `CapabilityEvents` 里注册；因此桶可以给桶、桶给坩埚/木桶倒液体，木桶的“拒热”检查也认它。
+  - 右键流体源可以舀满（`Item#use` + `BucketItem#getPlayerPOVHitResult`）。
+  - tooltip 显示内含流体与 mB 数。
+- 合成：7 瓷土（`x x / x x / xxx`）。Omnia 还有一步「未烧制桶 → 烧制」，本项目先直接合成，
+  等有手感反馈再补。
+- 客户端：模型用 predicate `exnihilosatellitium:filled` 在空桶/满桶模型之间切换；满桶模型的
+  layer1 是白色液体遮罩，`RegisterColorHandlersEvent.Item` 按流体上色（水 0xFF3F76E4、
+  熔岩 0xFFFF8A2A、巫水用流体的 tint）。
+- 贴图 `art/items/porcelain_bucket/generate.py`：读原版 `water_bucket.png`，金属部分按亮度映射到
+  瓷白色阶、水体部分输出成白色遮罩；仓库不存原版 PNG。
 
 **验证**
 
-- RCON：`setblock` 成功、NBT 熔岩 1000 mB 可读回、满桶比较器 15、loot table 掉自身。
-- **未验**：合成、拿桶真的把熔岩倒进去（要玩家）。
-
-**注意**
-
-- `scripts/generate_barrel_variants.py` 的 `merge_tag` 只追加不覆盖，重跑不会把瓷桶从
-  `minecraft:tags/block/mineable/pickaxe` 里删掉；但瓷桶的 blockstate/model/loot/recipe 是手写的，
-  脚本不负责生成。
+- 服务端：`[debug] our recipes=98`；`summon item` 带组件可读回
+  `{"exnihilosatellitium:fluid_contents": {amount: 1000, id: "minecraft:lava"}}`，巫水同样通过。
+- **未验**：进游戏看空桶/满桶模型与颜色、右键舀水、倒进木桶/坩埚、合成。

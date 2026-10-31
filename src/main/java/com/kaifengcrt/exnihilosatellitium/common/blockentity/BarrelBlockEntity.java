@@ -167,13 +167,9 @@ public class BarrelBlockEntity extends BlockEntity {
         return this.dirtReady ? 1.0F : this.compostProgress / (float) COMPOST_MAX;
     }
 
-    /**
-     * Stone and porcelain barrels hold lava; wooden barrels are limited to
-     * {@link #WOOD_MAX_TEMPERATURE}. Porcelain is the M6 "portable lava barrel".
-     */
+    /** Stone barrels hold lava; wooden barrels are limited to {@link #WOOD_MAX_TEMPERATURE}. */
     public boolean allowsHotFluids() {
-        return this.getBlockState().is(ModBlocks.STONE_BARREL.get())
-                || this.getBlockState().is(ModBlocks.PORCELAIN_BARREL.get());
+        return this.getBlockState().is(ModBlocks.STONE_BARREL.get());
     }
 
     private boolean canStore(final FluidStack stack) {
