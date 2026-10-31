@@ -824,9 +824,10 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 **实现**
 
-- 6 种木材变种（`wooden_crucible` 橡木 + spruce/birch/jungle/acacia/dark_oak）：
+- 11 种木材变种（橡木 + 5 种经典木 + 红树/樱花/竹 + 绯红/诡异菌柄）：
   `scripts/generate_wooden_crucible_variants.py` 生成 blockstate/模型/掉落/配方/lang/标签，
-  配方 = 该木材原木 ×6 + `#minecraft:wooden_slabs` ×1（台阶任意木材）。
+  配方 = 该木材原木 ×6 + `#minecraft:wooden_slabs` ×1（台阶任意木材）；竹用 `bamboo_block`、
+  下界两种用 `crimson_stem` / `warped_stem`。
 - 方块复用 `CrucibleBlock` + `CrucibleBlockEntity`（同一 BE 类型，所以 `CrucibleRenderer`、
   Jade、比较器都直接可用），`isWooden()` 查方块标签 `#exnihilosatellitium:wooden_crucibles`。
 - 行为差异都由 `CrucibleBlockEntity#isWooden()` 分支：
