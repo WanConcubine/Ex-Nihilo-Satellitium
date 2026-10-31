@@ -291,8 +291,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | `data/c/tags/item/ingots/<id>.json` | 自有锭加入 `c:ingots/<id>`，方便别的模组用标签接受它 |
 | `data/c/tags/block/ores/<id>.json` | 矿砾/矿砂/矿尘方块 → `c:ores/<id>`（方块标签） |
 | `data/c/tags/item/ores/<id>.json` | 同名方块物品 → `c:ores/<id>`（物品标签） |
-| `data/c/tags/item/raw_materials/<id>.json` | 3 个方块物品 + 破碎/粉碎/粉末 → `c:raw_materials/<id>` |
-| `data/c/tags/{block,item}/ores.json`、`data/c/tags/item/raw_materials.json` | 把本项目材料的子标签挂到根标签 |
+| ~~`data/c/tags/item/raw_materials/<id>.json`~~ | **已删除（2026-10-31）**：破碎/粉碎/粉末不是原矿，不能进 `c:raw_materials`，否则别的模组会把它们当原矿处理，绕过「4 块 → 方块 → 熔炼」链条 |
+| `data/c/tags/{block,item}/ores.json` | 把本项目材料的 `#c:ores/<id>` 子标签挂到根标签（只含矿砾/矿砂/矿尘方块，对应 1.7.10 把矿方块注册给 TE/TC 的做法） |
 
 - 铁/金/铜的 `ingot` 指向原版锭，所以 36 个熔炼配方里它们熔到 `minecraft:*_ingot`；
   其余 9 种熔到自有锭。

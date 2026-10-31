@@ -211,13 +211,13 @@ def main():
             lang_en[f"block.exnihilosatellitium.{bid}"] = f"{en} Ore {kind.capitalize()}"
             lang_zh[f"block.exnihilosatellitium.{bid}"] = f"{zh}矿{KIND_ZH[kind]}"
 
-        # Like vanilla raw ore: both the block and its item form are accepted by
-        # other mods' ore/raw-material machines. The broken/crushed/powdered
-        # pieces are raw material too.
-        pieces = [f"exnihilosatellitium:{mid}_{stage}" for stage in STAGES]
+        # Ore blocks only: 1.7.10 Ex Nihilo registers its gravel/sand/dust ore
+        # blocks with TE/TC, so `c:ores` is faithful. `c:raw_materials` is the
+        # 1.17+ "raw ore" concept and must NOT contain our broken/crushed/powdered
+        # intermediates — other mods would treat them as raw ore and bypass the
+        # 4-pieces -> block -> smelt chain.
         write_json(RES / f"data/c/tags/block/ores/{mid}.json", tag(ore_blocks))
         write_json(RES / f"data/c/tags/item/ores/{mid}.json", tag(ore_blocks))
-        write_json(RES / f"data/c/tags/item/raw_materials/{mid}.json", tag(ore_blocks + pieces))
 
     write_json(RES / "data/minecraft/tags/block/mineable/shovel.json",
                {"replace": False, "values": sorted(shovel)})
@@ -227,8 +227,13 @@ def main():
     subtags = [f"#c:ores/{m['id']}" for m in MATERIALS]
     write_json(RES / "data/c/tags/block/ores.json", tag(subtags))
     write_json(RES / "data/c/tags/item/ores.json", tag(subtags))
-    write_json(RES / "data/c/tags/item/raw_materials.json",
-               tag([f"#c:raw_materials/{m['id']}" for m in MATERIALS]))
+
+    # Drop tags from older generator versions: raw_materials is NeoForge's root
+    # tag and our pieces do not belong in it.
+    shutil.rmtree(RES / "data/c/tags/item/raw_materials", ignore_errors=True)
+    raw_root = RES / "data/c/tags/item/raw_materials.json"
+    if raw_root.exists():
+        raw_root.unlink()
     write_json(ASSETS / "lang/en_us.json", dict(sorted(lang_en.items())))
     write_json(ASSETS / "lang/zh_cn.json", dict(sorted(lang_zh.items())))
     print(f"generated assets for {len(MATERIALS)} materials "
