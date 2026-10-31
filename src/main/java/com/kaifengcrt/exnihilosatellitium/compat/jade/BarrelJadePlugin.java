@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.compat.jade;
 
 import com.kaifengcrt.exnihilosatellitium.common.block.BarrelBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.CrucibleBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.InfestedLeavesBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaPlugin;
@@ -16,5 +17,6 @@ public final class BarrelJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(BarrelComponentProvider.INSTANCE, BarrelBlock.class);
         registration.registerBlockComponent(SieveComponentProvider.INSTANCE, SieveBlock.class);
         registration.registerBlockComponent(CrucibleComponentProvider.INSTANCE, CrucibleBlock.class);
+        registration.registerBlockComponent(InfestedLeavesComponentProvider.INSTANCE, InfestedLeavesBlock.class);
     }
 }
