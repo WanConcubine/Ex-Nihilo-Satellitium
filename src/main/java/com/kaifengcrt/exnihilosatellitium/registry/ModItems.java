@@ -6,6 +6,7 @@ import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.GrassSeedsItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
@@ -172,7 +173,7 @@ public final class ModItems {
     public static final List<DeferredHolder<Item, Item>> CROOKS = List.of(WOODEN_CROOK, BONE_CROOK);
 
     public static final DeferredHolder<Item, Item> SILKWORM =
-            ITEMS.register("silkworm", () -> new Item(new Item.Properties()));
+            ITEMS.register("silkworm", () -> new SilkwormItem(new Item.Properties()));
     public static final DeferredHolder<Item, Item> COOKED_SILKWORM =
             ITEMS.register("cooked_silkworm", () -> new Item(new Item.Properties()
                     .food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.6F).build())));

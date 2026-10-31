@@ -877,3 +877,23 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 服务端：`[sieve] loaded 6 inputs, 69 drops`、`[hammer] loaded 49 recipes`；修掉了
   `minecraft:nether_quartz` 这个不存在的 id（1.21 是 `minecraft:quartz`），修完无 `bad drop` 警告。
 - **未验**：草种子右键、粉碎物平铺渲染、掉落手感（要玩家）。
+
+## 25. M6 第五刀：蚕与侵染树叶（2026-10-31）
+
+**做什么**
+
+- `infested_leaves` 方块：`RenderShape.ENTITYBLOCK_ANIMATED`，本体不画，由
+  `InfestedLeavesRenderer` 用 BER 把**被替换的树叶方块**画回来，所以橡木/云杉/樱花…各自保持外观；
+  文件是 `common/block/InfestedLeavesBlock` + `common/blockentity/InfestedLeavesBlockEntity`。
+- `silkworm` 从普通物品换成 `SilkwormItem`：右键 `#minecraft:leaves` → 换成侵染树叶并写入 `Mimic`。
+- 进度 0.0005/tick（2000 tick = 100 秒），`Progress > 0.6` 后每 100 tick 扩散一次；
+  扩散只在 3×3×3 里**真实存在的树叶**中随机挑一个（一开始用 3×3×3 随机偏移，大部分落在空气上，
+  20 秒只长 1 个，改成先收集候选再挑，20 秒能长 4 个）。
+- 破坏时按 `Progress` 掷 `线`：`rand < progress` 掉一个，再 `rand < progress * 0.25` 可能再掉一个。
+- 视觉：BER 画回原树叶 + 每 tick 1/24 概率的白灰粒子；`Progress` 同步给客户端（update tag）。
+
+**验证**
+
+- 服务端：`setblock infested_leaves` + `data merge` 写入 `Mimic/Progress` 后，20 秒 `0.65 → 0.849`，
+  8 个相邻树叶里 4 个变侵染。
+- **未验**：右键树叶转化、破坏掉线、游戏内渲染。

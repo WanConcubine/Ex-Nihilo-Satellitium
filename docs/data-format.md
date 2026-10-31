@@ -102,6 +102,14 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 - 桶里有流体时不能堆肥；堆肥进度 > 0 时不能灌流体（互斥）。
 - DIRT / `Solid` 状态下右键**任意手持物**都会取出产物并重置（原版 `ExtractMode.Always` 风格）。
 
+### 侵染树叶 NBT（M6）
+
+| 键 | 类型 | 含义 |
+|---|---|---|
+| `Mimic` | compound | 原树叶方块状态（`NbtUtils.writeBlockState`） |
+| `Progress` | float | 0..1，0.0005/tick；>0.6 开始扩散 |
+| `SpreadTimer` | int | 扩散计时，满 100 尝试一次 |
+
 ### 桶内反应（M1.5）
 
 | 桶里 | 加入 | 结果 |
