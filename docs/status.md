@@ -6,7 +6,7 @@
 ## 一句话
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
-（`1.20.1-forge` 分支，当前停在 M3，待补 M4、M5、M6、M10）。原来的 `legacy/1.20.1-forge` tag
+（`1.20.1-forge` 分支，当前停在 M4，待补 M5、M6、M10）。原来的 `legacy/1.20.1-forge` tag
 已于 2026-11-01 按所有者要求删除，1.20.1 以分支为准（见
 [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
@@ -14,12 +14,26 @@ GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**�
 GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
 `ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
 `check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
-`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M3**（M1.5 桶内转化 +
-M2 筛子/矿链 + M3 锤/钩/尘土，分支提交 `eaf5f6d`）。下一批是 1.20.1 的 M4 坩埚 / JEI，
-或主线的 P3 状态机拆分。
+`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M4**（M1.5 桶转化 +
+M2 筛子/矿链 + M3 锤/钩/尘土 + M4 坩埚 + JEI/Jade，分支提交 `93c1733`）。下一批是
+1.20.1 的 M6（蚕/人偶/巫水/瓷桶/木坩埚/木桶补齐），或主线的 P3 状态机拆分。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，1.20.1 M3）
+## 当前批次（2026-11-01，1.20.1 M4）
+
+- **分支**：`1.20.1-forge` @ `93c1733`；客户端 `./gradlew runClient -PdevMods`。
+- **M4 坩埚**（`93c1733`）：`CrucibleBlock` / `UnfiredCrucibleBlock` /
+  `CrucibleBlockEntity`、`CrucibleRecipes`（39 条熔点）+ `CrucibleHeat`（9 热源）+
+  reload listener；瓷土 → 未烧制 → 烧制；熔料/流体双储、比较器、破坏返还、Jade 熔料与
+  热源速度、JEI 熔点/热源两页。分支没有 config，容量/倍率先用常量（8000/2000/1.0）。
+  RCON：篝火 0.25 mB/t、熄灭停、火把 0.1 mB/t。
+- **M1.5/M3/JEI**（`67029d6`/`eaf5f6d`/`e701d17`/`5c9a1bc`）：桶转化、锤/钩/尘土、
+  JEI 五个分类页 + Jade 筛子；筛子产物超 21 条时同页轮播。
+- **验证**：build / 纹理守卫通过；`[crucible] 39 meltables / 9 heat sources`；
+  JEI `39 meltables, 9 heat sources`（进存档冒烟）；交互手感待玩家。
+- **未做**：M5、M6、M10（1.20.1 侧）。
+
+## 上一批次（2026-11-01，1.20.1 M3）
 
 - **分支**：`1.20.1-forge` @ `eaf5f6d`（worktree `../Ex-Nihilo-Satellitium-1.20.1`）。
   开发客户端：`./gradlew runClient -PdevMods`（JEI 15.59 / Jade 11.13.2 / JECh 4.6.11
@@ -406,6 +420,8 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 | 1.20.1 M3 表加载 | ✅ | `[hammer] 47`、`[crook] 10`、`[sieve] 4 inputs 62 drops` |
 | 1.20.1 M3 物品 | ✅ | RCON summon 锤/钩/尘土均成功，`dust` 方块可放置 |
 | 1.20.1 M3 手感 | ⚠️ | 锤左键链路/耐久、骨钩 ×1.5 待玩家 |
+| 1.20.1 M4 坩埚 | ✅ | 表加载 39/9；RCON 篝火 0.25、熄灭停、火把 0.1；JEI 两页注册 |
+| 1.20.1 M4 交互 | ⚠️ | 右键投料/取流体、Jade 画面待玩家 |
 | P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (145 recipes, 69 loot tables, 41 tags)` |
 | P2 生成器幂等 | ✅ | 1.21.1 四个生成器写入仓库副本后 `diff -r` 与仓库逐字节一致（含 lang/筛表） |
 | P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |
