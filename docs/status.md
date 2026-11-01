@@ -90,7 +90,8 @@
 | M3 锤/钩手感 | ⚠️ | 左键敲方块、耐久、创造模式、骨钩 ×1.5 需要玩家实测 |
 | JEI 分类页 | ✅ | `[jei] registered 35 hammer / 4 sieve / 4 barrel + 65 compost / 10 crook`（进存档冒烟） |
 | Jade 筛子 | ✅ | `SieveComponentProvider` 已注册 + `config.jade.plugin_...sieve` 翻译（缺 key 会崩） |
-| JEI 画面 | ⚠️ | 分类页/布局未目视；沙筛 23 条只显示 21 条（与主线同样的 7×3 上限） |
+| JEI 画面 | ⚠️ | 分类页/布局未目视（冒烟只验证了注册与不崩） |
+| 筛子产物轮播 | ✅ | 超过 21 条时按槽位轮播（JEI 自动切换多物品槽），tooltip 跟随当前显示项；沙筛 23 条不再截断 |
 | M2 第 4 张筛料表 | ✅ | `[sieve] loaded 4 inputs, 63 drops`（尘土已可筛） |
 | 27/28 资源模型 | ✅ | 客户端资源加载无 missing model/texture（筛子 frame/mesh、9 种锭、矿方块） |
 | 1.20.1 配方计数 | ℹ️ | 1.20.1 的 `Loaded 7 recipes` 是**配方类型数**，不是配方条数；别拿它当进度 |
