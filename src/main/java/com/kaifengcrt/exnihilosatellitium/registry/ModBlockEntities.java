@@ -5,6 +5,8 @@ import com.kaifengcrt.exnihilosatellitium.common.blockentity.BarrelBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.CrucibleBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.InfestedLeavesBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.SieveBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.ElectricMachineBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.FuelMachineBlockEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -38,6 +40,22 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<InfestedLeavesBlockEntity>> INFESTED_LEAVES =
             BLOCK_ENTITIES.register("infested_leaves", () -> BlockEntityType.Builder
                     .of(InfestedLeavesBlockEntity::new, ModBlocks.INFESTED_LEAVES.get())
+                    .build(null));
+
+    /** M10: both electric machines share one block entity type. */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ElectricMachineBlockEntity>> ELECTRIC_MACHINE =
+            BLOCK_ENTITIES.register("electric_machine", () -> BlockEntityType.Builder
+                    .of(ElectricMachineBlockEntity::new,
+                            ModBlocks.ELECTRIC_SIEVE.get(),
+                            ModBlocks.ELECTRIC_HAMMER.get())
+                    .build(null));
+
+    /** M10: both fuel machines share one block entity type. */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FuelMachineBlockEntity>> FUEL_MACHINE =
+            BLOCK_ENTITIES.register("fuel_machine", () -> BlockEntityType.Builder
+                    .of(FuelMachineBlockEntity::new,
+                            ModBlocks.FUEL_SIEVE.get(),
+                            ModBlocks.FUEL_HAMMER.get())
                     .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrucibleBlockEntity>> CRUCIBLE =

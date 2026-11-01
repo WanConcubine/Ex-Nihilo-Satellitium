@@ -5,6 +5,7 @@ import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
+import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -16,6 +17,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+
+import java.util.List;
 
 /**
  * Hammer/crook effects that hook into the normal block-break drop path.
@@ -72,7 +75,9 @@ public final class ToolEvents {
         if (rule == null || !(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        Block.popResource(level, event.getPos(), rule.roll(level.random));
+        for (final ItemStack result : HammerRolls.roll(event.getState(), 0, level.random)) {
+            Block.popResource(level, event.getPos(), result);
+        }
     }
 
     @SubscribeEvent
@@ -82,13 +87,14 @@ public final class ToolEvents {
         }
         final ItemStack tool = event.getTool();
         if (tool.getItem() instanceof HammerItem) {
-            final HammerRecipes.Rule rule = HammerRecipes.ruleFor(event.getState());
-            if (rule == null) {
+            final List<ItemStack> results = HammerRolls.roll(event.getState(), 0, event.getLevel().random);
+            if (results.isEmpty()) {
                 return;
             }
             event.getDrops().clear();
-            event.getDrops().add(drop(event.getLevel(), event.getPos(),
-                    rule.roll(event.getLevel().random)));
+            for (final ItemStack result : results) {
+                event.getDrops().add(drop(event.getLevel(), event.getPos(), result));
+            }
             wearMainHand(player, tool);
             return;
         }

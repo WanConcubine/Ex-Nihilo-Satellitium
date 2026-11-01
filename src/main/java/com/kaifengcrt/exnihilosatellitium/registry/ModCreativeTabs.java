@@ -60,6 +60,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.SHULKER_DOLL.get());
                         output.accept(ModItems.GUARDIAN_DOLL.get());
                         output.accept(ModItems.WITCH_WATER_BUCKET.get());
+                        ModItems.MACHINES.forEach(item -> output.accept(item.get()));
+                        ModItems.UPGRADES.forEach(item -> output.accept(item.get()));
                         ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
                         for (final OreMaterial material : OreMaterials.all()) {
                             final var entries = ModOreItems.byMaterial().get(material.id());

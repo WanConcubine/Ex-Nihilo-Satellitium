@@ -2,7 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.common.blockentity;
 
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
-import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveDrop;
+import com.kaifengcrt.exnihilosatellitium.common.machine.SieveRolls;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveRegistry;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -157,9 +157,8 @@ public class SieveBlockEntity extends BlockEntity {
             return;
         }
         final BlockPos pos = this.worldPosition;
-        final List<SieveDrop> drops = SieveRegistry.dropsFor(this.contents);
         this.work = 0;
-        if (drops.isEmpty()) {
+        if (SieveRegistry.dropsFor(this.contents).isEmpty()) {
             // A reload removed this input: hand it back instead of consuming it
             // and damaging the mesh for an empty roll.
             Block.popResource(level, pos, this.contents.copy());
@@ -169,15 +168,14 @@ public class SieveBlockEntity extends BlockEntity {
             return;
         }
 
-        for (final SieveDrop drop : drops) {
-            if (level.random.nextFloat() < drop.chance()) {
-                final ItemEntity entity = new ItemEntity(level,
-                        pos.getX() + 0.5D, pos.getY() + 1.1D, pos.getZ() + 0.5D,
-                        new ItemStack(drop.item()));
-                entity.setDeltaMovement((level.random.nextDouble() - 0.5D) * 0.05D, 0.12D,
-                        (level.random.nextDouble() - 0.5D) * 0.05D);
-                level.addFreshEntity(entity);
-            }
+        // Same judgement as the automatic sieve: one shared function, no copies.
+        final List<ItemStack> outputs = SieveRolls.roll(this.contents, 0, level.random);
+        for (final ItemStack output : outputs) {
+            final ItemEntity entity = new ItemEntity(level,
+                    pos.getX() + 0.5D, pos.getY() + 1.1D, pos.getZ() + 0.5D, output);
+            entity.setDeltaMovement((level.random.nextDouble() - 0.5D) * 0.05D, 0.12D,
+                    (level.random.nextDouble() - 0.5D) * 0.05D);
+            level.addFreshEntity(entity);
         }
         level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS,
                 0.4F, 0.9F + level.random.nextFloat() * 0.2F);

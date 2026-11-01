@@ -610,3 +610,61 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 **生效方式**：服务端 `/reload` 或重启；单人世界 JEI 现在优先读服务端表，
 所以覆盖会同步到 JEI。**专用服客户端**读不到服务端数据包，JEI 仍显示 jar 内置版
 （`assets/exnihilosatellitium/` 镜像），这是客户端限制，可在整合包里给客户端也装同一数据包。
+
+## 15. M10 自动化机器（2026-11-01）
+
+四台机器**没有自己的 JSON 表**：它们直接读 `sieve/*.json` 与 `hammer/*.json`，判定函数是
+`SieveRolls` / `HammerRolls`。因此改掉落表 = 改原有 JSON，机器自动跟随。
+
+### NBT 键
+
+| 键 | 类型 | 含义 |
+|---|---|---|
+| `Items` | list | 全部槽位；每项 `{Slot: byte, id, count, components?}` |
+| `Work` | int | 当前这一件的进度（tick）；满 `ticksPerOperation` 归零并产出 |
+| `Energy` | int | 电动版内部 FE；内能版没有这个键 |
+| `BurnHalfTicks` | int | 内能版剩余燃料，单位是**半个**燃烧 tick（煤 1600 tick = 3200） |
+| `BurnHalfTotal` | int | 当前这根燃料的总量，用于 GUI 火焰条 |
+
+- 槽位：`0` 工具（筛网 / 锤）、`1` 输入；电动 `2..5` 插件、`6..14` 输出；内能 `2` 燃料、`3..11` 输出。
+- 机器记录的 `Work` 在断电/断料时归零（不做半程存档）。
+
+### 配置
+
+`config/exnihilosatellitium-common.toml`：
+
+```toml
+[machine]
+    # 一次处理的基础耗时（tick）；速度插件按 ×1.5/×2.5/×4 缩短
+    ticksPerOperation = 80
+    # 电动机器每 tick 抽的 FE；0 = 免费
+    energyPerTick = 20
+    # 电动机器内部缓冲
+    energyCapacity = 20000
+    # 内能机器每完成一次消耗的燃烧值（煤 1600 = 8 次）
+    burnPerOperation = 200
+```
+
+### 测试命令
+
+```mcfunction
+forceload add 0 0
+setblock 0 120 0 exnihilosatellitium:electric_sieve
+data merge block 0 120 0 {Energy:20000, Items:[
+  {Slot:0b, id:"exnihilosatellitium:silk_mesh", count:1},
+  {Slot:1b, id:"minecraft:sand", count:64}]}
+# 等 5 秒（约 100 tick）后
+data get block 0 120 0
+```
+
+- 能量必须用 `setEnergyStored` 直接写；`/data merge` 的 `Energy` 会走 BE 的 `loadAdditional`。
+- 内能版的 `BurnHalfTicks` 是半 tick 单位：写 3200 = 一根煤。
+- **必须在 `forceload` 的区块里测**（没有玩家时，普通区块的 BE 不 tick）。
+- 管道验证：机器下方放漏斗只会抽到输出格；上方漏斗可以把料补进输入格。
+
+### 能力
+
+| 能力 | 电动 | 内能 |
+|---|---|---|
+| `ItemHandler.BLOCK` | 输入/工具/插件格可插，输出 9 格只抽不放 | 同左（输出 9 格只抽不放） |
+| `EnergyStorage.BLOCK` | `MachineEnergy`（只进不出） | `null`（没有能力） |

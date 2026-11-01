@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GEG",
+    "EFE",
+    "GEG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "E": {
+      "item": "minecraft:emerald"
+    },
+    "F": {
+      "item": "exnihilosatellitium:fortune_upgrade_1"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:fortune_upgrade_2",
+    "count": 1
+  }
+}

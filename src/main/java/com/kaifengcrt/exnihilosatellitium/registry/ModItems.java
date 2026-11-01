@@ -9,6 +9,8 @@ import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
+import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
+import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
@@ -150,6 +152,40 @@ public final class ModItems {
             ITEMS.register("crucible", () -> new BlockItem(ModBlocks.CRUCIBLE.get(),
                     new Item.Properties()));
 
+    // ------------------------------------------------------------- M10 automation
+    public static final DeferredHolder<Item, Item> ELECTRIC_SIEVE =
+            ITEMS.register("electric_sieve", () -> new BlockItem(ModBlocks.ELECTRIC_SIEVE.get(),
+                    new Item.Properties()));
+    public static final DeferredHolder<Item, Item> ELECTRIC_HAMMER =
+            ITEMS.register("electric_hammer", () -> new BlockItem(ModBlocks.ELECTRIC_HAMMER.get(),
+                    new Item.Properties()));
+    public static final DeferredHolder<Item, Item> FUEL_SIEVE =
+            ITEMS.register("fuel_sieve", () -> new BlockItem(ModBlocks.FUEL_SIEVE.get(),
+                    new Item.Properties()));
+    public static final DeferredHolder<Item, Item> FUEL_HAMMER =
+            ITEMS.register("fuel_hammer", () -> new BlockItem(ModBlocks.FUEL_HAMMER.get(),
+                    new Item.Properties()));
+
+    public static final List<DeferredHolder<Item, Item>> MACHINES = List.of(
+            ELECTRIC_SIEVE, ELECTRIC_HAMMER, FUEL_SIEVE, FUEL_HAMMER);
+
+    public static final DeferredHolder<Item, Item> SPEED_UPGRADE_1 =
+            registerUpgrade("speed_upgrade_1", UpgradeType.SPEED, 1);
+    public static final DeferredHolder<Item, Item> SPEED_UPGRADE_2 =
+            registerUpgrade("speed_upgrade_2", UpgradeType.SPEED, 2);
+    public static final DeferredHolder<Item, Item> SPEED_UPGRADE_3 =
+            registerUpgrade("speed_upgrade_3", UpgradeType.SPEED, 3);
+    public static final DeferredHolder<Item, Item> FORTUNE_UPGRADE_1 =
+            registerUpgrade("fortune_upgrade_1", UpgradeType.FORTUNE, 1);
+    public static final DeferredHolder<Item, Item> FORTUNE_UPGRADE_2 =
+            registerUpgrade("fortune_upgrade_2", UpgradeType.FORTUNE, 2);
+    public static final DeferredHolder<Item, Item> FORTUNE_UPGRADE_3 =
+            registerUpgrade("fortune_upgrade_3", UpgradeType.FORTUNE, 3);
+
+    public static final List<DeferredHolder<Item, Item>> UPGRADES = List.of(
+            SPEED_UPGRADE_1, SPEED_UPGRADE_2, SPEED_UPGRADE_3,
+            FORTUNE_UPGRADE_1, FORTUNE_UPGRADE_2, FORTUNE_UPGRADE_3);
+
     public static final DeferredHolder<Item, Item> WOOD_MESH =
             ITEMS.register("wood_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(10), 1));
     public static final DeferredHolder<Item, Item> SILK_MESH =
@@ -221,6 +257,12 @@ public final class ModItems {
     private static DeferredHolder<Item, Item> registerBarrelItem(final String name,
                                                            final DeferredHolder<Block, ? extends Block> block) {
         return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+    }
+
+    private static DeferredHolder<Item, Item> registerUpgrade(final String name,
+                                                              final UpgradeType type, final int tier) {
+        return ITEMS.register(name, () -> new UpgradeItem(
+                new Item.Properties().stacksTo(16), type, tier));
     }
 
     public static void register(final IEventBus modBus) {

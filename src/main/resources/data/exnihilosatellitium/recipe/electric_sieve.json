@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IRI",
+    "RSI",
+    "IRI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "exnihilosatellitium:sieve"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:electric_sieve",
+    "count": 1
+  }
+}

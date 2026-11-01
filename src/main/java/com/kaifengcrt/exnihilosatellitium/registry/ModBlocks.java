@@ -6,6 +6,8 @@ import com.kaifengcrt.exnihilosatellitium.common.block.CrucibleBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.InfestedLeavesBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.UnfiredCrucibleBlock;
+import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
+import com.kaifengcrt.exnihilosatellitium.common.machine.block.MachineBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -61,6 +63,24 @@ public final class ModBlocks {
             BLOCKS.register("sieve", () -> new SieveBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)
                     .noOcclusion()
                     .isViewBlocking((state, level, pos) -> false)));
+
+    // ------------------------------------------------------------- M10 automation
+    public static final DeferredHolder<Block, Block> ELECTRIC_SIEVE =
+            BLOCKS.register("electric_sieve", () -> new MachineBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK),
+                    MachineKind.SIEVE, true));
+    public static final DeferredHolder<Block, Block> ELECTRIC_HAMMER =
+            BLOCKS.register("electric_hammer", () -> new MachineBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK),
+                    MachineKind.HAMMER, true));
+    public static final DeferredHolder<Block, Block> FUEL_SIEVE =
+            BLOCKS.register("fuel_sieve", () -> new MachineBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).strength(3.5F, 6.0F),
+                    MachineKind.SIEVE, false));
+    public static final DeferredHolder<Block, Block> FUEL_HAMMER =
+            BLOCKS.register("fuel_hammer", () -> new MachineBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).strength(3.5F, 6.0F),
+                    MachineKind.HAMMER, false));
 
     /** M6: infested leaves (silkworm); the block entity renders the original leaves. */
     public static final DeferredHolder<Block, Block> INFESTED_LEAVES =
