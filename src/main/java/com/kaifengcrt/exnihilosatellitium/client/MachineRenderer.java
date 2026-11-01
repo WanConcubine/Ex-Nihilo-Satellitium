@@ -13,10 +13,14 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 
 /**
@@ -59,10 +63,36 @@ public final class MachineRenderer implements BlockEntityRenderer<MachineBlockEn
                 this.renderItem(level, input, pose, buffer, 0.5F, 6.0F / 16.0F, 0.5F, 0.22F);
             }
         } else if (!input.isEmpty()) {
-            final float jitter = animating
-                    ? (float) Math.sin((level.getGameTime() + partialTick) * 2.0F) * 0.10F : 0.0F;
-            this.renderItem(level, input, pose, buffer,
-                    0.5F + jitter, 10.42F / 16.0F, 0.5F + jitter, 0.30F);
+            // Same visual language as the manual sieve: the input block is
+            // squashed into a thin layer on the mesh and gets thinner as the
+            // cycle progresses, with a small sieving shake.
+            final float shakeX = animating
+                    ? (float) Math.sin((level.getGameTime() + partialTick) * 2.0F) * 0.02F : 0.0F;
+            final float shakeZ = animating
+                    ? (float) Math.cos((level.getGameTime() + partialTick) * 2.0F) * 0.02F : 0.0F;
+            final float remaining = animating ? Math.max(0.0F, 1.0F - phase) : 0.65F;
+            if (input.getItem() instanceof BlockItem blockItem) {
+                final BlockState state = blockItem.getBlock().defaultBlockState();
+                if (!state.isAir()) {
+                    final float thickness = Math.max(0.004F, 0.16F * remaining);
+                    pose.pushPose();
+                    pose.translate(0.5F + shakeX, 10.35F / 16.0F, 0.5F + shakeZ);
+                    pose.translate(-0.4375F, 0.0F, -0.4375F);
+                    pose.scale(0.875F, thickness, 0.875F);
+                    Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, pose, buffer,
+                            LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+                            ModelData.EMPTY, RenderType.solid());
+                    pose.popPose();
+                }
+            } else {
+                pose.pushPose();
+                pose.translate(0.5F + shakeX, 10.42F / 16.0F, 0.5F + shakeZ);
+                pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90.0F));
+                pose.scale(0.5F, 0.5F, 0.5F);
+                Minecraft.getInstance().getItemRenderer().renderStatic(input, ItemDisplayContext.FIXED,
+                        LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, pose, buffer, level, 0);
+                pose.popPose();
+            }
         }
     }
 
