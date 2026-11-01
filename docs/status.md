@@ -6,12 +6,27 @@
 ## 一句话
 
 **主线是 Minecraft 1.21.1 / NeoForge 21.1.x**（1.20.1/Forge 版归档在 tag `legacy/1.20.1-forge`）。
-M1–M4 已实现；**M6 也全部完成**（巫水、古代孢子、瓷桶、11 种木坩埚、12 种木桶、蚕、5 种人偶），
-最新提交 `d66b0c0`，`origin/main` 已同步。
-**下一步是进游戏验收**：M4/M6 的数值与生成都已用 RCON 或 FakePlayer 验过，剩下画面、右键手感、
-JEI 页面这些只能作者亲眼看的部分。M5/M7 余项（config 扩展、datagen）与 M10 自动化还没开始。
+M1–M4、M6 已实现；**M10 自动化也已落地**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件），
+服务端逻辑用 RCON 验过。
+**下一步是进游戏验收**：先看 M10 的 GUI / 贴图 / 手感，再补 M4/M6 的画面与右键。
+M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01 提交，M6）
+## 当前批次（2026-11-01，M10 自动化）
+
+- **四台机器**：`electric_sieve` / `electric_hammer`（FE，4 个插件槽）与
+  `fuel_sieve` / `fuel_hammer`（烧原版熔炉燃料，无插件槽）；共享一个 `MachineBlock` + 两个 BE 类型。
+- **判定单一来源**：新增 `SieveRolls` / `HammerRolls`；手动筛（`SieveBlockEntity`）、
+  手动锤（`ToolEvents` 普通/创造路径）已全部改调它们，机器不再有第二份掉落逻辑。
+- **数值**：基础 80 tick（4 秒）/ 件；电动 20 FE/t；内能 200 燃烧值/件（1 煤 = 8 件）；
+  速度 ×1.5/×2.5/×4，时运 = 额外 1/2/3 次整表 roll。全部走 `machine.*` config。
+- **GUI**：两个 Menu + 两个 Screen，进度条 / 能量条 / 火焰条 / tooltip；贴图由
+  `scripts/generate_machine_assets.py` 生成。
+- **管道**：`MachineItemHandler` 只允许从输出 9 格抽取，避免漏斗抽走筛网 / 锤 / 插件；
+  电动机器只进不出的能量能力。
+- **RCON 验证**：内能筛 / 电动筛 / 电动锤（速度 III + 时运 III）/ 内能锤 / 上下漏斗全部通过（见验证表）。
+- **未验**：GUI 打开与外观、贴图观感、合成配方、玩家手感。
+
+## 上一批次（2026-11-01 提交，M6）
 
 - **巫水**：自定义流体 + 桶 + 液方块；满水桶 + 菌丝（或蘑菇煲）发酵，`Spore` 进度存 NBT。
 - **古代孢子**：沙筛 1/128；右键泥土 → 菌丝、右键牛 → 哞菇。
@@ -86,10 +101,21 @@ JEI 页面这些只能作者亲眼看的部分。M5/M7 余项（config 扩展、
   内容存 `exnihilosatellitium:fluid_contents` 组件，`IFluidHandlerItem` 已接。
   3 瓷土按原版桶形（`x x` / ` x `）→ 未烧制瓷桶 → 熔炉烧 200 tick → 可用瓷桶。
 
+### 自动化（M10，2026-11-01）
+
+- 四台机器共用 `MachineBlock`（kind = 筛/锤，power = 电动/内能），BE 分 `ElectricMachineBlockEntity` /
+  `FuelMachineBlockEntity`，GUI 分 `ElectricMachineMenu` / `FuelMachineMenu`。
+- 槽位：`0` 工具、`1` 输入、输出 9 格；电动另有 `2..5` 插件，内能 `2` 燃料。
+- 工具消耗：筛网每件 −1 耐久、锤每件 −1 耐久，坏掉即消失；输出满时停机，剩余产物掉在机器上方。
+- 电动无电 / 内能无燃料时停机，`Work` 归零，不消耗输入。
+- 管道：下方漏斗只抽输出格；上方漏斗可补料。电动机器暴露只进不出的能量能力，内能机器没有能量能力。
+- 内能燃料接受任何 `getBurnTime(RecipeType.SMELTING) > 0` 的物品；熔岩桶退回空桶。
+
 ### 配置与 JEI
 
 - `config/exnihilosatellitium-common.toml`：`crucible.capacity`、`crucible.meltCapacity`、
   `crucible.heatSpeedMultiplier`，运行时读取。
+- `machine.ticksPerOperation` / `energyPerTick` / `energyCapacity` / `burnPerOperation`（M10）。
 - JEI 分类：`sieve`、`barrel`、`barrel_compost`、`hammer`、`crook`、`crucible`、`crucible_heat`；
   锤子页隐藏“粉尘→自身”的 no-op 规则（玩法 47，展示 35）。
 
@@ -105,6 +131,8 @@ JEI 页面这些只能作者亲眼看的部分。M5/M7 余项（config 扩展、
   - **M6 瓷桶**：未烧制 → 烧制；舀水/熔岩/巫水；倒进木桶/坩埚。
   - **M3**：6 锤/2 钩、左键链、右键无反应、矿砾/矿砂 4–6、锤钩 JEI 35/10、蚕动画。
   - **M2/M6 筛子**：6 个输入、74 掉落；JEI 筛子页；粉碎方块平铺料层。
+  - **M10 机器**：四台机器右键开 GUI；能量条/火焰条/进度条动；插件槽只收插件、燃料槽只收燃料；
+    筛网/锤在 GUI 里显示耐久；破坏机器掉出全部内容；贴图观感；上下漏斗在游戏里再走一遍。
 - **未验证**：上面这些画面/交互，以及 P0/P1 修复的玩家实测、桶/筛旧内容目视。
 - 不要提交 `build/`、`run/`、`reference/`、`libs/`。
 
@@ -119,6 +147,7 @@ JEI 页面这些只能作者亲眼看的部分。M5/M7 余项（config 扩展、
 | M3 | 6 锤 / 2 钩 / `dust` / 蚕动画 / 熟蚕 / 粘土 / 47 条锤表 / 锤钩 JEI | 🚧 待验收（[DESIGN §15–16、§18](DESIGN.md)） |
 | M4 | 坩埚 + 热源；19 熔点 / 9 热源；容量可配；Creatio 模型；熔料/流体显示；Jade；JEI 两页 | 服务端✅ / 画面🚧（[DESIGN §17](DESIGN.md)） |
 | M6 | 巫水 / 古代孢子 / 瓷桶 / 11 种木坩埚 / 12 种木桶 / 蚕 / 5 种人偶 / 筛出物扩充 | 服务端✅ / 画面🚧（[DESIGN §21–26](DESIGN.md)） |
+| M10 | 电动/内能 × 自动筛/自动锤 + 速度/时运插件；手动与机器共用判定函数 | 服务端✅ / GUI🚧（[DESIGN §27](DESIGN.md)） |
 
 ## 验证状态
 
@@ -183,17 +212,24 @@ JEI 页面这些只能作者亲眼看的部分。M5/M7 余项（config 扩展、
 | M4 JEI | ⚠️ | 坩埚/热源两页；未目视 |
 | 瓷土/坩埚配方 | ⚠️ | 瓷土、未烧制坩埚、烧制；未实测 |
 | 锤/钩 JEI | ⚠️ | 35 / 10 条 + catalyst；未目视 |
+| M10 内能筛 | ✅ | RCON：120 tick 后输入 64→63、筛网 damage 1、`BurnHalfTicks` 3200→2600、产出燧石 |
+| M10 电动筛 | ✅ | RCON：`Energy:20000`，101 tick 后 17980（20/tick 对得上）、输入 63、产出铝碎块/海晶结晶 |
+| M10 电动锤 + 速度 III + 时运 III | ✅ | RCON：5 秒 5 次（20 tick/次）、输入 64→59、锤 damage 5、20 砂砾（1×4 roll×5） |
+| M10 内能锤 | ✅ | RCON：80 tick 一次、输入 63、锤 damage 1、`BurnHalfTicks` 2700、1 砂砾 |
+| M10 管道 | ✅ | RCON：下方漏斗只抽到砂砾，锤/插件仍在；上方漏斗把圆石补进输入槽 |
+| M10 GUI / 贴图 / 合成 | ⚠️ | Menu/Screen/配方已注册，`build` 通过；未进游戏开过 GUI、未目视贴图、未实际合成 |
 | P0/P1 修复 | ⚠️ | 破坏返还、管道灌桶、F3+T 分离、红石/荧石未玩家实测 |
 | 旧内容目视 | ⚠️ | 桶/筛比例、Jade tooltip 等仍待作者确认；桶的两道外凸箍已按反馈删除（2026-10-31） |
 
 ## 下一步（按价值排序）
 
-0. **进游戏验收 M4 + M6**（当前优先级）：清单见上一节；这一环没过就不算完。
-1. **M10 Ex Astris 自动化**：自动筛 / 自动锤 / 速度与幸运升级插件——最大的一块新功能。
-2. **M7 余项**：config 扩展、datagen；JEI 已补全。
-3. **工程收尾**：advancement 树、mod 图标（`neoforge.mods.toml` 还没有 `logoFile`）、CI 加纹理检查、
+0. **进游戏验收 M10 + M4 + M6**（当前优先级）：先看 M10 的 GUI / 贴图 / 漏斗手感，
+   再补 M4/M6 的画面与右键；清单见上一节。这一环没过就不算完。
+1. **M7 余项**：config 扩展、datagen；JEI 已补全。
+2. **工程收尾**：advancement 树、mod 图标（`neoforge.mods.toml` 还没有 `logoFile`）、CI 加纹理检查、
    零测试（tech-debt P3 #37）。
-4. **M8 月光魔法联动**：目前只有 `MoonlightCompat` 占位。
+3. **M8 月光魔法联动**：目前只有 `MoonlightCompat` 占位。
+4. **M9 发布**：等验收与 M7/M8 收尾后再做。
 
 ## 已拍板的决策
 
@@ -227,6 +263,13 @@ JEI 页面这些只能作者亲眼看的部分。M5/M7 余项（config 扩展、
 - **1.21.1 没有 `#forge:*` 物品标签**：用 `#c:*`；`#minecraft:crops/seeds` 也不是物品标签。
 - **堆肥标签和 JSON 必须同步**：标签有、JSON 没有 = 按 1 点处理。
 - **内缩模型的外侧面不能加 `cullface`**：只保留在方块边界；坩埚模型已按此规则清洗。
+- **`Properties.ofFullCopy(Blocks.FURNACE)` 会带上 `lit` 光照函数**：新方块没有 `lit` 状态，
+  注册期就崩（`Cannot get property BooleanProperty{name=lit}`）。机器方块用 `IRON_BLOCK` 复制 + 手调强度。
+- **`EnergyStorage(maxExtract = 0)` 的 `extractEnergy` 永远返回 0**：机器内部扣电要走自己的
+  `MachineEnergy#drain`；同时 `receiveEnergy` 受 `maxReceive` 限制，读档要用 `setEnergyStored` 直写。
+- **没有玩家时普通区块的 BE 不 tick**：RCON 测机器先 `forceload add`，否则会看到“摆放后只动了几十 tick 就停”。
+- **漏斗会把机器里所有槽位当可抽**：`InvWrapper` 全开会让漏斗抽走筛网/插件，必须用
+  `MachineItemHandler` 限制抽取范围。
 - **共享 BE 类型要列全七种方块**：漏一个放置后 BE 不创建。
 - **子模型不要直接当方块模型用**：`barrel_base.json` 没有 textures，只作 parent。
 - **JEI / 月光魔法生产 jar 不能直接丢 `run/mods`**：SRG 名会 `NoSuchFieldError`。
@@ -258,6 +301,7 @@ python3 scripts/generate_barrel_variants.py          # 11 种木桶 + 石桶 JSO
 python3 scripts/generate_ore_variants.py             # 矿物链资源/配方/锭
 python3 art/items/tools/restyle.py                   # 锤/钩/蚕/熟蚕/尘土贴图 + 预览
 python3 art/blocks/crucible/restyle.py               # 坩埚模型/贴图（Creatio 现代化）
+python3 scripts/generate_machine_assets.py           # M10 机器方块/插件/GUI 贴图与模型
 ./gradlew runServer   # RCON：localhost:25575 / eni
 ./gradlew runClient
 ```
@@ -279,11 +323,16 @@ src/main/java/com/kaifengcrt/exnihilosatellitium/
 │   ├── hammer/                        # HammerRecipes + reload
 │   ├── crook/                         # CrookDrops + reload
 │   ├── crucible/                      # CrucibleRecipes / CrucibleHeat + reload
-│   ├── config/ModConfig.java          # 坩埚三项配置
+│   ├── machine/                       # M10：SieveRolls / HammerRolls / UpgradeItem
+│   │   ├── block/MachineBlock.java    # 四台机器共用一个方块类
+│   │   ├── blockentity/               # MachineBlockEntity + 电动/内能子类 + MachineItemHandler
+│   │   └── menu/                      # ElectricMachineMenu / FuelMachineMenu
+│   ├── config/ModConfig.java          # 坩埚/机器配置
 │   ├── material/                      # materials.json 读取（注册期）
 │   ├── event/{Common,Capability,Tool}Events.java
 │   └── tag/ModTags.java
 ├── client/                            # BarrelRenderer / SieveRenderer / CrucibleRenderer / ClientEvents
+│                                      # + screen/{Electric,Fuel}MachineScreen
 └── compat/
     ├── MoonlightCompat.java
     ├── jade/                          # 可选 HUD：桶/筛/坩埚

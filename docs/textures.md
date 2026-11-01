@@ -53,6 +53,10 @@ assets/exnihilosatellitium/textures/
     └── witch_water_bucket.png   # 巫水桶（M6，原版水桶重着色）
 ```
 
+- **M10 机器（2026-11-01）**：4 张 16×16 方块贴图（电动/内能 × 筛/锤）+ 6 张插件图标 +
+  2 张 176×166 GUI 背景，全部由 `python3 scripts/generate_machine_assets.py` 用 Pillow 逐像素生成；
+  脚本同时写 blockstate / 方块模型 / 物品模型。要改机器外观就改脚本重跑，不要手改 PNG。
+  GUI 贴图在 `textures/gui/`，检查脚本对它们豁免尺寸（允许 256×256 画布）。
 - **巫水流体不再自绘**：直接复用原版 `minecraft:block/water_still` / `water_flow`
   （灰度图），运行时乘 `IClientFluidTypeExtensions#getTintColor` 的紫色
   `0xFF6B44A8`。这样流动/动画全部跟原版水一致，只是颜色不同。
@@ -183,6 +187,8 @@ python3 scripts/check-textures.py
 - 已补齐 1.16/1.20 木材：红树 / 樱花 / 竹（`stripped_bamboo_block`）/ 绯红 / 诡异（菌柄），
   现在 11 种木桶 + 石桶；竹和下界菌柄的「内壁」贴图在生成脚本里单独指定。
 - 筛子、坩埚的 vanilla-sampled 模型与贴图待做。
+- M10 机器方块/插件/GUI 贴图是脚本生成的初版，尚未进游戏目视；`electric_*` 的网格与
+  `fuel_*` 的锈色/火口是否和现有方块风格一致，要在 4× 截图里再看。
 - 巫水有 still/flow 两套；水/熔岩仍走原版流体渲染。
 - **人偶（M6）**：采用 Creatio（MIT）的 `doll.png` 作为形状底稿（存在 `art/items/dolls/creatio/`），
   `art/items/dolls/restyle.py` 缩到 **64×64**、按亮度量化成 4 阶并补 1px 描边；

@@ -10,6 +10,9 @@ import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
+import com.kaifengcrt.exnihilosatellitium.registry.ModMenuTypes;
+import com.kaifengcrt.exnihilosatellitium.client.screen.ElectricMachineScreen;
+import com.kaifengcrt.exnihilosatellitium.client.screen.FuelMachineScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -38,6 +41,13 @@ public final class ClientEvents {
         event.registerBlockEntityRenderer(ModBlockEntities.SIEVE.get(), SieveRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.INFESTED_LEAVES.get(), InfestedLeavesRenderer::new);
+    }
+
+    /** M10: machine GUIs. */
+    @SubscribeEvent
+    public static void registerScreens(final net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
+        event.register(ModMenuTypes.ELECTRIC_MACHINE.get(), ElectricMachineScreen::new);
+        event.register(ModMenuTypes.FUEL_MACHINE.get(), FuelMachineScreen::new);
     }
 
     /** Item model predicate: the porcelain bucket switches to the filled model. */

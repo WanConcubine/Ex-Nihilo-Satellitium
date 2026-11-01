@@ -39,15 +39,17 @@
 - [x] M3 锤子 + 钩子（6 锤 / 2 钩 / 尘土 / 蚕动画 / 熟蚕 / 粘土 / 锤钩 JEI；待验收）
 - [x] M4 坩埚 + 热源（19 熔点 / 9 热源、容量/熔料/热源倍率可配、Creatio 模型、熔料/流体显示、Jade、JEI 两页；待验收）
 - [x] M5 矿粒 / 粉碎矿 / 冶炼（熔炼成锭已通；锤子降档已接，待验收）
-- [ ] M6 瓷桶 / 巫水 / 蚕丝 / 娃娃（瓷土与熟蚕已在 M3 完成）
-- [ ] M7 配置 / 数据生成（JEI 七个分类已完成；config 目前只有坩埚三项，datagen 未做）
+- [x] M6 瓷桶 / 巫水 / 蚕丝 / 娃娃（服务端已验证，画面待验收）
+- [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运插件（服务端已验证，GUI 待验收）
+- [ ] M7 配置 / 数据生成（JEI 七个分类已完成；config 有坩埚与机器两组，datagen 未做）
 - [ ] M8 与「月光魔法」联动
+- [ ] M9 发布（CurseForge / Modrinth）
 
 ## 文档
 
 - [docs/status.md](docs/status.md) —— 当前状态、验证表、下一步（交接先看这个）
 - [docs/tech-debt.md](docs/tech-debt.md) —— 技术债/潜在风险审计（P0–P3）
-- [docs/DESIGN.md](docs/DESIGN.md) —— 原则、架构、里程碑、M1–M4 实现记录
+- [docs/DESIGN.md](docs/DESIGN.md) —— 原则、架构、里程碑、M1–M10 实现记录
 - [docs/data-format.md](docs/data-format.md) —— 堆肥/筛子 JSON、材料表、NBT、命令、JEI
 - [docs/textures.md](docs/textures.md) —— 纹理路线、引用规则、检查脚本
 - [THIRD-PARTY.md](THIRD-PARTY.md) —— 第三方/参考来源

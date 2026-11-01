@@ -148,11 +148,16 @@ Ex Nihilo 系自身几乎不生成矿脉，玩家能拿到什么资源，完全�
 1. **判定单一来源**：筛料、锤碎写成纯函数（材料 + 筛网 + 幸运 → 输出），
    手动方块与自动方块**调同一个函数**。机器只负责供能、计时、抽取，绝不复制一份掉落表。
 2. **能源抽象成 FE**：用 `IEnergyStorage`，不直接依赖任何能源模组（1.7.10 的 RF 专有类不用）。
-   没装能源模组时的行为待定：慢速无电运行，或干脆不启动。
-3. **插件化**：速度 / 幸运（产量）作为 upgrade 物品，只调判定函数的参数，不改判定本身；
+   没装能源模组时的解法（2026-11-01 拍板）：**不做“无电慢速”，而是做两档机器**——
+   - **电动**：必须 FE，可装速度 / 时运插件，是后期规模化路线；
+   - **内能**：烧原版熔炉燃料（`ItemStack#getBurnTime`），不需要任何能源模组，**没有插件槽**，
+     是单人空岛 / 无能源整合包的前置路线。
+3. **插件化**：速度 / 时运（产量）作为 upgrade 物品，只调判定函数的参数，不改判定本身；
    同类词条也可以挂在手动工具上（可选，视平衡）。
 
 与 M2 的接口：M2 交付手动筛时就把判定抽成纯函数 + JSON 表，M10 的自动筛只接电与计时，不返工。
+M10 落地时把这条真正兑现了：`SieveRolls` / `HammerRolls` 成为唯一判定入口，手动筛、手动锤、
+四台机器全部调它们（见 §27）。
 
 ### 6.3 首个联动对象：月光魔法
 
@@ -936,3 +941,70 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 服务端：`[barrel] loaded 9 transforms (2 fluid, 7 item)`。
 - RCON：写入 `CookEntity=blaze` 后，Normal 难度刷出烈焰人；Peaceful 难度掉烈焰棒。
 - **未验**：6 条配方的摆放、玩家右键人偶、JEI 展示。
+
+## 27. M10 自动化：电动 / 内能四台机器（2026-11-01）
+
+**范围**
+
+| 机器 | id | 供能 | 插件 | 工具槽 |
+|---|---|---|---|---|
+| 电动自动筛 | `electric_sieve` | FE | 4 格 | 筛网 |
+| 电动自动锤 | `electric_hammer` | FE | 4 格 | 锤 |
+| 内能自动筛 | `fuel_sieve` | 原版熔炉燃料 | 无 | 筛网 |
+| 内能自动锤 | `fuel_hammer` | 原版熔炉燃料 | 无 | 锤 |
+
+**判定单一来源（M2 欠账兑现）**
+
+- 新增 `common/machine/SieveRolls`、`common/machine/HammerRolls`：机器与手动路径都走它们。
+  `SieveBlockEntity#completeSift` 和 `ToolEvents`（普通破坏、创造破坏）已改为调用同一函数，
+  判定逻辑不再有第二份。
+- 时运不是“提高概率”，而是**整表再掷一次**：时运 I/II/III = 额外 1/2/3 次独立 roll。
+  锤子的多次 roll 合并成一摞（例如矿砾 4–6 在时运 II 下是 12–18）。
+
+**槽位与布局（176×166 GUI）**
+
+- 通用：`0` 工具、`1` 输入、输出 9 格（3×3）。
+- 电动：`2..5` 插件、输出从 `6` 开始；能量条在左上。
+- 内能：`2` 燃料、输出从 `3` 开始；火焰条在左下。
+- 破坏方块时 `Containers.dropContents` 掉出全部内容（含筛网/锤/插件），不做返还例外。
+
+**数值（全部进 config）**
+
+| 键 | 默认 | 含义 |
+|---|---|---|
+| `machine.ticksPerOperation` | 80（4 秒） | 一次处理的基础耗时；速度插件按 ×1.5 / ×2.5 / ×4 缩短 |
+| `machine.energyPerTick` | 20 | 电动机器工作时每 tick 抽 FE；无电即停机 |
+| `machine.energyCapacity` | 20000 | 内部 FE 缓冲 |
+| `machine.burnPerOperation` | 200 | 内能机器每完成一次消耗的燃料值；煤 1600 → 8 次 |
+
+- 内能机器没有速度插件，`ticksPerOperation` 固定走 config；燃烧按“每 tick 消耗
+  `burnPerOperation × 2 / ticksPerOperation` 个半 tick”精确记账（内部用半 tick 整数，避免浮点漂移）。
+- 燃料槽接受任何 `getBurnTime(RecipeType.SMELTING) > 0` 的物品；熔岩桶会退回空桶。
+
+**能力 / 管道**
+
+- `Capabilities.ItemHandler.BLOCK`：四台机器都暴露 `MachineItemHandler`，
+  **只允许从输出 9 格抽取**，插入走与 GUI 相同的 `canPlaceInSlot`；避免漏斗把筛网/锤/插件抽走。
+- `Capabilities.EnergyStorage.BLOCK`：只有电动机器返回 `MachineEnergy`（只进不出，`maxExtract = 0`）；
+  内能机器返回 `null`，没有能量能力。
+- `MachineEnergy.Drain` 是机器内部扣电入口：NeoForge 的 `extractEnergy` 在 `maxExtract = 0` 时
+  直接返回 0，不能拿来扣自己的电量（踩坑记录见 status.md）。
+
+**GUI**
+
+- 两个 `MenuType`（`electric_machine` / `fuel_machine`）、两个 `Screen`；
+  进度条、能量条、火焰条、tooltip（FE / 燃料 tick / 进度百分比）都在 screen 里画。
+- `ContainerData` 7 项：`work / ticksPerOperation / energy / energyCapacity / burnHalfTicks / burnHalfTotal / active`。
+- 贴图：`textures/block/{electric,fuel}_{sieve,hammer}.png` 16×16、`textures/gui/{electric,fuel}_machine.png`，
+  由 `scripts/generate_machine_assets.py` 生成（Pillow），模型统一 `cube_all`。
+
+**验证（2026-11-01，RCON / forceload 0 0）**
+
+- 内能筛：写入木筛网 + 砂砾 64 + 煤 1，120 tick 后输入 63、筛网 damage 1、`BurnHalfTicks` 3200→2600、
+  产出燧石（走 `sieve/gravel.json`）。
+- 电动筛：`Energy:20000` + 丝筛网 + 沙 64，101 tick 后能量 17980（20/tick 对上）、输入 63、产出铝碎块/海晶结晶。
+- 电动锤 + 速度 III + 时运 III：5 秒完成 5 次（20 tick/次），输入 64→59、锤 damage 5、
+  圆石规则 1 个 × 4 roll × 5 次 = 20 砂砾（时运生效）。
+- 内能锤：80 tick 一次，输入 63、锤 damage 1、`BurnHalfTicks` 2700、产出 1 砂砾。
+- 漏斗在机器下方只抽到砂砾（输出），机器内的锤/插件仍在；漏斗在上方成功把圆石补进输入槽。
+- **未验**：GUI 外观 / 打开菜单 / 右键手感 / 贴图在游戏里的观感；配方未实际合成。

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DED",
+    "EFE",
+    "DED"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "E": {
+      "item": "minecraft:emerald"
+    },
+    "F": {
+      "item": "exnihilosatellitium:fortune_upgrade_2"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:fortune_upgrade_3",
+    "count": 1
+  }
+}
