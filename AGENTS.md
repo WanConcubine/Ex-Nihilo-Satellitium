@@ -19,6 +19,9 @@
 # 纹理守卫：允许 vanilla block，禁止 vanilla item
 python3 scripts/check-textures.py
 
+# 分层守卫：core 层（数据表/掷表/状态机）不得 import NeoForge/Forge
+python3 scripts/check-core-imports.py
+
 # 开发服（RCON 已配：localhost:25575 / eni）
 ./gradlew runServer
 

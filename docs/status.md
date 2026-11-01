@@ -392,6 +392,7 @@ M8 月光魔法、M9 发布仍未开始。
 ```bash
 ./gradlew build
 python3 scripts/check-textures.py
+python3 scripts/check-core-imports.py                # core 层不得出现 NeoForge/Forge import
 python3 scripts/generate_barrel_variants.py          # 11 种木桶 + 石桶 JSON
 python3 scripts/generate_ore_variants.py             # 矿物链资源/配方/锭
 python3 art/items/tools/restyle.py                   # 锤/钩/蚕/熟蚕/尘土贴图 + 预览
