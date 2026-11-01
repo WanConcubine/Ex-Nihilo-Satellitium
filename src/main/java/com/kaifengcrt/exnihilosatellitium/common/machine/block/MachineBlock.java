@@ -1,0 +1,170 @@
+package com.kaifengcrt.exnihilosatellitium.common.machine.block;
+
+import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.ElectricMachineBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.FuelMachineBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * One block class for all four machines; the kind (sieve / hammer) and the
+ * power tier (electric / fuel) are fixed at registration.
+ *
+ * <p>Right-click opens the machine menu. Contents are dropped when the block is
+ * broken outside creative, so a machine full of meshes is never lost.</p>
+ */
+@SuppressWarnings("deprecation")
+public class MachineBlock extends BaseEntityBlock {
+
+    /** Sieve tray and hammer press are both 14 px tall, inset by 1 px. */
+    private static final VoxelShape SIEVE_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
+    private static final VoxelShape HAMMER_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
+
+    private final MachineKind kind;
+    private final boolean electric;
+
+    public MachineBlock(final Properties properties, final MachineKind kind, final boolean electric) {
+        super(properties);
+        this.kind = kind;
+        this.electric = electric;
+    }
+
+    public MachineKind kind() {
+        return this.kind;
+    }
+
+    public boolean isElectric() {
+        return this.electric;
+    }
+
+    @Override
+    public RenderShape getRenderShape(final BlockState state) {
+        return RenderShape.MODEL;
+    }
+
+    @Override
+    public VoxelShape getShape(final BlockState state, final BlockGetter level,
+                               final BlockPos pos, final CollisionContext context) {
+        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : HAMMER_SHAPE;
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(final BlockState state, final BlockGetter level,
+                                        final BlockPos pos, final CollisionContext context) {
+        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : HAMMER_SHAPE;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(final BlockPos pos, final BlockState state) {
+        return this.electric
+                ? new ElectricMachineBlockEntity(pos, state)
+                : new FuelMachineBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(final Level level,
+                                                                  final BlockState state,
+                                                                  final BlockEntityType<T> type) {
+        if (level.isClientSide) {
+            return null;
+        }
+        return (lvl, pos, blockState, entity) -> {
+            if (entity instanceof MachineBlockEntity machine) {
+                machine.serverTick();
+            }
+        };
+    }
+
+    @Nullable
+    @Override
+    public MenuProvider getMenuProvider(final BlockState state, final Level level,
+                                        final BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof MenuProvider provider ? provider : null;
+    }
+
+    @Override
+    public InteractionResult use(final BlockState state, final Level level, final BlockPos pos,
+                                 final Player player, final InteractionHand hand,
+                                 final BlockHitResult hitResult) {
+        if (level.isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+        final MenuProvider provider = this.getMenuProvider(state, level, pos);
+        if (provider != null && player instanceof ServerPlayer serverPlayer) {
+            // The client menu factory reads the block position from the extra data;
+            // without this writer the buffer is null and opening the GUI NPEs.
+            net.minecraftforge.network.NetworkHooks.openScreen(serverPlayer, provider,
+                    buffer -> buffer.writeBlockPos(pos));
+        }
+        return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public void animateTick(final BlockState state, final Level level, final BlockPos pos,
+                            final RandomSource random) {
+        if (!(level.getBlockEntity(pos) instanceof MachineBlockEntity machine)
+                || !machine.isActive()) {
+            return;
+        }
+        final double x = pos.getX() + 0.5D;
+        final double y = pos.getY();
+        final double z = pos.getZ() + 0.5D;
+        final double dx = (random.nextDouble() - 0.5D) * 0.6D;
+        final double dz = (random.nextDouble() - 0.5D) * 0.6D;
+        if (machine.kind() == MachineKind.HAMMER) {
+            if (random.nextFloat() < 0.35F) {
+                level.addParticle(ParticleTypes.CRIT, x + dx * 0.5D, y + 0.55D, z + dz * 0.5D,
+                        0.0D, 0.02D, 0.0D);
+            }
+            if (random.nextFloat() < 0.18F) {
+                level.addParticle(machine.isElectric() ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.FLAME,
+                        x + dx * 0.4D, y + 0.5D, z + dz * 0.4D, 0.0D, 0.01D, 0.0D);
+            }
+            if (!machine.isElectric() && random.nextFloat() < 0.2F) {
+                level.addParticle(ParticleTypes.SMOKE, x, y + 0.4D, z, 0.0D, 0.03D, 0.0D);
+            }
+        } else {
+            if (random.nextFloat() < 0.3F) {
+                level.addParticle(ParticleTypes.CRIT, x + dx, y + 0.75D, z + dz,
+                        0.0D, 0.03D, 0.0D);
+            }
+            if (random.nextFloat() < 0.12F) {
+                level.addParticle(machine.isElectric() ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.SMOKE,
+                        x + dx * 0.6D, y + 0.8D, z + dz * 0.6D, 0.0D, 0.02D, 0.0D);
+            }
+        }
+    }
+
+    @Override
+    public void playerWillDestroy(final Level level, final BlockPos pos, final BlockState state,
+                                  final Player player) {
+        if (!level.isClientSide && !player.isCreative()
+                && level.getBlockEntity(pos) instanceof MachineBlockEntity machine) {
+            Containers.dropContents(level, pos, machine.getInventory());
+        }
+        super.playerWillDestroy(level, pos, state, player);
+    }
+}
