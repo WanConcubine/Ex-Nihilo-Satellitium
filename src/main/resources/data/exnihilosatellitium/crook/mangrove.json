@@ -1,0 +1,9 @@
+{
+  "input": "minecraft:mangrove_leaves",
+  "drops": [
+    {
+      "item": "minecraft:mangrove_propagule",
+      "chance": 0.25
+    }
+  ]
+}

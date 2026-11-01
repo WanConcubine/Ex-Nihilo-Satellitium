@@ -1,0 +1,9 @@
+{
+  "input": "minecraft:spruce_leaves",
+  "drops": [
+    {
+      "item": "minecraft:spruce_sapling",
+      "chance": 0.25
+    }
+  ]
+}

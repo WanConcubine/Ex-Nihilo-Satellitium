@@ -1,0 +1,9 @@
+{
+  "input": "minecraft:acacia_leaves",
+  "drops": [
+    {
+      "item": "minecraft:acacia_sapling",
+      "chance": 0.25
+    }
+  ]
+}

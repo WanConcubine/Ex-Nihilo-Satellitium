@@ -1,0 +1,9 @@
+{
+  "input": "minecraft:flowering_azalea_leaves",
+  "drops": [
+    {
+      "item": "minecraft:flowering_azalea",
+      "chance": 0.25
+    }
+  ]
+}

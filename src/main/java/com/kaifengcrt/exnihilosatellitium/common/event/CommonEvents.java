@@ -2,6 +2,8 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -22,5 +24,7 @@ public final class CommonEvents {
         event.addListener(new BarrelRecipeReloadListener(false));
         event.addListener(new CompostReloadListener());
         event.addListener(new SieveReloadListener());
+        event.addListener(new HammerRecipeReloadListener(false));
+        event.addListener(new CrookDropsReloadListener(false));
     }
 }
