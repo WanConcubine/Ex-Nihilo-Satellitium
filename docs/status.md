@@ -106,11 +106,30 @@
 | 1.20.1 配方计数 | ℹ️ | 1.20.1 的 `Loaded 7 recipes` 是**配方类型数**，不是配方条数；别拿它当进度 |
 | 改名完整性 | ✅ | `git grep` 无旧 id/旧类名；jar 内 `mods.toml` 为 `exnihilosatellitium` / `Ex Nihilo: Satellitium` |
 
+## 交接清单（新会话先看）
+
+- 工作区：**`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`**（`1.20.1-forge` 的
+  worktree）；主工作区 `/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium` 是 `main`。
+- 构建：`JAVA_HOME=/Users/kaifengcrt/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home ./gradlew build`。
+- 客户端：`./gradlew runClient -PdevMods`（JEI 走 maven、Jade/JECh 走 `libs/` deobf；
+  `-PdevMods` 只给客户端，JECh 在专用服会崩）。专用服：`./gradlew runServer`（不带 `-PdevMods`）。
+- 冒烟技巧：临时在 `runs` 里加 `client { args '--quickPlaySingleplayer', '<世界名>' }`
+  可无点击进存档，JEI/Jade 的注册日志会打印；验完把这段删掉。
+- 新增方块/物品的固定套路（M4 已验证）：注册 → BE → 数据表 + reload listener →
+  渲染 → Jade（**`config.jade.plugin_<ns>.<uid>` 翻译必须有，缺了 Jade 直接崩客户端**）→
+  JEI 分类（参考已移植的 `compat/jei/` 五页 + 坩埚两页）→ `check-textures.py`。
+- 分支还没有 config：M4 的容量/熔料/倍率是 `CrucibleBlockEntity` 里的常量。
+
 ## 下一步（按价值排序）
 
 1. **进游戏验收 M1.5 / M2 / M3 / M4 + JEI/Jade**：桶转化、筛四档料、锤/钩左键、坩埚投料熔化、
    JEI 七个分类页。
-2. **M6**：蚕 / 人偶 / 巫水 / 瓷桶 / 11 种木坩埚 / 12 种木桶补齐。
+2. **M6，按 5 刀做**（每刀独立可验收）：
+   1) 巫水 + 古代孢子（自定义流体/桶/液方块、发酵、两条转化、沙筛 1/128）；
+   2) 瓷桶（通用 1000 mB，`fluid_contents` 组件 → 1.20.1 是 NBT）；
+   3) 木坩埚 11 种 + 木桶补齐到 12 种（木坩埚被动熔水、433 K 上限）；
+   4) 蚕 + 侵染树叶（BE 记原树叶、变白渲染、扩散、掉线、Jade 百分比）；
+   5) 人偶 5 种 + 8 条桶规则（右键立即生效；和平掉战利品、非和平生成生物）。
 3. **配置**：分支还没有 config，M4 的容量/倍率目前是常量，后续补 `ModConfig`。
 
 ## 已拍板的决策
