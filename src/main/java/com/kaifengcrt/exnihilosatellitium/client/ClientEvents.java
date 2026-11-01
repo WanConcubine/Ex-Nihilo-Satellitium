@@ -41,6 +41,8 @@ public final class ClientEvents {
         event.registerBlockEntityRenderer(ModBlockEntities.SIEVE.get(), SieveRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.INFESTED_LEAVES.get(), InfestedLeavesRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.ELECTRIC_MACHINE.get(), MachineRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.FUEL_MACHINE.get(), MachineRenderer::new);
     }
 
     /** M10: machine GUIs. */
