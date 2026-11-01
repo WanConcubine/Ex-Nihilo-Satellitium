@@ -5,7 +5,8 @@
 
 ## 1. 项目是什么
 
-- **Minecraft 1.21.1 / NeoForge 21.1.x / Java 21**，mod id `exnihilosatellitium`。
+- **双版本目标**：**1.21.1 / NeoForge 21.1.x / Java 21**（主线 `main`）+ **1.20.1 / Forge 47.4 /
+  Java 17**（`1.20.1-forge` 分支，目前停在 M1，待补 M2–M10），mod id `exnihilosatellitium`。
 - 独立实现的 Ex Nihilo 风格空岛模组；**不是** Ex Nihilo 的官方续作。
 - 许可证 **MIT**；第三方声明见 [THIRD-PARTY.md](THIRD-PARTY.md)。
 
