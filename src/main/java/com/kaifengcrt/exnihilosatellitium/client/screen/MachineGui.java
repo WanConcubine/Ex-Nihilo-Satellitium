@@ -1,5 +1,6 @@
 package com.kaifengcrt.exnihilosatellitium.client.screen;
 
+import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.AbstractMachineMenu;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -62,6 +63,19 @@ public final class MachineGui {
         };
         graphics.drawString(font, text, rightX - font.width(text), y,
                 status == 0 ? 0xFF2E7D32 : 0xFFB3261E, false);
+    }
+
+    /**
+     * Opens JEI for the current input. Kept behind a ModList guard so the JEI
+     * classes are not resolved when JEI is absent.
+     */
+    public static boolean openJei(final AbstractMachineMenu menu) {
+        if (!net.neoforged.fml.ModList.get().isLoaded("jei")) {
+            return false;
+        }
+        return com.kaifengcrt.exnihilosatellitium.compat.jei.MachineJeiPlugin.showFor(
+                menu.getSlot(MachineBlockEntity.INPUT_SLOT).getItem(),
+                menu.kind() == MachineKind.SIEVE);
     }
 
     /** Tooltip for an empty machine slot; no-op for filled or non-machine slots. */

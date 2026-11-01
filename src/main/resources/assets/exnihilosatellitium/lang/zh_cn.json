@@ -81,6 +81,7 @@
   "gui.exnihilosatellitium.burn": "燃料：%s / %s 刻",
   "gui.exnihilosatellitium.energy": "能量：%s / %s FE",
   "gui.exnihilosatellitium.progress": "进度：%s%%",
+  "gui.exnihilosatellitium.progress.hint": "进度：%s%%（点击查看 JEI）",
   "gui.exnihilosatellitium.slot.fortune": "时运插件",
   "gui.exnihilosatellitium.slot.fuel": "燃料",
   "gui.exnihilosatellitium.slot.hammer": "锤子",

@@ -963,7 +963,7 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 **槽位与布局（176×166 GUI）**
 
-- 通用：`0` 工具、`1` 输入、输出 9 格（3×3）。
+- 通用：`0` 工具、`1` 输入、输出 **12 格（3 行 × 4 列）**。
 - 电动：`2..5` 插件、输出从 `6` 开始；能量条在左上。
 - 内能：`2` 燃料、输出从 `3` 开始；火焰条在左下。
 - 破坏方块时 `Containers.dropContents` 掉出全部内容（含筛网/锤/插件），不做返还例外。
@@ -984,7 +984,7 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 **能力 / 管道**
 
 - `Capabilities.ItemHandler.BLOCK`：四台机器都暴露 `MachineItemHandler`，
-  **只允许从输出 9 格抽取**，插入走与 GUI 相同的 `canPlaceInSlot`；避免漏斗把筛网/锤/插件抽走。
+  **只允许从输出 12 格抽取**，插入走与 GUI 相同的 `canPlaceInSlot`；避免漏斗把筛网/锤/插件抽走。
 - `Capabilities.EnergyStorage.BLOCK`：只有电动机器返回 `MachineEnergy`（只进不出，`maxExtract = 0`）；
   内能机器返回 `null`，没有能量能力。
 - `MachineEnergy.Drain` 是机器内部扣电入口：NeoForge 的 `extractEnergy` 在 `maxExtract = 0` 时
@@ -994,13 +994,21 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 - 标题直接取方块名（`getBlockState().getBlock().getName()`），所以是「电动自动筛子 / 内能自动筛子 /
   电动自动锤 / 内能自动锤」，不按电源类型写死。
+- 槽位用自定义 `MachineSlot`：1.21.1 的 `Slot#mayPlace` 默认 `true`，必须显式转发
+  `canPlaceInSlot`，否则 GUI 拖拽/shift-click 能把插件塞进筛网格（2026-11-01 修）。
 - 两个 `MenuType`（`electric_machine` / `fuel_machine`）、两个 `Screen`，尺寸 **176×186**；
   玩家物品栏下移到 `y=104/162`，`物品栏` 标签在分隔线下方，不再和插件槽重叠。
+- 输出 3×4（x=99..169），电动 18 格 / 内能 15 格。
 - 空槽虚影：工具槽 = 筛网/锤、输入槽 = 沙/圆石、燃料槽 = 煤、
   电动前两个插件槽 = 速度 I / 时运 I；空槽铺深蓝底、物品用 `setShaderColor` 压暗
   （**不要用 `fill` 盖物品**：`fill` 走 `gui` 渲染批次，会画在物品模型下面），悬停显示槽位说明。
 - 标题右侧状态行（服务端算、`ContainerData` 下发）：运行中 / 缺少工具 / 缺少原料 /
   缺少能量 / 缺少燃料 / 输出已满（`DATA_STATUS`）。
+- 仪表：能量条用 `energy_fill.png`（8×42 竖向渐变 + 分段线）、进度条用 `progress_fill.png`
+  （27×6 箭头形，底槽是暗绿箭头）、火焰用 `flame.png`（14×14，从下往上长）；三者都是贴图，
+  不再用纯色 `fill`。
+- JEI：电动/内能筛与锤注册为 `sieve` / `hammer` 分类的催化剂；点击进度条按当前输入打开 JEI
+  （输入为空则用 `showTypes` 打开整个分类）。运行时句柄在 `MachineJeiPlugin`。
 - `ContainerData` 8 项：`work / ticksPerOperation / energy / energyCapacity / burnHalfTicks /
   burnHalfTotal / active / status`。**客户端用 `SimpleContainerData`** 接收同步值；
   直接用 BE 会把 `set` 吃掉，进度条冻住（踩坑记录见 status.md）。
