@@ -38,7 +38,7 @@ import net.minecraft.world.Containers;
 public class MachineBlock extends BaseEntityBlock {
 
     /** Sieve model is 12 px tall on four legs; hammer machines stay full cubes. */
-    private static final VoxelShape SIEVE_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D);
+    private static final VoxelShape SIEVE_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
 
     private final MachineKind kind;
     private final boolean electric;

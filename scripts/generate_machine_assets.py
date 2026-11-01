@@ -312,32 +312,39 @@ def sieve_model(*, fuel: bool) -> dict:
         return out
 
     side_uv = [0, 0, 16, 16]
-    rim_uv = [0, 0, 16, 3]
+    rim_uv = [0, 0, 16, 4]
     elements = []
-    # fully solid body from the ground up: no legs, no see-through gaps
+    # four 2x2 legs, inset by 1 px so adjacent machines never share a face plane
+    for x, z in ((2, 2), (12, 2), (2, 12), (12, 12)):
+        elements.append({
+            "from": [x, 0, z], "to": [x + 2, 6, z + 2],
+            "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
+        })
+    # tray bottom 6..7
     elements.append({
-        "from": [0, 0, 0], "to": [16, 13, 16],
+        "from": [1, 6, 1], "to": [15, 7, 15],
         "faces": {
             "down": face("#side"), "up": face("#inner"),
-            "north": face("#side", side_uv), "south": face("#side", side_uv),
-            "west": face("#side", side_uv), "east": face("#side", side_uv),
+            "north": face("#side"), "south": face("#side"),
+            "west": face("#side"), "east": face("#side"),
         },
     })
-    # thin 1 px rim 13..14 around the shallow mesh tray
+    # solid tray walls 7..14 (2 px thick), mesh sits at the bottom of the tray
     walls = (
-        ("north", [0, 13, 0, 16, 14, 1]),
-        ("south", [0, 13, 15, 16, 14, 16]),
-        ("west", [0, 13, 1, 1, 14, 15]),
-        ("east", [15, 13, 1, 16, 14, 15]),
+        ("north", [1, 7, 1, 15, 14, 3]),
+        ("south", [1, 7, 13, 15, 14, 15]),
+        ("west", [1, 7, 3, 3, 14, 13]),
+        ("east", [13, 7, 3, 15, 14, 13]),
     )
     for outer, box in walls:
-        faces = {f: face("#side", rim_uv) for f in ("down", "up", "north", "south", "west", "east")}
+        faces = {f: face("#side") for f in ("down", "up", "north", "south", "west", "east")}
         faces["up"] = face("#top")
+        faces[outer] = face("#side", side_uv)
         inner = {"north": "south", "south": "north", "west": "east", "east": "west"}[outer]
         faces[inner] = face("#inner")
         elements.append({"from": box[:3], "to": box[3:], "faces": faces})
     elements.append({
-        "from": [1, 13.05, 1], "to": [15, 13.2, 15],
+        "from": [3, 7.2, 3], "to": [13, 7.35, 13],
         "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
     })
     return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
