@@ -37,15 +37,15 @@ public final class ModConfig {
 
         builder.comment("Automation machines (M10)").push("machine");
         MACHINE_TICKS_PER_OPERATION = builder
-                .comment("Ticks one sift / crush takes before speed upgrades (default 80 = 4 s).")
-                .defineInRange("ticksPerOperation", 80, 1, 2400);
+                .comment("Ticks one sift / crush takes before speed upgrades (default 100 = 5 s).")
+                .defineInRange("ticksPerOperation", 100, 1, 2400);
         MACHINE_ENERGY_PER_TICK = builder
                 .comment("FE consumed per working tick by electric machines (0 = free).",
                         "Default 20 FE/t: one operation costs 1600 FE before speed upgrades.")
                 .defineInRange("energyPerTick", 20, 0, 10000);
         MACHINE_ENERGY_CAPACITY = builder
-                .comment("Internal FE buffer of electric machines.")
-                .defineInRange("energyCapacity", 20000, 0, 2000000);
+                .comment("Internal FE buffer of electric machines (default 48000).")
+                .defineInRange("energyCapacity", 48000, 0, 2000000);
         MACHINE_BURN_PER_OPERATION = builder
                 .comment("Vanilla burn ticks consumed per completed operation by fuel machines.",
                         "Default 200: one coal (1600) is eight operations.")

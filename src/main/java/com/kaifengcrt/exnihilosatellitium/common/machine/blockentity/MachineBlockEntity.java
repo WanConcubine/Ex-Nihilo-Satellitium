@@ -121,13 +121,81 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     }
 
     public int ticksPerOperation() {
-        final double multiplier = this.electric
-                ? UpgradeItem.speedMultiplier(this.upgradeTier(UpgradeType.SPEED)) : 1.0D;
+        final double multiplier = this.electric ? this.speedMultiplier() : 1.0D;
         return Math.max(1, (int) Math.round(ModConfig.machineTicksPerOperation() / multiplier));
     }
 
+    /** All installed upgrades of one type, best tier first. */
+    private java.util.List<UpgradeItem> upgradesOf(final UpgradeType type) {
+        final java.util.List<UpgradeItem> list = new java.util.ArrayList<>();
+        if (!this.electric) {
+            return list;
+        }
+        for (int i = 0; i < UPGRADE_SLOTS; i++) {
+            if (this.inventory.getItem(UPGRADE_SLOT_START + i).getItem()
+                    instanceof UpgradeItem upgrade && upgrade.type() == type) {
+                list.add(upgrade);
+            }
+        }
+        list.sort(java.util.Comparator.comparingInt(UpgradeItem::tier).reversed());
+        return list;
+    }
+
+    /** Number of installed upgrade items (0..4); drives the FE surcharge. */
+    public int upgradeCount() {
+        int count = 0;
+        if (this.electric) {
+            for (int i = 0; i < UPGRADE_SLOTS; i++) {
+                if (this.inventory.getItem(UPGRADE_SLOT_START + i).getItem() instanceof UpgradeItem) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Speed multipliers stack with diminishing returns: the best upgrade counts
+     * fully, every further one adds half of the previous bonus.
+     */
+    public double speedMultiplier() {
+        double multiplier = 1.0D;
+        double weight = 1.0D;
+        for (final UpgradeItem upgrade : this.upgradesOf(UpgradeType.SPEED)) {
+            multiplier += (UpgradeItem.speedMultiplier(upgrade.tier()) - 1.0D) * weight;
+            weight *= 0.5D;
+        }
+        return multiplier;
+    }
+
+    /**
+     * Expected extra rolls. Fortune stacks diminishing: tier I/II/III adds 1/2/3,
+     * each further upgrade adds half of the previous value.
+     */
+    public double fortuneBonus() {
+        double bonus = 0.0D;
+        double weight = 1.0D;
+        for (final UpgradeItem upgrade : this.upgradesOf(UpgradeType.FORTUNE)) {
+            bonus += upgrade.tier() * weight;
+            weight *= 0.5D;
+        }
+        return bonus;
+    }
+
+    /** Whole extra rolls plus one probabilistic roll for the fractional part. */
+    private int fortuneExtraRolls() {
+        final double bonus = this.fortuneBonus();
+        int rolls = (int) Math.floor(bonus);
+        if (this.level != null && this.level.random.nextDouble() < bonus - rolls) {
+            rolls++;
+        }
+        return rolls;
+    }
+
     public int energyPerTick() {
-        return ModConfig.machineEnergyPerTick();
+        final int base = ModConfig.machineEnergyPerTick();
+        // Each installed upgrade adds 25% draw on top of the base.
+        return (int) Math.round(base * (1.0D + 0.25D * Math.max(0, this.upgradeCount() - 1)));
     }
 
     public int burnHalfPerOperation() {
@@ -138,19 +206,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         return Math.max(1, this.burnHalfPerOperation() / this.ticksPerOperation());
     }
 
-    public int upgradeTier(final UpgradeType type) {
-        if (!this.electric) {
-            return 0;
-        }
-        int best = 0;
-        for (int i = 0; i < UPGRADE_SLOTS; i++) {
-            final ItemStack stack = this.inventory.getItem(UPGRADE_SLOT_START + i);
-            if (stack.getItem() instanceof UpgradeItem upgrade && upgrade.type() == type) {
-                best = Math.max(best, upgrade.tier());
-            }
-        }
-        return best;
-    }
+
 
     public int outputSlotStart() {
         return this.electric ? ELECTRIC_OUTPUT_START : FUEL_OUTPUT_START;
@@ -249,7 +305,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
 
     private void completeOperation() {
         final ItemStack input = this.inventory.getItem(INPUT_SLOT).copy();
-        final int fortune = this.upgradeTier(UpgradeType.FORTUNE);
+        final int fortune = this.fortuneExtraRolls();
         final List<ItemStack> outputs = this.kind() == MachineKind.SIEVE
                 ? SieveRolls.roll(input, fortune, this.level.random)
                 : HammerRolls.roll(input, fortune, this.level.random);

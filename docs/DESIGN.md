@@ -964,6 +964,10 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 **槽位与布局（176×166 GUI）**
 
 - 通用：`0` 工具、`1` 输入、输出 **12 格（3 行 × 4 列）**。
+- 自动筛子的方块模型是**四腿托盘**（参考 Ex Astris 造型，MIT 思路）：腿 0..5、底板 5..6、
+  四壁 6..11、内嵌网格 6.2；碰撞/`getShape` 是 1..15 × 0..11 的盒子（锤子机器仍是整块 cube）。
+  贴图：`machine_frame_side_{electric,fuel}`（底部色带）、`machine_frame_top`、`machine_leg`、
+  `machine_mesh`（cutout 镂空网格）、`machine_inner`。
 - 电动：`2..5` 插件、输出从 `6` 开始；能量条在左上。
 - 内能：`2` 燃料、输出从 `3` 开始；火焰条在左下。
 - 破坏方块时 `Containers.dropContents` 掉出全部内容（含筛网/锤/插件），不做返还例外。
@@ -972,13 +976,18 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 | 键 | 默认 | 含义 |
 |---|---|---|
-| `machine.ticksPerOperation` | 80（4 秒） | 一次处理的基础耗时；速度插件按 ×1.5 / ×2.5 / ×4 缩短 |
+| `machine.ticksPerOperation` | 100（5 秒） | 一次处理的基础耗时；速度插件按 ×1.5 / ×2.5 / ×4 缩短，叠加递减 |
 | `machine.energyPerTick` | 20 | 电动机器工作时每 tick 抽 FE；无电即停机 |
-| `machine.energyCapacity` | 20000 | 内部 FE 缓冲 |
+| `machine.energyCapacity` | 48000 | 内部 FE 缓冲（电动筛/锤共用） |
 | `machine.burnPerOperation` | 200 | 内能机器每完成一次消耗的燃料值；煤 1600 → 8 次 |
 
 - 内能机器没有速度插件，`ticksPerOperation` 固定走 config；燃烧按“每 tick 消耗
   `burnPerOperation × 2 / ticksPerOperation` 个半 tick”精确记账（内部用半 tick 整数，避免浮点漂移）。
+- **插件叠加（2026-11-01 改）**：不再“只取最高档”。同类型多个插件按档位从高到低排序，
+  第 1 个全额、之后每个权重减半：
+  - 速度倍率 = `1 + Σ (tier 倍率 - 1) × 0.5^(名次-1)`；4 个速度 III ≈ ×6.25（16 tick/件）。
+  - 时运额外判定 = `Σ tier × 0.5^(名次-1)`；小数部分按概率补一次 roll（期望值精确）。
+  - 每多装一个插件，`FE/t` 增加 25%（4 个 = 1.75×基础），内能机器不受影响。
 - 燃料槽接受任何 `getBurnTime(RecipeType.SMELTING) > 0` 的物品；熔岩桶会退回空桶。
 
 **能力 / 管道**

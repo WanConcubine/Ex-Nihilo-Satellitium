@@ -241,17 +241,126 @@ def arrow_fill() -> Image.Image:
     return img
 
 
+def sieve_side_texture(*, fuel: bool) -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    metal_base(img, RUST if fuel else PLATE, RUST_DARK if fuel else EDGE)
+    draw = ImageDraw.Draw(img)
+    band = (176, 58, 46) if not fuel else (176, 90, 30)
+    draw.rectangle((0, 14, 15, 15), fill=band)
+    draw.line((0, 14, 15, 14), fill=(255, 190, 170) if not fuel else (255, 214, 150))
+    draw.line((0, 15, 15, 15), fill=(60, 20, 16))
+    draw.point((2, 2), fill=BOLT)
+    draw.point((13, 2), fill=BOLT)
+    return img
+
+
+def sieve_top_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 15, 15), fill=(55, 61, 66))
+    draw.rectangle((1, 1, 14, 14), fill=(150, 159, 166))
+    draw.rectangle((3, 3, 12, 12), fill=(74, 81, 87))
+    draw.line((1, 1, 14, 1), fill=(203, 210, 215))
+    draw.line((1, 1, 1, 14), fill=(203, 210, 215))
+    return img
+
+
+def sieve_leg_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 15, 15), fill=(46, 51, 56))
+    for x in (3, 7, 11):
+        draw.line((x, 0, x, 15), fill=(34, 38, 42))
+        draw.line((x + 1, 0, x + 1, 15), fill=(66, 73, 79))
+    return img
+
+
+def sieve_mesh_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    for x in range(0, 16, 2):
+        draw.line((x, 0, x, 15), fill=(202, 210, 216, 255))
+    for y in range(0, 16, 2):
+        draw.line((0, y, 15, y), fill=(178, 187, 194, 255))
+    return img
+
+
+def sieve_inner_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 15, 15), fill=(40, 45, 50))
+    for x in range(1, 16, 4):
+        draw.line((x, 0, x, 15), fill=(33, 37, 41))
+    return img
+
+
+def sieve_model(*, fuel: bool) -> dict:
+    side = f"exnihilosatellitium:block/machine_frame_side_{'fuel' if fuel else 'electric'}"
+    tex = {
+        "particle": side,
+        "side": side,
+        "top": "exnihilosatellitium:block/machine_frame_top",
+        "leg": "exnihilosatellitium:block/machine_leg",
+        "mesh": "exnihilosatellitium:block/machine_mesh",
+        "inner": "exnihilosatellitium:block/machine_inner",
+    }
+
+    def face(texture, uv=None):
+        out = {"texture": texture}
+        if uv:
+            out["uv"] = uv
+        return out
+
+    side_uv = [0, 10, 16, 16]
+    elements = []
+    for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
+        elements.append({
+            "from": [x, 0, z], "to": [x + 2, 5, z + 2],
+            "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
+        })
+    elements.append({
+        "from": [1, 5, 1], "to": [15, 6, 15],
+        "faces": {
+            "down": face("#side"), "up": face("#inner"),
+            "north": face("#side"), "south": face("#side"),
+            "west": face("#side"), "east": face("#side"),
+        },
+    })
+    walls = (
+        ("north", [1, 6, 1, 15, 11, 3]),
+        ("south", [1, 6, 13, 15, 11, 15]),
+        ("west", [1, 6, 3, 3, 11, 13]),
+        ("east", [13, 6, 3, 15, 11, 13]),
+    )
+    for outer, box in walls:
+        faces = {f: face("#side") for f in ("down", "up", "north", "south", "west", "east")}
+        faces["up"] = face("#top")
+        faces[outer] = face("#side", side_uv)
+        inner = {"north": "south", "south": "north", "west": "east", "east": "west"}[outer]
+        faces[inner] = face("#inner")
+        elements.append({"from": box[:3], "to": box[3:], "faces": faces})
+    elements.append({
+        "from": [3, 6.2, 3], "to": [13, 6.35, 13],
+        "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
+    })
+    return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
+            "textures": tex, "elements": elements}
+
+
 def write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def machine_assets(name: str) -> None:
+def machine_assets(name: str, *, sieve: bool, fuel: bool) -> None:
     write_json(ASSETS / "blockstates" / f"{name}.json",
                {"variants": {"": {"model": f"exnihilosatellitium:block/{name}"}}})
-    write_json(ASSETS / "models" / "block" / f"{name}.json",
-               {"parent": "minecraft:block/cube_all",
-                "textures": {"all": f"exnihilosatellitium:block/{name}"}})
+    if sieve:
+        model = sieve_model(fuel=fuel)
+    else:
+        model = {"parent": "minecraft:block/cube_all",
+                 "textures": {"all": f"exnihilosatellitium:block/{name}"}}
+    write_json(ASSETS / "models" / "block" / f"{name}.json", model)
     write_json(ASSETS / "models" / "item" / f"{name}.json",
                {"parent": f"exnihilosatellitium:block/{name}"})
 
@@ -264,7 +373,7 @@ def main() -> None:
             ("fuel_hammer", True, False)):
         block_texture(name, fuel=fuel, sieve=sieve).save(
             ASSETS / "textures" / "block" / f"{name}.png")
-        machine_assets(name)
+        machine_assets(name, sieve=sieve, fuel=fuel)
 
     for kind in ("speed", "fortune"):
         for tier in (1, 2, 3):
@@ -274,6 +383,15 @@ def main() -> None:
             write_json(ASSETS / "models" / "item" / f"{name}.json",
                        {"parent": "minecraft:item/generated",
                         "textures": {"layer0": f"exnihilosatellitium:item/{name}"}})
+
+    sieve_side_texture(fuel=False).save(
+        ASSETS / "textures" / "block" / "machine_frame_side_electric.png")
+    sieve_side_texture(fuel=True).save(
+        ASSETS / "textures" / "block" / "machine_frame_side_fuel.png")
+    sieve_top_texture().save(ASSETS / "textures" / "block" / "machine_frame_top.png")
+    sieve_leg_texture().save(ASSETS / "textures" / "block" / "machine_leg.png")
+    sieve_mesh_texture().save(ASSETS / "textures" / "block" / "machine_mesh.png")
+    sieve_inner_texture().save(ASSETS / "textures" / "block" / "machine_inner.png")
 
     gui_texture(electric=True).save(
         ASSETS / "textures" / "gui" / "electric_machine.png")

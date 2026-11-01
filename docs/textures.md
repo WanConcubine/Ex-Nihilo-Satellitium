@@ -58,6 +58,10 @@ assets/exnihilosatellitium/textures/
   脚本同时写 blockstate / 方块模型 / 物品模型。要改机器外观就改脚本重跑，不要手改 PNG。
   GUI 贴图在 `textures/gui/`，检查脚本对它们豁免尺寸（允许 256×256 画布）；
   机器面板实际用到 176×186，玩家物品栏在 `y=104/162`。
+- 自动筛子改为四腿托盘模型（`models/block/{electric,fuel}_sieve.json`，10 个 element），
+  贴图 `machine_frame_side_{electric,fuel}` / `machine_frame_top` / `machine_leg` /
+  `machine_mesh`（cutout 网格）/ `machine_inner`，全部由同一个生成脚本产出；
+  锤子机器仍是 16×16 cube_all。
 - 机器仪表是三张独立贴图：`energy_fill.png`（8×42）、`progress_fill.png`（27×6，箭头形）、
   `flame.png`（14×14）；都生成在 256×256 画布左上角，screen 按比例裁剪 src。
 - **巫水流体不再自绘**：直接复用原版 `minecraft:block/water_still` / `water_flow`

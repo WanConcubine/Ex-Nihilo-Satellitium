@@ -635,12 +635,12 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 ```toml
 [machine]
-    # 一次处理的基础耗时（tick）；速度插件按 ×1.5/×2.5/×4 缩短
-    ticksPerOperation = 80
+    # 一次处理的基础耗时（tick）；速度插件按 ×1.5/×2.5/×4 缩短（叠加递减）
+    ticksPerOperation = 100
     # 电动机器每 tick 抽的 FE；0 = 免费
     energyPerTick = 20
     # 电动机器内部缓冲
-    energyCapacity = 20000
+    energyCapacity = 48000
     # 内能机器每完成一次消耗的燃烧值（煤 1600 = 8 次）
     burnPerOperation = 200
 ```
@@ -650,7 +650,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 ```mcfunction
 forceload add 0 0
 setblock 0 120 0 exnihilosatellitium:electric_sieve
-data merge block 0 120 0 {Energy:20000, Items:[
+data merge block 0 120 0 {Energy:48000, Items:[
   {Slot:0b, id:"exnihilosatellitium:silk_mesh", count:1},
   {Slot:1b, id:"minecraft:sand", count:64}]}
 # 等 5 秒（约 100 tick）后

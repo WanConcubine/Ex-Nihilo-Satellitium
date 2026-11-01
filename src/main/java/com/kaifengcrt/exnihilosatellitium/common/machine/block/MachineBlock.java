@@ -17,6 +17,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -32,6 +36,9 @@ import net.minecraft.world.Containers;
  * broken outside creative, so a machine full of meshes is never lost.</p>
  */
 public class MachineBlock extends BaseEntityBlock {
+
+    /** Sieve model is 12 px tall on four legs; hammer machines stay full cubes. */
+    private static final VoxelShape SIEVE_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 11.0D, 15.0D);
 
     private final MachineKind kind;
     private final boolean electric;
@@ -58,6 +65,18 @@ public class MachineBlock extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(final BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    protected VoxelShape getShape(final BlockState state, final BlockGetter level,
+                                  final BlockPos pos, final CollisionContext context) {
+        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : Shapes.block();
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(final BlockState state, final BlockGetter level,
+                                           final BlockPos pos, final CollisionContext context) {
+        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : Shapes.block();
     }
 
     @Override
