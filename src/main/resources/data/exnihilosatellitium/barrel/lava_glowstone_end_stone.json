@@ -1,0 +1,5 @@
+{
+  "base": "minecraft:lava",
+  "added": { "item": "minecraft:glowstone_dust" },
+  "result": "minecraft:end_stone"
+}
