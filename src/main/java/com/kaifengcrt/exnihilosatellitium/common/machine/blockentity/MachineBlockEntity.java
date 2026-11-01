@@ -569,6 +569,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         }
         tag.put("Items", items);
         tag.putInt("Work", this.work);
+        tag.putBoolean("Active", this.active);
         tag.putInt("BurnHalfTicks", this.burnHalfTicks);
         tag.putInt("BurnHalfTotal", this.burnHalfTotal);
         if (this.energy != null) {
@@ -591,6 +592,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             }
         }
         this.work = tag.getInt("Work");
+        this.active = tag.getBoolean("Active");
         this.burnHalfTicks = tag.getInt("BurnHalfTicks");
         this.burnHalfTotal = tag.getInt("BurnHalfTotal");
         if (this.energy != null) {
