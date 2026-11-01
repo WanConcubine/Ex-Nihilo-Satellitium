@@ -6,7 +6,7 @@
 ## 一句话
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
-（`1.20.1-forge` 分支，当前停在 M4，待补 M5、M6、M10）。原来的 `legacy/1.20.1-forge` tag
+（`1.20.1-forge` 分支，当前停在 M6，待补 M5、M10）。原来的 `legacy/1.20.1-forge` tag
 已于 2026-11-01 按所有者要求删除，1.20.1 以分支为准（见
 [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
@@ -14,24 +14,30 @@ GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**�
 GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
 `ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
 `check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
-`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M4**（M1.5 桶转化 +
-M2 筛子/矿链 + M3 锤/钩/尘土 + M4 坩埚 + JEI/Jade，分支提交 `93c1733`）。下一批是
-1.20.1 的 M6（蚕/人偶/巫水/瓷桶/木坩埚/木桶补齐），或主线的 P3 状态机拆分。
+`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M6**（M1.5 桶转化 + M2 筛子/矿链 + M3 锤/钩/尘土 + M4 坩埚 +
+M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + `crucible.*` config；分支提交 `b0bb00c`）。
+顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
+缺失的掉落表。下一批是 1.20.1 的 M5/M10，或主线的 P3 状态机拆分。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，1.20.1 M4）
+## 当前批次（2026-11-01，1.20.1 M6）
 
-- **分支**：`1.20.1-forge` @ `93c1733`；客户端 `./gradlew runClient -PdevMods`。
-- **M4 坩埚**（`93c1733`）：`CrucibleBlock` / `UnfiredCrucibleBlock` /
-  `CrucibleBlockEntity`、`CrucibleRecipes`（39 条熔点）+ `CrucibleHeat`（9 热源）+
-  reload listener；瓷土 → 未烧制 → 烧制；熔料/流体双储、比较器、破坏返还、Jade 熔料与
-  热源速度、JEI 熔点/热源两页。分支没有 config，容量/倍率先用常量（8000/2000/1.0）。
-  RCON：篝火 0.25 mB/t、熄灭停、火把 0.1 mB/t。
-- **M1.5/M3/JEI**（`67029d6`/`eaf5f6d`/`e701d17`/`5c9a1bc`）：桶转化、锤/钩/尘土、
-  JEI 五个分类页 + Jade 筛子；筛子产物超 21 条时同页轮播。
-- **验证**：build / 纹理守卫通过；`[crucible] 39 meltables / 9 heat sources`；
-  JEI `39 meltables, 9 heat sources`（进存档冒烟）；交互手感待玩家。
-- **未做**：M5、M6、M10（1.20.1 侧）。
+- **分支**：`1.20.1-forge`（worktree `../Ex-Nihilo-Satellitium-1.20.1`）；客户端
+  `./gradlew runClient -PdevMods`，服务端 `./gradlew runServer`。
+- **M6 五刀**：巫水 + 古代孢子（自定义流体/液方块/桶、菌丝发酵、两条转化、沙筛 1/128）→
+  瓷桶（Forge `FluidHandlerItemStack`，1000 mB）→ 木坩埚 11 种（被动 0.5 mB/t、只收水、
+  433 K 上限）+ 木桶补齐 12 种 → 蚕/侵染树叶（BE 记原树叶、BER 变白、扩散、掉线、Jade）→
+  5 种人偶 + 8 条桶规则（`entity` + `peaceful_drop`，右键立即生效）。
+- **config（小尾巴）**：`ExConfig`（`ForgeConfigSpec`）补上 `crucible.capacity` /
+  `meltCapacity` / `heatSpeedMultiplier`，与主线键名一致；坩埚 tick 里动态裁剪容量。
+- **桶配方错误修正**：七种桶合成回到原版 `x x / x x / xyx`（4 板 + 台阶；石桶
+  `stone` + `smooth_stone_slab`），此前误用 8 块板。
+- **顺手补坑**：`dust` / `crucible` / `unfired_crucible` 没有掉落表，挖掉不掉，已补。
+- **验证**：`./gradlew build --offline` + `check-textures.py` 通过；RCON 验了巫水发酵/液方块、
+  巫水+沙→灵魂沙、熔岩+愤怒人偶→烈焰人、和平守卫者人偶→海晶砂粒、木坩埚投料、瓷桶↔木桶
+  流体、蚕右键/扩散、草种子/孢子、config 热改；`[barrel] 11 transforms` /
+  `[sieve] 6 inputs, 72 drops` / `[hammer] 49`。
+- **未做**：M5、M10（1.20.1 侧）；M6 的画面/手感（BER 变白、瓷桶模型染色、人偶贴图）待目视。
 
 ## 上一批次（2026-11-01，1.20.1 M3）
 
@@ -283,9 +289,9 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 ## 交接清单（下次会话先做）
 
 - **1.20.1 分支**：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`
-  （`1.20.1-forge` @ `fde30e7`），已到 **M4**，下一步是 **M6 五刀**（巫水+孢子 → 瓷桶 →
-  木坩埚+木桶 → 蚕 → 人偶）。分支的 `docs/status.md` 里有完整的交接清单、构建/客户端命令
-  （`runClient -PdevMods`）和固定套路。新会话在分支工作区开工即可。
+  （`1.20.1-forge` @ `b0bb00c`），已到 **M6**（含 config），下一步是 **M5 / M10** 和画面验收。
+  分支的 `docs/status.md` 里有当前批次、验证表、构建/客户端命令（`runClient -PdevMods`）
+  和固定套路。新会话在分支工作区开工即可。
 
 - **先读** [porting.md](porting.md) §3 的 P2 记录；本批从 **1.20.1 分支补 M2** 开始（清单见「下一步」）。
 - **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`
@@ -443,8 +449,8 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 
 ## 下一步（按价值排序）
 
-1. **1.20.1 分支补 M2**（筛子 + 矿链 + 材料表）：先 `port_data.py --target 1.20.1` 铺数据，
-   再按 [porting.md](porting.md) §4 换平台 API；之后接 Thermal（它只有 1.20.1）。
+1. **1.20.1 分支补 M5 / M10**（M6 已完成）：M10 机器移植时把 `machine.*` 配置键补进分支的
+   `ExConfig`（键名与主线一致）；之后接 Thermal（它只有 1.20.1）。
 2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
    清单见交接清单。
 3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
