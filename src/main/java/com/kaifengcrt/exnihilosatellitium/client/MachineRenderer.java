@@ -66,17 +66,13 @@ public final class MachineRenderer implements BlockEntityRenderer<MachineBlockEn
             // Same visual language as the manual sieve: the input block is
             // squashed into a thin layer on the mesh and gets thinner as the
             // cycle progresses, with a small sieving shake.
-            final float shakeX = animating
-                    ? (float) Math.sin((level.getGameTime() + partialTick) * 2.0F) * 0.02F : 0.0F;
-            final float shakeZ = animating
-                    ? (float) Math.cos((level.getGameTime() + partialTick) * 2.0F) * 0.02F : 0.0F;
             final float remaining = animating ? Math.max(0.0F, 1.0F - phase) : 0.65F;
             if (input.getItem() instanceof BlockItem blockItem) {
                 final BlockState state = blockItem.getBlock().defaultBlockState();
                 if (!state.isAir()) {
                     final float thickness = Math.max(0.004F, 0.16F * remaining);
                     pose.pushPose();
-                    pose.translate(0.5F + shakeX, 10.35F / 16.0F, 0.5F + shakeZ);
+                    pose.translate(0.5F, 10.35F / 16.0F, 0.5F);
                     pose.translate(-0.4375F, 0.0F, -0.4375F);
                     pose.scale(0.875F, thickness, 0.875F);
                     Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, pose, buffer,
@@ -86,7 +82,7 @@ public final class MachineRenderer implements BlockEntityRenderer<MachineBlockEn
                 }
             } else {
                 pose.pushPose();
-                pose.translate(0.5F + shakeX, 10.42F / 16.0F, 0.5F + shakeZ);
+                pose.translate(0.5F, 10.42F / 16.0F, 0.5F);
                 pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90.0F));
                 pose.scale(0.5F, 0.5F, 0.5F);
                 Minecraft.getInstance().getItemRenderer().renderStatic(input, ItemDisplayContext.FIXED,
