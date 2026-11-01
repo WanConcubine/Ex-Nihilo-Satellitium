@@ -1,0 +1,5 @@
+{
+  "input": "minecraft:snow_block",
+  "fluid": "minecraft:water",
+  "amount": 500
+}

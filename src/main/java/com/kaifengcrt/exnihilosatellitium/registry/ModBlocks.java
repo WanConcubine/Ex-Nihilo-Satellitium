@@ -2,7 +2,9 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.block.BarrelBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.CrucibleBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.UnfiredCrucibleBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -41,6 +43,16 @@ public final class ModBlocks {
     public static final RegistryObject<Block> STONE_BARREL =
             BLOCKS.register("stone_barrel",
                     () -> new BarrelBlock(BlockBehaviour.Properties.copy(Blocks.STONE)));
+
+    /** M4: unfired porcelain crucible (smelted into the working crucible). */
+    public static final RegistryObject<Block> UNFIRED_CRUCIBLE =
+            BLOCKS.register("unfired_crucible", () -> new UnfiredCrucibleBlock(
+                    BlockBehaviour.Properties.copy(Blocks.CLAY).noOcclusion()));
+
+    /** M4: fired crucible with a fluid tank and a heat-driven melt queue. */
+    public static final RegistryObject<Block> CRUCIBLE =
+            BLOCKS.register("crucible", () -> new CrucibleBlock(
+                    BlockBehaviour.Properties.copy(Blocks.QUARTZ_BLOCK).noOcclusion()));
 
     /** M3: the dust block (hammer sand -> dust; sifting dust gives redstone etc.). */
     public static final RegistryObject<Block> DUST =

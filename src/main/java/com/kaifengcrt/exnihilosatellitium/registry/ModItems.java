@@ -64,6 +64,13 @@ public final class ModItems {
                     new Item.Properties().stacksTo(1).durability(256), 3));
     public static final List<RegistryObject<Item>> MESHES = List.of(WOOD_MESH, SILK_MESH, IRON_MESH);
 
+    public static final RegistryObject<Item> UNFIRED_CRUCIBLE =
+            ITEMS.register("unfired_crucible", () -> new BlockItem(ModBlocks.UNFIRED_CRUCIBLE.get(),
+                    new Item.Properties()));
+    public static final RegistryObject<Item> CRUCIBLE =
+            ITEMS.register("crucible", () -> new BlockItem(ModBlocks.CRUCIBLE.get(),
+                    new Item.Properties()));
+
     public static final RegistryObject<Item> DUST =
             ITEMS.register("dust", () -> new BlockItem(ModBlocks.DUST.get(), new Item.Properties()));
 

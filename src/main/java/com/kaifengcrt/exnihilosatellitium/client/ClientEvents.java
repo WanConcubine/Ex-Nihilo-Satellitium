@@ -20,5 +20,6 @@ public final class ClientEvents {
     public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.BARREL.get(), BarrelRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.SIEVE.get(), SieveRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
     }
 }
