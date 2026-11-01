@@ -9,7 +9,8 @@
 熔岩+水→黑曜石、熔岩+红石→下界岩、熔岩+荧石→末地石，木桶限温 + 接雨水）；
 **M2 筛子 + 矿链已铺好**（三种筛网、4 张筛料表、12 种材料 4 碎块→方块→锭）；
 **M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、47 条锤表、10 张钩表、沙→尘土）；
-**JEI 五个分类页 + Jade 筛子 tooltip 已补**（2026-11-01）。**M4 坩埚仍未开始**。
+**M4 坩埚已铺好**（2026-11-01：瓷土 → 未烧制 → 烧制、39 条熔点 / 9 热源、
+熔料+流体双储、JEI 两页 + Jade）。**M6（蚕/人偶/巫水/瓷桶/木坩埚）仍未开始**。
 
 ## 现在停在哪
 
@@ -27,6 +28,11 @@
   - 矿链：12 种材料 × 4 碎块 → 矿方块 → 熔炼成锭；9 种没有现成锭的材料（tin/silver/lead/
     nickel/platinum/aluminum/osmium/zinc/uranium）注册自有 `<m>_ingot`，铜改成原版铜锭。
   - **没有做**：`dust` 筛料表（需要 M3 的尘土方块）、JEI（这条分支还没引入 JEI 依赖）。
+- **2026-11-01 M4 坩埚**：`CrucibleBlock` / `UnfiredCrucibleBlock` / `CrucibleBlockEntity`、
+  `CrucibleRecipes`（39 条熔点）+ `CrucibleHeat`（9 热源）+ reload listener；瓷土 → 未烧制
+  坩埚 → 烧制；熔料与流体分开记，热源按 `crucible_heat/*.json` 的 mB/t 熔化；比较器、
+  破坏返还、Jade 熔料/热源、JEI 熔点/热源两页。1.20.1 分支没有 config，容量/倍率先用常量
+  （8000 / 2000 / 1.0）。RCON 验证：篝火 0.25 mB/t、熄灭篝火停、火把 0.1 mB/t。
 - **2026-11-01 JEI + Jade**：JEI 15.59 的 compileOnly API（`maven.blamejared.com`）+
   `-PdevMods` 才加载完整 JEI；移植五个分类页（筛子 / 桶转化 / 堆肥 / 锤 / 钩），
   数据和 block entity 共用同一张表。Jade 补 `SieveComponentProvider`（筛网名称+耐久、
@@ -91,6 +97,9 @@
 | JEI 分类页 | ✅ | `[jei] registered 35 hammer / 4 sieve / 4 barrel + 65 compost / 10 crook`（进存档冒烟） |
 | Jade 筛子 | ✅ | `SieveComponentProvider` 已注册 + `config.jade.plugin_...sieve` 翻译（缺 key 会崩） |
 | JEI 画面 | ⚠️ | 分类页/布局未目视（冒烟只验证了注册与不崩） |
+| M4 坩埚表 | ✅ | `[crucible] loaded 39 meltables` / `9 heat sources`；JEI `39 meltables, 9 heat sources` |
+| M4 熔化 | ✅ | RCON：篝火 0.25 mB/t（3 秒 250→234.75、15 mB 熔岩）；熄灭篝火停；火把 0.1 mB/t |
+| M4 玩家交互 | ⚠️ | 右键投料/取流体、木坩埚差异化（M6）、Jade 画面待玩家 |
 | 筛子产物轮播 | ✅ | 超过 21 条时按槽位轮播（JEI 自动切换多物品槽），tooltip 跟随当前显示项；沙筛 23 条不再截断 |
 | M2 第 4 张筛料表 | ✅ | `[sieve] loaded 4 inputs, 62 drops`（尘土已可筛） |
 | 27/28 资源模型 | ✅ | 客户端资源加载无 missing model/texture（筛子 frame/mesh、9 种锭、矿方块） |
@@ -99,9 +108,10 @@
 
 ## 下一步（按价值排序）
 
-1. **进游戏验收 M1.5 / M2 / M3 + JEI/Jade**：桶转化、筛四档料、锤/钩左键、JEI 五个分类页。
-2. **M4 坩埚**：瓷土 → 未烧制坩埚 → 烧制；19 条熔点 / 9 热源、熔料 + 流体双储。
-3. **M6**：蚕 / 人偶 / 巫水 / 瓷桶。
+1. **进游戏验收 M1.5 / M2 / M3 / M4 + JEI/Jade**：桶转化、筛四档料、锤/钩左键、坩埚投料熔化、
+   JEI 七个分类页。
+2. **M6**：蚕 / 人偶 / 巫水 / 瓷桶 / 11 种木坩埚 / 12 种木桶补齐。
+3. **配置**：分支还没有 config，M4 的容量/倍率目前是常量，后续补 `ModConfig`。
 
 ## 已拍板的决策
 

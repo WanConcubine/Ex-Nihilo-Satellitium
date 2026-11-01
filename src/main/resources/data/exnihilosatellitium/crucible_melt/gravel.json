@@ -1,0 +1,5 @@
+{
+  "input": "minecraft:gravel",
+  "fluid": "minecraft:lava",
+  "amount": 250
+}

@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
@@ -26,5 +27,6 @@ public final class CommonEvents {
         event.addListener(new SieveReloadListener());
         event.addListener(new HammerRecipeReloadListener(false));
         event.addListener(new CrookDropsReloadListener(false));
+        event.addListener(new CrucibleReloadListener(false));
     }
 }

@@ -1,0 +1,10 @@
+{
+  "parent": "exnihilosatellitium:block/crucible_base",
+  "textures": {
+    "particle": "exnihilosatellitium:block/crucible",
+    "side": "exnihilosatellitium:block/crucible",
+    "top": "exnihilosatellitium:block/crucible",
+    "bottom": "exnihilosatellitium:block/crucible",
+    "inside": "exnihilosatellitium:block/crucible"
+  }
+}

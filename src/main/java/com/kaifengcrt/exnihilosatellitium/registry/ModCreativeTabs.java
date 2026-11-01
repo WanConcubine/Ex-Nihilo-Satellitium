@@ -31,6 +31,8 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.SIEVE.get());
                 ModItems.MESHES.forEach(mesh -> output.accept(mesh.get()));
                 output.accept(ModItems.DUST.get());
+                output.accept(ModItems.UNFIRED_CRUCIBLE.get());
+                output.accept(ModItems.CRUCIBLE.get());
                 ModItems.HAMMERS.forEach(hammer -> output.accept(hammer.get()));
                 ModItems.CROOKS.forEach(crook -> output.accept(crook.get()));
                 for (final OreMaterial material : OreMaterials.all()) {
