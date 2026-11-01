@@ -509,7 +509,7 @@ def hammer_top_32() -> Image.Image:
     return img
 
 
-def hammer_model(*, fuel: bool) -> dict:
+def hammer_model(*, fuel: bool, head: bool = True) -> dict:
     side = f"exnihilosatellitium:block/machine_frame_side_{'fuel' if fuel else 'electric'}"
     tex = {
         "particle": side,
@@ -537,9 +537,10 @@ def hammer_model(*, fuel: bool) -> dict:
         box([12, 4, 12], [14, 12, 14], "#leg"),
         box([2, 12, 2], [14, 14, 14], "#top"),
         box([5, 4, 5], [11, 6, 11], "#anvil"),
-        box([5, 7, 5], [11, 10, 11], "#head"),
         box([7, 10, 7], [9, 12, 9], "#shaft"),
     ]
+    if head:
+        elements.append(box([5, 7, 5], [11, 10, 11], "#head"))
     # top plate should use top texture on the up face only
     elements[5]["faces"]["up"] = face("#top")
     return {"parent": "minecraft:block/block", "textures": tex, "elements": elements}
@@ -554,12 +555,16 @@ def machine_assets(name: str, *, sieve: bool, fuel: bool) -> None:
     write_json(ASSETS / "blockstates" / f"{name}.json",
                {"variants": {"": {"model": f"exnihilosatellitium:block/{name}"}}})
     if sieve:
-        model = sieve_model(fuel=fuel)
+        write_json(ASSETS / "models" / "block" / f"{name}.json", sieve_model(fuel=fuel))
+        write_json(ASSETS / "models" / "item" / f"{name}.json",
+                   {"parent": f"exnihilosatellitium:block/{name}"})
     else:
-        model = hammer_model(fuel=fuel)
-    write_json(ASSETS / "models" / "block" / f"{name}.json", model)
-    write_json(ASSETS / "models" / "item" / f"{name}.json",
-               {"parent": f"exnihilosatellitium:block/{name}"})
+        # the block model has no head (the BER renders the moving head), but the
+        # item model keeps a static head so the icon is not an empty press
+        write_json(ASSETS / "models" / "block" / f"{name}.json",
+                   hammer_model(fuel=fuel, head=False))
+        write_json(ASSETS / "models" / "item" / f"{name}.json",
+                   hammer_model(fuel=fuel, head=True))
 
 
 def main() -> None:

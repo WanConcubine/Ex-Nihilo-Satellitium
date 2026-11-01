@@ -237,38 +237,6 @@
     },
     {
       "from": [
-        5,
-        7,
-        5
-      ],
-      "to": [
-        11,
-        10,
-        11
-      ],
-      "faces": {
-        "down": {
-          "texture": "#head"
-        },
-        "up": {
-          "texture": "#head"
-        },
-        "north": {
-          "texture": "#head"
-        },
-        "south": {
-          "texture": "#head"
-        },
-        "west": {
-          "texture": "#head"
-        },
-        "east": {
-          "texture": "#head"
-        }
-      }
-    },
-    {
-      "from": [
         7,
         10,
         7
