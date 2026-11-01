@@ -497,6 +497,16 @@ public class BarrelBlockEntity extends BlockEntity {
         return true;
     }
 
+    /** True while a doll is cooking in this barrel (synced to the client). */
+    public boolean isCooking() {
+        return this.pendingEntity != null;
+    }
+
+    /** Seconds left before the entity spawns, for Jade. */
+    public int getCookSeconds() {
+        return (this.cookTicks + 19) / 20;
+    }
+
     /** True when the tank holds a full 1000 mB of plain water. */
     private boolean isFullWater() {
         return this.tank.getFluidAmount() >= CAPACITY

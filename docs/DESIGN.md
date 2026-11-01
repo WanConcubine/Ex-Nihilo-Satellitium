@@ -895,6 +895,8 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   另有每 tick 1/24 概率的白灰粒子。`Progress` 同步给客户端（update tag）。
 - **创造模式**：`playerWillDestroy` 里跳过掉线；补了 `infested_leaves` 物品形态 +
   `infestation` 组件，创造栏给两个堆叠（0% / 100%），放下时由 `InfestedLeavesBlock#setPlacedBy` 设进度。
+- **Jade（桶）**：烹饪期间显示 `生成中：还需 N 秒`（`jade.exnihilosatellitium.barrel.cooking`），
+  之前作者以为「右键没反应」，其实是没看到 600 tick 的倒计时。
 - **Jade**：`InfestedLeavesComponentProvider` 显示 `原树叶：<方块名>` 和 `侵染：xx%`，
   成熟（progress = 1）时改成「已成熟（会向周围扩散）」；配置键
   `config.jade.plugin_exnihilosatellitium.infested_leaves` 已补。
