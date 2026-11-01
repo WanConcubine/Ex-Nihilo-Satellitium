@@ -50,9 +50,13 @@ public class UpgradeItem extends Item {
             tooltip.add(Component.translatable("tooltip.exnihilosatellitium.speed_upgrade",
                     String.format(java.util.Locale.ROOT, "%.1f", speedMultiplier(this.tier)))
                     .withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.translatable("tooltip.exnihilosatellitium.speed_upgrade.stack")
+                    .withStyle(ChatFormatting.DARK_GRAY));
         } else {
             tooltip.add(Component.translatable("tooltip.exnihilosatellitium.fortune_upgrade", this.tier)
                     .withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.translatable("tooltip.exnihilosatellitium.fortune_upgrade.stack")
+                    .withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 }
