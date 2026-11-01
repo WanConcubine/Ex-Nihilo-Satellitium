@@ -37,8 +37,9 @@ import net.minecraft.world.Containers;
  */
 public class MachineBlock extends BaseEntityBlock {
 
-    /** Sieve model is 12 px tall on four legs; hammer machines stay full cubes. */
+    /** Sieve tray and hammer press are both 14 px tall, inset by 1 px. */
     private static final VoxelShape SIEVE_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
+    private static final VoxelShape HAMMER_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
 
     private final MachineKind kind;
     private final boolean electric;
@@ -70,13 +71,13 @@ public class MachineBlock extends BaseEntityBlock {
     @Override
     protected VoxelShape getShape(final BlockState state, final BlockGetter level,
                                   final BlockPos pos, final CollisionContext context) {
-        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : Shapes.block();
+        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : HAMMER_SHAPE;
     }
 
     @Override
     protected VoxelShape getCollisionShape(final BlockState state, final BlockGetter level,
                                            final BlockPos pos, final CollisionContext context) {
-        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : Shapes.block();
+        return this.kind == MachineKind.SIEVE ? SIEVE_SHAPE : HAMMER_SHAPE;
     }
 
     @Override
