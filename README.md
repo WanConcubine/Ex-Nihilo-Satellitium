@@ -98,7 +98,7 @@ python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶�
 | 模组 | 覆盖材料 | 说明 |
 |---|---|---|
 | [Mekanism](https://modrinth.com/mod/mekanism) 1.21.1 | 锡 / 铅 / 锇 / 铀 | 矿砾/矿砂/矿尘熔成 `mekanism:ingot_*`；这四种不再注册自有锭 |
-| Thermal 系列 | — | 目前只有 1.20.1，**不接**；有 1.21.1 版后加一行 id 即可 |
+| Thermal 系列 | 锡 / 银 / 铅 / 镍 / 铂 / 铝 | **接在 1.20.1 线**（Thermal 只有 1.20.1）；1.21.1 侧等它有 1.21.1 版后加一行 id |
 
 加模组支持 = 在 `materials.json` 对应材料里加一条 `{"item": "...", "mod": "..."}`，
 再跑 `python3 scripts/generate_ore_variants.py`。**开世界前定好模组列表**：加/减受支持模组会

@@ -37,7 +37,7 @@ M8 月光魔法、M9 发布仍未开始。
   （`{"item": ..., "mod": ...}`）。启动时取第一个已加载模组的锭，都不在就注册自有锭；
   生成脚本给每个候选写 `neoforge:mod_loaded` 条件的熔炼配方，base 配方用
   `neoforge:not(...)` 兜底。首个接入 **Mekanism 1.21.1**：tin / lead / osmium / uranium
-  熔成 `mekanism:ingot_*`（自有锭在那 4 种里不再注册）。Thermal 没有 1.21.1，暂不接。
+  熔成 `mekanism:ingot_*`（自有锭在那 4 种里不再注册）。Thermal 只有 1.20.1，接在 1.20.1 分支。
   图标三帧预览：[m10-output-button.png](images/m10-output-button.png)。
 
 ## 上一批次（2026-11-01，M10 自动化）
