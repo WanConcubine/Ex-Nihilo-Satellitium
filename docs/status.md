@@ -6,7 +6,7 @@
 ## 一句话
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
-（`1.20.1-forge` 分支，当前停在 M6，待补 M5、M10）。原来的 `legacy/1.20.1-forge` tag
+（`1.20.1-forge` 分支，当前停在 M10，M1.5–M10 已全部铺完）。原来的 `legacy/1.20.1-forge` tag
 已于 2026-11-01 按所有者要求删除，1.20.1 以分支为准（见
 [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
@@ -14,13 +14,14 @@ GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**�
 GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
 `ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
 `check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
-`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M6**（M1.5 桶转化 + M2 筛子/矿链 + M3 锤/钩/尘土 + M4 坩埚 +
-M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + `crucible.*` config；分支提交 `b0bb00c`）。
+`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M10**（M1.5 桶转化 + M2 筛子/矿链 + M3 锤/钩/尘土 + M4 坩埚 +
+M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件/自动输出 +
+`crucible.*`/`machine.*` config；分支提交 `5ebe5ef`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
-缺失的掉落表。下一批是 1.20.1 的 M5/M10，或主线的 P3 状态机拆分。
+缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，1.20.1 M6）
+## 当前批次（2026-11-01，1.20.1 M10）
 
 - **分支**：`1.20.1-forge`（worktree `../Ex-Nihilo-Satellitium-1.20.1`）；客户端
   `./gradlew runClient -PdevMods`，服务端 `./gradlew runServer`。
@@ -37,7 +38,11 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   巫水+沙→灵魂沙、熔岩+愤怒人偶→烈焰人、和平守卫者人偶→海晶砂粒、木坩埚投料、瓷桶↔木桶
   流体、蚕右键/扩散、草种子/孢子、config 热改；`[barrel] 11 transforms` /
   `[sieve] 6 inputs, 72 drops` / `[hammer] 49`。
-- **未做**：M5、M10（1.20.1 侧）；M6 的画面/手感（BER 变白、瓷桶模型染色、人偶贴图）待目视。
+- **M10 自动化**：四台机器（电动/内能 × 筛/锤）、6 个插件、自动输出（内嵌左侧抽屉）、
+  GUI/BER/JEI、`machine.*` config；1.20.1 用 `ForgeHooks.getBurnTime` 取燃料值
+  （`ItemStack#getBurnTime` 在 Forge 47 返回 -1，坑已记进分支 status）。
+- **未做**：1.20.1 只剩画面/手感验收（机器 GUI、抽屉、BER 动画、插件槽拖拽、M6 美术）；
+  M5 的矿链在 M2 已铺完。
 
 ## 上一批次（2026-11-01，1.20.1 M3）
 
@@ -289,7 +294,8 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 ## 交接清单（下次会话先做）
 
 - **1.20.1 分支**：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`
-  （`1.20.1-forge` @ `b0bb00c`），已到 **M6**（含 config），下一步是 **M5 / M10** 和画面验收。
+  （`1.20.1-forge` @ `5ebe5ef`），已到 **M10**（含 `crucible.*` + `machine.*` config），
+  下一步只剩一次性画面/手感验收。
   分支的 `docs/status.md` 里有当前批次、验证表、构建/客户端命令（`runClient -PdevMods`）
   和固定套路。新会话在分支工作区开工即可。
 
@@ -449,8 +455,8 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 
 ## 下一步（按价值排序）
 
-1. **1.20.1 分支补 M5 / M10**（M6 已完成）：M10 机器移植时把 `machine.*` 配置键补进分支的
-   `ExConfig`（键名与主线一致）；之后接 Thermal（它只有 1.20.1）。
+1. **1.20.1 一次性验收 M1.5–M10**：服务端逻辑都已 RCON 验过，剩下机器 GUI/自动输出抽屉/
+   BER 动画、M6 美术与右键手感；之后接 Thermal（它只有 1.20.1）。
 2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
    清单见交接清单。
 3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
