@@ -2,8 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "IRI",
-    "RSI",
-    "IRI"
+    "RBR",
+    "ISI"
   ],
   "key": {
     "I": {
@@ -11,6 +11,9 @@
     },
     "R": {
       "item": "minecraft:redstone"
+    },
+    "B": {
+      "item": "minecraft:iron_block"
     },
     "S": {
       "item": "exnihilosatellitium:sieve"
