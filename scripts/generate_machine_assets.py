@@ -349,7 +349,7 @@ def sieve_model(*, fuel: bool) -> dict:
         "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
     })
     return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
-            "ambientocclusion": False, "textures": tex, "elements": elements}
+            "textures": tex, "elements": elements}
 
 
 def write_json(path: Path, payload: dict) -> None:

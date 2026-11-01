@@ -242,7 +242,7 @@
   "message.exnihilosatellitium.crucible.hot_fluid": "木坩埚装不了熔岩",
   "message.exnihilosatellitium.need_mesh": "需要先放入筛网",
   "tooltip.exnihilosatellitium.fortune_upgrade": "额外 %s 次独立判定",
-  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "叠加：第 1 个全额，之后每个按 80% 递减；小数次数按概率补 1 次判定",
+  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "每叠加一个生效几率减少20%，且增加25%能量消耗",
   "tooltip.exnihilosatellitium.speed_upgrade": "筛/锤速度 ×%s",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "叠加：第 1 个全额，之后每个按前一个的 80% 算；每个物品 +25% FE/t"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "每叠加一个效果衰减20%，且增加25%能量消耗"
 }

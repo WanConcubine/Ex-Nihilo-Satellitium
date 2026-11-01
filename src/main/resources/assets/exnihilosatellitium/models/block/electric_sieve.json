@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:block/block",
   "render_type": "minecraft:cutout",
-  "ambientocclusion": false,
   "textures": {
     "particle": "exnihilosatellitium:block/machine_frame_side_electric",
     "side": "exnihilosatellitium:block/machine_frame_side_electric",
