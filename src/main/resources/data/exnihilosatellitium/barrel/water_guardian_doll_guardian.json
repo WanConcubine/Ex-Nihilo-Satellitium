@@ -7,6 +7,5 @@
   "peaceful_drop": [
     "minecraft:prismarine_shard",
     "minecraft:prismarine_crystals"
-  ],
-  "cook_ticks": 600
+  ]
 }
