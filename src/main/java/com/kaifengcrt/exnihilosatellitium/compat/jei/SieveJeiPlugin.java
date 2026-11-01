@@ -48,5 +48,8 @@ public final class SieveJeiPlugin implements IModPlugin {
         for (final DeferredHolder<Item, Item> mesh : ModItems.MESHES) {
             registration.addRecipeCatalyst(new ItemStack(mesh.get()), RECIPE_TYPE);
         }
+        // M10: the automatic sieves show the same sift table.
+        registration.addRecipeCatalyst(new ItemStack(ModItems.ELECTRIC_SIEVE.get()), RECIPE_TYPE);
+        registration.addRecipeCatalyst(new ItemStack(ModItems.FUEL_SIEVE.get()), RECIPE_TYPE);
     }
 }

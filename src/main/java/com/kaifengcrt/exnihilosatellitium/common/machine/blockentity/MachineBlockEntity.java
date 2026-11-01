@@ -1,5 +1,6 @@
 package com.kaifengcrt.exnihilosatellitium.common.machine.blockentity;
 
+import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
@@ -64,7 +65,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     public static final int FUEL_SLOT = 2;
     public static final int UPGRADE_SLOT_START = 2;
     public static final int UPGRADE_SLOTS = 4;
-    public static final int OUTPUT_SLOTS = 9;
+    public static final int OUTPUT_SLOTS = 12;
 
     private static final int ELECTRIC_OUTPUT_START = UPGRADE_SLOT_START + UPGRADE_SLOTS;
     private static final int FUEL_OUTPUT_START = FUEL_SLOT + 1;
@@ -83,7 +84,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
                                  final BlockState state, final boolean electric) {
         super(type, pos, state);
         this.electric = electric;
-        this.inventory = new MachineInventory(this, electric ? 15 : 12);
+        this.inventory = new MachineInventory(this, electric ? 18 : 15);
         this.energy = electric ? new MachineEnergy(ModConfig.machineEnergyCapacity()) : null;
     }
 
@@ -165,7 +166,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         if (this.level == null || this.level.isClientSide) {
             return;
         }
-        this.ejectInvalidSlotItems();
+        this.relocateInvalidSlotItems();
         if (!this.canWork()) {
             if (this.work != 0) {
                 this.work = 0;
@@ -269,20 +270,43 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     }
 
     /**
-     * Safety net: any item that is not allowed in an input-side slot is popped
-     * out instead of silently blocking the machine forever. Output slots are
-     * machine-owned and never validated here.
+     * Safety net for misplaced items (shift-click, pipes, commands). An item that
+     * is not allowed in its current input-side slot is first moved to a slot that
+     * does accept it (e.g. an upgrade that landed in the mesh slot goes to an
+     * upgrade slot); only when no such slot exists is it popped out.
      */
-    private void ejectInvalidSlotItems() {
+    private void relocateInvalidSlotItems() {
         for (int slot = 0; slot < this.outputSlotStart(); slot++) {
             final ItemStack stack = this.inventory.getItem(slot);
-            if (!stack.isEmpty() && !this.canPlaceInSlot(slot, stack)) {
+            if (stack.isEmpty() || this.canPlaceInSlot(slot, stack)) {
+                continue;
+            }
+            final int target = this.findSlotFor(stack, slot);
+            if (target >= 0) {
+                this.inventory.setItem(target, stack);
+                this.inventory.setItem(slot, ItemStack.EMPTY);
+                ExNihiloSatellitium.LOGGER.debug("[machine] moved {} from slot {} to {}",
+                        stack.getItem(), slot, target);
+            } else {
                 this.inventory.setItem(slot, ItemStack.EMPTY);
                 if (this.level != null) {
                     Block.popResource(this.level, this.worldPosition.above(), stack);
                 }
+                ExNihiloSatellitium.LOGGER.debug("[machine] no slot for {}, popped out",
+                        stack.getItem());
             }
         }
+    }
+
+    /** First empty input-side slot that accepts this stack, excluding {@code skip}. */
+    private int findSlotFor(final ItemStack stack, final int skip) {
+        for (int slot = 0; slot < this.outputSlotStart(); slot++) {
+            if (slot != skip && this.inventory.getItem(slot).isEmpty()
+                    && this.canPlaceInSlot(slot, stack)) {
+                return slot;
+            }
+        }
+        return -1;
     }
 
     private boolean hasTool() {

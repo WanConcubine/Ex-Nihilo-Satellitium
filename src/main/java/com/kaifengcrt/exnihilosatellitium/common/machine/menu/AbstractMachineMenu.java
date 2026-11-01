@@ -36,10 +36,27 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
     public static final int TOOL_Y = 20;
     public static final int INPUT_Y = 44;
     public static final int LOWER_Y = 68;
-    public static final int OUTPUT_X = 98;
+    public static final int OUTPUT_X = 99;
     public static final int OUTPUT_Y = 20;
     public static final int INVENTORY_Y = 104;
     public static final int HOTBAR_Y = 162;
+
+    /**
+     * Machine slots must enforce {@link Container#canPlaceItem}: in 1.21.1 the
+     * base {@link Slot#mayPlace} returns {@code true} unconditionally, so a plain
+     * Slot lets shift-click/drag put anything anywhere (upgrades in the mesh slot).
+     */
+    private static final class MachineSlot extends Slot {
+
+        private MachineSlot(final Container container, final int slot, final int x, final int y) {
+            super(container, slot, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(final ItemStack stack) {
+            return this.container.canPlaceItem(this.getContainerSlot(), stack);
+        }
+    }
 
     protected final MachineBlockEntity owner;
     protected final Container machine;
@@ -56,27 +73,28 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
         this.electric = electric;
         this.kind = kind;
         this.machine = owner != null ? owner.getInventory()
-                : new SimpleContainer(electric ? 15 : 12);
+                : new SimpleContainer(electric ? 18 : 15);
         this.data = playerInventory.player.level().isClientSide
                 ? new SimpleContainerData(MachineBlockEntity.DATA_COUNT)
                 : (owner != null ? owner : new SimpleContainerData(MachineBlockEntity.DATA_COUNT));
 
-        this.addSlot(new Slot(this.machine, MachineBlockEntity.TOOL_SLOT, 26, TOOL_Y));
-        this.addSlot(new Slot(this.machine, MachineBlockEntity.INPUT_SLOT, 26, INPUT_Y));
+        this.addSlot(new MachineSlot(this.machine, MachineBlockEntity.TOOL_SLOT, 26, TOOL_Y));
+        this.addSlot(new MachineSlot(this.machine, MachineBlockEntity.INPUT_SLOT, 26, INPUT_Y));
 
         if (electric) {
             for (int i = 0; i < MachineBlockEntity.UPGRADE_SLOTS; i++) {
-                this.addSlot(new Slot(this.machine,
+                this.addSlot(new MachineSlot(this.machine,
                         MachineBlockEntity.UPGRADE_SLOT_START + i, 26 + i * 18, LOWER_Y));
             }
         } else {
-            this.addSlot(new Slot(this.machine, MachineBlockEntity.FUEL_SLOT, 26, LOWER_Y));
+            this.addSlot(new MachineSlot(this.machine, MachineBlockEntity.FUEL_SLOT, 26, LOWER_Y));
         }
 
+        // 3 rows x 4 columns = 12 output slots.
         final int outputStart = electric ? 6 : 3;
         for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 3; column++) {
-                this.addSlot(new Slot(this.machine, outputStart + row * 3 + column,
+            for (int column = 0; column < 4; column++) {
+                this.addSlot(new MachineSlot(this.machine, outputStart + row * 4 + column,
                         OUTPUT_X + column * 18, OUTPUT_Y + row * 18));
             }
         }

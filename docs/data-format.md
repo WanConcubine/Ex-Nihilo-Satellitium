@@ -620,7 +620,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 | 键 | 类型 | 含义 |
 |---|---|---|
-| `Items` | list | 全部槽位；每项 `{Slot: byte, id, count, components?}` |
+| `Items` | list | 全部槽位；每项 `{Slot: byte, id, count, components?}`（3×4 输出后电动 18 格 / 内能 15 格） |
 | `Work` | int | 当前这一件的进度（tick）；满 `ticksPerOperation` 归零并产出 |
 | `Energy` | int | 电动版内部 FE；内能版没有这个键 |
 | `BurnHalfTicks` | int | 内能版剩余燃料，单位是**半个**燃烧 tick（煤 1600 tick = 3200） |
@@ -666,5 +666,5 @@ data get block 0 120 0
 
 | 能力 | 电动 | 内能 |
 |---|---|---|
-| `ItemHandler.BLOCK` | 输入/工具/插件格可插，输出 9 格只抽不放 | 同左（输出 9 格只抽不放） |
+| `ItemHandler.BLOCK` | 输入/工具/插件格可插，输出 12 格只抽不放 | 同左（输出 12 格只抽不放） |
 | `EnergyStorage.BLOCK` | `MachineEnergy`（只进不出） | `null`（没有能力） |

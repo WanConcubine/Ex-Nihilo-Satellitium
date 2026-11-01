@@ -81,6 +81,7 @@
   "gui.exnihilosatellitium.burn": "Fuel: %s / %s ticks",
   "gui.exnihilosatellitium.energy": "%s / %s FE",
   "gui.exnihilosatellitium.progress": "Progress: %s%%",
+  "gui.exnihilosatellitium.progress.hint": "Progress: %s%% (click for JEI)",
   "gui.exnihilosatellitium.slot.fortune": "Fortune upgrade",
   "gui.exnihilosatellitium.slot.fuel": "Fuel",
   "gui.exnihilosatellitium.slot.hammer": "Hammer",

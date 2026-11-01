@@ -42,5 +42,8 @@ public final class HammerJeiPlugin implements IModPlugin {
     public void registerRecipeCatalysts(final IRecipeCatalystRegistration registration) {
         ModItems.HAMMERS.forEach(hammer ->
                 registration.addRecipeCatalyst(new ItemStack(hammer.get()), TYPE));
+        // M10: the automatic hammers show the same crush table.
+        registration.addRecipeCatalyst(new ItemStack(ModItems.ELECTRIC_HAMMER.get()), TYPE);
+        registration.addRecipeCatalyst(new ItemStack(ModItems.FUEL_HAMMER.get()), TYPE);
     }
 }

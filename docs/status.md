@@ -19,12 +19,13 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   手动锤（`ToolEvents` 普通/创造路径）已全部改调它们，机器不再有第二份掉落逻辑。
 - **数值**：基础 80 tick（4 秒）/ 件；电动 20 FE/t；内能 200 燃烧值/件（1 煤 = 8 件）；
   速度 ×1.5/×2.5/×4，时运 = 额外 1/2/3 次整表 roll。全部走 `machine.*` config。
-- **GUI**：两个 Menu + 两个 Screen，进度条 / 能量条 / 火焰条 / tooltip；
+- **GUI**：两个 Menu + 两个 Screen，进度/能量/火焰三块仪表改用贴图渐变（进度是箭头形），
   空槽有物品虚影（筛网/锤、原料、燃料、速度/时运），标题右侧实时状态
   （运行中/缺少工具/原料/能量/燃料/输出已满）；176×186，玩家物品栏下移，`物品栏` 不再压住插件槽。
   贴图由 `scripts/generate_machine_assets.py` 生成。
-- **管道**：`MachineItemHandler` 只允许从输出 9 格抽取，避免漏斗抽走筛网 / 锤 / 插件；
+- **管道**：`MachineItemHandler` 只允许从输出 12 格抽取，避免漏斗抽走筛网 / 锤 / 插件；
   电动机器只进不出的能量能力。
+- **JEI**：四台机器注册为筛/锤配方催化剂；点击 GUI 进度条用当前输入打开 JEI（空输入则打开分类）。
 - **RCON 验证**：内能筛 / 电动筛 / 电动锤（速度 III + 时运 III）/ 内能锤 / 上下漏斗全部通过（见验证表）。
 - **未验**：GUI 打开与外观、贴图观感、合成配方、玩家手感。
 
@@ -107,7 +108,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 
 - 四台机器共用 `MachineBlock`（kind = 筛/锤，power = 电动/内能），BE 分 `ElectricMachineBlockEntity` /
   `FuelMachineBlockEntity`，GUI 分 `ElectricMachineMenu` / `FuelMachineMenu`。
-- 槽位：`0` 工具、`1` 输入、输出 9 格；电动另有 `2..5` 插件，内能 `2` 燃料。
+- 槽位：`0` 工具、`1` 输入、输出 12 格（3×4）；电动另有 `2..5` 插件，内能 `2` 燃料。
 - 工具消耗：筛网每件 −1 耐久、锤每件 −1 耐久，坏掉即消失；输出满时停机，剩余产物掉在机器上方。
 - 电动无电 / 内能无燃料时停机，`Work` 归零，不消耗输入。
 - 管道：下方漏斗只抽输出格；上方漏斗可补料。电动机器暴露只进不出的能量能力，内能机器没有能量能力。
@@ -279,6 +280,9 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   进度/能量/火焰条会永远冻在初始值。客户端菜单要用 `SimpleContainerData`，服务端才用 BE。
 - **`renderBg` 里全局 pose 还没有平移到 `leftPos/topPos`**：自绘虚影/图标要自己加偏移，
   否则全部画到屏幕左上角。
+- **1.21.1 的 `Slot#mayPlace` 默认恒为 `true`**，不会调用 `Container#canPlaceItem`；只用容器校验
+  挡不住 GUI 拖拽/shift-click（插件会进筛网格）。必须给槽位写 `MachineSlot#mayPlace` 显式转发
+  `canPlaceInSlot`（2026-11-01 修）。
 - **`IContainerFactory` 菜单只调 `openMenu(provider)` 会崩客户端**：原版 `handleOpenScreen` 走
   `MenuType.create(id, inv)`，额外数据 buffer 为 `null`，客户端工厂 `readBlockPos()` 直接 NPE。
   必须 `openMenu(provider, buf -> buf.writeBlockPos(pos))`，让 NeoForge 发 `AdvancedOpenScreenPayload`
