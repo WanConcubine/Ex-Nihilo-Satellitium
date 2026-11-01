@@ -37,7 +37,7 @@
   `CrookDrops` + 两个 reload listener、`HammerRolls` 共用判定；6 锤（100 木/石/铁/金/钻/下界合金，
   耐久 64/128/256/32/1561/2031）+ 2 钩（木 64 / 骨 128，骨钩概率 ×1.5）；47 条锤表（跳过
   M6 的 `crushed_*` 两条）、10 张钩表（去掉 M6 蚕掉落）；沙 → 尘土、尘土方块可筛
-  （第 4 张筛料表现在启用：4 输入 / 63 掉落）。**1.20.1 没有 `BlockDropsEvent`**：锤子走
+  （第 4 张筛料表现在启用：4 输入 / 62 掉落）。**1.20.1 没有 `BlockDropsEvent`**：锤子走
   `BlockEvent.BreakEvent` 自己接管破坏（取消事件 + 手动移除 + 掉锤表产物 + 扣耐久），
   钩子保留原版树叶掉落、只追加钩表产物。
 - **2026-11-01 M1.5 桶内转化**：`BarrelRecipes` + `BarrelRecipeReloadListener`
@@ -92,7 +92,7 @@
 | Jade 筛子 | ✅ | `SieveComponentProvider` 已注册 + `config.jade.plugin_...sieve` 翻译（缺 key 会崩） |
 | JEI 画面 | ⚠️ | 分类页/布局未目视（冒烟只验证了注册与不崩） |
 | 筛子产物轮播 | ✅ | 超过 21 条时按槽位轮播（JEI 自动切换多物品槽），tooltip 跟随当前显示项；沙筛 23 条不再截断 |
-| M2 第 4 张筛料表 | ✅ | `[sieve] loaded 4 inputs, 63 drops`（尘土已可筛） |
+| M2 第 4 张筛料表 | ✅ | `[sieve] loaded 4 inputs, 62 drops`（尘土已可筛） |
 | 27/28 资源模型 | ✅ | 客户端资源加载无 missing model/texture（筛子 frame/mesh、9 种锭、矿方块） |
 | 1.20.1 配方计数 | ℹ️ | 1.20.1 的 `Loaded 7 recipes` 是**配方类型数**，不是配方条数；别拿它当进度 |
 | 改名完整性 | ✅ | `git grep` 无旧 id/旧类名；jar 内 `mods.toml` 为 `exnihilosatellitium` / `Ex Nihilo: Satellitium` |

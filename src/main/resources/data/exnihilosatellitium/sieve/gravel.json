@@ -68,10 +68,6 @@
     {
       "item": "minecraft:emerald",
       "chance": 0.00667
-    },
-    {
-      "item": "minecraft:prismarine_shard",
-      "chance": 0.02
     }
   ]
 }
