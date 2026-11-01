@@ -230,6 +230,20 @@ M10 落地时把这条真正兑现了：`SieveRolls` / `HammerRolls` 成为唯�
 所以它不能是数据包，只能是 jar 内资源。数据包能改的是概率与配方，
 不能“让一个新物品凭空出现”。
 
+**supported mods（2026-11-01）**：`materials.json` 的 `ingots` 是**有序候选列表**
+（`{"item": "mekanism:ingot_tin", "mod": "mekanism"}`）。启动时按顺序取第一个已加载模组的锭；
+都不在就注册自有锭（经典 Ex Nihilo 的 “create the ingot if no other mod supplies one”）。
+生成脚本把每个候选写成带 `neoforge:mod_loaded` 条件的熔炼配方，base 配方再用
+`neoforge:not(...)` 兜底到自有锭——JSON 条件与 Java 解析走同一条顺序，加载时永远只有一个
+配方生效，不需要运行时注入配方。
+
+- 首个接入：**Mekanism 1.21.1**（`mekanism:ingot_tin` / `lead` / `osmium` / `uranium`），
+  覆盖我们材料表里的 tin / lead / osmium / uranium。
+- **Thermal 系列没有 1.21.1**（只有 1.20.1），不作为目标；将来有 1.21.1 版时，在对应材料里
+  加一行 item id 即可，不用改代码。
+- 换模组会改变“哪些锭存在”：已有世界里已经拿到的自有锭，在装上受支持模组后会变成未知物品
+  （日志 `Unknown registry key`）。**开世界前定好模组列表**；这是经典行为，不做运行时迁移。
+
 **贴图（两条线，都不手绘方块底图）**：
 
 - **物品**（破碎 / 粉碎 / 粉末）：5 阶调色板手绘像素，已完成的 11 种见

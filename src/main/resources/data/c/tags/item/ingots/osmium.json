@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "exnihilosatellitium:osmium_ingot"
+    {
+      "id": "exnihilosatellitium:osmium_ingot",
+      "required": false
+    }
   ]
 }

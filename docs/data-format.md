@@ -266,7 +266,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | `name` | ✅ | 显示名，至少给 `en_us`；缺 `zh_cn` 时回退 `en_us` |
 | `tier` | ✅ | `common` / `uncommon` / `rare` / `epic`，校验数值区间用（见下） |
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。**当前只支持整数**；对象写法未实现（读 `gravel` 并打警告） |
-| `ingot` | ❌ | 已有锭：写**具体物品 id**（`minecraft:iron_ingot`），熔炼就产出它，不重复造锭。省略时注册自有 `exnihilosatellitium:<id>_ingot`（9 种非原版金属走这条）。**暂不支持标签**（`#c:ingots/tin`）：材料表在标签加载前读取，写标签会打警告并按自有锭处理 |
+| `ingot` | ❌ | 无条件复用：写**具体物品 id**（`minecraft:iron_ingot`），熔炼总是产出它，不注册自有锭。**暂不支持标签**（`#c:ingots/tin`），写标签会打警告并按自有锭处理 |
+| `ingots` | ❌ | **受支持模组的候选锭**（有序数组）：`[{"item": "mekanism:ingot_tin", "mod": "mekanism"}]`。启动时取第一个 `mod` 已加载（或没写 `mod`）的候选；都不匹配时注册自有 `exnihilosatellitium:<id>_ingot`。生成脚本会给每个候选写一条 `neoforge:mod_loaded` 条件的熔炼配方，base 配方用 `neoforge:not(...)` 兜底，见下 |
 | `owner_mod` | ❌ | 主要来源模组；当前不解析，仅保留字段 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；设为 `false` 时该条跳过（当前没有自动骨架行） |
@@ -307,6 +308,16 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | ~~`data/c/tags/item/raw_materials/<id>.json`~~ | **已删除（2026-10-31）**：破碎/粉碎/粉末不是原矿，不能进 `c:raw_materials`，否则别的模组会把它们当原矿处理，绕过「4 块 → 方块 → 熔炼」链条 |
 | `data/c/tags/{block,item}/ores.json` | 把本项目材料的 `#c:ores/<id>` 子标签挂到根标签（只含矿砾/矿砂/矿尘方块，对应 1.7.10 把矿方块注册给 TE/TC 的做法） |
 
+- **受支持模组（`ingots` 候选）**：每个候选生成
+  `<m>_ore_<kind>_smelting_<mod>.json`（条件 `neoforge:mod_loaded`）；base
+  `<m>_ore_<kind>_smelting.json` 的结果是自有锭，条件是对所有候选 mod 的 `neoforge:not`。
+  运行时 `OreMaterials` 用同一个顺序解析，命中的候选模组在场时**不注册自有锭**，
+  `c:ingots/<id>` 里的自有锭条目写成 `required: false`（物品不存在时标签跳过）。
+  - 现在接入的是 **Mekanism**：tin / lead / osmium / uranium 熔成 `mekanism:ingot_*`。
+  - 加一个模组 = 在材料里加一行候选 + 重跑 `scripts/generate_ore_variants.py`；
+    id 必须按对方 jar 核对。
+  - **换模组会改变物品存在性**：已有存档里拿到的自有锭，装上受支持模组后会变成未知物品
+    （日志报错并消失）。开世界前定好模组列表。
 - 铁/金/铜的 `ingot` 指向原版锭，所以 36 个熔炼配方里它们熔到 `minecraft:*_ingot`；
   其余 9 种熔到自有锭。
 - 锭贴图由 `art/items/ingots/generate.py` 用同一套 5 阶色板生成，16×16、自有像素。

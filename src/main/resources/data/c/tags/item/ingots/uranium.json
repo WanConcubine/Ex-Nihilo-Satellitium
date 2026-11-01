@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "exnihilosatellitium:uranium_ingot"
+    {
+      "id": "exnihilosatellitium:uranium_ingot",
+      "required": false
+    }
   ]
 }

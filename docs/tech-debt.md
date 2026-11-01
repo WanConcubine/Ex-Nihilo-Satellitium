@@ -52,7 +52,7 @@
 | 18 | **转化表重复规则无检测**：同一 `base+added` 多条时先加载者赢 | `BarrelRecipes.java:80-143` | 数据包/内置表重复时行为取决于文件顺序，难排查 | 加载时用 `Set` 检测重复并打 `[barrel]` 警告 |
 | 19 | **筛表重复输入无检测**：`built.put(input, ...)` 后者覆盖前者 | `SieveRegistry.java:76` | 两个数据包都写 `gravel.json` 时，前者静默失效 | 检测重复 key 并警告 |
 | 20 | **`OreMaterials` 不校验 `tier`，`rarity` 对象只读 `gravel`** | `OreMaterials.java:54-57`；`docs/data-format.md:250-264` | 文档说 tier 与 rarity 区间联动校验，实际任何 tier 字符串都能过；写 `{"gravel":..,"sand":..,"dust":..}` 的沙/尘值被忽略 | 校验 tier 枚举 + rarity 区间；`OreMaterial` 改成三个 rarity 或明确只支持单值 |
-| 21 | **`ingot` 只做 id 语法校验，不查物品是否存在** | `OreMaterials.java:98-115` | 指向缺失模组的锭时，不注册自有锭，熔炼配方结果为空/未知物品，链条断掉 | 在 registry 可用后校验；缺失则回退自有锭并打警告 |
+| 21 | **`ingot`/`ingots` 不校验目标物品是否存在**（缺模组已处理） | `OreMaterials.java:138-205` | 2026-11-01 加了 `ingots` 候选 + `mod_loaded` 门控：模组不在就回退自有锭。但如果模组在、候选 id 写错/版本改名，仍会不注册自有锭且配方指向未知物品 | 在 registry 完成后校验候选 id，缺失时回退自有锭并打警告（注册期决定不了，需要延后注册或改用运行时配方） |
 | 22 | **`generate_sieve_assets.py` 把 `rarity` 当数字** | `scripts/generate_sieve_assets.py:129-130` | 一旦按文档写 rarity 对象，脚本直接 `1.0 / dict` 崩溃 | 与材料表 schema 同步，或先只允许数字并在脚本里报错 |
 | 23 | **生成脚本不跳过 `enabled:false`** | `scripts/generate_ore_variants.py:146`；`scripts/generate_sieve_assets.py:128` | 被禁用的材料仍生成模型/配方/筛出物，但 Java 不注册物品 → 配方指向缺失物品 | 两个脚本都 `if not m.get('enabled', True): continue`；同时清理旧文件 |
 | 24 | **生成脚本不清理被删除材料的旧文件** | `scripts/generate_ore_variants.py` 只清“切换锭”的三类文件 | 删材料/改 id 后，旧 blockstate/model/loot/recipe 留在仓库，产生孤儿资源/未知配方 | 维护一个 manifest，或生成前按当前材料集合删除旧产物 |

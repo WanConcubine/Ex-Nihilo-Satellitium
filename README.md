@@ -90,6 +90,20 @@ python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶�
 候选内容：月光线做筛网、池尘做稀有筛出物、月光植物进堆肥、本模组矿粒作为月光仪式材料。
 详见 [docs/DESIGN.md](docs/DESIGN.md) 第 6 节。
 
+### 支持的模组（supported mods）
+
+材料表的 `ingots` 是**有序候选列表**：装了对应模组就用它的锭熔炼，没装就注册我们自己的锭
+（经典 Ex Nihilo 行为）。配方用 `neoforge:mod_loaded` 条件生成，缺模组时自动回退。
+
+| 模组 | 覆盖材料 | 说明 |
+|---|---|---|
+| [Mekanism](https://modrinth.com/mod/mekanism) 1.21.1 | 锡 / 铅 / 锇 / 铀 | 矿砾/矿砂/矿尘熔成 `mekanism:ingot_*`；这四种不再注册自有锭 |
+| Thermal 系列 | — | 目前只有 1.20.1，**不接**；有 1.21.1 版后加一行 id 即可 |
+
+加模组支持 = 在 `materials.json` 对应材料里加一条 `{"item": "...", "mod": "..."}`，
+再跑 `python3 scripts/generate_ore_variants.py`。**开世界前定好模组列表**：加/减受支持模组会
+改变哪些锭存在，旧存档里的自有锭会变成未知物品。
+
 ## Jade（玉）
 
 安装 [Jade](https://modrinth.com/mod/jade) 后，准星对准木桶会显示：
