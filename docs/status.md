@@ -412,6 +412,11 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 ./gradlew build
 python3 scripts/check-textures.py
 python3 scripts/check-core-imports.py                # core 层不得出现 NeoForge/Forge import
+
+# 推送（SakuraCat 代理；SSH 22 会被代理拒，走 ssh.github.com:443）
+GIT_SSH_COMMAND='ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes \
+  -o ProxyCommand="nc -X connect -x 127.0.0.1:12450 %h %p"' \
+  git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin main
 python3 scripts/generate_barrel_variants.py          # 11 种木桶 + 石桶 JSON
 python3 scripts/generate_ore_variants.py             # 矿物链资源/配方/锭
 python3 art/items/tools/restyle.py                   # 锤/钩/蚕/熟蚕/尘土贴图 + 预览
