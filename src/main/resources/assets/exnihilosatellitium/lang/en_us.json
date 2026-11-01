@@ -239,7 +239,7 @@
   "message.exnihilosatellitium.crucible.hot_fluid": "A wooden crucible cannot hold lava",
   "message.exnihilosatellitium.need_mesh": "Needs a mesh",
   "tooltip.exnihilosatellitium.fortune_upgrade": "Adds %s extra independent roll(s)",
-  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "Stacks: each extra upgrade adds half the extra rolls",
+  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "Stacks: each extra upgrade adds 80% of the previous extra rolls",
   "tooltip.exnihilosatellitium.speed_upgrade": "Sifts and crushes %s× faster",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Stacks: each extra upgrade adds half the bonus and +25% FE/t"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Stacks: each extra upgrade adds 80% of the previous bonus and +25% FE/t"
 }

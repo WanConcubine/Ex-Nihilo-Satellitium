@@ -246,9 +246,9 @@ def sieve_side_texture(*, fuel: bool) -> Image.Image:
     metal_base(img, RUST if fuel else PLATE, RUST_DARK if fuel else EDGE)
     draw = ImageDraw.Draw(img)
     band = (176, 58, 46) if not fuel else (176, 90, 30)
-    draw.rectangle((0, 14, 15, 15), fill=band)
-    draw.line((0, 14, 15, 14), fill=(255, 190, 170) if not fuel else (255, 214, 150))
-    draw.line((0, 15, 15, 15), fill=(60, 20, 16))
+    draw.rectangle((0, 12, 15, 14), fill=band)
+    draw.line((0, 12, 15, 12), fill=(255, 190, 170) if not fuel else (255, 214, 150))
+    draw.line((0, 14, 15, 14), fill=(60, 20, 16))
     draw.point((2, 2), fill=BOLT)
     draw.point((13, 2), fill=BOLT)
     return img
@@ -311,26 +311,20 @@ def sieve_model(*, fuel: bool) -> dict:
             out["uv"] = uv
         return out
 
-    side_uv = [0, 10, 16, 16]
+    side_uv = [0, 6, 16, 16]
     elements = []
-    for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
+    # four 1x1 legs, exactly like the manual sieve
+    for x, z in ((1, 1), (14, 1), (1, 14), (14, 14)):
         elements.append({
-            "from": [x, 0, z], "to": [x + 2, 5, z + 2],
+            "from": [x, 0, z], "to": [x + 1, 11, z + 1],
             "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
         })
-    elements.append({
-        "from": [1, 5, 1], "to": [15, 6, 15],
-        "faces": {
-            "down": face("#side"), "up": face("#inner"),
-            "north": face("#side"), "south": face("#side"),
-            "west": face("#side"), "east": face("#side"),
-        },
-    })
+    # 1 px thick rim at y=10..14, matching the manual sieve frame
     walls = (
-        ("north", [1, 6, 1, 15, 11, 3]),
-        ("south", [1, 6, 13, 15, 11, 15]),
-        ("west", [1, 6, 3, 3, 11, 13]),
-        ("east", [13, 6, 3, 15, 11, 13]),
+        ("north", [0, 10, 0, 16, 14, 1]),
+        ("south", [0, 10, 15, 16, 14, 16]),
+        ("west", [0, 10, 1, 1, 14, 15]),
+        ("east", [15, 10, 1, 16, 14, 15]),
     )
     for outer, box in walls:
         faces = {f: face("#side") for f in ("down", "up", "north", "south", "west", "east")}
@@ -339,8 +333,13 @@ def sieve_model(*, fuel: bool) -> dict:
         inner = {"north": "south", "south": "north", "west": "east", "east": "west"}[outer]
         faces[inner] = face("#inner")
         elements.append({"from": box[:3], "to": box[3:], "faces": faces})
+    # dark shelf under the mesh, then the cutout mesh surface
     elements.append({
-        "from": [3, 6.2, 3], "to": [13, 6.35, 13],
+        "from": [1, 10, 1], "to": [15, 10.1, 15],
+        "faces": {"up": face("#inner"), "down": face("#inner")},
+    })
+    elements.append({
+        "from": [1, 10.25, 1], "to": [15, 10.4, 15],
         "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
     })
     return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",

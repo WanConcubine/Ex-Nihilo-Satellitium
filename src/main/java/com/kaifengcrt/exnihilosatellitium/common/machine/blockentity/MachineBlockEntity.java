@@ -156,14 +156,14 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
 
     /**
      * Speed multipliers stack with diminishing returns: the best upgrade counts
-     * fully, every further one adds half of the previous bonus.
+     * fully, every further one adds 80% of the previous bonus.
      */
     public double speedMultiplier() {
         double multiplier = 1.0D;
         double weight = 1.0D;
         for (final UpgradeItem upgrade : this.upgradesOf(UpgradeType.SPEED)) {
             multiplier += (UpgradeItem.speedMultiplier(upgrade.tier()) - 1.0D) * weight;
-            weight *= 0.5D;
+            weight *= 0.8D;
         }
         return multiplier;
     }
@@ -177,7 +177,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         double weight = 1.0D;
         for (final UpgradeItem upgrade : this.upgradesOf(UpgradeType.FORTUNE)) {
             bonus += upgrade.tier() * weight;
-            weight *= 0.5D;
+            weight *= 0.8D;
         }
         return bonus;
     }
