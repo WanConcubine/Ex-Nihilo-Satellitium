@@ -40,6 +40,11 @@ public final class CompostRegistry {
     private CompostRegistry() {
     }
 
+    /** Immutable snapshot for recipe browsers (JEI); the server table stays authoritative. */
+    public static List<Entry> all() {
+        return List.copyOf(ENTRIES);
+    }
+
     public static void reload(final Map<ResourceLocation, JsonElement> jsons) {
         final List<Entry> next = new ArrayList<>();
 

@@ -125,6 +125,11 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    // JEI (1.20.1). Compile-only API so the plugin classes build without the mod.
+    maven {
+        name = "BlameJared"
+        url = "https://maven.blamejared.com"
+    }
     // Local production jars for dev testing (libs/ is gitignored). ForgeGradle
     // deobfuscates them, otherwise SRG names break at runtime in the dev client.
     flatDir {
@@ -147,11 +152,12 @@ dependencies {
     // the dev runtime. Only with -PdevMods, because they are client-side mods and
     // would break `runServer` (Just Enough Characters even fails on a dedicated
     // server). `./gradlew runClient -PdevMods` is the intended use.
+    // JEI API is always needed: the plugin classes live in src/main/java.
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:15.59.0.212")
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.59.0.212")
+
     if (project.hasProperty("devMods")) {
-        if (file("libs/jei-1.20.1-forge-15.59.0.212.jar").exists()) {
-            compileOnly fg.deobf("libs:jei-1.20.1-forge:15.59.0.212")
-            runtimeOnly fg.deobf("libs:jei-1.20.1-forge:15.59.0.212")
-        }
+        runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.59.0.212")
         if (file("libs/Jade-1.20.1-Forge-11.13.2.jar").exists()) {
             runtimeOnly fg.deobf("libs:Jade-1.20.1-Forge:11.13.2")
         }
