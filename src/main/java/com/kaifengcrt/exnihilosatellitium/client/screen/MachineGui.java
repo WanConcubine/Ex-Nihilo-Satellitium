@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.client.screen;
 
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.AbstractMachineMenu;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,13 +14,17 @@ import net.minecraft.world.item.ItemStack;
  * Shared drawing for the machine screens: ghost items in empty slots and the
  * running/blocked status line.
  *
- * <p>The ghost is drawn at full opacity and then washed with a translucent grey
- * rectangle: most item models use cutout rendering, where shader alpha would not
- * fade them.</p>
+ * <p>Ghost items are not washed with an overlay rectangle: {@code fill} goes to
+ * the {@code gui} render type, which is batched and depth-sorted separately from
+ * item models, so the wash ends up <em>under</em> the item and is invisible.
+ * Instead the empty slot gets a dark blue tint (drawn first, under the item) and
+ * the item itself is rendered dimmed through the shader colour, which works for
+ * cutout item models.</p>
  */
 public final class MachineGui {
 
-    private static final int GHOST_WASH = 0x88C6C6C6;
+    private static final int GHOST_SLOT_TINT = 0x88203040;
+    private static final float GHOST_BRIGHTNESS = 0.72F;
 
     private MachineGui() {
     }
@@ -37,8 +42,10 @@ public final class MachineGui {
             }
             final int x = left + slot.x;
             final int y = top + slot.y;
+            graphics.fill(x, y, x + 16, y + 16, GHOST_SLOT_TINT);
+            RenderSystem.setShaderColor(GHOST_BRIGHTNESS, GHOST_BRIGHTNESS, GHOST_BRIGHTNESS, 1.0F);
             graphics.renderFakeItem(ghost, x, y);
-            graphics.fill(x, y, x + 16, y + 16, GHOST_WASH);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 

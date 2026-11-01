@@ -384,9 +384,9 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable(this.electric
-                ? "container.exnihilosatellitium.electric_machine"
-                : "container.exnihilosatellitium.fuel_machine");
+        // The block's own name carries the kind (sieve / hammer) and the power
+        // tier, so the GUI title always matches the item the player placed.
+        return this.getBlockState().getBlock().getName();
     }
 
     @Override

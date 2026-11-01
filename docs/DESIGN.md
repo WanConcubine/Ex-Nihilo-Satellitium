@@ -992,10 +992,13 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 **GUI**
 
+- 标题直接取方块名（`getBlockState().getBlock().getName()`），所以是「电动自动筛子 / 内能自动筛子 /
+  电动自动锤 / 内能自动锤」，不按电源类型写死。
 - 两个 `MenuType`（`electric_machine` / `fuel_machine`）、两个 `Screen`，尺寸 **176×186**；
   玩家物品栏下移到 `y=104/162`，`物品栏` 标签在分隔线下方，不再和插件槽重叠。
-- 空槽虚影（40% 灰度水洗）：工具槽 = 筛网/锤、输入槽 = 沙/圆石、燃料槽 = 煤、
-  电动前两个插件槽 = 速度 I / 时运 I；悬停显示槽位说明。
+- 空槽虚影：工具槽 = 筛网/锤、输入槽 = 沙/圆石、燃料槽 = 煤、
+  电动前两个插件槽 = 速度 I / 时运 I；空槽铺深蓝底、物品用 `setShaderColor` 压暗
+  （**不要用 `fill` 盖物品**：`fill` 走 `gui` 渲染批次，会画在物品模型下面），悬停显示槽位说明。
 - 标题右侧状态行（服务端算、`ContainerData` 下发）：运行中 / 缺少工具 / 缺少原料 /
   缺少能量 / 缺少燃料 / 输出已满（`DATA_STATUS`）。
 - `ContainerData` 8 项：`work / ticksPerOperation / energy / energyCapacity / burnHalfTicks /
