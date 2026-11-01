@@ -1,6 +1,5 @@
 package com.kaifengcrt.exnihilosatellitium.compat.jei;
 
-import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveDrop;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -9,12 +8,13 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 /**
  * JEI category for the sieve.
@@ -39,7 +39,6 @@ public final class SieveRecipeCategory extends AbstractRecipeCategory<SieveRecip
     private static final int MESH_Y = 39;
     private static final int OUTPUT_X = 34;
     private static final int OUTPUT_Y = 3;
-    private static final Set<Object> OVERFLOW_WARNED = ConcurrentHashMap.newKeySet();
 
     public SieveRecipeCategory(final IGuiHelper guiHelper) {
         super(SieveJeiPlugin.RECIPE_TYPE,
@@ -52,11 +51,6 @@ public final class SieveRecipeCategory extends AbstractRecipeCategory<SieveRecip
     @Override
     public void setRecipe(final IRecipeLayoutBuilder builder, final SieveRecipe recipe,
                           final IFocusGroup focuses) {
-        if (recipe.drops().size() > COLUMNS * ROWS
-                && OVERFLOW_WARNED.add(recipe.input().getItem())) {
-            ExNihiloSatellitium.LOGGER.warn("[jei] sieve input {} has {} drops; only {} fit on one page",
-                    recipe.input().getHoverName().getString(), recipe.drops().size(), COLUMNS * ROWS);
-        }
         builder.addInputSlot(INPUT_X, INPUT_Y)
                 .setStandardSlotBackground()
                 .addItemStack(recipe.input())
@@ -69,21 +63,34 @@ public final class SieveRecipeCategory extends AbstractRecipeCategory<SieveRecip
                 .addRichTooltipCallback((view, tooltip) -> tooltip.add(
                         Component.translatable("jei.exnihilosatellitium.sieve.mesh_hint")));
 
-        int index = 0;
-        for (final SieveDrop drop : recipe.drops()) {
-            if (index >= COLUMNS * ROWS) {
-                break;
-            }
-            final int x = OUTPUT_X + (index % COLUMNS) * SLOT;
-            final int y = OUTPUT_Y + (index / COLUMNS) * SLOT;
+        // A sift table keeps growing as mod integrations add drops, so never
+        // truncate at 21: distribute them round-robin over the 7x3 grid. A slot
+        // that holds several drops is cycled by JEI, and the chance tooltip
+        // follows whatever is currently displayed.
+        final List<SieveDrop> drops = recipe.drops();
+        final int slots = COLUMNS * ROWS;
+        for (int slotIndex = 0; slotIndex < Math.min(slots, drops.size()); slotIndex++) {
+            final int x = OUTPUT_X + (slotIndex % COLUMNS) * SLOT;
+            final int y = OUTPUT_Y + (slotIndex / COLUMNS) * SLOT;
             final IRecipeSlotBuilder slot = builder.addOutputSlot(x, y)
                     // Same vanilla crafting-table slot as the inputs; do not mix
                     // JEI's special output-slot background into the grid.
-                    .setStandardSlotBackground()
-                    .addItemStack(new ItemStack(drop.item()));
-            slot.addRichTooltipCallback((view, tooltip) -> tooltip.add(
-                    Component.translatable("jei.exnihilosatellitium.sieve.chance", percent(drop.chance()))));
-            index++;
+                    .setStandardSlotBackground();
+
+            final Map<Item, Float> chances = new HashMap<>();
+            for (int dropIndex = slotIndex; dropIndex < drops.size(); dropIndex += slots) {
+                final SieveDrop drop = drops.get(dropIndex);
+                slot.addItemStack(new ItemStack(drop.item()));
+                chances.put(drop.item(), drop.chance());
+            }
+            slot.addRichTooltipCallback((view, tooltip) ->
+                    view.getDisplayedItemStack().ifPresent(stack -> {
+                        final Float chance = chances.get(stack.getItem());
+                        if (chance != null) {
+                            tooltip.add(Component.translatable(
+                                    "jei.exnihilosatellitium.sieve.chance", percent(chance)));
+                        }
+                    }));
         }
     }
 
