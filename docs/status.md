@@ -5,7 +5,9 @@
 
 ## 一句话
 
-**主线是 Minecraft 1.21.1 / NeoForge 21.1.x**（1.20.1/Forge 版归档在 tag `legacy/1.20.1-forge`）。
+**双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
+（`1.20.1-forge` 分支，当前停在 M1，待补 M2–M10）。tag `legacy/1.20.1-forge` 只是
+1.20.1 最后状态的书签，**不代表归档决定**（见 [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
 GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**自动输出配置也已实现**（服务端 RCON 验过，
 GUI 待目视）。下一步是补 M4/M6/M10 的画面与右键验收；M5/M7 余项（config 扩展、datagen）、
