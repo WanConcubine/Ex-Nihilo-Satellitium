@@ -707,3 +707,21 @@ data merge block 0 120 0 {AutoOutput:0b}
 |---|---|---|
 | `ItemHandler.BLOCK` | 输入/工具/插件格可插，输出 12 格只抽不放 | 同左（输出 12 格只抽不放） |
 | `EnergyStorage.BLOCK` | `MachineEnergy`（只进不出） | `null`（没有能力） |
+
+## 16. 版本相关的数据目录（P2，2026-11-01）
+
+自定义表（`sieve/` `hammer/` `crook/` `barrel/` `compost/` `crucible_melt/` `crucible_heat/`）
+两版同构，目录名不变。**vanilla 类型**的数据随版本换：
+
+| 1.21.1（NeoForge） | 1.20.1（Forge） |
+|---|---|
+| `data/<ns>/recipe/` | `data/<ns>/recipes/` |
+| `data/<ns>/loot_table/` | `data/<ns>/loot_tables/` |
+| `data/<ns>/tags/block/`、`tags/item/` | `tags/blocks/`、`tags/items/` |
+| `result: {"id": ..., "count": n}` | `result: {"item": ..., "count": n}` |
+| `neoforge:conditions` / `neoforge:mod_loaded` / `neoforge:not` | `forge:*` |
+| `c:` 标签（含 `#c:`、`"tag": "c:..."`） | `forge:` |
+
+工具链：`scripts/data_target.py`（唯一真相）、`scripts/port_data.py`（整体移植数据）、
+`scripts/check-data-paths.py`（守卫）；生成器用 `--target 1.21.1|1.20.1 --out DIR`。
+细节见 [porting.md](porting.md) §3 的 P2。

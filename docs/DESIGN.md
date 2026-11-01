@@ -1118,3 +1118,24 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   `MachineBlockEntity` 仍单独受检（core 状态机，能力只走门面）。
 - 验证：`./gradlew build` 通过、守卫 0 泄漏、`runServer` 起来后 RCON 抽验 20 FE/t、
   自动输出进下方箱子、漏斗只抽输出格（明细见 [status.md](status.md) 验证表）。
+
+## 29. P2 数据管线：一份输入、两个 target（2026-11-01）
+
+问题：vanilla 类型 JSON（recipe / loot / tag）的目录名、`result` 字段、条件命名空间、
+common 标签命名空间随版本变；1.20.1 分支的数据是手抄的，已经漂过一次（tech-debt #1）。
+P2 把“版本差异”收进一个模块，让数据只维护一份。
+
+- `scripts/data_target.py`：`DataTarget` 是唯一知道 1.21.1 / 1.20.1 差异的地方。
+  生成器只用 `TARGET.recipe_path / loot_path / tag_path`、`TARGET.result_key`、
+  `TARGET.condition_key`、`TARGET.mod_loaded / negate`、`TARGET.common_ref`，
+  不写死目录名和 `neoforge:`。
+- 四个数据生成器接受 `--target`（选版本）和 `--out`（选输出树，默认仓库）；流程仍是
+  “生成 → 人 review diff”。
+- `scripts/port_data.py`：从 1.21.1 树整体生成 1.20.1 数据（路径/字段/命名空间），数值原样；
+  用于给 1.20.1 分支铺底。之后两边**数值改动只能在生成器或手写源里做**，不要在移植产物上补丁。
+- `scripts/check-data-paths.py`：按 target 反查目录名、`result` 键、条件前缀、标签命名空间。
+  单独成脚本而不是塞进 `check-textures.py`：报错要能直接指到“哪个文件哪个字段错了”。
+- **合并而不是覆盖**：`lang` 用 setdefault（人工文案优先）；筛表按 item 合并、按材料权重更新、
+  清理已移除材料的残留。之前直接重跑会把 M2/M6 手加的 13 条筛出物（沙 12 + 砂砾 1）删掉。
+- 验收：生成器对当前树重跑零 diff；port 产物过守卫；生成器产物与 port 产物在 240 个文件上
+  逐字节一致（只剩合并型标签与筛表的上下文差异）。

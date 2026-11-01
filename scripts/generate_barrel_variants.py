@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the per-material barrel assets (1.21.1 data paths).
+"""Generate the per-material barrel assets.
 
 The barrel geometry lives in `models/block/barrel_base.json`. Every material is
 a child model that only overrides the texture slots, so the cuboids and the
@@ -7,20 +7,30 @@ a child model that only overrides the texture slots, so the cuboids and the
 shaped recipes, loot tables and the vanilla mineable tags all come from the same
 table below; adding a material is one line.
 
-    python3 scripts/generate_barrel_variants.py
+Recipe/loot/tag paths follow `--target` (1.21.1: `recipe/`, `result.id`;
+1.20.1: `recipes/`, `result.item`), see scripts/data_target.py.
+
+    python3 scripts/generate_barrel_variants.py [--target 1.21.1|1.20.1] [--out DIR]
 
 This writes into `src/main/resources`; review the diff before committing.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
+import data_target
+
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium"
-DATA = ROOT / "src" / "main" / "resources" / "data"
+# Read-only inputs. Writes go to RES; --out redirects them.
+SOURCE = ROOT / "src" / "main" / "resources"
+RES = SOURCE
+ASSETS = RES / "assets" / "exnihilosatellitium"
 MOD_ID = "exnihilosatellitium"
+
+TARGET = data_target.get(data_target.DEFAULT)
 
 # (block id, wood type). The public `barrel` id stays oak for save compatibility.
 WOOD_BARRELS = (
@@ -104,7 +114,7 @@ def generate(name: str, textures: dict[str, str], planks: str, slab: str) -> Non
     })
 
     # Classic barrel: four corner planks plus a slab floor.
-    write_json(DATA / MOD_ID / "recipe" / f"{name}.json", {
+    write_json(RES / TARGET.recipe_path(MOD_ID, name), {
         "type": "minecraft:crafting_shaped",
         "pattern": [
             "x x",
@@ -116,11 +126,11 @@ def generate(name: str, textures: dict[str, str], planks: str, slab: str) -> Non
             "y": {"item": slab},
         },
         "result": {
-            "id": f"{MOD_ID}:{name}",
+            TARGET.result_key: f"{MOD_ID}:{name}",
         },
     })
 
-    write_json(DATA / MOD_ID / "loot_table" / "blocks" / f"{name}.json", {
+    write_json(RES / TARGET.loot_path(MOD_ID, f"blocks/{name}"), {
         "type": "minecraft:block",
         "pools": [
             {
@@ -136,8 +146,20 @@ def generate(name: str, textures: dict[str, str], planks: str, slab: str) -> Non
     })
 
 
-def main() -> None:
-    base = ASSETS / "models" / "block" / "barrel_base.json"
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--target", choices=data_target.TARGETS, default=data_target.DEFAULT)
+    parser.add_argument("--out", type=Path, default=None,
+                        help="write the resource tree here instead of src/main/resources")
+    args = parser.parse_args(argv)
+
+    global RES, ASSETS, TARGET
+    TARGET = data_target.get(args.target)
+    if args.out is not None:
+        RES = args.out
+        ASSETS = RES / "assets" / "exnihilosatellitium"
+
+    base = SOURCE / "assets" / "exnihilosatellitium" / "models" / "block" / "barrel_base.json"
     if not base.exists():
         raise SystemExit(f"missing shared geometry: {base}")
 
@@ -154,12 +176,12 @@ def main() -> None:
     generate(STONE_BARREL, stone_textures(), "minecraft:stone", "minecraft:smooth_stone_slab")
 
     merge_tag(
-        DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json",
+        RES / TARGET.tag_path("minecraft", "block", "mineable/axe"),
         [f"{MOD_ID}:{name}" for name, _ in WOOD_BARRELS]
         + [f"{MOD_ID}:{name}" for name, _, _, _, _ in EXTRA_BARRELS],
     )
     merge_tag(
-        DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json",
+        RES / TARGET.tag_path("minecraft", "block", "mineable/pickaxe"),
         [f"{MOD_ID}:{STONE_BARREL}"],
     )
 

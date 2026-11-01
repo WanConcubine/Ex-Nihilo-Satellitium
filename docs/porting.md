@@ -67,16 +67,25 @@ docs/        本文件 + status/parity 的版本标注。
 - 验证：`./gradlew build` 通过；`check-core-imports.py` → `0 known leak(s)`；`runServer` 起来后
   RCON 验过 20 FE/t、自动输出进箱子、漏斗只抽输出格（细节在 [status.md](status.md) 验证表）。
 
-### P2 —— 数据管线（移植成本最大的一块）
+### P2 —— 数据管线（移植成本最大的一块）—— ✅ 2026-11-01 完成
 
-- [ ] 生成器加 `--target 1.21.1|1.20.1`，统一处理：
-      - 目录：`recipe/` ↔ `recipes/`、`loot_table/` ↔ `loot_tables/`、
-        `tags/block` ↔ `tags/blocks`、`tags/item` ↔ `tags/items`；
-      - 配方：`result.id` ↔ `result.item`；
-      - 条件：`neoforge:mod_loaded` ↔ `forge:mod_loaded`（`conditions` 数组）。
-- [ ] 写一个 `scripts/port_data.py`：从当前 1.21 数据生成 1.20.1 版本的数据（只做路径/字段/条件
-      转换，不改数值），放到 1.20.1 分支用。
-- [ ] `check-textures.py` 增加一个“数据路径与目标版本一致”的检查（防 tech-debt #1 重演）。
+- [x] `scripts/data_target.py`：`DataTarget` 统一管路径与字段——`recipe/`↔`recipes/`、
+      `loot_table/`↔`loot_tables/`、`tags/block|item`↔`tags/blocks|items`、
+      `result.id`↔`result.item`、`neoforge:*`↔`forge:*`、`c:`↔`forge:`（含 `c:rods/wooden`
+      这类 `"tag": "..."` 引用和 `#c:` 标签值）。
+- [x] 四个数据生成器（ore / barrel / wooden crucible / sieve）接受
+      `--target 1.21.1|1.20.1` 与 `--out DIR`，默认写 `src/main/resources`；路径全部走
+      `TARGET.recipe_path / loot_path / tag_path`。顺带修了生成器会吃掉手改内容的两处：
+      **lang 只补缺失键**、**筛表改成合并**（保留 M2/M6 手加掉落、按物料更新权重、
+      清掉已移除材料的残留条目）。
+- [x] `scripts/port_data.py`：1.21.1 数据 → 1.20.1 数据（只转换路径/字段/命名空间，数值原样），
+      默认写 `build/port-1.20.1`；非空目录要 `--force`，不会误写回源树。
+- [x] `scripts/check-data-paths.py`：按 `--target` 检查目录名、`result.id/item`、
+      `neoforge:`/`forge:` 条件、`c:`/`forge:` 标签值。**没有塞进 `check-textures.py`**：
+      纹理与数据路径是两件事，分开报错更清楚（见 §4 的说明）。
+- 验证：四个生成器对当前 1.21.1 树重跑 **零 diff**；`--target 1.20.1 --out` 产物通过
+  `check-data-paths.py`；`port_data.py` 产物同样通过，且与生成器产物在 **240 个文件**上逐字节一致
+  （只有合并型标签和筛表因“空树 / 完整树”上下文不同而不同）。
 
 ### P3 —— 状态机拆分（为移植也为测试）
 
