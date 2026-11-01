@@ -144,17 +144,20 @@ dependencies {
     compileOnly "maven.modrinth:jade:${jade_version}"
 
     // Dev-test mods: production jars from libs/ (gitignored), deobfuscated into
-    // the dev runtime. Guarded so a fresh clone without libs/ still builds.
-    // JEI 15 / Jade 11 / Just Enough Characters 4 (1.20.1 Forge).
-    if (file("libs/jei-1.20.1-forge-15.59.0.212.jar").exists()) {
-        compileOnly fg.deobf("libs:jei-1.20.1-forge:15.59.0.212")
-        runtimeOnly fg.deobf("libs:jei-1.20.1-forge:15.59.0.212")
-    }
-    if (file("libs/Jade-1.20.1-Forge-11.13.2.jar").exists()) {
-        runtimeOnly fg.deobf("libs:Jade-1.20.1-Forge:11.13.2")
-    }
-    if (file("libs/jecharacters-1.20.1-forge-4.6.11.jar").exists()) {
-        runtimeOnly fg.deobf("libs:jecharacters-1.20.1-forge:4.6.11")
+    // the dev runtime. Only with -PdevMods, because they are client-side mods and
+    // would break `runServer` (Just Enough Characters even fails on a dedicated
+    // server). `./gradlew runClient -PdevMods` is the intended use.
+    if (project.hasProperty("devMods")) {
+        if (file("libs/jei-1.20.1-forge-15.59.0.212.jar").exists()) {
+            compileOnly fg.deobf("libs:jei-1.20.1-forge:15.59.0.212")
+            runtimeOnly fg.deobf("libs:jei-1.20.1-forge:15.59.0.212")
+        }
+        if (file("libs/Jade-1.20.1-Forge-11.13.2.jar").exists()) {
+            runtimeOnly fg.deobf("libs:Jade-1.20.1-Forge:11.13.2")
+        }
+        if (file("libs/jecharacters-1.20.1-forge-4.6.11.jar").exists()) {
+            runtimeOnly fg.deobf("libs:jecharacters-1.20.1-forge:4.6.11")
+        }
     }
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings

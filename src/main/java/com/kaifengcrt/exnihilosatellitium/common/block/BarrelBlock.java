@@ -75,6 +75,15 @@ public class BarrelBlock extends BaseEntityBlock {
     }
 
     @Override
+    public void playerWillDestroy(final Level level, final BlockPos pos, final BlockState state,
+                                  final Player player) {
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof BarrelBlockEntity barrel) {
+            barrel.dropContentsOnBreak(level, pos);
+        }
+        super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
     public InteractionResult use(final BlockState state, final Level level, final BlockPos pos,
                                  final Player player, final InteractionHand hand, final BlockHitResult hit) {
         final BlockEntity blockEntity = level.getBlockEntity(pos);

@@ -10,9 +10,13 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import org.joml.Matrix4f;
@@ -35,9 +39,9 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
     private static final float HEIGHT = 15.0F / 16.0F;
 
     private static final ResourceLocation COMPOST_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(ExNihiloSatellitium.MOD_ID, "block/barrel_compost");
+            new ResourceLocation(ExNihiloSatellitium.MOD_ID, "block/barrel_compost");
     private static final ResourceLocation DIRT_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/dirt");
+            new ResourceLocation("minecraft", "block/dirt");
 
     public BarrelRenderer(final BlockEntityRendererProvider.Context context) {
     }
@@ -51,6 +55,11 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
 
         if (barrel.isDirtReady()) {
             this.renderDirt(poseStack, bufferSource, light);
+            return;
+        }
+
+        if (barrel.hasSolid()) {
+            this.renderSolid(barrel, poseStack, bufferSource, light);
             return;
         }
 
@@ -115,6 +124,20 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
                 BOTTOM + HEIGHT * fill, light, red, green, blue);
     }
 
+    private void renderSolid(final BarrelBlockEntity barrel, final PoseStack poseStack,
+                             final MultiBufferSource bufferSource, final int light) {
+        final ItemStack stack = barrel.getSolid();
+        if (!(stack.getItem() instanceof BlockItem blockItem)) {
+            return;
+        }
+        final BlockState state = blockItem.getBlock().defaultBlockState();
+        final TextureAtlasSprite sprite = Minecraft.getInstance().getBlockRenderer()
+                .getBlockModelShaper().getParticleIcon(state);
+        final VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
+        contentBox(consumer, poseStack.last().pose(), sprite,
+                BOTTOM + HEIGHT, light, 1.0F, 1.0F, 1.0F);
+    }
+
     private void renderDirt(final PoseStack poseStack, final MultiBufferSource bufferSource, final int light) {
         final TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
@@ -155,58 +178,40 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
                              final float x3, final float y3, final float z3,
                              final int light, final float red, final float green, final float blue,
                              final float normalX, final float normalY, final float normalZ) {
-        consumer.vertex(matrix, x0, y0, z0)
-                .color(red, green, blue, 1.0F)
-                .uv(sprite.getU(0.0F), sprite.getV(1.0F))
-                .uv2(light)
-                .normal(normalX, normalY, normalZ)
-                .endVertex();
-        consumer.vertex(matrix, x1, y1, z1)
-                .color(red, green, blue, 1.0F)
-                .uv(sprite.getU(0.0F), sprite.getV(0.0F))
-                .uv2(light)
-                .normal(normalX, normalY, normalZ)
-                .endVertex();
-        consumer.vertex(matrix, x2, y2, z2)
-                .color(red, green, blue, 1.0F)
-                .uv(sprite.getU(1.0F), sprite.getV(0.0F))
-                .uv2(light)
-                .normal(normalX, normalY, normalZ)
-                .endVertex();
-        consumer.vertex(matrix, x3, y3, z3)
-                .color(red, green, blue, 1.0F)
-                .uv(sprite.getU(1.0F), sprite.getV(1.0F))
-                .uv2(light)
-                .normal(normalX, normalY, normalZ)
-                .endVertex();
+        vert(consumer, matrix, x0, y0, z0, red, green, blue,
+                sprite.getU(0.0F), sprite.getV(1.0F), light, normalX, normalY, normalZ);
+        vert(consumer, matrix, x1, y1, z1, red, green, blue,
+                sprite.getU(0.0F), sprite.getV(0.0F), light, normalX, normalY, normalZ);
+        vert(consumer, matrix, x2, y2, z2, red, green, blue,
+                sprite.getU(1.0F), sprite.getV(0.0F), light, normalX, normalY, normalZ);
+        vert(consumer, matrix, x3, y3, z3, red, green, blue,
+                sprite.getU(1.0F), sprite.getV(1.0F), light, normalX, normalY, normalZ);
     }
 
     private static void topQuad(final VertexConsumer consumer, final Matrix4f matrix,
                                 final TextureAtlasSprite sprite, final float y, final int light,
                                 final float red, final float green, final float blue, final float alpha) {
-        consumer.vertex(matrix, X0, y, Z1)
-                .color(red, green, blue, alpha)
-                .uv(sprite.getU(0.0F), sprite.getV(1.0F))
+        vert(consumer, matrix, X0, y, Z1, red, green, blue,
+                sprite.getU(0.0F), sprite.getV(1.0F), light, 0.0F, 1.0F, 0.0F);
+        vert(consumer, matrix, X1, y, Z1, red, green, blue,
+                sprite.getU(1.0F), sprite.getV(1.0F), light, 0.0F, 1.0F, 0.0F);
+        vert(consumer, matrix, X1, y, Z0, red, green, blue,
+                sprite.getU(1.0F), sprite.getV(0.0F), light, 0.0F, 1.0F, 0.0F);
+        vert(consumer, matrix, X0, y, Z0, red, green, blue,
+                sprite.getU(0.0F), sprite.getV(0.0F), light, 0.0F, 1.0F, 0.0F);
+    }
+
+    private static void vert(final VertexConsumer consumer, final Matrix4f matrix,
+                             final float x, final float y, final float z,
+                             final float red, final float green, final float blue,
+                             final float u, final float v, final int light,
+                             final float normalX, final float normalY, final float normalZ) {
+        consumer.vertex(matrix, x, y, z)
+                .color(red, green, blue, 1.0F)
+                .uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(light)
-                .normal(0.0F, 1.0F, 0.0F)
-                .endVertex();
-        consumer.vertex(matrix, X1, y, Z1)
-                .color(red, green, blue, alpha)
-                .uv(sprite.getU(1.0F), sprite.getV(1.0F))
-                .uv2(light)
-                .normal(0.0F, 1.0F, 0.0F)
-                .endVertex();
-        consumer.vertex(matrix, X1, y, Z0)
-                .color(red, green, blue, alpha)
-                .uv(sprite.getU(1.0F), sprite.getV(0.0F))
-                .uv2(light)
-                .normal(0.0F, 1.0F, 0.0F)
-                .endVertex();
-        consumer.vertex(matrix, X0, y, Z0)
-                .color(red, green, blue, alpha)
-                .uv(sprite.getU(0.0F), sprite.getV(0.0F))
-                .uv2(light)
-                .normal(0.0F, 1.0F, 0.0F)
+                .normal(normalX, normalY, normalZ)
                 .endVertex();
     }
 }
