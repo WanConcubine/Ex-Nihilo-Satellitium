@@ -163,6 +163,7 @@
   "item.exnihilosatellitium.zinc_powdered": "Zinc Powdered Ore",
   "itemGroup.exnihilosatellitium": "Ex Nihilo: Satellitium",
   "jade.exnihilosatellitium.barrel.compost": "Compost: %s%% (%s / %s)",
+  "jade.exnihilosatellitium.barrel.cooking": "Spawning: %ss left",
   "jade.exnihilosatellitium.barrel.fluid": "%s: %s / %s mB",
   "jade.exnihilosatellitium.barrel.ready": "Dirt ready (right-click)",
   "jade.exnihilosatellitium.barrel.solid": "%s (right-click to take out)",
