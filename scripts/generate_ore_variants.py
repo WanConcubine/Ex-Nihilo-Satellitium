@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate ore-chain assets and recipes from materials.json + art/items.
 
-Outputs (all under src/main/resources):
+Outputs (all under src/main/resources, or --out):
   assets/exnihilosatellitium/textures/item/<m>_<stage>.png     (copied from art)
   assets/exnihilosatellitium/textures/item/<m>_ingot.png       (own ingots only)
   assets/exnihilosatellitium/models/block/ore_<kind>_block.json (3 shared models)
@@ -9,33 +9,46 @@ Outputs (all under src/main/resources):
   assets/exnihilosatellitium/models/item/<m>_ore_<kind>.json
   assets/exnihilosatellitium/models/item/<m>_<stage>.json
   assets/exnihilosatellitium/models/item/<m>_ingot.json
-  data/exnihilosatellitium/loot_table/blocks/<m>_ore_<kind>.json
-  data/exnihilosatellitium/recipe/<m>_<stage>_to_ore_<kind>.json   (4 pieces -> block)
-  data/exnihilosatellitium/recipe/<m>_ore_<kind>_smelting.json     (block -> ingot)
+  <recipe dir>/<m>_<stage>_to_ore_<kind>.json        (4 pieces -> block)
+  <recipe dir>/<m>_ore_<kind>_smelting.json          (block -> ingot)
       when materials.json has an `ingots` candidate list, the candidate
       variants are written as <m>_ore_<kind>_smelting_<mod>.json with
-      neoforge:mod_loaded conditions, and the base recipe falls back to our
-      own ingot when none of the candidate mods is loaded
-  data/c/tags/item/ingots/<m>.json                              (own ingots)
-  data/minecraft/tags/block/mineable/shovel.json
+      mod_loaded conditions, and the base recipe falls back to our own ingot
+      when none of the candidate mods is loaded
+  <loot dir>/blocks/<m>_ore_<kind>.json
+  <tag dir>/ingots/<m>.json                          (own ingots)
+  data/minecraft/tags/<blocks|block>/mineable/shovel.json
   lang entries merged into en_us.json / zh_cn.json
 
-    python3 scripts/generate_ore_variants.py
+The recipe/loot/tag paths and the condition ids follow --target (see
+scripts/data_target.py): 1.21.1 writes `recipe/`, `result.id`, `neoforge:*`
+and `c:` tags; 1.20.1 writes `recipes/`, `result.item`, `forge:*` and
+`forge:` tags.
+
+    python3 scripts/generate_ore_variants.py [--target 1.21.1|1.20.1] [--out DIR]
 """
 
+import argparse
 import importlib.util
 import json
 import shutil
 from pathlib import Path
 
+import data_target
+
 ROOT = Path(__file__).resolve().parents[1]
-RES = ROOT / "src/main/resources"
+# Read-only inputs (materials, art). Writes go to RES; --out redirects them.
+SOURCE = ROOT / "src/main/resources"
+RES = SOURCE
 ASSETS = RES / "assets/exnihilosatellitium"
 ART_ITEMS = ROOT / "art/items/ore_pieces"
 ART_INGOTS = ROOT / "art/items/ingots"
 ART_BLOCKS = ROOT / "art/blocks/ore_overlay"
+MOD_ID = "exnihilosatellitium"
 
-MATERIALS = [m for m in json.load(open(RES / "exnihilosatellitium/materials.json", encoding="utf-8"))["materials"]
+TARGET = data_target.get(data_target.DEFAULT)
+
+MATERIALS = [m for m in json.load(open(SOURCE / f"{MOD_ID}/materials.json", encoding="utf-8"))["materials"]
              if m.get("enabled", True)]
 STAGES = ("broken", "crushed", "powdered")
 KINDS = {"gravel": "gravel", "sand": "sand", "dust": "gray_concrete_powder"}
@@ -108,27 +121,27 @@ def crafting_pieces_to_block(mid, stage):
     return {
         "type": "minecraft:crafting_shaped",
         "pattern": ["xx", "xx"],
-        "key": {"x": {"item": f"exnihilosatellitium:{mid}_{stage}"}},
-        "result": {"id": f"exnihilosatellitium:{mid}_ore_{kind}"},
+        "key": {"x": {"item": f"{MOD_ID}:{mid}_{stage}"}},
+        "result": {TARGET.result_key: f"{MOD_ID}:{mid}_ore_{kind}"},
     }
 
 
 def smelting_block_to_ingot(mid, kind, ingot_id):
     return {
         "type": "minecraft:smelting",
-        "ingredient": {"item": f"exnihilosatellitium:{mid}_ore_{kind}"},
-        "result": {"id": ingot_id},
+        "ingredient": {"item": f"{MOD_ID}:{mid}_ore_{kind}"},
+        "result": {TARGET.result_key: ingot_id},
         "experience": 0.1,
         "cookingtime": 200,
     }
 
 
 def mod_loaded(modid):
-    return {"type": "neoforge:mod_loaded", "modid": modid}
+    return TARGET.mod_loaded(modid)
 
 
 def negate(condition):
-    return {"type": "neoforge:not", "value": condition}
+    return TARGET.negate(condition)
 
 
 def smelting_variants(material, mid):
@@ -176,18 +189,32 @@ def clear_own_ingot_assets(mid):
     for path in (
         ASSETS / f"textures/item/{mid}_ingot.png",
         ASSETS / f"models/item/{mid}_ingot.json",
-        RES / f"data/c/tags/item/ingots/{mid}.json",
+        RES / TARGET.tag_path("c", "item", f"ingots/{mid}"),
     ):
         path.unlink(missing_ok=True)
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--target", choices=data_target.TARGETS, default=data_target.DEFAULT)
+    parser.add_argument("--out", type=Path, default=None,
+                        help="write the resource tree here instead of src/main/resources")
+    args = parser.parse_args(argv)
+
+    global RES, ASSETS, TARGET
+    TARGET = data_target.get(args.target)
+    if args.out is not None:
+        RES = args.out
+        ASSETS = RES / "assets/exnihilosatellitium"
+
     for kind in KINDS:
         write_json(ASSETS / f"models/block/ore_{kind}_block.json", block_model(kind))
 
-    shovel = ["exnihilosatellitium:dust"]
-    lang_en = json.load(open(ASSETS / "lang/en_us.json", encoding="utf-8"))
-    lang_zh = json.load(open(ASSETS / "lang/zh_cn.json", encoding="utf-8"))
+    shovel = [f"{MOD_ID}:dust"]
+    # Language files are hand-edited copy: merge on top of the source file.
+    lang_dir = SOURCE / "assets" / MOD_ID / "lang"
+    lang_en = json.load(open(lang_dir / "en_us.json", encoding="utf-8"))
+    lang_zh = json.load(open(lang_dir / "zh_cn.json", encoding="utf-8"))
 
     for m in MATERIALS:
         mid, en = m["id"], m["name"]["en_us"]
@@ -203,9 +230,10 @@ def main():
             write_json(ASSETS / f"models/item/{iid}.json",
                        {"parent": "minecraft:item/generated",
                         "textures": {"layer0": f"exnihilosatellitium:item/{iid}"}})
-            lang_en[f"item.exnihilosatellitium.{iid}"] = f"{en} {stage.capitalize()} Ore"
-            lang_zh[f"item.exnihilosatellitium.{iid}"] = f"{STAGE_ZH[stage]}{zh}矿"
-            write_json(RES / f"data/exnihilosatellitium/recipe/{iid}_to_ore_{STAGE_TO_KIND[stage]}.json",
+            # Language files are hand-edited copy: only fill missing keys.
+            lang_en.setdefault(f"item.exnihilosatellitium.{iid}", f"{en} {stage.capitalize()} Ore")
+            lang_zh.setdefault(f"item.exnihilosatellitium.{iid}", f"{STAGE_ZH[stage]}{zh}矿")
+            write_json(RES / TARGET.recipe_path(MOD_ID, f"{iid}_to_ore_{STAGE_TO_KIND[stage]}"),
                        crafting_pieces_to_block(mid, stage))
 
         if own_ingot_reachable:
@@ -219,10 +247,10 @@ def main():
             values = [own_ingot_id(mid)]
             if len(smelting) > 1:
                 values = [{"id": own_ingot_id(mid), "required": False}]
-            write_json(RES / f"data/c/tags/item/ingots/{mid}.json",
+            write_json(RES / TARGET.tag_path("c", "item", f"ingots/{mid}"),
                        {"replace": False, "values": values})
-            lang_en[f"item.exnihilosatellitium.{iid}"] = f"{en} Ingot"
-            lang_zh[f"item.exnihilosatellitium.{iid}"] = f"{zh}锭"
+            lang_en.setdefault(f"item.exnihilosatellitium.{iid}", f"{en} Ingot")
+            lang_zh.setdefault(f"item.exnihilosatellitium.{iid}", f"{zh}锭")
         else:
             clear_own_ingot_assets(mid)
             lang_en.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
@@ -237,17 +265,16 @@ def main():
                        {"variants": {"": {"model": f"exnihilosatellitium:block/ore_{kind}_block"}}})
             write_json(ASSETS / f"models/item/{bid}.json",
                        {"parent": f"exnihilosatellitium:block/ore_{kind}_block"})
-            write_json(RES / f"data/exnihilosatellitium/loot_table/blocks/{bid}.json",
-                       loot_table(mid, kind))
+            write_json(RES / TARGET.loot_path(MOD_ID, f"blocks/{bid}"), loot_table(mid, kind))
             # drop variants of candidates that were removed from the table
-            for stale in (RES / "data/exnihilosatellitium/recipe").glob(f"{bid}_smelting_*.json"):
+            recipe_dir = RES / f"data/{MOD_ID}" / TARGET.recipe_dir
+            for stale in recipe_dir.glob(f"{bid}_smelting_*.json"):
                 stale.unlink()
             for suffix, ingot_id, conditions in smelting:
                 recipe = smelting_block_to_ingot(mid, kind, ingot_id)
                 if conditions:
-                    recipe["neoforge:conditions"] = conditions
-                write_json(RES / f"data/exnihilosatellitium/recipe/{bid}_smelting{suffix}.json",
-                           recipe)
+                    recipe[TARGET.condition_key] = conditions
+                write_json(RES / TARGET.recipe_path(MOD_ID, f"{bid}_smelting{suffix}"), recipe)
             if kind == "gravel":
                 write_json(RES / f"data/exnihilosatellitium/hammer/{mid}_ore_gravel.json",
                            {"input": f"exnihilosatellitium:{mid}_ore_gravel",
@@ -264,20 +291,20 @@ def main():
                 write_json(RES / f"data/exnihilosatellitium/hammer/{mid}_ore_dust.json",
                            {"input": f"exnihilosatellitium:{mid}_ore_dust",
                             "result": f"exnihilosatellitium:{mid}_ore_dust"})
-            lang_en[f"block.exnihilosatellitium.{bid}"] = f"{en} Ore {kind.capitalize()}"
-            lang_zh[f"block.exnihilosatellitium.{bid}"] = f"{zh}矿{KIND_ZH[kind]}"
+            lang_en.setdefault(f"block.exnihilosatellitium.{bid}", f"{en} Ore {kind.capitalize()}")
+            lang_zh.setdefault(f"block.exnihilosatellitium.{bid}", f"{zh}矿{KIND_ZH[kind]}")
 
         # Ore blocks only: 1.7.10 Ex Nihilo registers its gravel/sand/dust ore
         # blocks with TE/TC, so `c:ores` is faithful. `c:raw_materials` is the
         # 1.17+ "raw ore" concept and must NOT contain our broken/crushed/powdered
         # intermediates — other mods would treat them as raw ore and bypass the
         # 4-pieces -> block -> smelt chain.
-        write_json(RES / f"data/c/tags/block/ores/{mid}.json", tag(ore_blocks))
-        write_json(RES / f"data/c/tags/item/ores/{mid}.json", tag(ore_blocks))
+        write_json(RES / TARGET.tag_path("c", "block", f"ores/{mid}"), tag(ore_blocks))
+        write_json(RES / TARGET.tag_path("c", "item", f"ores/{mid}"), tag(ore_blocks))
 
     # Merge with whatever is already in the tag: the M6 crushed netherrack/end
     # stone blocks are added by another script and must survive a rerun.
-    shovel_path = RES / "data/minecraft/tags/block/mineable/shovel.json"
+    shovel_path = RES / TARGET.tag_path("minecraft", "block", "mineable/shovel")
     existing_shovel = set()
     if shovel_path.exists():
         existing_shovel = set(json.loads(shovel_path.read_text(encoding="utf-8"))["values"])
@@ -286,16 +313,15 @@ def main():
 
     # Root tags: NeoForge's own root only lists vanilla metals, so append our
     # per-material subtags for mods that look up the whole tag.
-    subtags = [f"#c:ores/{m['id']}" for m in MATERIALS]
-    write_json(RES / "data/c/tags/block/ores.json", tag(subtags))
-    write_json(RES / "data/c/tags/item/ores.json", tag(subtags))
+    subtags = ["#" + TARGET.common_ref(f"ores/{m['id']}") for m in MATERIALS]
+    write_json(RES / TARGET.tag_path("c", "block", "ores"), tag(subtags))
+    write_json(RES / TARGET.tag_path("c", "item", "ores"), tag(subtags))
 
-    # Drop tags from older generator versions: raw_materials is NeoForge's root
-    # tag and our pieces do not belong in it.
-    shutil.rmtree(RES / "data/c/tags/item/raw_materials", ignore_errors=True)
-    raw_root = RES / "data/c/tags/item/raw_materials.json"
-    if raw_root.exists():
-        raw_root.unlink()
+    # Drop tags from older generator versions: raw_materials is the loader's
+    # root tag and our pieces do not belong in it.
+    raw_root = RES / "data" / TARGET.tag_namespace("c") / TARGET.tag_dir("item")
+    shutil.rmtree(raw_root / "raw_materials", ignore_errors=True)
+    (raw_root / "raw_materials.json").unlink(missing_ok=True)
     write_json(ASSETS / "lang/en_us.json", dict(sorted(lang_en.items())))
     write_json(ASSETS / "lang/zh_cn.json", dict(sorted(lang_zh.items())))
     print(f"generated assets for {len(MATERIALS)} materials "

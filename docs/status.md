@@ -13,11 +13,38 @@ M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 /
 GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**自动输出配置也已实现**（服务端 RCON 验过，
 GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
 `ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
-`check-core-imports.py` 的 known 清零。下一批是 **P2 数据管线**（生成器 `--target` +
-`scripts/port_data.py`），再把 1.20.1 分支补到 M2（见 [porting.md](porting.md)）。
+`check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
+`scripts/port_data.py`、`scripts/check-data-paths.py`。下一批是**把 1.20.1 分支补到 M2**
+（用 port_data 铺数据，见 [porting.md](porting.md)）。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，P1 薄门面）
+## 当前批次（2026-11-01，P2 数据管线）
+
+- **`scripts/data_target.py`**：`DataTarget` 一处管住两版的路径与字段——`recipe/`↔`recipes/`、
+  `loot_table/`↔`loot_tables/`、`tags/block|item`↔`tags/blocks|items`、`result.id`↔`result.item`、
+  `neoforge:*`↔`forge:*`、`c:`↔`forge:`（含 `"tag": "c:rods/wooden"` 与 `#c:` 值）。
+- **生成器加 `--target` / `--out`**：`generate_ore_variants` / `generate_barrel_variants` /
+  `generate_wooden_crucible_variants` / `generate_sieve_assets`；默认仍写
+  `src/main/resources`，`--out` 用于预览/验证。
+- **顺手修了两个“重跑会吃手改”的坑**（以前生成器直接覆盖）：
+  - lang（三个生成器）改成**只补缺失键**，作者改过的 `木筛网`/`线筛网`/`String Mesh` 不会被冲掉；
+  - 筛表（`sieve/*.json`）改成**合并**：保留 M2/M6 手加掉落、生成项按材料权重更新、
+    删掉已从 `materials.json` 移除的材料的残留条目。
+  现在四个生成器对当前树重跑是 **零 diff**（以前会删掉 13 条手写筛出物：沙 12 + 砂砾 1）。
+- **`scripts/port_data.py`**：1.21.1 → 1.20.1 数据（只改路径/字段/命名空间，数值原样）；
+  默认输出 `build/port-1.20.1`，非空目录要 `--force`，拒绝写回源树/仓库根。
+- **`scripts/check-data-paths.py`**：按目标版本检查目录名、`result.id/item`、条件命名空间、
+  `c:`/`forge:` 标签；没有塞进 `check-textures.py`（两类问题分开报更清楚）。
+- **验证**：
+  - 1.21.1 生成器重跑 → `diff -r` 与仓库逐字节一致（含 lang、筛表）；
+  - `port_data.py` → 145 recipe / 69 loot / 41 tag / 125 其他文件，`check-data-paths --target 1.20.1` 通过；
+  - 生成器 `--target 1.20.1 --out` 产物（107 recipe / 60 loot / 39 tag）同样通过守卫，
+    并与 port 产物在 **240 个文件**上逐字节一致（差异只有合并型 `minecraft:tags/blocks/mineable/*`
+    和 3 张筛表——空树没有手写条目，属预期）。
+- **未做**：1.20.1 分支本身还没铺数据、没补 M2；生成器产物里的 `render_type` 等**资产**差异不在
+  本批范围（P2 只管 `data/`）。
+
+## 上一批次（2026-11-01，P1 薄门面）
 
 - **分层落地**：新增顶层 `platform/` 包，只放每版要重写的胶水
   （`NeoForgeModProbe`、`config/ModConfig`、`machine/{MachineEnergy,MachineItemHandler,MachineHooks}`）。
@@ -41,7 +68,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 - **未验**：纯结构重构，画面/手感预期不变，但**客户端没进游戏看**（自动输出抽屉仍走同一个
   `pushGuiLayer`，只是多包了一层）。
 
-## 上一批次（2026-11-01，双版本 / supported mods / 移植审计）
+## 更早（2026-11-01，双版本 / supported mods / 移植审计）
 
 - **supported mods**：`materials.json` 的 `ingots` 有序候选（`{"item": ..., "mod": ...}`），
   启动时取第一个已加载模组的锭，都没装就回退自有锭；熔炼配方按 `neoforge:mod_loaded` 生成，
@@ -202,9 +229,13 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 
 ## 交接清单（下次会话先做）
 
-- **先读** [porting.md](porting.md)；本批从 **P2 数据管线** 开始（清单见「下一步」）。
+- **先读** [porting.md](porting.md) §3 的 P2 记录；本批从 **1.20.1 分支补 M2** 开始（清单见「下一步」）。
 - **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`
-  （最后一条现在必须是 `0 known leak(s)`；新增 NeoForge import 进 core 会直接失败）。
+  + `python3 scripts/check-data-paths.py`（后两条必须 `0 known leak(s)` / `passed for 1.21.1`）。
+- **数据管线验收（不需要进游戏）**：
+  `python3 scripts/port_data.py --out build/port-1.20.1 --force` →
+  `python3 scripts/check-data-paths.py --target 1.20.1 --root build/port-1.20.1`；
+  四个生成器重跑不应产生 diff（`git status --short` 应为空）。
 - 进游戏验收（服务端逻辑都已验过，剩下“看得见/摸得着”的）：
   - **M4 坩埚**：1 块圆石只占 12.5%、8 块满 2000、第 9 块被拒；沙子/尘土 100、花岗岩 250；
     桶/瓶抽流体；熔料↔流体显示切换；Jade 熔料剩余 + 热源速度；三个配置键热改；JEI 两页。
@@ -328,6 +359,11 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 | 筛料渲染溢出 | ⚠️ | 作者截图确认料层与盘壁交替渲染；已改为 0.6 宽 + 抬到 10.5 px，**待目视** |
 | 木桶/石桶竖棱 | ⚠️ | 作者反馈棱上渲染怪；已去掉 4 个 1×15 端面的 `rotation:90`（离线渲染对比确认条纹消失），**待目视** |
 | 机器镐挖掘 | ⚠️ | 已加 `mineable/pickaxe` + `needs_stone_tool`（石镐及以上掉方块），**待游戏内挖一次确认** |
+| P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (145 recipes, 69 loot tables, 41 tags)` |
+| P2 生成器幂等 | ✅ | 1.21.1 四个生成器写入仓库副本后 `diff -r` 与仓库逐字节一致（含 lang/筛表） |
+| P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |
+| P2 生成器 1.20.1 | ✅ | `--target 1.20.1 --out`：107 recipe / 60 loot / 39 tag 通过守卫；与 port 产物 240 文件逐字节一致 |
+| P2 1.20.1 分支 | ⚠️ | 分支本身还没铺数据、没补 M2 |
 | P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
 | P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |
 | P1 ConfigValues | ✅ | RCON：电动筛 217 tick，`Energy` 20000→15660（正好 20 FE/t） |
@@ -339,11 +375,11 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 
 ## 下一步（按价值排序）
 
-1. **P2 数据管线**（[porting.md](porting.md) §3）：生成器 `--target 1.21.1|1.20.1` +
-   `scripts/port_data.py`（路径/`result.id`↔`result.item`/`neoforge:`↔`forge:` 条件），
-   让数据只维护一份；顺手给 `check-textures.py` 加“数据路径与目标版本一致”的检查。
-2. **1.20.1 分支补 M2**（筛子 + 矿链 + 材料表），然后接 Thermal（它只有 1.20.1）。
-3. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI）：清单见交接清单。
+1. **1.20.1 分支补 M2**（筛子 + 矿链 + 材料表）：先 `port_data.py --target 1.20.1` 铺数据，
+   再按 [porting.md](porting.md) §4 换平台 API；之后接 Thermal（它只有 1.20.1）。
+2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
+   清单见交接清单。
+3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
 4. **M7 余项**：config 扩展、datagen；JEI 已补全。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
@@ -408,6 +444,11 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   并与盘壁外侧面共面，表现为「料层和盘边交替闪烁」；缩到 0.6（3.2..12.8）并抬高 0.15 px 才干净。
 - **1px 宽的端面不能带 `rotation: 90`**：面只有 1 px 宽、UV 矩形是 1×15，旋转后木纹被压进
   1 px → 棱上出现一排细条纹；端面用默认 UV（不旋转）才干净（木桶 2026-11-01 修）。
+- **生成器不能无条件覆盖手写数据**：`lang` 只补缺失键、筛表按 item 合并；否则重跑
+  `generate_sieve_assets.py` 会删掉 M2/M6 手加的 13 条沙筛掉落（P2 修）。
+  新写生成器时，凡是作者可能手改的 JSON，都要走“合并”而不是整文件重写。
+- **`port_data.py` 只改路径/字段/命名空间，不改数值**：数值漂移要回生成器或手写源改，
+  别在移植产物上打补丁（改完下一次 port 就丢）。
 - **core 门面必须在注册之前安装**：`Platform.install()` / `ConfigValues.install()` /
   `OreMaterials.init()` 都在 mod 构造函数最前面；漏装会抛带说明的 `IllegalStateException`
   （`OreMaterials.all()` 同理），而不是到世界加载时才 NPE。配置门面是**委托读 spec**，
@@ -453,6 +494,12 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 ./gradlew build
 python3 scripts/check-textures.py
 python3 scripts/check-core-imports.py                # core 层不得出现 NeoForge/Forge import
+python3 scripts/check-data-paths.py                  # 数据目录/字段/命名空间与目标版本一致
+
+# 数据管线（P2）
+python3 scripts/port_data.py --out build/port-1.20.1 --force     # 1.21.1 -> 1.20.1 数据
+python3 scripts/check-data-paths.py --target 1.20.1 --root build/port-1.20.1
+python3 scripts/generate_ore_variants.py --target 1.20.1 --out build/gen-1.20.1   # 生成器同理
 
 # 推送（SakuraCat 代理；SSH 22 会被代理拒，走 ssh.github.com:443）
 GIT_SSH_COMMAND='ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes \

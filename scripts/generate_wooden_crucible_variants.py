@@ -1,25 +1,34 @@
 #!/usr/bin/env python3
-"""Generate the per-wood wooden crucible assets (1.21.1 data paths).
+"""Generate the per-wood wooden crucible assets.
 
 Geometry is shared with the porcelain crucible (`models/block/crucible_base.json`);
 each wood variant is a child model that only overrides the texture slots with
 vanilla-sampled log textures. Recipes use that wood's own log plus any wooden
 slab (`#minecraft:wooden_slabs`).
 
-    python3 scripts/generate_wooden_crucible_variants.py
+Recipe/loot/tag paths follow `--target`, see scripts/data_target.py.
+
+    python3 scripts/generate_wooden_crucible_variants.py [--target 1.21.1|1.20.1] [--out DIR]
 
 This writes into `src/main/resources`; review the diff before committing.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
+import data_target
+
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium"
-DATA = ROOT / "src" / "main" / "resources" / "data"
+# Read-only inputs (lang). Writes go to RES; --out redirects them.
+SOURCE = ROOT / "src" / "main" / "resources"
+RES = SOURCE
+ASSETS = RES / "assets" / "exnihilosatellitium"
 MOD_ID = "exnihilosatellitium"
+
+TARGET = data_target.get(data_target.DEFAULT)
 
 # (block id, log item, side texture, top texture, inside texture, zh, en).
 # `wooden_crucible` keeps the plain id but is named as the oak variant.
@@ -79,17 +88,34 @@ def textures(side: str, top: str, inside: str) -> dict[str, str]:
 
 def update_lang() -> None:
     for lang in ("en_us", "zh_cn"):
-        path = ASSETS / "lang" / f"{lang}.json"
+        # Always merge on top of the source language file, so --out previews
+        # carry the hand-written entries too.
+        path = SOURCE / "assets" / "exnihilosatellitium" / "lang" / f"{lang}.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         for block_id, _, _, _, _, zh, en in WOODS:
             name = zh if lang == "zh_cn" else en
-            data[f"block.{MOD_ID}.{block_id}"] = name
-            data[f"item.{MOD_ID}.{block_id}"] = name
-        path.write_text(json.dumps(dict(sorted(data.items())), indent=2, ensure_ascii=False) + "\n",
-                        encoding="utf-8")
+            # Language files are hand-edited copy: only fill missing keys.
+            data.setdefault(f"block.{MOD_ID}.{block_id}", name)
+            data.setdefault(f"item.{MOD_ID}.{block_id}", name)
+        out = ASSETS / "lang" / f"{lang}.json"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(dict(sorted(data.items())), indent=2, ensure_ascii=False) + "\n",
+                       encoding="utf-8")
 
 
-def main() -> None:
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--target", choices=data_target.TARGETS, default=data_target.DEFAULT)
+    parser.add_argument("--out", type=Path, default=None,
+                        help="write the resource tree here instead of src/main/resources")
+    args = parser.parse_args(argv)
+
+    global RES, ASSETS, TARGET
+    TARGET = data_target.get(args.target)
+    if args.out is not None:
+        RES = args.out
+        ASSETS = RES / "assets" / "exnihilosatellitium"
+
     ids = []
     for block_id, log_item, side, top, inside, _, _ in WOODS:
         ids.append(f"{MOD_ID}:{block_id}")
@@ -104,7 +130,7 @@ def main() -> None:
         write_json(ASSETS / "models" / "item" / f"{block_id}.json",
                    {"parent": f"{MOD_ID}:block/{block_id}"})
 
-        write_json(DATA / MOD_ID / "loot_table" / "blocks" / f"{block_id}.json", {
+        write_json(RES / TARGET.loot_path(MOD_ID, f"blocks/{block_id}"), {
             "type": "minecraft:block",
             "pools": [{
                 "rolls": 1.0,
@@ -113,20 +139,20 @@ def main() -> None:
             }],
         })
 
-        write_json(DATA / MOD_ID / "recipe" / f"{block_id}.json", {
+        write_json(RES / TARGET.recipe_path(MOD_ID, block_id), {
             "type": "minecraft:crafting_shaped",
             "pattern": ["x x", "x x", "xyx"],
             "key": {
                 "x": {"item": log_item},
                 "y": {"tag": "minecraft:wooden_slabs"},
             },
-            "result": {"id": f"{MOD_ID}:{block_id}"},
+            "result": {TARGET.result_key: f"{MOD_ID}:{block_id}"},
         })
 
     update_lang()
-    write_json(DATA / MOD_ID / "tags" / "block" / "wooden_crucibles.json",
+    write_json(RES / TARGET.tag_path(MOD_ID, "block", "wooden_crucibles"),
                {"replace": False, "values": ids})
-    merge_tag(DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json", ids)
+    merge_tag(RES / TARGET.tag_path("minecraft", "block", "mineable/axe"), ids)
     print(f"generated {len(WOODS)} wooden crucibles")
 
 

@@ -22,6 +22,9 @@ python3 scripts/check-textures.py
 # 分层守卫：core 层（数据表/掷表/状态机）不得 import NeoForge/Forge
 python3 scripts/check-core-imports.py
 
+# 数据守卫：数据目录/字段/条件/标签命名空间必须与目标版本一致
+python3 scripts/check-data-paths.py
+
 # 开发服（RCON 已配：localhost:25575 / eni）
 ./gradlew runServer
 
@@ -29,7 +32,7 @@ python3 scripts/check-core-imports.py
 ./gradlew runClient
 ```
 
-- 改完**至少**跑 `build` + `check-textures.py`。
+- 改完**至少**跑 `build` + `check-textures.py` + `check-data-paths.py`。
 - 服务端逻辑用 RCON 验（`/setblock`、`/data merge`、`/execute if block`）。
 - **测试绿 ≠ 画面/手感验过**；没进游戏看过就不要在 status.md 写“已验证”。
 - NeoForge 1.21 运行时用官方名，生产 jar 可以直接放进 `run/mods` 测（已验证 Jade 15 / JEI 19 / Just Enough Characters）；`run/` 已 gitignore，别提交。
