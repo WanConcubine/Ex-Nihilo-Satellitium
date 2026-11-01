@@ -132,9 +132,12 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             return list;
         }
         for (int i = 0; i < UPGRADE_SLOTS; i++) {
-            if (this.inventory.getItem(UPGRADE_SLOT_START + i).getItem()
-                    instanceof UpgradeItem upgrade && upgrade.type() == type) {
-                list.add(upgrade);
+            final ItemStack stack = this.inventory.getItem(UPGRADE_SLOT_START + i);
+            if (stack.getItem() instanceof UpgradeItem upgrade && upgrade.type() == type) {
+                // each item in the stack is one upgrade, not one per slot
+                for (int count = 0; count < stack.getCount(); count++) {
+                    list.add(upgrade);
+                }
             }
         }
         list.sort(java.util.Comparator.comparingInt(UpgradeItem::tier).reversed());
@@ -146,8 +149,9 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         int count = 0;
         if (this.electric) {
             for (int i = 0; i < UPGRADE_SLOTS; i++) {
-                if (this.inventory.getItem(UPGRADE_SLOT_START + i).getItem() instanceof UpgradeItem) {
-                    count++;
+                final ItemStack stack = this.inventory.getItem(UPGRADE_SLOT_START + i);
+                if (stack.getItem() instanceof UpgradeItem) {
+                    count += stack.getCount();
                 }
             }
         }

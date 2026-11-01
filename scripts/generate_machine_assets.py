@@ -311,35 +311,40 @@ def sieve_model(*, fuel: bool) -> dict:
             out["uv"] = uv
         return out
 
-    side_uv = [0, 6, 16, 16]
+    side_uv = [0, 0, 16, 16]
+    rim_uv = [0, 0, 16, 4]
     elements = []
-    # four 1x1 legs, exactly like the manual sieve
-    for x, z in ((1, 1), (14, 1), (1, 14), (14, 14)):
+    # solid body 5..13: no see-through gaps below the rim
+    elements.append({
+        "from": [0, 5, 0], "to": [16, 13, 16],
+        "faces": {
+            "down": face("#side"), "up": face("#inner"),
+            "north": face("#side", side_uv), "south": face("#side", side_uv),
+            "west": face("#side", side_uv), "east": face("#side", side_uv),
+        },
+    })
+    # four 2x2 legs 0..5
+    for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
         elements.append({
-            "from": [x, 0, z], "to": [x + 1, 11, z + 1],
+            "from": [x, 0, z], "to": [x + 2, 5, z + 2],
             "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
         })
-    # 1 px thick rim at y=10..14, matching the manual sieve frame
+    # 1 px rim 13..14 around a shallow mesh tray
     walls = (
-        ("north", [0, 10, 0, 16, 14, 1]),
-        ("south", [0, 10, 15, 16, 14, 16]),
-        ("west", [0, 10, 1, 1, 14, 15]),
-        ("east", [15, 10, 1, 16, 14, 15]),
+        ("north", [0, 13, 0, 16, 14, 1]),
+        ("south", [0, 13, 15, 16, 14, 16]),
+        ("west", [0, 13, 1, 1, 14, 15]),
+        ("east", [15, 13, 1, 16, 14, 15]),
     )
     for outer, box in walls:
-        faces = {f: face("#side") for f in ("down", "up", "north", "south", "west", "east")}
+        faces = {f: face("#side", rim_uv) for f in ("down", "up", "north", "south", "west", "east")}
         faces["up"] = face("#top")
-        faces[outer] = face("#side", side_uv)
         inner = {"north": "south", "south": "north", "west": "east", "east": "west"}[outer]
         faces[inner] = face("#inner")
         elements.append({"from": box[:3], "to": box[3:], "faces": faces})
-    # dark shelf under the mesh, then the cutout mesh surface
+    # mesh surface just above the body top
     elements.append({
-        "from": [1, 10, 1], "to": [15, 10.1, 15],
-        "faces": {"up": face("#inner"), "down": face("#inner")},
-    })
-    elements.append({
-        "from": [1, 10.25, 1], "to": [15, 10.4, 15],
+        "from": [1, 13.05, 1], "to": [15, 13.2, 15],
         "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
     })
     return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
