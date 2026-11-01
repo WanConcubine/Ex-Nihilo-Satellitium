@@ -48,6 +48,12 @@ python3 scripts/check-textures.py
    - 墙在 x/z=1，不在方块边界；加了会在相邻方块旁整面被剔除。
 5. **许可证变更必须得到仓库所有者明确同意。**
    - 默认 MIT；不要为了抄某个 GPL 资源而偷偷改 license。
+6. **版本线去留 / 归档 / 发布 / 破坏性迁移必须所有者同意。**
+   - 「A 版本线终止、只维护 B」这类表述不能由 agent 自行决定，也不能从「主线切换」推导出来；
+     先在对话里拿到明确同意，再改文档、打 tag、写提交信息。
+   - 2026-10-29 的 1.20.1「归档」就是反面案例：见
+     [docs/incidents/2026-11-01-unauthorized-archive.md](docs/incidents/2026-11-01-unauthorized-archive.md)。
+   - 迁移时只切构建目标，不要顺手给旧线打 `legacy/` tag。
 
 ## 4. 代码地图
 
