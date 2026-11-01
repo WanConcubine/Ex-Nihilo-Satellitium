@@ -38,7 +38,7 @@ public final class MachineOutputPanel {
     private final AbstractMachineScreen<?> screen;
     private final AbstractMachineMenu menu;
     private final BlockPos pos;
-    private final Direction front;
+    private Direction front = Direction.NORTH;
     private final Direction[] faces = new Direction[6];
     private final Map<Direction, Button> faceButtons = new EnumMap<>(Direction.class);
 
@@ -59,16 +59,18 @@ public final class MachineOutputPanel {
         this.screen = screen;
         this.menu = menu;
         this.pos = menu.owner() != null ? menu.owner().getBlockPos() : BlockPos.ZERO;
-        this.front = screen.playerFacing();
+    }
+
+    void init() {
+        // The screen constructor runs before Minecraft attaches itself to the
+        // screen, so the player facing must be frozen here, in init().
+        this.front = this.screen.playerFacing();
         this.faces[0] = Direction.UP;
         this.faces[1] = Direction.DOWN;
         this.faces[2] = this.front;
         this.faces[3] = this.front.getOpposite();
         this.faces[4] = this.front.getCounterClockWise();
         this.faces[5] = this.front.getClockWise();
-    }
-
-    void init() {
         final int guiLeft = this.screen.guiLeft();
         final int guiTop = this.screen.guiTop();
         this.left = Math.max(2, guiLeft - PANEL_WIDTH);
