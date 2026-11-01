@@ -1,6 +1,8 @@
 package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -61,6 +63,38 @@ public final class ModItems {
             ITEMS.register("iron_mesh", () -> new MeshItem(
                     new Item.Properties().stacksTo(1).durability(256), 3));
     public static final List<RegistryObject<Item>> MESHES = List.of(WOOD_MESH, SILK_MESH, IRON_MESH);
+
+    public static final RegistryObject<Item> DUST =
+            ITEMS.register("dust", () -> new BlockItem(ModBlocks.DUST.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WOODEN_HAMMER =
+            ITEMS.register("wooden_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(64), 1));
+    public static final RegistryObject<Item> STONE_HAMMER =
+            ITEMS.register("stone_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(128), 2));
+    public static final RegistryObject<Item> IRON_HAMMER =
+            ITEMS.register("iron_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(256), 3));
+    public static final RegistryObject<Item> GOLDEN_HAMMER =
+            ITEMS.register("golden_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(32), 4));
+    public static final RegistryObject<Item> DIAMOND_HAMMER =
+            ITEMS.register("diamond_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(1561), 5));
+    public static final RegistryObject<Item> NETHERITE_HAMMER =
+            ITEMS.register("netherite_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(2031), 6));
+    public static final List<RegistryObject<Item>> HAMMERS = List.of(
+            WOODEN_HAMMER, STONE_HAMMER, IRON_HAMMER, GOLDEN_HAMMER, DIAMOND_HAMMER, NETHERITE_HAMMER);
+
+    public static final RegistryObject<Item> WOODEN_CROOK =
+            ITEMS.register("wooden_crook", () -> new CrookItem(
+                    new Item.Properties().stacksTo(1).durability(64), 1));
+    public static final RegistryObject<Item> BONE_CROOK =
+            ITEMS.register("bone_crook", () -> new CrookItem(
+                    new Item.Properties().stacksTo(1).durability(128), 2));
+    public static final List<RegistryObject<Item>> CROOKS = List.of(WOODEN_CROOK, BONE_CROOK);
 
     private ModItems() {
     }

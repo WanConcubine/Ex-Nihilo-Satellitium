@@ -42,6 +42,10 @@ public final class ModBlocks {
             BLOCKS.register("stone_barrel",
                     () -> new BarrelBlock(BlockBehaviour.Properties.copy(Blocks.STONE)));
 
+    /** M3: the dust block (hammer sand -> dust; sifting dust gives redstone etc.). */
+    public static final RegistryObject<Block> DUST =
+            BLOCKS.register("dust", () -> new Block(BlockBehaviour.Properties.copy(Blocks.SAND)));
+
     public static final RegistryObject<Block> SIEVE =
             BLOCKS.register("sieve", () -> new SieveBlock(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
                     .noOcclusion()

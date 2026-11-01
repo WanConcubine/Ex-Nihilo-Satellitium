@@ -30,6 +30,9 @@ public final class ModCreativeTabs {
                 ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
                 output.accept(ModItems.SIEVE.get());
                 ModItems.MESHES.forEach(mesh -> output.accept(mesh.get()));
+                output.accept(ModItems.DUST.get());
+                ModItems.HAMMERS.forEach(hammer -> output.accept(hammer.get()));
+                ModItems.CROOKS.forEach(crook -> output.accept(crook.get()));
                 for (final OreMaterial material : OreMaterials.all()) {
                     final var entries = ModOreItems.byMaterial().get(material.id());
                     for (final String kind : ModOreBlocks.KINDS) {

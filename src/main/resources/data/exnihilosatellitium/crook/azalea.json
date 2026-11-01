@@ -1,0 +1,9 @@
+{
+  "input": "minecraft:azalea_leaves",
+  "drops": [
+    {
+      "item": "minecraft:azalea",
+      "chance": 0.25
+    }
+  ]
+}
