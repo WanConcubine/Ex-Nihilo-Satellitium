@@ -93,6 +93,10 @@ public final class ModItems {
             ITEMS.register("angry_doll", () -> new Item(new Item.Properties().stacksTo(16)));
     public static final DeferredHolder<Item, Item> CREEPY_DOLL =
             ITEMS.register("creepy_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final DeferredHolder<Item, Item> SHULKER_DOLL =
+            ITEMS.register("shulker_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final DeferredHolder<Item, Item> GUARDIAN_DOLL =
+            ITEMS.register("guardian_doll", () -> new Item(new Item.Properties().stacksTo(16)));
 
     /** M6: infested leaves item; the infestation component picks 0 % or mature. */
     public static final DeferredHolder<Item, Item> INFESTED_LEAVES =

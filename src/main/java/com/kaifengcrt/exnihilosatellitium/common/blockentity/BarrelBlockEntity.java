@@ -130,7 +130,7 @@ public class BarrelBlockEntity extends BlockEntity {
     private int sporeProgress;
     /** Doll rules: entity to spawn when cooking finishes, or null. */
     private ResourceLocation pendingEntity;
-    private Item peacefulDrop;
+    private final java.util.List<Item> peacefulDrops = new java.util.ArrayList<>();
     private int cookTicks;
 
     public BarrelBlockEntity(final BlockPos pos, final BlockState state) {
@@ -440,7 +440,8 @@ public class BarrelBlockEntity extends BlockEntity {
     /** Dolls: consume the fluid and start a cooking timer that spawns an entity. */
     private void startCooking(final BarrelRecipes.Recipe rule) {
         this.pendingEntity = rule.entity();
-        this.peacefulDrop = rule.peacefulDrop();
+        this.peacefulDrops.clear();
+        this.peacefulDrops.addAll(rule.peacefulDrops());
         this.cookTicks = rule.cookTicks();
         this.tank.setFluid(FluidStack.EMPTY);
         this.dirtReady = false;
@@ -482,13 +483,14 @@ public class BarrelBlockEntity extends BlockEntity {
                         level.addFreshEntity(entity);
                     }
                 }
-            } else if (this.peacefulDrop != null) {
-                Block.popResource(level, pos.above(), new ItemStack(this.peacefulDrop));
+            } else if (!this.peacefulDrops.isEmpty()) {
+                final Item drop = this.peacefulDrops.get(level.random.nextInt(this.peacefulDrops.size()));
+                Block.popResource(level, pos.above(), new ItemStack(drop));
             }
             level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.4F);
         }
         this.pendingEntity = null;
-        this.peacefulDrop = null;
+        this.peacefulDrops.clear();
         this.cookTicks = 0;
         this.setChanged();
         this.sync();
@@ -627,8 +629,13 @@ public class BarrelBlockEntity extends BlockEntity {
         if (this.pendingEntity != null) {
             tag.putString("CookEntity", this.pendingEntity.toString());
         }
-        if (this.peacefulDrop != null) {
-            tag.putString("PeacefulDrop", BuiltInRegistries.ITEM.getKey(this.peacefulDrop).toString());
+        if (!this.peacefulDrops.isEmpty()) {
+            final net.minecraft.nbt.ListTag drops = new net.minecraft.nbt.ListTag();
+            for (final Item item : this.peacefulDrops) {
+                drops.add(net.minecraft.nbt.StringTag.valueOf(
+                        BuiltInRegistries.ITEM.getKey(item).toString()));
+            }
+            tag.put("PeacefulDrops", drops);
         }
         tag.putInt("CookTicks", this.cookTicks);
         if (this.hasSolid()) {
@@ -649,10 +656,13 @@ public class BarrelBlockEntity extends BlockEntity {
         this.sporeProgress = tag.getInt("Spore");
         this.pendingEntity = tag.contains("CookEntity")
                 ? ResourceLocation.tryParse(tag.getString("CookEntity")) : null;
-        this.peacefulDrop = tag.contains("PeacefulDrop")
-                ? BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(tag.getString("PeacefulDrop")))
-                        .orElse(null)
-                : null;
+        this.peacefulDrops.clear();
+        if (tag.contains("PeacefulDrops")) {
+            for (final net.minecraft.nbt.Tag element : tag.getList("PeacefulDrops", net.minecraft.nbt.Tag.TAG_STRING)) {
+                BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(element.getAsString()))
+                        .ifPresent(this.peacefulDrops::add);
+            }
+        }
         this.cookTicks = tag.getInt("CookTicks");
         this.solid = tag.contains("Solid")
                 ? ItemStack.parseOptional(registries, tag.getCompound("Solid"))

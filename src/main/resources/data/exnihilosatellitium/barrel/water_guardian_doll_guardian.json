@@ -1,0 +1,12 @@
+{
+  "base": "minecraft:water",
+  "added": {
+    "item": "exnihilosatellitium:guardian_doll"
+  },
+  "entity": "minecraft:guardian",
+  "peaceful_drop": [
+    "minecraft:prismarine_shard",
+    "minecraft:prismarine_crystals"
+  ],
+  "cook_ticks": 600
+}
