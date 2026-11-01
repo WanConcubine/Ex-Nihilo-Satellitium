@@ -4,6 +4,5 @@
     "item": "exnihilosatellitium:creepy_doll"
   },
   "entity": "minecraft:enderman",
-  "peaceful_drop": "minecraft:ender_pearl",
-  "cook_ticks": 600
+  "peaceful_drop": "minecraft:ender_pearl"
 }

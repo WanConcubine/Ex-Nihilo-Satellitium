@@ -370,7 +370,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
     "entity": "minecraft:blaze", "peaceful_drop": "minecraft:blaze_rod", "cook_ticks": 600 }
   ```
   `peaceful_drop` 也可以是数组（守卫者人偶）：`["minecraft:prismarine_shard", "minecraft:prismarine_crystals"]`，
-  结束时随机取一个。
+  结束时随机取一个。`cook_ticks` 现在**不再使用**（右键立即生效），仅为旧数据包兼容保留解析。
   满桶 + 人偶 → 清空流体、倒计时；结束时非和平模式在桶上方生成实体，和平模式掉 `peaceful_drop`，
   桶恢复空桶。JEI 里显示 `peaceful_drop` 作为结果。
   两个都有 / 都没有 → 跳过该文件并打 `[barrel]` 警告。

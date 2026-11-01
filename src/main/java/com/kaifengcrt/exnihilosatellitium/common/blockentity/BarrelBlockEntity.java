@@ -453,9 +453,10 @@ public class BarrelBlockEntity extends BlockEntity {
             this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
                     SoundSource.BLOCKS, 1.0F, 0.6F);
         }
-        // Peaceful: no mob can spawn, so skip the 30 s cook and drop right away.
-        if (this.level != null && !this.level.isClientSide
-                && this.level.getDifficulty() == Difficulty.PEACEFUL) {
+        // Dolls convert on the right-click: peaceful drops the loot, otherwise the
+        // mob spawns right away. The cook machinery below only serves old saves
+        // that still carry a pending CookEntity.
+        if (this.level != null && !this.level.isClientSide) {
             this.finishCooking(this.level);
         }
     }

@@ -4,6 +4,5 @@
     "item": "exnihilosatellitium:angry_doll"
   },
   "entity": "minecraft:blaze",
-  "peaceful_drop": "minecraft:blaze_rod",
-  "cook_ticks": 600
+  "peaceful_drop": "minecraft:blaze_rod"
 }
