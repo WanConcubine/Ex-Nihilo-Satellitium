@@ -8,8 +8,8 @@
 **M1 木桶 + 七种材质变体已完成**；**M1.5 桶内方块转化已铺好**（2026-11-01：水+熔岩→圆石、
 熔岩+水→黑曜石、熔岩+红石→下界岩、熔岩+荧石→末地石，木桶限温 + 接雨水）；
 **M2 筛子 + 矿链已铺好**（三种筛网、4 张筛料表、12 种材料 4 碎块→方块→锭）；
-**M3 锤/钩 + 尘土方块已铺好**（2026-11-01：6 锤 / 2 钩、47 条锤表、10 张钩表、
-沙→尘土、尘土可筛）。**M4 坩埚、JEI 分类仍未开始**。
+**M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、47 条锤表、10 张钩表、沙→尘土）；
+**JEI 五个分类页 + Jade 筛子 tooltip 已补**（2026-11-01）。**M4 坩埚仍未开始**。
 
 ## 现在停在哪
 
@@ -27,6 +27,12 @@
   - 矿链：12 种材料 × 4 碎块 → 矿方块 → 熔炼成锭；9 种没有现成锭的材料（tin/silver/lead/
     nickel/platinum/aluminum/osmium/zinc/uranium）注册自有 `<m>_ingot`，铜改成原版铜锭。
   - **没有做**：`dust` 筛料表（需要 M3 的尘土方块）、JEI（这条分支还没引入 JEI 依赖）。
+- **2026-11-01 JEI + Jade**：JEI 15.59 的 compileOnly API（`maven.blamejared.com`）+
+  `-PdevMods` 才加载完整 JEI；移植五个分类页（筛子 / 桶转化 / 堆肥 / 锤 / 钩），
+  数据和 block entity 共用同一张表。Jade 补 `SieveComponentProvider`（筛网名称+耐久、
+  筛选进度）和 `config.jade.plugin_exnihilosatellitium.sieve` 翻译（缺了 Jade 会崩客户端）。
+  冒烟测试（`--quickPlaySingleplayer` 进存档）：`[jei] registered 35 hammer / 4 sieve /
+  4 barrel + 65 compost / 10 crook`，无异常。
 - **2026-11-01 M3 锤/钩 + 尘土**：`HammerItem` / `CrookItem` / `HammerRecipes` /
   `CrookDrops` + 两个 reload listener、`HammerRolls` 共用判定；6 锤（100 木/石/铁/金/钻/下界合金，
   耐久 64/128/256/32/1561/2031）+ 2 钩（木 64 / 骨 128，骨钩概率 ×1.5）；47 条锤表（跳过
@@ -82,6 +88,9 @@
 | M3 表加载 | ✅ | `[hammer] loaded 47 recipes`、`[crook] loaded 10 leaves tables` |
 | M3 物品/方块 | ✅ | RCON：Wooden Hammer / Netherite Hammer / Bone Crook / Dust 均能 summon，`dust` 方块可放置 |
 | M3 锤/钩手感 | ⚠️ | 左键敲方块、耐久、创造模式、骨钩 ×1.5 需要玩家实测 |
+| JEI 分类页 | ✅ | `[jei] registered 35 hammer / 4 sieve / 4 barrel + 65 compost / 10 crook`（进存档冒烟） |
+| Jade 筛子 | ✅ | `SieveComponentProvider` 已注册 + `config.jade.plugin_...sieve` 翻译（缺 key 会崩） |
+| JEI 画面 | ⚠️ | 分类页/布局未目视；沙筛 23 条只显示 21 条（与主线同样的 7×3 上限） |
 | M2 第 4 张筛料表 | ✅ | `[sieve] loaded 4 inputs, 63 drops`（尘土已可筛） |
 | 27/28 资源模型 | ✅ | 客户端资源加载无 missing model/texture（筛子 frame/mesh、9 种锭、矿方块） |
 | 1.20.1 配方计数 | ℹ️ | 1.20.1 的 `Loaded 7 recipes` 是**配方类型数**，不是配方条数；别拿它当进度 |
@@ -89,9 +98,9 @@
 
 ## 下一步（按价值排序）
 
-1. **进游戏验收 M1.5 / M2 / M3**：桶转化、筛四档料、锤/钩左键手感。
+1. **进游戏验收 M1.5 / M2 / M3 + JEI/Jade**：桶转化、筛四档料、锤/钩左键、JEI 五个分类页。
 2. **M4 坩埚**：瓷土 → 未烧制坩埚 → 烧制；19 条熔点 / 9 热源、熔料 + 流体双储。
-3. **JEI**：`-PdevMods` 只给客户端（JECh 在服务端会崩），JEI 分类页要等依赖策略定了再补。
+3. **M6**：蚕 / 人偶 / 巫水 / 瓷桶。
 
 ## 已拍板的决策
 
