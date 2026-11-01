@@ -27,6 +27,8 @@ PALETTES = {
     "doll": [(74, 86, 100), (140, 158, 175), (198, 212, 226), (236, 244, 250)],
     "angry_doll": [(64, 26, 24), (146, 52, 44), (204, 96, 72), (246, 168, 118)],
     "creepy_doll": [(46, 30, 72), (104, 74, 150), (158, 122, 208), (214, 190, 244)],
+    "shulker_doll": [(70, 40, 80), (150, 92, 150), (202, 142, 196), (242, 208, 236)],
+    "guardian_doll": [(26, 74, 74), (62, 138, 136), (127, 198, 192), (201, 239, 232)],
 }
 
 
@@ -77,12 +79,12 @@ def main() -> None:
 
         image.save(TEX / f"{name}.png")
 
-    preview = Image.new("RGBA", (SIZE * 3 + 16, SIZE), (24, 24, 24, 255))
-    for index, name in enumerate(("doll", "angry_doll", "creepy_doll")):
+    preview = Image.new("RGBA", (SIZE * len(PALETTES) + 8 * (len(PALETTES) - 1), SIZE), (24, 24, 24, 255))
+    for index, name in enumerate(PALETTES):
         preview.paste(Image.open(TEX / f"{name}.png"), (index * (SIZE + 8), 0))
     preview.resize((preview.width * 4, preview.height * 4), Image.NEAREST).save(
         Path(__file__).with_name("preview.png"))
-    print("wrote doll / angry_doll / creepy_doll")
+    print("wrote " + ", ".join(PALETTES))
 
 
 if __name__ == "__main__":

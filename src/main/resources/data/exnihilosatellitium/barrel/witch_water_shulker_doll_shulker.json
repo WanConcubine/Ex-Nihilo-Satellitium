@@ -1,0 +1,9 @@
+{
+  "base": "exnihilosatellitium:witch_water",
+  "added": {
+    "item": "exnihilosatellitium:shulker_doll"
+  },
+  "entity": "minecraft:shulker",
+  "peaceful_drop": "minecraft:shulker_shell",
+  "cook_ticks": 600
+}

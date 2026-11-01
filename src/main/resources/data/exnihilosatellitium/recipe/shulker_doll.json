@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xyx",
+    "zwz",
+    "xvx"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:purple_dye"
+    },
+    "y": {
+      "item": "minecraft:end_stone"
+    },
+    "z": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "v": {
+      "item": "minecraft:ender_pearl"
+    },
+    "w": {
+      "item": "exnihilosatellitium:doll"
+    }
+  },
+  "result": {
+    "id": "exnihilosatellitium:shulker_doll"
+  }
+}

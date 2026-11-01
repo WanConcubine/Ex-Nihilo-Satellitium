@@ -46,7 +46,7 @@ public final class BarrelRecipes {
      * drop so JEI still has something to show.</p>
      */
     public record Recipe(Fluid base, @Nullable Fluid addedFluid, @Nullable Item addedItem, ItemStack result,
-                         @Nullable ResourceLocation entity, @Nullable Item peacefulDrop, int cookTicks) {
+                         @Nullable ResourceLocation entity, List<Item> peacefulDrops, int cookTicks) {
 
         public boolean isFluidReaction() {
             return this.addedFluid != null;
@@ -135,7 +135,7 @@ public final class BarrelRecipes {
                 }
 
                 ResourceLocation entityId = null;
-                Item peacefulDrop = null;
+                final List<Item> peacefulDrops = new ArrayList<>();
                 int cookTicks = 600;
                 if (root.has("entity")) {
                     entityId = ResourceLocation.parse(root.get("entity").getAsString());
@@ -147,18 +147,32 @@ public final class BarrelRecipes {
                         ExNihiloSatellitium.LOGGER.warn("[barrel] entity rule {} needs peaceful_drop", id);
                         continue;
                     }
-                    final ResourceLocation dropId = ResourceLocation.parse(root.get("peaceful_drop").getAsString());
-                    final Optional<Item> dropOptional = BuiltInRegistries.ITEM.getOptional(dropId);
-                    if (dropOptional.isEmpty() || dropOptional.get() == Items.AIR) {
-                        ExNihiloSatellitium.LOGGER.warn("[barrel] unknown peaceful_drop {} in {}", dropId, id);
+                    final JsonElement dropElement = root.get("peaceful_drop");
+                    final List<String> dropIds = new ArrayList<>();
+                    if (dropElement.isJsonArray()) {
+                        for (final JsonElement element : dropElement.getAsJsonArray()) {
+                            dropIds.add(element.getAsString());
+                        }
+                    } else {
+                        dropIds.add(dropElement.getAsString());
+                    }
+                    for (final String rawId : dropIds) {
+                        final ResourceLocation dropId = ResourceLocation.parse(rawId);
+                        final Optional<Item> dropOptional = BuiltInRegistries.ITEM.getOptional(dropId);
+                        if (dropOptional.isEmpty() || dropOptional.get() == Items.AIR) {
+                            ExNihiloSatellitium.LOGGER.warn("[barrel] unknown peaceful_drop {} in {}", dropId, id);
+                            continue;
+                        }
+                        peacefulDrops.add(dropOptional.get());
+                    }
+                    if (peacefulDrops.isEmpty()) {
                         continue;
                     }
-                    peacefulDrop = dropOptional.get();
                     cookTicks = root.has("cook_ticks") ? root.get("cook_ticks").getAsInt() : 600;
                 }
                 final ItemStack resultStack;
                 if (entityId != null) {
-                    resultStack = new ItemStack(peacefulDrop);
+                    resultStack = new ItemStack(peacefulDrops.get(0));
                 } else {
                     final ResourceLocation resultId = ResourceLocation.parse(root.get("result").getAsString());
                     final Optional<Item> resultOptional = BuiltInRegistries.ITEM.getOptional(resultId);
@@ -190,7 +204,7 @@ public final class BarrelRecipes {
                         continue;
                     }
                     final Fluid fluid = fluidOptional.get();
-                    built.add(new Recipe(base, fluid, null, resultStack, entityId, peacefulDrop, cookTicks));
+                    built.add(new Recipe(base, fluid, null, resultStack, entityId, List.copyOf(peacefulDrops), cookTicks));
                     fluidReactions++;
                 } else {
                     final ResourceLocation itemId = ResourceLocation.parse(added.get("item").getAsString());
@@ -200,7 +214,7 @@ public final class BarrelRecipes {
                         continue;
                     }
                     final Item item = itemOptional.get();
-                    built.add(new Recipe(base, null, item, resultStack, entityId, peacefulDrop, cookTicks));
+                    built.add(new Recipe(base, null, item, resultStack, entityId, List.copyOf(peacefulDrops), cookTicks));
                     itemReactions++;
                 }
                 files++;
