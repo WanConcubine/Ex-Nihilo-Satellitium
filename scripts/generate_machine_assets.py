@@ -312,29 +312,29 @@ def sieve_model(*, fuel: bool) -> dict:
         return out
 
     side_uv = [0, 0, 16, 16]
-    rim_uv = [0, 0, 16, 4]
+    rim_uv = [0, 0, 16, 6]
     elements = []
-    # four 2x2 legs, inset by 1 px so adjacent machines never share a face plane
-    for x, z in ((2, 2), (12, 2), (2, 12), (12, 12)):
+    # thin 1x1 legs (0..10), inset 1 px so adjacent machines never share a plane
+    for x, z in ((1, 1), (14, 1), (1, 14), (14, 14)):
         elements.append({
-            "from": [x, 0, z], "to": [x + 2, 6, z + 2],
+            "from": [x, 0, z], "to": [x + 1, 10, z + 1],
             "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
         })
-    # tray bottom 6..7
+    # thin tray bottom 9..10
     elements.append({
-        "from": [1, 6, 1], "to": [15, 7, 15],
+        "from": [1, 9, 1], "to": [15, 10, 15],
         "faces": {
             "down": face("#side"), "up": face("#inner"),
             "north": face("#side"), "south": face("#side"),
             "west": face("#side"), "east": face("#side"),
         },
     })
-    # solid tray walls 7..14 (2 px thick), mesh sits at the bottom of the tray
+    # thin 4 px tray walls 10..14, mesh at the tray bottom
     walls = (
-        ("north", [1, 7, 1, 15, 14, 3]),
-        ("south", [1, 7, 13, 15, 14, 15]),
-        ("west", [1, 7, 3, 3, 14, 13]),
-        ("east", [13, 7, 3, 15, 14, 13]),
+        ("north", [1, 10, 1, 15, 14, 3]),
+        ("south", [1, 10, 13, 15, 14, 15]),
+        ("west", [1, 10, 3, 3, 14, 13]),
+        ("east", [13, 10, 3, 15, 14, 13]),
     )
     for outer, box in walls:
         faces = {f: face("#side") for f in ("down", "up", "north", "south", "west", "east")}
@@ -344,7 +344,7 @@ def sieve_model(*, fuel: bool) -> dict:
         faces[inner] = face("#inner")
         elements.append({"from": box[:3], "to": box[3:], "faces": faces})
     elements.append({
-        "from": [3, 7.2, 3], "to": [13, 7.35, 13],
+        "from": [3, 10.2, 3], "to": [13, 10.35, 13],
         "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
     })
     return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",

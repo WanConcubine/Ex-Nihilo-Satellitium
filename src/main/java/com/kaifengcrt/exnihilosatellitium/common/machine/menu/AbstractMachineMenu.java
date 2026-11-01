@@ -142,10 +142,11 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
                     ? Items.SAND : Items.COBBLESTONE);
         }
         if (this.electric) {
-            // one neutral ghost on the speed and fortune slots; slots 4/5 stay empty
-            if (index == MachineBlockEntity.UPGRADE_SLOT_START
-                    || index == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
+            if (index == MachineBlockEntity.UPGRADE_SLOT_START) {
                 return new ItemStack(ModItems.SPEED_UPGRADE_1.get());
+            }
+            if (index == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
+                return new ItemStack(ModItems.FORTUNE_UPGRADE_1.get());
             }
             return ItemStack.EMPTY;
         }
