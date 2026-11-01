@@ -29,6 +29,13 @@
 - **M1.5 桶内转化**（水+熔岩等）仍未开始。
 - 开发服：`run/server.properties` 现在是测试用（`level-name=m2-test`、RCON `eni`、
   `online-mode=false`）；要和主线一样正式联调时记得改回 `true`。
+- **开发时加载生产 mod（2026-11-01）**：1.20.1 的 dev 运行时用 official 名，生产 jar 里是
+  SRG 名，**直接丢 `run/mods` 会 `NoSuchMethodError` / mixin refmap 失效**。现在的做法：
+  jar 放 `libs/`（gitignored）→ `build.gradle` 里 `flatDir` + `fg.deobf(...)` 挂成
+  `compileOnly`/`runtimeOnly`，并给 run config 加
+  `mixin.env.remapRefMap=true` + `mixin.env.refMapRemappingFile=build/createSrgToMcp/output.srg`。
+  依赖块用 `file(...).exists()` 守卫，没放 jar 的干净 clone 仍能 `build`。
+  当前接的是 **JEI 15.59.0.212 / Jade 11.13.2 / Just Enough Characters 4.6.11**。
 
 ## 验证状态
 
@@ -44,6 +51,7 @@
 | 掉落表 | ✅ | `/loot spawn ... exnihilosatellitium:blocks/{spruce,stone}_barrel` 返回对应物品 |
 | 资源重载 | ✅ | `/reload` 后 `Loaded 7 recipes`（正好七种桶配方）、`[compost] loaded 65 entries` |
 | 客户端资源加载 | ✅ | 改名后客户端到主菜单；`Reloading ResourceManager` 无 missing model / missing texture |
+| 开发测试 mod | ✅ | JEI 15.59.0.212 / Jade 11.13.2 / JECh 4.6.11 按 deobf 方式加载，客户端到主菜单不崩 |
 | 实际进游戏目视 | ❌ | 只跑了客户端资源加载；没有截图验收比例、箍位置、物品栏图标 |
 | 右键取泥土 | ⚠️ | 逻辑未改，仍未自动化（需要真实玩家） |
 | 逐项右键堆肥 | ⚠️ | JSON/标签已对齐，但没有玩家逐项右键验证点数 |
@@ -106,7 +114,11 @@
 - **旧配方 `#minecraft:planks` 必须删掉**：它会和具体木种配方同时匹配，产物不可预测。
 - **子模型不要直接当方块模型用**：`barrel_base.json` 没有 `textures`，只作为 parent。
 - **Jade / 月光魔法生产 jar 不能直接丢 `run/mods` 做 dev 测试**：SRG 名会 `NoSuchFieldError`；
-  联调要正式服务端/客户端，或用 deobf 依赖。
+  联调要正式服务端/客户端，或用 deobf 依赖。本分支已改成 `libs/` + `fg.deobf` +
+  `mixin.env.remapRefMap`（见「现在停在哪」），新加 mod 照这个套路放。
+- **Jade provider 缺 `config.jade.plugin_<ns>.<uid>` 翻译会直接崩客户端**：jade 11 在
+  `JadeClient.onGui` 里 `AssertionError`（`Missing config translation`），不是可选提示。
+  分支的木桶插件 uid 是 `barrel`，`config.jade.plugin_exnihilosatellitium.barrel` 已补。
 
 ## 常用命令
 
