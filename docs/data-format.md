@@ -639,7 +639,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 掩码只影响自动弹出；`ItemHandler.BLOCK` 不受影响，漏斗/管道仍可从任意面抽输出格。
 - `AutoOutput=true` 且 `OutputMask=0`：GUI 提交（`setOutputConfig`）会回退为底面，
   直接 `/data merge` 写 0 不会推送（没有目标面）。
-- GUI 入口：机器界面进度条右侧（78,20）的 16×16 图标 → `MachineOutputScreen`（叠加层，不关菜单）。
+- GUI 入口：机器面板左侧突出的标签页（22×28）→ `MachineOutputScreen`（向左伸出的配置面板，不关菜单）；
+  面按钮用玩家相对方向（上/下/前/后/左/右），世界方向在 tooltip。
 - 网络包 `exnihilosatellitium:set_machine_output`（C2S）：`{BlockPos pos, boolean autoOutput, int mask}`，
   服务端用 `stillValid`（8 格）校验，只写绝对值，不做切换。
 

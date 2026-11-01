@@ -5,6 +5,7 @@ import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBloc
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.ElectricMachineMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -37,8 +38,7 @@ public class ElectricMachineScreen extends AbstractContainerScreen<ElectricMachi
     private static final int PROGRESS_Y = 26;
     private static final int PROGRESS_W = 24;
     private static final int PROGRESS_H = 16;
-    private static final int OUTPUT_BUTTON_X = 78;
-    private static final int OUTPUT_BUTTON_Y = 20;
+    private static final int OUTPUT_TAB_Y = 72;
 
     public ElectricMachineScreen(final ElectricMachineMenu menu, final Inventory playerInventory,
                                  final Component title) {
@@ -55,7 +55,7 @@ public class ElectricMachineScreen extends AbstractContainerScreen<ElectricMachi
     protected void init() {
         super.init();
         this.addRenderableWidget(new OutputConfigButton(
-                this.leftPos + OUTPUT_BUTTON_X, this.topPos + OUTPUT_BUTTON_Y,
+                this.leftPos - OutputConfigButton.TAB_WIDTH, this.topPos + OUTPUT_TAB_Y,
                 () -> this.menu.data().get(MachineBlockEntity.DATA_AUTO_OUTPUT) != 0,
                 Component.translatable("gui.exnihilosatellitium.output.button"),
                 button -> this.openOutputConfig()));
@@ -65,7 +65,10 @@ public class ElectricMachineScreen extends AbstractContainerScreen<ElectricMachi
     private void openOutputConfig() {
         final MachineBlockEntity machine = this.menu.owner();
         if (machine != null) {
-            this.minecraft.pushGuiLayer(new MachineOutputScreen(this.menu, machine.getBlockPos()));
+            final Direction facing = this.minecraft.player != null
+                    ? this.minecraft.player.getDirection() : Direction.NORTH;
+            this.minecraft.pushGuiLayer(
+                    new MachineOutputScreen(this.menu, machine.getBlockPos(), facing));
         }
     }
 

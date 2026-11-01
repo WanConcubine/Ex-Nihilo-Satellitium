@@ -179,12 +179,10 @@
           "texture": "#side"
         },
         "west": {
-          "texture": "#side",
-          "rotation": 90
+          "texture": "#side"
         },
         "east": {
-          "texture": "#side",
-          "rotation": 90
+          "texture": "#side"
         }
       }
     },
@@ -214,12 +212,10 @@
           "texture": "#side"
         },
         "west": {
-          "texture": "#side",
-          "rotation": 90
+          "texture": "#side"
         },
         "east": {
-          "texture": "#side",
-          "rotation": 90
+          "texture": "#side"
         }
       }
     },
