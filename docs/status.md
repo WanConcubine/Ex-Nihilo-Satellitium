@@ -6,7 +6,7 @@
 ## 一句话
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
-（`1.20.1-forge` 分支，当前停在 M1，待补 M2–M10）。原来的 `legacy/1.20.1-forge` tag
+（`1.20.1-forge` 分支，当前停在 M3，待补 M4、M5、M6、M10）。原来的 `legacy/1.20.1-forge` tag
 已于 2026-11-01 按所有者要求删除，1.20.1 以分支为准（见
 [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
@@ -14,11 +14,29 @@ GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**�
 GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
 `ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
 `check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
-`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M2**（筛子 + 矿链，
-分支提交 `9b92322`）。下一批是 1.20.1 的 M1.5 / JEI，或主线的 P3 状态机拆分。
+`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M3**（M1.5 桶内转化 +
+M2 筛子/矿链 + M3 锤/钩/尘土，分支提交 `eaf5f6d`）。下一批是 1.20.1 的 M4 坩埚 / JEI，
+或主线的 P3 状态机拆分。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，1.20.1 M2）
+## 当前批次（2026-11-01，1.20.1 M3）
+
+- **分支**：`1.20.1-forge` @ `eaf5f6d`（worktree `../Ex-Nihilo-Satellitium-1.20.1`）。
+  开发客户端：`./gradlew runClient -PdevMods`（JEI 15.59 / Jade 11.13.2 / JECh 4.6.11
+  从 `libs/` deobf 加载；`-PdevMods` 只给客户端，JECh 在专用服会崩）。
+- **M1.5**（`67029d6`）：`BarrelRecipes` 4 条（水+熔岩→圆石、熔岩+水→黑曜石、
+  熔岩+红石→下界岩、熔岩+荧石→末地石）、木桶 433 K 限温、满桶上方倒另一种流体固化、
+  右键取固体、接雨水、渲染桶内固体；RCON 验过两条流体反应。
+- **M3**（`eaf5f6d`）：6 锤 / 2 钩、47 条锤表 / 10 张钩表、`HammerRolls` 共用判定、
+  尘土方块（沙→尘土，第 4 张筛料表启用，4 输入 / 63 掉落）。1.20.1 没有
+  `BlockDropsEvent`：锤子接管 `BlockEvent.BreakEvent`（取消 + 手动移除 + 掉表 + 扣耐久），
+  钩子保留原版树叶掉落、只追加。
+- **验证**：build / 纹理守卫通过；服务端 `[barrel] 4`、`[sieve] 4 inputs 63 drops`、
+  `[hammer] 47`、`[crook] 10`；锭/锤/钩/尘土均可 summon。左键敲方块、右键取固体、
+  筛料手感需要玩家实测（客户端已启动）。
+- **未做**：M4 坩埚、JEI 分类页、M6 蚕/人偶/巫水。
+
+## 上一批次（2026-11-01，1.20.1 M2）
 
 - **分支**：`1.20.1-forge` @ `9b92322`（worktree：`../Ex-Nihilo-Satellitium-1.20.1`），
   主线 `main` 不受影响。构建用 Temurin 17（ForgeGradle 47.4.28）。
@@ -37,7 +55,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   筛子方块/`mesh` 状态/`Mesh`+`Contents` NBT、锭物品存在、`[sieve] loaded 3 inputs, 48 drops`。
   **右键筛料、耐久、掉落需要玩家**——客户端已重新启动，等作者操作验收。
 
-## 上一批次（2026-11-01，P2 数据管线）
+## 更早（2026-11-01，P2 数据管线）
 
 - **`scripts/data_target.py`**：`DataTarget` 一处管住两版的路径与字段——`recipe/`↔`recipes/`、
   `loot_table/`↔`loot_tables/`、`tags/block|item`↔`tags/blocks|items`、`result.id`↔`result.item`、
@@ -383,6 +401,9 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 | 1.20.1 M2 数据 | ✅ | `[sieve] loaded 3 inputs, 48 drops`；`[compost] loaded 65`；83 个 recipe JSON |
 | 1.20.1 M2 锭物品 | ✅ | RCON `summon item ... tin_ingot` → `Tin Ingot`（9 种自有锭） |
 | 1.20.1 M2 右键筛料 | ⚠️ | 需要玩家右键（客户端已启动）；未由 agent 实测 |
+| 1.20.1 M3 表加载 | ✅ | `[hammer] 47`、`[crook] 10`、`[sieve] 4 inputs 63 drops` |
+| 1.20.1 M3 物品 | ✅ | RCON summon 锤/钩/尘土均成功，`dust` 方块可放置 |
+| 1.20.1 M3 手感 | ⚠️ | 锤左键链路/耐久、骨钩 ×1.5 待玩家 |
 | P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (145 recipes, 69 loot tables, 41 tags)` |
 | P2 生成器幂等 | ✅ | 1.21.1 四个生成器写入仓库副本后 `diff -r` 与仓库逐字节一致（含 lang/筛表） |
 | P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |
