@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.common.machine.menu;
 
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -118,5 +119,12 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
                                                       final BlockPos pos) {
         return playerInventory.player.level().getBlockEntity(pos) instanceof MachineBlockEntity machine
                 ? machine : null;
+    }
+
+    /** Client factory helper: tolerate a missing payload instead of NPE-ing the client. */
+    protected static MachineBlockEntity ownerFrom(final Inventory playerInventory,
+                                                  final RegistryFriendlyByteBuf buffer) {
+        return buffer == null ? null
+                : blockEntityAt(playerInventory, buffer.readBlockPos());
     }
 }

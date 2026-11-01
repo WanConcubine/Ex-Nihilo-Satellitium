@@ -16,6 +16,6 @@ public class FuelMachineMenu extends AbstractMachineMenu {
     /** Network factory: the block position is the only data needed. */
     public FuelMachineMenu(final int id, final Inventory playerInventory,
                            final RegistryFriendlyByteBuf buffer) {
-        this(id, playerInventory, blockEntityAt(playerInventory, buffer.readBlockPos()));
+        this(id, playerInventory, ownerFrom(playerInventory, buffer));
     }
 }

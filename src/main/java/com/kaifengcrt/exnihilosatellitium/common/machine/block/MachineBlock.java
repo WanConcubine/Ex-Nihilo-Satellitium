@@ -6,6 +6,7 @@ import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.FuelMachine
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -106,8 +107,10 @@ public class MachineBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
         final MenuProvider provider = this.getMenuProvider(level.getBlockState(pos), level, pos);
-        if (provider != null) {
-            player.openMenu(provider);
+        if (provider != null && player instanceof ServerPlayer serverPlayer) {
+            // The client menu factory reads the block position from the extra data;
+            // without this writer the buffer is null and opening the GUI NPEs.
+            serverPlayer.openMenu(provider, buffer -> buffer.writeBlockPos(pos));
         }
         return ItemInteractionResult.CONSUME;
     }
