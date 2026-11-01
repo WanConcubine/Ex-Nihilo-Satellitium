@@ -11,11 +11,37 @@
 [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
 GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**自动输出配置也已实现**（服务端 RCON 验过，
-GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。下一批是**双版本重构**：
-先做 P1 薄门面、P2 数据管线，再把 1.20.1 分支补到 M2（见 [porting.md](porting.md)）。
+GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
+`ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
+`check-core-imports.py` 的 known 清零。下一批是 **P2 数据管线**（生成器 `--target` +
+`scripts/port_data.py`），再把 1.20.1 分支补到 M2（见 [porting.md](porting.md)）。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，双版本 / supported mods / 移植审计）
+## 当前批次（2026-11-01，P1 薄门面）
+
+- **分层落地**：新增顶层 `platform/` 包，只放每版要重写的胶水
+  （`NeoForgeModProbe`、`config/ModConfig`、`machine/{MachineEnergy,MachineItemHandler,MachineHooks}`）。
+  core 里新增窄门面 `common/config/{ConfigSource,ConfigValues}`、`common/platform/{ModProbe,Platform}`；
+  判断标准：**1.20.1 会重写的文件才进 `platform/`**。
+- **ConfigValues**：`platform/config/ModConfig` 实现 `ConfigSource`（仍然每次实时读 spec），
+  构造期 `install` 进门面。坩埚/机器 10 个调用点改读 `ConfigValues.*`，热改行为不变。
+- **Platform / ModProbe**：`OreMaterials` 不再 import `ModList`，改为 `OreMaterials.init()`
+  （mod 构造期、注册之前）+ `Platform.isModLoaded`；`MoonlightCompat` 与机器 GUI 的 JEI 探测也走 `Platform`。
+- **机器能量拆两半**：`MachineEnergyBuffer`（core，纯整数缓冲数学）+
+  `platform/machine/MachineEnergy`（`EnergyStorage` 适配器，创建时绑定 buffer）；BE 只碰 buffer。
+- **机器能力门面**：自动输出改调 `MachineHooks.insertIntoNeighbour(...)`；
+  `MachineItemHandler` / `MachineEnergy` 移到 `platform/machine`，`CapabilityEvents` 从新位置注册。
+- **GuiLayers**：`client/GuiLayers.push/pop` 包住 `Minecraft#pushGuiLayer`，自动输出抽屉不再直接调平台 API。
+- **守卫清零**：`check-core-imports.py` 的 `KNOWN` 4 → 0；新增 `common/config`、`common/platform`
+  两个受检目录，`common/machine/blockentity/MachineBlockEntity.java` 仍单独受检。顶层 `platform/`
+  按约定不扫描（它就是每版重写的层）。
+- **服务端 RCON 已验证**：电动筛 217 tick 从 20000 FE 掉到 15660（正好 20 FE/t，配置门面生效）、
+  产物 1 秒内推进下方箱子（`MachineHooks`）、下方漏斗只抽到输出格（`MachineItemHandler`，
+  筛网/沙/输入都留在机器里）；`[materials] loaded 12 entries`，无 ERROR。
+- **未验**：纯结构重构，画面/手感预期不变，但**客户端没进游戏看**（自动输出抽屉仍走同一个
+  `pushGuiLayer`，只是多包了一层）。
+
+## 上一批次（2026-11-01，双版本 / supported mods / 移植审计）
 
 - **supported mods**：`materials.json` 的 `ingots` 有序候选（`{"item": ..., "mod": ...}`），
   启动时取第一个已加载模组的锭，都没装就回退自有锭；熔炼配方按 `neoforge:mod_loaded` 生成，
@@ -28,7 +54,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   `scripts/check-core-imports.py` 守住 core（4 个已知漏点，新增 NeoForge import 直接失败）。
 - **下一批从 P1 开始**（见「下一步」）；画面验收（M4/M6/M10 + 自动输出 GUI）仍然待做。
 
-## 上一批次（2026-11-01，M10 自动输出配置）
+## 更早（2026-11-01，M10 自动输出配置）
 
 - **自动输出**：机器新增 `AutoOutput`（总开关，默认关）+ `OutputMask`（6 个面各一位，默认只推底面）。
   每完成一次操作立刻推一次，另有 20 tick 重试；邻居拒收的余量留在输出格。
@@ -176,8 +202,9 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 
 ## 交接清单（下次会话先做）
 
-- **先读** [porting.md](porting.md)；本批从 **P1 薄门面** 开始（清单见「下一步」）。
-- **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`。
+- **先读** [porting.md](porting.md)；本批从 **P2 数据管线** 开始（清单见「下一步」）。
+- **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`
+  （最后一条现在必须是 `0 known leak(s)`；新增 NeoForge import 进 core 会直接失败）。
 - 进游戏验收（服务端逻辑都已验过，剩下“看得见/摸得着”的）：
   - **M4 坩埚**：1 块圆石只占 12.5%、8 块满 2000、第 9 块被拒；沙子/尘土 100、花岗岩 250；
     桶/瓶抽流体；熔料↔流体显示切换；Jade 熔料剩余 + 热源速度；三个配置键热改；JEI 两页。
@@ -195,7 +222,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   - **筛料渲染**：新料层不再穿过盘壁、不再和盘边交替闪烁；变薄动画照旧（三种筛料各看一遍）。
   - **木桶竖棱**：木桶/石桶四条竖棱不再是细条纹；俯视/平视都看一遍。
   - **机器镐挖掘**：木镐不掉落、石镐及以上正常掉机器（含内容物掉落逻辑不变）。
-- **未验证**：上面这些画面/交互，以及 P0/P1 修复的玩家实测、桶/筛旧内容目视。
+- **未验证**：上面这些画面/交互，以及 P1 重构后的客户端实测（服务端已 RCON 验过）、桶/筛旧内容目视。
 - 不要提交 `build/`、`run/`、`reference/`、`libs/`。
 
 ## 已完成的里程碑
@@ -301,20 +328,25 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 | 筛料渲染溢出 | ⚠️ | 作者截图确认料层与盘壁交替渲染；已改为 0.6 宽 + 抬到 10.5 px，**待目视** |
 | 木桶/石桶竖棱 | ⚠️ | 作者反馈棱上渲染怪；已去掉 4 个 1×15 端面的 `rotation:90`（离线渲染对比确认条纹消失），**待目视** |
 | 机器镐挖掘 | ⚠️ | 已加 `mineable/pickaxe` + `needs_stone_tool`（石镐及以上掉方块），**待游戏内挖一次确认** |
+| P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
+| P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |
+| P1 ConfigValues | ✅ | RCON：电动筛 217 tick，`Energy` 20000→15660（正好 20 FE/t） |
+| P1 MachineHooks（自动输出） | ✅ | RCON：`AutoOutput=1/OutputMask=1` + 下方箱子，产物 1 秒内进箱子 |
+| P1 MachineItemHandler（漏斗） | ✅ | RCON：下方漏斗只抽走 3 燧石，铁筛网/沙/输入仍留在机器 |
+| P1 客户端 | ⚠️ | 只编译与跑服务端；画面未进游戏看（P1 不改渲染） |
 | P0/P1 修复 | ⚠️ | 破坏返还、管道灌桶、F3+T 分离、红石/荧石未玩家实测 |
 | 旧内容目视 | ⚠️ | 桶/筛比例、Jade tooltip 等仍待作者确认；桶的两道外凸箍已按反馈删除（2026-10-31） |
 
 ## 下一步（按价值排序）
 
-1. **P1 薄门面**（[porting.md](porting.md) §3）：`ConfigValues`、`Platform` + `ModProbe`、
-   `MachineHooks`、`GuiLayers`；做完把 `check-core-imports.py` 的 known 清到 0。
-2. **P2 数据管线**：生成器 `--target 1.21.1|1.20.1` + `scripts/port_data.py`
-   （路径/`result.id`↔`result.item`/`neoforge:`↔`forge:` 条件），让数据只维护一份。
-3. **1.20.1 分支补 M2**（筛子 + 矿链 + 材料表），然后接 Thermal（它只有 1.20.1）。
-4. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI）：清单见交接清单。
-5. **M7 余项**：config 扩展、datagen；JEI 已补全。
-6. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
-7. **M8 月光魔法联动** / **M9 发布**。
+1. **P2 数据管线**（[porting.md](porting.md) §3）：生成器 `--target 1.21.1|1.20.1` +
+   `scripts/port_data.py`（路径/`result.id`↔`result.item`/`neoforge:`↔`forge:` 条件），
+   让数据只维护一份；顺手给 `check-textures.py` 加“数据路径与目标版本一致”的检查。
+2. **1.20.1 分支补 M2**（筛子 + 矿链 + 材料表），然后接 Thermal（它只有 1.20.1）。
+3. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI）：清单见交接清单。
+4. **M7 余项**：config 扩展、datagen；JEI 已补全。
+5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
+6. **M8 月光魔法联动** / **M9 发布**。
 
 ## 已拍板的决策
 
@@ -332,6 +364,9 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 - **数据包优先**：所有玩法表可覆盖/新增；单人 JEI 优先服务端表，专用服客户端回退内置镜像。
 - **Jade 是可选依赖**：`compileOnly`，不打包；每个 provider 都要有 `config.jade.plugin_<ns>.<uid>` 翻译。
 - **月光魔法是可选软依赖**：目前只占位。
+- **分层契约（P1）**：`common/` 是 core（两版共用，可整包复制），顶层 `platform/` 是每版重写的胶水；
+  core 只通过 `ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 这几个窄门面碰平台，
+  不用 `ModList` / `ModConfigSpec` / capability 类型。
 
 ## 踩过的坑
 
@@ -373,6 +408,12 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   并与盘壁外侧面共面，表现为「料层和盘边交替闪烁」；缩到 0.6（3.2..12.8）并抬高 0.15 px 才干净。
 - **1px 宽的端面不能带 `rotation: 90`**：面只有 1 px 宽、UV 矩形是 1×15，旋转后木纹被压进
   1 px → 棱上出现一排细条纹；端面用默认 UV（不旋转）才干净（木桶 2026-11-01 修）。
+- **core 门面必须在注册之前安装**：`Platform.install()` / `ConfigValues.install()` /
+  `OreMaterials.init()` 都在 mod 构造函数最前面；漏装会抛带说明的 `IllegalStateException`
+  （`OreMaterials.all()` 同理），而不是到世界加载时才 NPE。配置门面是**委托读 spec**，
+  所以 `/reload` 或改配置文件不需要重启。
+- **`platform/` 不进 core 守卫**：判断标准是“1.20.1 要重写它吗”；要重写的才放顶层 `platform/`。
+  core 门面（`common/config`、`common/platform`、`MachineHooks` 的调用方）永远不带 NeoForge import。
 - **`ofFullCopy(IRON_BLOCK)` 不会把方块放进镐标签**：只继承 `requiresCorrectToolForDrops`，
   不加 `#minecraft:mineable/pickaxe` 时镐挖不掉方块；石镐门槛还要 `#minecraft:needs_stone_tool`。
 - **配置层别用 `setScreen` 开**：那会把机器菜单关掉（`Screen#removed` → 菜单失效）。1.21.1 用
@@ -434,9 +475,15 @@ python3 scripts/generate_machine_assets.py           # M10 机器方块/插件/G
 src/main/java/com/kaifengcrt/exnihilosatellitium/
 ├── ExNihiloSatellitium.java           # 入口 + config 注册
 ├── registry/                          # Block / Item / BlockEntity / CreativeTab
+├── platform/                          # 版本胶水（1.20.1 只重写这一层）
+│   ├── NeoForgeModProbe.java          # ModProbe 的 NeoForge 实现（ModList）
+│   ├── config/ModConfig.java          # ModConfigSpec + ConfigSource 实现
+│   └── machine/                       # MachineEnergy / MachineItemHandler / MachineHooks
 ├── common/
 │   ├── block/{Barrel,Sieve,Crucible,UnfiredCrucible}Block.java
 │   ├── blockentity/{Barrel,Sieve,Crucible}BlockEntity.java
+│   ├── config/                        # ConfigSource + ConfigValues 门面（core）
+│   ├── platform/                      # ModProbe + Platform 门面（core）
 │   ├── barrel/                        # BarrelRecipes + reload
 │   ├── compost/                       # CompostRegistry + reload
 │   ├── sieve/                         # SieveRegistry + reload + SieveDrop
@@ -445,9 +492,8 @@ src/main/java/com/kaifengcrt/exnihilosatellitium/
 │   ├── crucible/                      # CrucibleRecipes / CrucibleHeat + reload
 │   ├── machine/                       # M10：SieveRolls / HammerRolls / UpgradeItem
 │   │   ├── block/MachineBlock.java    # 四台机器共用一个方块类
-│   │   ├── blockentity/               # MachineBlockEntity + 电动/内能子类 + MachineItemHandler
+│   │   ├── blockentity/               # MachineBlockEntity + 电动/内能子类 + MachineInventory
 │   │   └── menu/                      # ElectricMachineMenu / FuelMachineMenu
-│   ├── config/ModConfig.java          # 坩埚/机器配置
 │   ├── material/                      # materials.json 读取（注册期）
 │   ├── event/{Common,Capability,Tool}Events.java
 │   └── tag/ModTags.java

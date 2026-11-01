@@ -4,17 +4,16 @@
 > 以后再加 1.21.x / 1.22 时只改“平台层”，核心逻辑与数据格式不动。
 > 本文件是移植的总清单；当前状态仍以 [status.md](status.md) 为准。
 
-## 1. 现状（2026-11-01，main）
+## 1. 现状（2026-11-01，P1 之后，main）
 
-- `src/main/java` 共 **103 个文件**，其中 **40 个** import `net.neoforged`，63 个只依赖
-  `net.minecraft` / `com.mojang` / `com.google.gson`。
-- **判定/数据逻辑本来就干净**：`sieve` / `hammer` / `crook` / `compost` / `barrel` /
-  `crucible` 六个包 **0 个 NeoForge import**；`machine` 包里的
-  `SieveRolls` / `HammerRolls` / `MachineKind` / `UpgradeType` / `UpgradeItem` 也干净。
-  已知漏点只有 4 个文件（见 §3 P0）。
-- 版本耦合集中在：`registry/*`（8 个）、`client/*`（渲染/界面）、`common/event/*`、
-  `common/network/*`、`common/config/*`、`common/item/*`、`common/block/*`、`common/blockentity/*`、
-  `common/machine/blockentity/*`、`compat/*`。
+- `src/main/java` 共 **111 个文件**，其中 **36 个** import `net.neoforged`。
+- **core 已经干净**：`sieve` / `hammer` / `crook` / `compost` / `barrel` / `crucible` /
+  `material` / `config` / `platform`（core 门面）以及 `machine` 顶层类 **0 个 NeoForge import**；
+  `MachineBlockEntity` 也只经 `MachineHooks` 调能力。`check-core-imports.py` 的 known 已从 4 清零。
+- 版本耦合集中在：顶层 `platform/`（5 个文件：`NeoForgeModProbe`、`config/ModConfig`、
+  `machine/{MachineEnergy,MachineItemHandler,MachineHooks}`）、`registry/*`（8 个）、
+  `client/*`（渲染/界面）、`common/event/*`、`common/network/*`、`common/item/*`、
+  `common/block/*`、`common/blockentity/*`、`compat/*`。
 - 数据：**145 个 recipe + 69 个 loot_table + 41 个 tag** 是 vanilla 类型，路径/格式随版本变
   （1.21 单数、`result.id`；1.20.1 复数、`result.item`）；自定义表（sieve/hammer/crook/compost/
   barrel/crucible_*）是我们自己的目录，**两版同构**。
@@ -27,7 +26,10 @@
 ```
 core/        纯逻辑：数据记录 + JSON 表解析 + 掷表/权重/状态机。
              只允许 net.minecraft / com.google.gson / java；不得 import net.neoforged。
+             需要平台能力时只走窄门面：ConfigValues / Platform / MachineHooks / GuiLayers。
 platform/    版本胶水：注册、事件、能力、网络、配置 spec、BE 菜单/同步、渲染、compat。
+             包名就是 com.kaifengcrt.exnihilosatellitium.platform（与 core 的
+             common/config、common/platform 门面不是一回事：那两个是接口，platform/ 是实现）。
 data/        JSON 数据。自定义表两版共用；vanilla 类型（recipe/loot/tag）按目标版本转换。
 scripts/     生成器按 --target 输出对应路径/格式；检查脚本。
 docs/        本文件 + status/parity 的版本标注。
@@ -40,23 +42,30 @@ docs/        本文件 + status/parity 的版本标注。
 
 ### P0 —— 守边界（本批次可做）
 
-- [x] `scripts/check-core-imports.py`：六个逻辑包 + machine 纯类纳入守护；已知漏点列在
-      脚本的 `KNOWN` 里（有 4 个），新增 NeoForge import 直接失败。
-- [ ] P1 用 `OreMaterials.init(ModProbe)` 显式注入替代 `ModList`（`ModProbe` 是 core 里的
-      一行接口，平台传 `ModList::isLoaded`），材料表就完全干净。
-- [ ] `MachineEnergy` / `MachineItemHandler` / `MachineBlockEntity` 里的 `IItemHandler`/
-      `EnergyStorage`/`Capabilities` 属于“机器平台层”，**不强行抽成 core**；在包里加注释说明，
-      脚本把它们列为已知例外。
+- [x] `scripts/check-core-imports.py`：逻辑包 + machine 纯类纳入守护，新增 NeoForge import
+      直接失败；P1 之后 `KNOWN` 已清空（4 → 0），`common/config`、`common/platform` 也在受检范围。
+- [x] `OreMaterials` 不再 import `ModList`：改为 `OreMaterials.init()`（mod 构造期、注册之前）
+      + `Platform.isModLoaded`；`ModProbe` 是 core 的一行接口，`platform/NeoForgeModProbe`
+      用 `ModList` 实现，构造期 `Platform.install(...)` 注入。
+- [x] `MachineEnergy` / `MachineItemHandler` 移到 `platform/machine/`（它们本来就是每版重写的胶水）；
+      缓冲数学抽成 core 的 `MachineEnergyBuffer`，`MachineBlockEntity` 只碰 buffer 和
+      `MachineHooks.insertIntoNeighbour(...)`。脚本不再把它们列为已知例外。
 
-### P1 —— 薄门面（小、收益直接）
+### P1 —— 薄门面（小、收益直接）—— ✅ 2026-11-01 完成
 
-- [ ] `ConfigValues`：core 只读 `ConfigValues.crucibleCapacity()` 之类；`ModConfig`（NeoForge
-      spec）作为实现。10 个调用点，1.20.1 只要换 spec 类。
-- [ ] `Platform`：`isModLoaded` / `modVersion` / `dataDir` 这类最小接口。
-- [ ] `MachineHooks`：把 `Capabilities.ItemHandler.BLOCK`、`ItemHandlerHelper`、`EnergyStorage`
-      的查询收进一个平台类；BE 只调 `MachineHooks.push(...)` / `MachineHooks.energy(...)`。
-- [ ] 客户端 `GuiLayers`：`MachineOutputScreen` 的压栈/出栈（1.21 用
-      `Minecraft#pushGuiLayer`，1.20.1 Forge 没有）包成 `GuiLayers.push/pop`。
+- [x] `ConfigValues`（`common/config`）：`ConfigSource` 是 core 接口（7 个 getter），
+      `ConfigValues` 是静态门面，`platform/config/ModConfig` 用 `ModConfigSpec` 实现并在构造期
+      `install`。10 个调用点改完；门面是**委托读**，所以配置热改/`/reload` 行为不变。
+- [x] `Platform` + `ModProbe`（`common/platform`）：`isLoaded` / `version` 两个最小方法；
+      `platform/NeoForgeModProbe` 包住 `ModList`，`OreMaterials` / `MoonlightCompat` /
+      机器 GUI 的 JEI 探测都走它。`dataDir` 等到 P2 真需要时再加，避免空接口。
+- [x] `MachineHooks`（`platform/machine`）：自动输出只调
+      `MachineHooks.insertIntoNeighbour(level, pos, face, stack)`；能力查询/`ItemHandlerHelper`
+      都留在平台层。能量侧是 `MachineEnergyBuffer`（core）+ `MachineEnergy`（`EnergyStorage` 适配器）。
+- [x] `GuiLayers`（`client`）：`push/pop` 包住 `Minecraft#pushGuiLayer`，自动输出抽屉只调门面。
+      1.20.1 没有 GUI layer 系统，移植时在这里换成自绘/重新打开菜单。
+- 验证：`./gradlew build` 通过；`check-core-imports.py` → `0 known leak(s)`；`runServer` 起来后
+  RCON 验过 20 FE/t、自动输出进箱子、漏斗只抽输出格（细节在 [status.md](status.md) 验证表）。
 
 ### P2 —— 数据管线（移植成本最大的一块）
 

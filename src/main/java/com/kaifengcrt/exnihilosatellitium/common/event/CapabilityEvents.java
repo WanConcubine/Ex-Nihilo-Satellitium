@@ -2,7 +2,8 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketFluidHandler;
-import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineItemHandler;
+import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineEnergy;
+import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineItemHandler;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -35,8 +36,10 @@ public final class CapabilityEvents {
                 (machine, side) -> new MachineItemHandler(machine));
         // Only electric machines expose an energy buffer; fuel machines return null.
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ELECTRIC_MACHINE.get(),
-                (machine, side) -> machine.getEnergy());
+                (machine, side) -> machine.getEnergyBuffer() == null
+                        ? null : new MachineEnergy(machine.getEnergyBuffer()));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.FUEL_MACHINE.get(),
-                (machine, side) -> machine.getEnergy());
+                (machine, side) -> machine.getEnergyBuffer() == null
+                        ? null : new MachineEnergy(machine.getEnergyBuffer()));
     }
 }

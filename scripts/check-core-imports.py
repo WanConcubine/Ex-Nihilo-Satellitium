@@ -6,8 +6,12 @@ copyable between the 1.21.1 and 1.20.1 branches without touching it. This guard
 fails when a new `net.neoforged` / `net.minecraftforge` reference sneaks into a
 core package.
 
-`KNOWN` lists the platform-glue files that currently live in core-looking
-packages; they are reported as warnings until the P1 facades move them out.
+Version glue lives in `com.kaifengcrt.exnihilosatellitium.platform` (registries,
+capabilities, config spec, machine capability adapters) and is deliberately not
+scanned: that is exactly the layer a port rewrites. Core talks to it through the
+small facades `ConfigValues`, `Platform` and `MachineHooks`.
+
+`KNOWN` is empty since P1; add an entry only together with a plan to remove it.
 
     python3 scripts/check-core-imports.py
 """
@@ -29,23 +33,18 @@ CORE_DIRS = (
     "common/barrel",
     "common/crucible",
     "common/material",
-    "common/machine",   # top-level roll math / enums; subpackages are platform glue
+    "common/config",    # ConfigValues / ConfigSource facades
+    "common/platform",  # Platform / ModProbe facades
+    "common/machine",   # top-level roll math / enums / energy buffer
 )
 
 CORE_FILES = (
-    # platform glue that lives next to the pure machine math; tracked as known leaks
+    # the machine state machine is pure; capabilities live in platform/machine
     "common/machine/blockentity/MachineBlockEntity.java",
-    "common/machine/blockentity/MachineEnergy.java",
-    "common/machine/blockentity/MachineItemHandler.java",
 )
 
-# Platform glue in core-looking packages. Each entry should disappear in P1.
-KNOWN = {
-    "common/material/OreMaterials.java": "ModList -> P1 ModProbe",
-    "common/machine/blockentity/MachineEnergy.java": "net.neoforged EnergyStorage",
-    "common/machine/blockentity/MachineItemHandler.java": "IItemHandler",
-    "common/machine/blockentity/MachineBlockEntity.java": "Capabilities/ItemHandler/Energy",
-}
+# Platform glue in core-looking packages. Empty since P1.
+KNOWN: dict[str, str] = {}
 
 PATTERN = re.compile(r"net\.(?:neoforged|minecraftforge)\.")
 

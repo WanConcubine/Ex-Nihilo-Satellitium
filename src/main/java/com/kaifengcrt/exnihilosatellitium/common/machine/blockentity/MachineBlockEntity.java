@@ -1,10 +1,11 @@
 package com.kaifengcrt.exnihilosatellitium.common.machine.blockentity;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
-import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
+import com.kaifengcrt.exnihilosatellitium.common.config.ConfigValues;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
+import com.kaifengcrt.exnihilosatellitium.common.machine.MachineEnergyBuffer;
 import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
 import com.kaifengcrt.exnihilosatellitium.common.machine.SieveRolls;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
@@ -13,6 +14,7 @@ import com.kaifengcrt.exnihilosatellitium.common.machine.block.MachineBlock;
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.ElectricMachineMenu;
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.FuelMachineMenu;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveRegistry;
+import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineHooks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -35,9 +37,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import java.util.List;
 
@@ -85,7 +84,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
 
     private final boolean electric;
     private final MachineInventory inventory;
-    private final MachineEnergy energy;
+    private final MachineEnergyBuffer energy;
 
     private int work;
     private int burnHalfTicks;
@@ -102,7 +101,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         super(type, pos, state);
         this.electric = electric;
         this.inventory = new MachineInventory(this, electric ? 18 : 15);
-        this.energy = electric ? new MachineEnergy(ModConfig.machineEnergyCapacity()) : null;
+        this.energy = electric ? new MachineEnergyBuffer(ConfigValues.machineEnergyCapacity()) : null;
     }
 
     // ------------------------------------------------------------------ state
@@ -121,7 +120,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     }
 
     /** {@code null} on fuel machines. */
-    public MachineEnergy getEnergy() {
+    public MachineEnergyBuffer getEnergyBuffer() {
         return this.energy;
     }
 
@@ -156,7 +155,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
 
     public int ticksPerOperation() {
         final double multiplier = this.electric ? this.speedMultiplier() : 1.0D;
-        return Math.max(1, (int) Math.round(ModConfig.machineTicksPerOperation() / multiplier));
+        return Math.max(1, (int) Math.round(ConfigValues.machineTicksPerOperation() / multiplier));
     }
 
     /** All installed upgrades of one type, best tier first. */
@@ -219,13 +218,13 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     }
 
     public int energyPerTick() {
-        final int base = ModConfig.machineEnergyPerTick();
+        final int base = ConfigValues.machineEnergyPerTick();
         // Each installed upgrade adds 25% draw on top of the base.
         return (int) Math.round(base * (1.0D + 0.25D * Math.max(0, this.upgradeCount() - 1)));
     }
 
     public int burnHalfPerOperation() {
-        return ModConfig.machineBurnPerOperation() * 2;
+        return ConfigValues.machineBurnPerOperation() * 2;
     }
 
     private int burnHalfPerTick() {
@@ -291,18 +290,15 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             if (!this.outputsTo(direction)) {
                 continue;
             }
-            final IItemHandler target = this.level.getCapability(Capabilities.ItemHandler.BLOCK,
-                    this.worldPosition.relative(direction), direction.getOpposite());
-            if (target == null) {
-                continue;
-            }
             for (int slot = this.outputSlotStart(); slot < this.outputSlotEnd(); slot++) {
                 final ItemStack stack = this.inventory.getItem(slot);
                 if (stack.isEmpty()) {
                     continue;
                 }
-                final ItemStack remainder = ItemHandlerHelper.insertItemStacked(target,
-                        stack.copy(), false);
+                // The capability lookup lives behind the platform facade; a face
+                // without an inventory simply returns the stack unchanged.
+                final ItemStack remainder = MachineHooks.insertIntoNeighbour(this.level,
+                        this.worldPosition, direction, stack.copy());
                 if (remainder.getCount() == stack.getCount()) {
                     continue;
                 }
@@ -600,8 +596,8 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         return switch (index) {
             case DATA_WORK -> this.work;
             case DATA_TICKS -> this.ticksPerOperation();
-            case DATA_ENERGY -> this.energy == null ? 0 : this.energy.getEnergyStored();
-            case DATA_ENERGY_MAX -> this.energy == null ? 0 : this.energy.getMaxEnergyStored();
+            case DATA_ENERGY -> this.energy == null ? 0 : this.energy.stored();
+            case DATA_ENERGY_MAX -> this.energy == null ? 0 : this.energy.capacity();
             case DATA_BURN -> this.burnHalfTicks;
             case DATA_BURN_MAX -> this.burnHalfTotal;
             case DATA_ACTIVE -> this.active ? 1 : 0;
@@ -628,7 +624,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             return 2;
         }
         if (this.electric) {
-            return this.energyPerTick() > 0 && this.energy.getEnergyStored() < this.energyPerTick()
+            return this.energyPerTick() > 0 && this.energy.stored() < this.energyPerTick()
                     ? 3 : 0;
         }
         if (this.burnHalfTicks < this.burnHalfPerTick() && !this.hasFuel()) {
@@ -674,7 +670,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         tag.putBoolean("AutoOutput", this.autoOutput);
         tag.putInt("OutputMask", this.outputMask);
         if (this.energy != null) {
-            tag.putInt("Energy", this.energy.getEnergyStored());
+            tag.putInt("Energy", this.energy.stored());
         }
     }
 
@@ -699,7 +695,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         this.autoOutput = tag.getBoolean("AutoOutput");
         this.outputMask = tag.contains("OutputMask") ? tag.getInt("OutputMask") & ALL_FACES : FACE_DOWN;
         if (this.energy != null) {
-            this.energy.setEnergyStored(tag.getInt("Energy"));
+            this.energy.setStored(tag.getInt("Energy"));
         }
     }
 
