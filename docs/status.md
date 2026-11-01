@@ -11,10 +11,11 @@
 **M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、47 条锤表、10 张钩表、沙→尘土）；
 **M4 坩埚已铺好**（2026-11-01：瓷土 → 未烧制 → 烧制、39 条熔点 / 9 热源、
 熔料+流体双储、JEI 两页 + Jade）。**M6 五刀已铺完**（2026-11-01：巫水 + 古代孢子、瓷桶、
-木坩埚 11 种、木桶补齐 12 种、粉碎下界岩/末地石 + 草种子、蚕/侵染树叶、5 种人偶），
-并且补上了 `crucible.*` config。**桶配方已按原版改正**（4 板 + 台阶，见下）。
+木坩埚 11 种、木桶补齐 12 种、粉碎下界岩/末地石 + 草种子、蚕/侵染树叶、5 种人偶）；
+**M10 自动化也已铺完**（四台机器 + 6 个插件 + 自动输出 + GUI/JEI/BER）；
+`crucible.*` 与 `machine.*` config 全部就位。**桶配方已按原版改正**（4 板 + 台阶，见下）。
 
-## 当前批次（2026-11-01，M6 + config + 桶配方修正）
+## 当前批次（2026-11-01，M6 + M10 + config + 桶配方修正）
 
 - **桶配方修正**：七种木桶/石桶的合成回到原版式样 `x x / x x / xyx`
   （x=对应木板或 `stone`，y=对应台阶 / `smooth_stone_slab`）；之前是 8 块板的
@@ -44,6 +45,32 @@
   和平掉战利品（随机列表），旧存档的 `CookEntity` 倒计时仍可继续。
 - **顺手补的坑**：`dust`、`crucible`、`unfired_crucible` 三个方块此前**没有掉落表**
   （挖掉不掉），本批一并补上；`check-textures.py` 同步主线的 64×64 人偶 / 16×64 蚕动画放行。
+
+## 当前批次（2026-11-01，M10 自动化）
+
+- **四台机器**：`electric_sieve` / `electric_hammer` / `fuel_sieve` / `fuel_hammer`，
+  共用 `MachineBlock` + `MachineBlockEntity`，BE 分电动/内能两种；4 个插件槽（速度/时运，
+  每种一个专槽，锤子的时运槽上限 1），内能机器只烧原版熔炉燃料。
+- **判定单一来源**：机器每完成一次操作都调 `SieveRolls` / `HammerRolls`，与手动筛/锤完全同一张表。
+- **GUI**：`ElectricMachineScreen` / `FuelMachineScreen`（176×186，能量/火焰条、箭头进度、
+  空槽虚影、状态行）；1.20.1 没有 `pushGuiLayer`，自动输出改成**同一屏幕内嵌的左侧抽屉**
+  （22×28 标签页 + 132×168 面板，6 个玩家相对方向按钮），不再新开 Screen。
+- **网络/能力**：`MachineOutputMessage` 走 Forge `SimpleChannel`；菜单用
+  `IForgeMenuType` + `NetworkHooks.openScreen` 传方块坐标。物品能力
+  `MachineItemHandler` 只允许从输出 12 格抽取；电动暴露只进不出的 `MachineEnergy`。
+- **config**：新增 `machine.ticksPerOperation` / `energyPerTick` / `energyCapacity` /
+  `burnPerOperation`（键名与主线一致）。
+- **数据/资产**：四台机器的 blockstate/model/32×32 贴图、6 个插件物品、合成配方、
+  掉落表、`mineable/pickaxe` + `needs_stone_tool`、JEI 催化剂、GUI 贴图全部同步主线。
+- **踩坑**：1.20.1 的 `ItemStack#getBurnTime` 走 `IForgeItem` 返回 **-1**，燃料槽必须用
+  `ForgeHooks.getBurnTime(stack, RecipeType.SMELTING)`；否则煤会被当成非法物品弹出来。
+- **验证**：`./gradlew build --offline` + `check-textures.py` 通过；RCON 验了电动筛耗电
+  （20 FE/t）、电动锤速度 III + 时运 III（15 秒 23 次、92 砂砾）、内能筛烧煤
+  （`BurnHalfTicks` 3200→2712 / 6 秒）、自动输出进下方箱子、下方漏斗只抽输出格、
+  上方漏斗补料；客户端冒烟进存档，JEI `37 hammer / 11 barrel / 6 sieve / 10 crook /
+  39 meltables`，无 missing model / texture。
+- **未验**：机器 GUI 画面/点击、自动输出抽屉观感、BER 工作动画、插件槽/燃料槽的拖拽规则
+  （逻辑已编译且服务端行为验过，需要作者进游戏看一眼）。
 
 ## 现在停在哪
 
@@ -153,6 +180,16 @@
 | 1.20.1 M6 表加载 | ✅ | `[barrel] 11 transforms (2 fluid, 9 item)`、`[sieve] 6 inputs, 72 drops`、`[hammer] 49` |
 | 1.20.1 build（M6） | ✅ | `./gradlew build --offline` 通过；`scripts/check-textures.py` 通过 |
 
+| M10 电动筛 | ✅ | RCON：Electric 20000 → 12460（20 FE/t），15 秒产 3 件、沙 64→61、筛网 Damage 3 |
+| M10 电动锤 + 速度/时运 | ✅ | RCON：速度 III ×2 + 时运 III，15 秒 23 次、铁锤 Damage 23、92 砂砾 |
+| M10 内能筛 | ✅ | RCON：煤燃烧 `BurnHalfTicks` 3200→2712（6 秒），Work 22，产出矿碎块 |
+| M10 自动输出 | ✅ | RCON：`AutoOutput=1/OutputMask=1` + 下方箱子，产出进箱子；内能筛同样生效 |
+| M10 漏斗抽取 | ✅ | RCON：下方漏斗只拿到 `osmium_crushed` / `prismarine_shard`，筛网/沙留在机器 |
+| M10 漏斗补料 | ✅ | RCON：上方漏斗把箱子里的沙补进输入槽（机器沙 28、箱子剩 33） |
+| M10 config | ✅ | `run/config/exnihilosatellitium-common.toml` 生成 `crucible.*` + `machine.*` |
+| M10 客户端冒烟 | ✅ | 进存档无 missing model/texture；JEI 37 hammer / 11 barrel / 6 sieve / 10 crook |
+| M10 GUI/动画 | ⚠️ | 画面、抽屉、BER 动画、槽位拖拽待作者目视 |
+
 ## 交接清单（新会话先看）
 
 - 工作区：**`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`**（`1.20.1-forge` 的
@@ -166,16 +203,14 @@
   渲染 → Jade（**`config.jade.plugin_<ns>.<uid>` 翻译必须有，缺了 Jade 直接崩客户端**）→
   JEI 分类（参考已移植的 `compat/jei/` 五页 + 坩埚两页）→ `check-textures.py`。
 - config 已有：`common/config/ExConfig`（`run/config/exnihilosatellitium-common.toml`），
-  键是 `crucible.capacity` / `crucible.meltCapacity` / `crucible.heatSpeedMultiplier`；
-  热改由 `CrucibleBlockEntity` 每 tick 读取并裁剪。
+  键是 `crucible.*` 与 `machine.*`；热改由 `CrucibleBlockEntity` 每 tick 读取并裁剪。
 
 ## 下一步（按价值排序）
 
-1. **进游戏验收 M1.5–M6 + JEI/Jade**：桶转化、12 种桶合成、筛四档料、锤/钩左键、坩埚投料熔化、
-   木坩埚被动熔水、巫水/瓷桶/蚕/人偶的画面与手感（RCON 逻辑已验，美术/交互未目视）。
-2. **M5（1.20.1 侧）**：按主线 M5 的范围补（含 datagen 视需要）。
-3. **M10 自动化（1.20.1 侧）**：四台机器 + 插件 + 自动输出；届时把 `machine.*`
-   配置键一并补进 `ExConfig`（键名与主线保持一致）。
+1. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶，以及四台机器、
+   自动输出抽屉、BER 动画、JEI 页面（服务端逻辑都已 RCON 验过，剩下画面/手感）。
+2. **M5**：矿链（4 碎块→方块→锭）在 M2 已铺完，无需再补；标记为完成。
+3. **M7 余项**：datagen（主线也未开始）；配置已齐。
 
 ## 已拍板的决策
 

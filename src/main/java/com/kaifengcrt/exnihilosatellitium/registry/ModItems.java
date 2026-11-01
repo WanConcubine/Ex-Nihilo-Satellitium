@@ -9,6 +9,8 @@ import com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
+import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
+import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
@@ -86,6 +88,41 @@ public final class ModItems {
             ITEMS.register("iron_mesh", () -> new MeshItem(
                     new Item.Properties().stacksTo(1).durability(256), 3));
     public static final List<RegistryObject<Item>> MESHES = List.of(WOOD_MESH, SILK_MESH, IRON_MESH);
+
+    /** M10: the four automation machines (electric / fuel x sieve / hammer). */
+    public static final RegistryObject<Item> ELECTRIC_SIEVE =
+            ITEMS.register("electric_sieve", () -> new BlockItem(ModBlocks.ELECTRIC_SIEVE.get(),
+                    new Item.Properties()));
+    public static final RegistryObject<Item> ELECTRIC_HAMMER =
+            ITEMS.register("electric_hammer", () -> new BlockItem(ModBlocks.ELECTRIC_HAMMER.get(),
+                    new Item.Properties()));
+    public static final RegistryObject<Item> FUEL_SIEVE =
+            ITEMS.register("fuel_sieve", () -> new BlockItem(ModBlocks.FUEL_SIEVE.get(),
+                    new Item.Properties()));
+    public static final RegistryObject<Item> FUEL_HAMMER =
+            ITEMS.register("fuel_hammer", () -> new BlockItem(ModBlocks.FUEL_HAMMER.get(),
+                    new Item.Properties()));
+
+    public static final List<RegistryObject<Item>> MACHINES = List.of(
+            ELECTRIC_SIEVE, ELECTRIC_HAMMER, FUEL_SIEVE, FUEL_HAMMER);
+
+    /** M10: speed / fortune upgrades, three tiers each. */
+    public static final RegistryObject<Item> SPEED_UPGRADE_1 =
+            registerUpgrade("speed_upgrade_1", UpgradeType.SPEED, 1);
+    public static final RegistryObject<Item> SPEED_UPGRADE_2 =
+            registerUpgrade("speed_upgrade_2", UpgradeType.SPEED, 2);
+    public static final RegistryObject<Item> SPEED_UPGRADE_3 =
+            registerUpgrade("speed_upgrade_3", UpgradeType.SPEED, 3);
+    public static final RegistryObject<Item> FORTUNE_UPGRADE_1 =
+            registerUpgrade("fortune_upgrade_1", UpgradeType.FORTUNE, 1);
+    public static final RegistryObject<Item> FORTUNE_UPGRADE_2 =
+            registerUpgrade("fortune_upgrade_2", UpgradeType.FORTUNE, 2);
+    public static final RegistryObject<Item> FORTUNE_UPGRADE_3 =
+            registerUpgrade("fortune_upgrade_3", UpgradeType.FORTUNE, 3);
+
+    public static final List<RegistryObject<Item>> UPGRADES = List.of(
+            SPEED_UPGRADE_1, SPEED_UPGRADE_2, SPEED_UPGRADE_3,
+            FORTUNE_UPGRADE_1, FORTUNE_UPGRADE_2, FORTUNE_UPGRADE_3);
 
     public static final RegistryObject<Item> UNFIRED_CRUCIBLE =
             ITEMS.register("unfired_crucible", () -> new BlockItem(ModBlocks.UNFIRED_CRUCIBLE.get(),
@@ -221,6 +258,12 @@ public final class ModItems {
     private static RegistryObject<Item> registerBarrelItem(final String name,
                                                            final RegistryObject<? extends Block> block) {
         return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+    }
+
+    private static RegistryObject<Item> registerUpgrade(final String name, final UpgradeType type,
+                                                        final int tier) {
+        return ITEMS.register(name, () -> new UpgradeItem(
+                new Item.Properties().stacksTo(8), type, tier));
     }
 
     private static RegistryObject<Item> registerCrucibleItem(final String name,

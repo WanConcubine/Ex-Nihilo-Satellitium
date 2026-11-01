@@ -3,10 +3,12 @@ package com.kaifengcrt.exnihilosatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.compat.MoonlightCompat;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
+import com.kaifengcrt.exnihilosatellitium.common.network.ModNetwork;
 import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
+import com.kaifengcrt.exnihilosatellitium.registry.ModMenuTypes;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import com.mojang.logging.LogUtils;
@@ -44,6 +46,8 @@ public final class ExNihiloSatellitium {
         ModBlockEntities.register(modBus);
         ModItems.register(modBus);
         ModCreativeTabs.register(modBus);
+        ModMenuTypes.register(modBus);
+        ModNetwork.register();
 
         modBus.addListener(this::commonSetup);
 
