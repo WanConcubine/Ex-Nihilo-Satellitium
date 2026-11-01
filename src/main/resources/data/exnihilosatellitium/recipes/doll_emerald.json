@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xyx",
+    " x ",
+    "x x"
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:porcelain"
+    },
+    "y": {
+      "item": "minecraft:emerald"
+    }
+  },
+  "result": {
+    "item": "exnihilosatellitium:doll"
+  }
+}

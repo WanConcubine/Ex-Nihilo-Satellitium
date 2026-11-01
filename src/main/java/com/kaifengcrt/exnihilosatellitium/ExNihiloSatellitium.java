@@ -1,7 +1,9 @@
 package com.kaifengcrt.exnihilosatellitium;
 
+import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.compat.MoonlightCompat;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
+import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
@@ -9,7 +11,9 @@ import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
@@ -31,7 +35,10 @@ public final class ExNihiloSatellitium {
     public ExNihiloSatellitium(final FMLJavaModLoadingContext context) {
         final IEventBus modBus = context.getModEventBus();
 
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ExConfig.SPEC);
+
         ModBlocks.register(modBus);
+        ModFluids.register(modBus);
         ModOreBlocks.register(modBus);
         ModOreItems.register(modBus);
         ModBlockEntities.register(modBus);

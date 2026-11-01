@@ -5,7 +5,11 @@ Checks:
   - every model texture reference to this mod resolves to an existing PNG
   - no model texture reference points at minecraft:item/* (vanilla block
     textures are allowed for the vanilla-sampled style)
-  - every block/item texture is 16x16 (PNG header only, no Pillow needed)
+  - every block texture is 16x16; item textures may be 16x16 or 64x64
+    (the dolls ship at 64x64; PNG header only, no Pillow needed)
+  - animated textures (a sibling .mcmeta with an "animation" block) are
+    16x(16*n) vertical sprite sheets
+  - GUI textures under textures/gui/ are exempt (JEI backgrounds etc.)
 
 Usage:
     python3 scripts/check-textures.py
@@ -24,6 +28,15 @@ MODELS = ASSETS / "models"
 TEXTURES = ASSETS / "textures"
 
 errors: list[str] = []
+
+
+def allowed_sizes(path: Path) -> set[tuple[int, int]]:
+    """Item icons may ship at 64x64 (dolls); block textures stay 16x16."""
+    if "textures" in path.parts and "item" in path.parts:
+        return {(16, 16), (64, 64)}
+    if path.name.startswith("machine_"):
+        return {(16, 16), (32, 32)}
+    return {(16, 16)}
 
 
 def png_size(path: Path) -> tuple[int, int]:
@@ -86,8 +99,23 @@ def main() -> int:
         except ValueError as exception:
             errors.append(f"{png}: {exception}")
             continue
-        if (width, height) != (16, 16):
-            errors.append(f"{png}: expected 16x16, got {width}x{height}")
+        if png.parent.name == "gui":
+            continue
+        meta = png.with_name(png.name + ".mcmeta")
+        if meta.exists():
+            # Animated sprite sheet: 16 wide, a vertical strip of 16 px frames.
+            if width != 16 or height % 16 != 0 or height == 0:
+                errors.append(f"{png}: animated texture must be 16x(16*n), got {width}x{height}")
+            try:
+                data = json.loads(meta.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exception:
+                errors.append(f"{meta}: invalid JSON ({exception})")
+                continue
+            if "animation" not in data:
+                errors.append(f"{meta}: missing \"animation\" block")
+        elif (width, height) not in allowed_sizes(png):
+            errors.append(f"{png}: expected {sorted(allowed_sizes(png))[0]}x..."
+                          f" got {width}x{height}")
 
     if errors:
         print("texture check failed:")

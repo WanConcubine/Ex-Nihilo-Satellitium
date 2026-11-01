@@ -1,0 +1,8 @@
+{
+  "base": "minecraft:lava",
+  "added": {
+    "item": "exnihilosatellitium:angry_doll"
+  },
+  "entity": "minecraft:blaze",
+  "peaceful_drop": "minecraft:blaze_rod"
+}

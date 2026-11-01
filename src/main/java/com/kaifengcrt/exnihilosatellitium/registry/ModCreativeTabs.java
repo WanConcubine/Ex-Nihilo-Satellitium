@@ -35,6 +35,24 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CRUCIBLE.get());
                 ModItems.HAMMERS.forEach(hammer -> output.accept(hammer.get()));
                 ModItems.CROOKS.forEach(crook -> output.accept(crook.get()));
+                output.accept(ModItems.INFESTED_LEAVES.get());
+                output.accept(com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem
+                        .withProgress(new ItemStack(ModItems.INFESTED_LEAVES.get()), 1.0F));
+                output.accept(ModItems.SILKWORM.get());
+                output.accept(ModItems.COOKED_SILKWORM.get());
+                ModItems.WOODEN_CRUCIBLES.forEach(crucible -> output.accept(crucible.get()));
+                output.accept(ModItems.UNFIRED_PORCELAIN_BUCKET.get());
+                output.accept(ModItems.PORCELAIN_BUCKET.get());
+                output.accept(ModItems.WITCH_WATER_BUCKET.get());
+                output.accept(ModItems.GRASS_SEEDS.get());
+                output.accept(ModItems.CRUSHED_NETHERRACK.get());
+                output.accept(ModItems.CRUSHED_END_STONE.get());
+                output.accept(ModItems.ANCIENT_SPORES.get());
+                output.accept(ModItems.DOLL.get());
+                output.accept(ModItems.ANGRY_DOLL.get());
+                output.accept(ModItems.CREEPY_DOLL.get());
+                output.accept(ModItems.SHULKER_DOLL.get());
+                output.accept(ModItems.GUARDIAN_DOLL.get());
                 for (final OreMaterial material : OreMaterials.all()) {
                     final var entries = ModOreItems.byMaterial().get(material.id());
                     for (final String kind : ModOreBlocks.KINDS) {
