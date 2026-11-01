@@ -112,6 +112,23 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         return this.work;
     }
 
+    public boolean isActive() {
+        return this.active;
+    }
+
+    /** Called when the working flag changes; syncs the BE so the client can emit particles. */
+    private void setActive(final boolean value) {
+        if (this.active == value) {
+            return;
+        }
+        this.active = value;
+        this.setChanged();
+        if (this.level != null && !this.level.isClientSide) {
+            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(),
+                    this.getBlockState(), Block.UPDATE_CLIENTS);
+        }
+    }
+
     public int getBurnHalfTicks() {
         return this.burnHalfTicks;
     }
@@ -134,8 +151,12 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         for (int i = 0; i < UPGRADE_SLOTS; i++) {
             final ItemStack stack = this.inventory.getItem(UPGRADE_SLOT_START + i);
             if (stack.getItem() instanceof UpgradeItem upgrade && upgrade.type() == type) {
-                // each item in the stack is one upgrade, not one per slot
-                for (int count = 0; count < stack.getCount(); count++) {
+                // each item in the stack is one upgrade, not one per slot; hammer
+                // machines accept only one fortune item
+                final int count = type == UpgradeType.FORTUNE
+                        && this.kind() == MachineKind.HAMMER
+                        ? Math.min(1, stack.getCount()) : stack.getCount();
+                for (int n = 0; n < count; n++) {
                     list.add(upgrade);
                 }
             }
@@ -146,16 +167,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
 
     /** Number of installed upgrade items (0..4); drives the FE surcharge. */
     public int upgradeCount() {
-        int count = 0;
-        if (this.electric) {
-            for (int i = 0; i < UPGRADE_SLOTS; i++) {
-                final ItemStack stack = this.inventory.getItem(UPGRADE_SLOT_START + i);
-                if (stack.getItem() instanceof UpgradeItem) {
-                    count += stack.getCount();
-                }
-            }
-        }
-        return count;
+        return this.upgradesOf(UpgradeType.SPEED).size() + this.upgradesOf(UpgradeType.FORTUNE).size();
     }
 
     /**
@@ -225,10 +237,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
                 this.work = 0;
                 this.setChanged();
             }
-            if (this.active) {
-                this.active = false;
-                this.setChanged();
-            }
+            this.setActive(false);
             return;
         }
         if (!this.consumePowerPerTick()) {
@@ -236,13 +245,10 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
                 this.work = 0;
                 this.setChanged();
             }
-            if (this.active) {
-                this.active = false;
-                this.setChanged();
-            }
+            this.setActive(false);
             return;
         }
-        this.active = true;
+        this.setActive(true);
         this.work++;
         if (this.work >= this.ticksPerOperation()) {
             this.work = 0;

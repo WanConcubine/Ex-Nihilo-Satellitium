@@ -6,6 +6,8 @@ import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.FuelMachine
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -133,6 +135,42 @@ public class MachineBlock extends BaseEntityBlock {
             serverPlayer.openMenu(provider, buffer -> buffer.writeBlockPos(pos));
         }
         return ItemInteractionResult.CONSUME;
+    }
+
+    @Override
+    public void animateTick(final BlockState state, final Level level, final BlockPos pos,
+                            final RandomSource random) {
+        if (!(level.getBlockEntity(pos) instanceof MachineBlockEntity machine)
+                || !machine.isActive()) {
+            return;
+        }
+        final double x = pos.getX() + 0.5D;
+        final double y = pos.getY();
+        final double z = pos.getZ() + 0.5D;
+        final double dx = (random.nextDouble() - 0.5D) * 0.6D;
+        final double dz = (random.nextDouble() - 0.5D) * 0.6D;
+        if (machine.kind() == MachineKind.HAMMER) {
+            if (random.nextFloat() < 0.35F) {
+                level.addParticle(ParticleTypes.CRIT, x + dx * 0.5D, y + 0.55D, z + dz * 0.5D,
+                        0.0D, 0.02D, 0.0D);
+            }
+            if (random.nextFloat() < 0.18F) {
+                level.addParticle(machine.isElectric() ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.FLAME,
+                        x + dx * 0.4D, y + 0.5D, z + dz * 0.4D, 0.0D, 0.01D, 0.0D);
+            }
+            if (!machine.isElectric() && random.nextFloat() < 0.2F) {
+                level.addParticle(ParticleTypes.SMOKE, x, y + 0.4D, z, 0.0D, 0.03D, 0.0D);
+            }
+        } else {
+            if (random.nextFloat() < 0.3F) {
+                level.addParticle(ParticleTypes.CRIT, x + dx, y + 0.75D, z + dz,
+                        0.0D, 0.03D, 0.0D);
+            }
+            if (random.nextFloat() < 0.12F) {
+                level.addParticle(machine.isElectric() ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.SMOKE,
+                        x + dx * 0.6D, y + 0.8D, z + dz * 0.6D, 0.0D, 0.02D, 0.0D);
+            }
+        }
     }
 
     @Override

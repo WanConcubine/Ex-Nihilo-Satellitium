@@ -971,6 +971,9 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 自动锤子是**四柱压锤**：底板（0..4，色带区分电动/内能）+ 四条立柱（4..12）+
   顶板（12..14）+ 中间铁砧（4..6）/ 锤头（7..10）/ 连杆（10..12），整体也内缩 1px、
   高度 14；碰撞 `getShape` 同为 1..15 × 0..14。
+- **工作时粒子**（`MachineBlock#animateTick`，服务端 `active` 变化时同步 BE）：筛子在托盘上方
+  冒 `CRIT`，电动加 `ELECTRIC_SPARK`、内能加 `SMOKE`；锤子在铁砧/锤头处冒 `CRIT`，
+  电动 `ELECTRIC_SPARK`、内能 `FLAME`/`SMOKE`。
   贴图：`machine_frame_side_{electric,fuel}`（底部色带）、`machine_frame_top`、`machine_leg`、
   `machine_mesh`（cutout 镂空网格）、`machine_inner`。
 - 电动：`2..5` 插件、输出从 `6` 开始；能量条在左上。
@@ -997,6 +1000,8 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   - 时运按**生效几率**叠加：第 1 个 100% 生效，之后每个的生效率乘 0.8（100/80/64/51.2%…）；
     生效的插件把自己的档位作为额外 roll（时运 III = +3 次）。
   - 每多装一个插件，`FE/t` 增加 25%（4 个 = 1.75×基础），内能机器不受影响。
+  - **自动锤的时运槽最多只收 1 个**（槽位 `getMaxStackSize`/管道 `getSlotLimit` 双重限制），
+    筛子仍是 8 个。
 - 燃料槽接受任何 `getBurnTime(RecipeType.SMELTING) > 0` 的物品；熔岩桶会退回空桶。
 
 **能力 / 管道**
@@ -1031,8 +1036,8 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - `ContainerData` 8 项：`work / ticksPerOperation / energy / energyCapacity / burnHalfTicks /
   burnHalfTotal / active / status`。**客户端用 `SimpleContainerData`** 接收同步值；
   直接用 BE 会把 `set` 吃掉，进度条冻住（踩坑记录见 status.md）。
-- 贴图：`textures/block/{electric,fuel}_{sieve,hammer}.png` 16×16、`textures/gui/{electric,fuel}_machine.png`，
-  由 `scripts/generate_machine_assets.py` 生成（Pillow），模型统一 `cube_all`。
+- 贴图：机器方块用 **32×32** 的 `machine_*` 贴图（2026-11-01 由 16×16 升级），
+  `scripts/generate_machine_assets.py` 生成（Pillow）；`check-textures.py` 对 `machine_*` 允许 16/32。
 
 **验证（2026-11-01，RCON / forceload 0 0）**
 

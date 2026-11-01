@@ -84,6 +84,7 @@
   "gui.exnihilosatellitium.progress.hint": "Progress: %s%% (click for JEI)",
   "gui.exnihilosatellitium.slot.fortune": "Fortune upgrade",
   "gui.exnihilosatellitium.slot.fortune_only": "Fortune upgrades (max 8)",
+  "gui.exnihilosatellitium.slot.fortune_only_1": "Fortune upgrades (max 1)",
   "gui.exnihilosatellitium.slot.fuel": "Fuel",
   "gui.exnihilosatellitium.slot.hammer": "Hammer",
   "gui.exnihilosatellitium.slot.input.hammer": "Hammer-able block",
