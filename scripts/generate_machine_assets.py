@@ -288,9 +288,10 @@ def sieve_mesh_texture() -> Image.Image:
 def sieve_inner_texture() -> Image.Image:
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    draw.rectangle((0, 0, 15, 15), fill=(40, 45, 50))
+    draw.rectangle((0, 0, 15, 15), fill=(118, 126, 133))
     for x in range(1, 16, 4):
-        draw.line((x, 0, x, 15), fill=(33, 37, 41))
+        draw.line((x, 0, x, 15), fill=(102, 110, 117))
+    draw.line((0, 0, 15, 0), fill=(150, 158, 165))
     return img
 
 
@@ -317,7 +318,7 @@ def sieve_model(*, fuel: bool) -> dict:
     # thin 1x1 legs (0..10), inset 1 px so adjacent machines never share a plane
     for x, z in ((1, 1), (14, 1), (1, 14), (14, 14)):
         elements.append({
-            "from": [x, 0, z], "to": [x + 1, 10, z + 1],
+            "from": [x, 0, z], "to": [x + 1, 8.95, z + 1],
             "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
         })
     # thin tray bottom 9..10
@@ -348,7 +349,7 @@ def sieve_model(*, fuel: bool) -> dict:
         "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
     })
     return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
-            "textures": tex, "elements": elements}
+            "ambientocclusion": False, "textures": tex, "elements": elements}
 
 
 def write_json(path: Path, payload: dict) -> None:
