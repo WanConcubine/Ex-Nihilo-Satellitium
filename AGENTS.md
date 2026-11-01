@@ -93,6 +93,7 @@ com/kaifengcrt/exnihilosatellitium/
 | [docs/parity.md](docs/parity.md) | **复刻对照表**：经典项与 Ex Astris 的逐项状态、分档 |
 | [docs/ex-nihilo-basics.md](docs/ex-nihilo-basics.md) | **原版机制基础**：桶/筛/锤/钩/坩埚/矿链怎么运作，含待核清单 |
 | [docs/data-format.md](docs/data-format.md) | 堆肥 JSON、物品标签、NBT 键、命令、比较器 |
+| [docs/porting.md](docs/porting.md) | **多版本分层与移植**：core/platform 边界、1.20.1↔1.21.1 API 差异、P0–P4 顺序 |
 | [docs/textures.md](docs/textures.md) | 纹理路线、色板、引用规则、AI 政策、检查 |
 | [docs/incidents/](docs/incidents/) | 事故复盘（流程/判断问题，不是当前状态） |
 | [README.md](README.md) | 面向玩家/贡献者的入口 |
