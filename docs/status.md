@@ -16,7 +16,7 @@ GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P
 `check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
 `scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M10**（M1.5 桶转化 + M2 筛子/矿链 + M3 锤/钩/尘土 + M4 坩埚 +
 M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件/自动输出 +
-`crucible.*`/`machine.*` config；分支提交 `5ebe5ef`）。
+`crucible.*`/`machine.*` config；分支提交 `ca939da`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
@@ -294,7 +294,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 ## 交接清单（下次会话先做）
 
 - **1.20.1 分支**：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`
-  （`1.20.1-forge` @ `5ebe5ef`），已到 **M10**（含 `crucible.*` + `machine.*` config），
+  （`1.20.1-forge` @ `ca939da`），已到 **M10**（含 `crucible.*` + `machine.*` config），
   下一步只剩一次性画面/手感验收。
   分支的 `docs/status.md` 里有当前批次、验证表、构建/客户端命令（`runClient -PdevMods`）
   和固定套路。新会话在分支工作区开工即可。
