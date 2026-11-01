@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "exnihilosatellitium:lead_ingot"
+    {
+      "id": "exnihilosatellitium:lead_ingot",
+      "required": false
+    }
   ]
 }

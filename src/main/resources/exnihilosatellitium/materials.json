@@ -48,6 +48,12 @@
       },
       "tier": "common",
       "rarity": 18,
+      "ingots": [
+        {
+          "item": "mekanism:ingot_tin",
+          "mod": "mekanism"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -72,6 +78,12 @@
       },
       "tier": "uncommon",
       "rarity": 32,
+      "ingots": [
+        {
+          "item": "mekanism:ingot_lead",
+          "mod": "mekanism"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -120,6 +132,12 @@
       },
       "tier": "common",
       "rarity": 10,
+      "ingots": [
+        {
+          "item": "mekanism:ingot_osmium",
+          "mod": "mekanism"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -144,6 +162,12 @@
       },
       "tier": "rare",
       "rarity": 90,
+      "ingots": [
+        {
+          "item": "mekanism:ingot_uranium",
+          "mod": "mekanism"
+        }
+      ],
       "source": "estimate",
       "enabled": true
     }

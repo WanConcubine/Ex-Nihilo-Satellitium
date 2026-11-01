@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.ModList;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -66,7 +67,7 @@ public final class OreMaterials {
                     final JsonObject name = entry.getAsJsonObject("name");
                     final String en = name.get("en_us").getAsString();
                     final String zh = name.has("zh_cn") ? name.get("zh_cn").getAsString() : en;
-                    final String ingot = readIngot(entry, id);
+                    final String ingot = resolveIngot(entry, id);
 
                     if (!ID.matcher(id).matches()) {
                         ExNihiloSatellitium.LOGGER.error("[materials] bad id '{}', skipped", id);
@@ -151,5 +152,53 @@ public final class OreMaterials {
             return null;
         }
         return value;
+    }
+
+    /**
+     * Resolves the ingot the ore blocks smelt into.
+     *
+     * <p>{@code ingot} is an unconditional override. Otherwise {@code ingots} is
+     * an ordered candidate list ({@code {"item": "...", "mod": "..."}}) and the
+     * first entry whose mod is loaded wins; when no entry matches we register
+     * our own {@code <id>_ingot}, matching the classic "create the ingot if no
+     * other mod supplies one" behaviour.</p>
+     *
+     * <p>The generated smelting recipes carry the same order as
+     * {@code neoforge:mod_loaded} conditions, so the JSON data and this runtime
+     * resolution agree without the recipe existing twice at load time.</p>
+     */
+    private static String resolveIngot(final JsonObject entry, final String id) {
+        final String explicit = readIngot(entry, id);
+        if (explicit != null) {
+            return explicit;
+        }
+        final JsonElement candidates = entry.get("ingots");
+        if (candidates == null || !candidates.isJsonArray()) {
+            return null;
+        }
+        for (final JsonElement element : candidates.getAsJsonArray()) {
+            if (!element.isJsonObject()) {
+                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping a non-object ingots entry", id);
+                continue;
+            }
+            final JsonObject candidate = element.getAsJsonObject();
+            if (!candidate.has("item")) {
+                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping an ingots entry without 'item'", id);
+                continue;
+            }
+            final String item = candidate.get("item").getAsString();
+            if (ResourceLocation.tryParse(item) == null) {
+                ExNihiloSatellitium.LOGGER.error("[materials] {}: bad ingots item '{}', skipped", id, item);
+                continue;
+            }
+            final String mod = candidate.has("mod") ? candidate.get("mod").getAsString() : null;
+            if (mod != null && !ModList.get().isLoaded(mod)) {
+                continue;
+            }
+            ExNihiloSatellitium.LOGGER.info("[materials] {} smelts into {}{}", id, item,
+                    mod == null ? "" : " from " + mod);
+            return item;
+        }
+        return null;
     }
 }

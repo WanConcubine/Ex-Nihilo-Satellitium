@@ -12,6 +12,10 @@ Outputs (all under src/main/resources):
   data/exnihilosatellitium/loot_table/blocks/<m>_ore_<kind>.json
   data/exnihilosatellitium/recipe/<m>_<stage>_to_ore_<kind>.json   (4 pieces -> block)
   data/exnihilosatellitium/recipe/<m>_ore_<kind>_smelting.json     (block -> ingot)
+      when materials.json has an `ingots` candidate list, the candidate
+      variants are written as <m>_ore_<kind>_smelting_<mod>.json with
+      neoforge:mod_loaded conditions, and the base recipe falls back to our
+      own ingot when none of the candidate mods is loaded
   data/c/tags/item/ingots/<m>.json                              (own ingots)
   data/minecraft/tags/block/mineable/shovel.json
   lang entries merged into en_us.json / zh_cn.json
@@ -119,6 +123,47 @@ def smelting_block_to_ingot(mid, kind, ingot_id):
     }
 
 
+def mod_loaded(modid):
+    return {"type": "neoforge:mod_loaded", "modid": modid}
+
+
+def negate(condition):
+    return {"type": "neoforge:not", "value": condition}
+
+
+def smelting_variants(material, mid):
+    """The smelting outputs of one material as (recipe_suffix, ingot_id, conditions).
+
+    `ingot` is an unconditional override. `ingots` is an ordered candidate list:
+    the first candidate whose mod is loaded wins, later ones are gated behind
+    the negation of the earlier mods, and the base recipe (our own ingot) is the
+    fallback when none of the candidate mods is present. `conditions is None`
+    means the recipe is unconditional.
+
+    The second return value says whether our own ingot can ever be used (i.e.
+    whether its item, model, texture, tag and lang entry must stay).
+    """
+    explicit = material.get("ingot")
+    if explicit and not explicit.startswith("#"):
+        return [("", explicit, None)], False
+    candidates = [c for c in material.get("ingots", []) if isinstance(c, dict) and c.get("item")]
+    if not candidates:
+        return [("", own_ingot_id(mid), None)], True
+    variants = []
+    previous_mods = []
+    for candidate in candidates:
+        mod = candidate.get("mod")
+        if mod is None:
+            # unconditional candidate: it always wins, nothing after it is reachable
+            variants.append(("", candidate["item"], None))
+            return variants, False
+        conditions = [mod_loaded(mod)] + [negate(mod_loaded(prev)) for prev in previous_mods]
+        variants.append((f"_{mod}", candidate["item"], conditions))
+        previous_mods.append(mod)
+    variants.append(("", own_ingot_id(mid), [negate(mod_loaded(prev)) for prev in previous_mods]))
+    return variants, True
+
+
 def ensure_ingot_texture(mid):
     src = ART_INGOTS / f"{mid}_ingot.png"
     dst = ASSETS / "textures/item" / f"{mid}_ingot.png"
@@ -151,6 +196,7 @@ def main():
         if existing_ingot and existing_ingot.startswith("#"):
             print(f"warning: {mid}: tag ingot {existing_ingot} is not supported; using own ingot")
             existing_ingot = None
+        smelting, own_ingot_reachable = smelting_variants(m, mid)
         for stage in STAGES:
             ensure_item_texture(mid, stage)
             iid = f"{mid}_{stage}"
@@ -162,22 +208,25 @@ def main():
             write_json(RES / f"data/exnihilosatellitium/recipe/{iid}_to_ore_{STAGE_TO_KIND[stage]}.json",
                        crafting_pieces_to_block(mid, stage))
 
-        if existing_ingot:
-            ingot_id = existing_ingot
-            clear_own_ingot_assets(mid)
-            lang_en.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
-            lang_zh.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
-        else:
-            ingot_id = own_ingot_id(mid)
+        if own_ingot_reachable:
             ensure_ingot_texture(mid)
             iid = f"{mid}_ingot"
             write_json(ASSETS / f"models/item/{iid}.json",
                        {"parent": "minecraft:item/generated",
                         "textures": {"layer0": f"exnihilosatellitium:item/{iid}"}})
+            # When the ingot is only a fallback, its item does not exist in packs
+            # where a candidate mod is loaded, so the tag entry must be optional.
+            values = [own_ingot_id(mid)]
+            if len(smelting) > 1:
+                values = [{"id": own_ingot_id(mid), "required": False}]
             write_json(RES / f"data/c/tags/item/ingots/{mid}.json",
-                       {"replace": False, "values": [own_ingot_id(mid)]})
+                       {"replace": False, "values": values})
             lang_en[f"item.exnihilosatellitium.{iid}"] = f"{en} Ingot"
             lang_zh[f"item.exnihilosatellitium.{iid}"] = f"{zh}锭"
+        else:
+            clear_own_ingot_assets(mid)
+            lang_en.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
+            lang_zh.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
 
         ore_blocks = []
         for kind, _ in KINDS.items():
@@ -190,8 +239,15 @@ def main():
                        {"parent": f"exnihilosatellitium:block/ore_{kind}_block"})
             write_json(RES / f"data/exnihilosatellitium/loot_table/blocks/{bid}.json",
                        loot_table(mid, kind))
-            write_json(RES / f"data/exnihilosatellitium/recipe/{bid}_smelting.json",
-                       smelting_block_to_ingot(mid, kind, ingot_id))
+            # drop variants of candidates that were removed from the table
+            for stale in (RES / "data/exnihilosatellitium/recipe").glob(f"{bid}_smelting_*.json"):
+                stale.unlink()
+            for suffix, ingot_id, conditions in smelting:
+                recipe = smelting_block_to_ingot(mid, kind, ingot_id)
+                if conditions:
+                    recipe["neoforge:conditions"] = conditions
+                write_json(RES / f"data/exnihilosatellitium/recipe/{bid}_smelting{suffix}.json",
+                           recipe)
             if kind == "gravel":
                 write_json(RES / f"data/exnihilosatellitium/hammer/{mid}_ore_gravel.json",
                            {"input": f"exnihilosatellitium:{mid}_ore_gravel",
@@ -219,8 +275,14 @@ def main():
         write_json(RES / f"data/c/tags/block/ores/{mid}.json", tag(ore_blocks))
         write_json(RES / f"data/c/tags/item/ores/{mid}.json", tag(ore_blocks))
 
-    write_json(RES / "data/minecraft/tags/block/mineable/shovel.json",
-               {"replace": False, "values": sorted(shovel)})
+    # Merge with whatever is already in the tag: the M6 crushed netherrack/end
+    # stone blocks are added by another script and must survive a rerun.
+    shovel_path = RES / "data/minecraft/tags/block/mineable/shovel.json"
+    existing_shovel = set()
+    if shovel_path.exists():
+        existing_shovel = set(json.loads(shovel_path.read_text(encoding="utf-8"))["values"])
+    existing_shovel.update(shovel)
+    write_json(shovel_path, {"replace": False, "values": sorted(existing_shovel)})
 
     # Root tags: NeoForge's own root only lists vanilla metals, so append our
     # per-material subtags for mods that look up the whole tag.

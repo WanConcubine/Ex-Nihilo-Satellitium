@@ -33,6 +33,11 @@ M8 月光魔法、M9 发布仍未开始。
 - **RCON 已验证**：电动筛向下推、关掉后产物留槽、改推上方、无邻居时放箱子 20 tick 内补推、
   内能筛同配置——5 项都通过（见验证表）。**配置 GUI 第二版的画面/点击未目视**
   （作者看过首版：面按钮别用东南西北、入口别放内部、筛料穿模）。
+- **supported mods 框架（2026-11-01）**：`materials.json` 新增 `ingots` 有序候选
+  （`{"item": ..., "mod": ...}`）。启动时取第一个已加载模组的锭，都不在就注册自有锭；
+  生成脚本给每个候选写 `neoforge:mod_loaded` 条件的熔炼配方，base 配方用
+  `neoforge:not(...)` 兜底。首个接入 **Mekanism 1.21.1**：tin / lead / osmium / uranium
+  熔成 `mekanism:ingot_*`（自有锭在那 4 种里不再注册）。Thermal 没有 1.21.1，暂不接。
   图标三帧预览：[m10-output-button.png](images/m10-output-button.png)。
 
 ## 上一批次（2026-11-01，M10 自动化）
@@ -264,6 +269,10 @@ M8 月光魔法、M9 发布仍未开始。
 | M10 5 秒 / 48k / 叠加 | ✅ | RCON：无升级 124 tick → 1 次 + Work24、20 FE/t；2 个速度 III（同槽 count2）→ 7 次 + Work12（16 tick/件）、25 FE/t |
 | M10 配方 | ⚠️ | 四台机器 + 6 个插件配方已注册，未实际合成 |
 | M10 电动筛配方 | ⚠️ | 2026-11-01 按作者要求换成 `IRI / RBR / ISI`（铁锭角 + 红石 ×3 + **铁块** + 筛子底），替换原来 `IRI / RSI / IRI`；服务端 1423 条配方加载无报错，JEI 未目视 |
+| supported mods（Mek 在场） | ✅ | 服务端加 Mekanism 10.7.19.85：日志 `tin/lead/osmium/uranium smelts into mekanism:ingot_*`；`summon` 自有 `tin_ingot` 得到 Air（未注册），`mekanism:ingot_tin` 正常；1423 → 3001 条配方（Mek 自带 + 我们的 12 条变体） |
+| supported mods（Mek 不在） | ✅ | 无 Mek：1423 条配方照旧；熔炉烧 `tin_ore_gravel` 产出 `exnihilosatellitium:tin_ingot`（fallback 条件生效） |
+| supported mods（Mek 在场熔炼） | ✅ | 有 Mek：熔炉烧同一块 `tin_ore_gravel` 产出 `mekanism:ingot_tin` |
+| supported mods（JEI/客户端） | ⚠️ | 服务端已验；JEI 里的熔炼页与创造栏未在客户端目视 |
 | M10 自动输出（下推） | ✅ | RCON 2026-11-01：`AutoOutput=1/OutputMask=1` + 下方箱子，一件后箱子拿到 `iron_crushed`、输出格清空 |
 | M10 自动输出（关闭） | ✅ | RCON：`AutoOutput=0` 后产物留在槽 6..10，下方箱子不再增长 |
 | M10 自动输出（换面） | ✅ | RCON：`OutputMask=2`（只推上）→ 缓冲 5 件 + 新 1 件全进上方箱子，下方不变 |
