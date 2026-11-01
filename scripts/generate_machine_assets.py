@@ -416,10 +416,17 @@ def machine_side_32(*, fuel: bool) -> Image.Image:
     for x, y in ((4, 4), (27, 4), (4, 27), (27, 27)):
         draw.rectangle((x, y, x + 1, y + 1), fill=(210, 218, 224))
         draw.point((x + 1, y + 1), fill=(70, 77, 83))
-    # bottom band
+    # cooling vents in the upper panel
+    for y in (9, 14, 19):
+        draw.rectangle((8, y, 23, y + 2), fill=(58, 64, 70))
+        draw.line((8, y, 23, y), fill=(36, 40, 44))
+        draw.line((8, y + 2, 23, y + 2), fill=(150, 159, 166))
+    # bottom band with hazard dashes
     draw.rectangle((0, 26, 31, 30), fill=band)
     draw.line((0, 26, 31, 26), fill=(255, 196, 170) if not fuel else (255, 214, 150))
     draw.line((0, 30, 31, 30), fill=(60, 20, 16))
+    for x in range(2, 32, 8):
+        draw.line((x, 28, x + 3, 28), fill=(255, 226, 170))
     return img
 
 
@@ -430,6 +437,11 @@ def machine_top_32() -> Image.Image:
     draw.rectangle((2, 2, 29, 29), fill=(160, 169, 176))
     draw.rectangle((5, 5, 26, 26), fill=(128, 137, 144))
     draw.line((2, 2, 29, 2), fill=(210, 218, 224))
+    # raised center plate with diagonal brace
+    draw.rectangle((10, 10, 21, 21), fill=(96, 104, 111))
+    draw.rectangle((11, 11, 20, 20), fill=(140, 149, 156))
+    draw.line((11, 11, 20, 20), fill=(78, 85, 91))
+    draw.line((11, 20, 20, 11), fill=(78, 85, 91))
     for x, y in ((3, 3), (27, 3), (3, 27), (27, 27)):
         draw.rectangle((x, y, x + 1, y + 1), fill=(228, 234, 238))
     return img
@@ -482,8 +494,11 @@ def hammer_head_32() -> Image.Image:
     draw.rectangle((0, 0, 31, 31), fill=(74, 81, 88))
     draw.rectangle((2, 2, 29, 29), fill=(168, 177, 184))
     draw.rectangle((4, 4, 27, 12), fill=(210, 218, 224))
+    draw.rectangle((4, 16, 27, 20), fill=(96, 104, 111))
     draw.line((4, 14, 27, 14), fill=(120, 128, 135))
     draw.line((4, 26, 27, 26), fill=(120, 128, 135))
+    draw.point((5, 27), fill=(74, 81, 88))
+    draw.point((26, 5), fill=(232, 240, 246))
     return img
 
 

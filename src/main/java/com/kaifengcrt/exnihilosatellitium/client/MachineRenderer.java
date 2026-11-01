@@ -50,14 +50,14 @@ public final class MachineRenderer implements BlockEntityRenderer<MachineBlockEn
         if (machine.kind() == MachineKind.HAMMER) {
             // raised at the start of the cycle, slams down onto the anvil at the end
             final float lift = machine.isActive()
-                    ? (1.0F - phase) * (2.0F / 16.0F) - (0.6F / 16.0F) : 0.0F;
+                    ? (1.0F - phase) * (4.0F / 16.0F) - (1.2F / 16.0F) : 0.0F;
             this.renderHead(pose, buffer, lift);
             if (!input.isEmpty()) {
                 this.renderItem(level, input, pose, buffer, 0.5F, 6.0F / 16.0F, 0.5F, 0.22F);
             }
         } else if (!input.isEmpty()) {
             final float jitter = machine.isActive()
-                    ? (float) Math.sin((level.getGameTime() + partialTick) * 2.0F) * 0.02F : 0.0F;
+                    ? (float) Math.sin((level.getGameTime() + partialTick) * 2.0F) * 0.06F : 0.0F;
             this.renderItem(level, input, pose, buffer,
                     0.5F + jitter, 10.42F / 16.0F, 0.5F + jitter, 0.30F);
         }
