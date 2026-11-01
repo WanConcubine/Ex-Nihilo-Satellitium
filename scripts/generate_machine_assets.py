@@ -285,6 +285,51 @@ def sieve_mesh_texture() -> Image.Image:
     return img
 
 
+def hammer_anvil_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 15, 15), fill=(62, 68, 74))
+    draw.rectangle((1, 1, 14, 14), fill=(88, 96, 103))
+    draw.rectangle((2, 2, 13, 6), fill=(120, 129, 136))
+    draw.line((2, 7, 13, 7), fill=(48, 53, 58))
+    return img
+
+
+def hammer_head_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 15, 15), fill=(74, 81, 88))
+    draw.rectangle((1, 1, 14, 14), fill=(168, 177, 184))
+    draw.rectangle((2, 2, 13, 6), fill=(210, 218, 224))
+    draw.line((2, 13, 13, 13), fill=(120, 128, 135))
+    draw.line((2, 7, 13, 7), fill=(140, 149, 156))
+    return img
+
+
+def hammer_top_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 15, 15), fill=(55, 61, 66))
+    draw.rectangle((1, 1, 14, 14), fill=(150, 159, 166))
+    draw.rectangle((3, 3, 12, 12), fill=(126, 134, 141))
+    draw.line((1, 1, 14, 1), fill=(203, 210, 215))
+    draw.point((2, 2), fill=(220, 226, 230))
+    draw.point((13, 2), fill=(220, 226, 230))
+    draw.point((2, 13), fill=(220, 226, 230))
+    draw.point((13, 13), fill=(220, 226, 230))
+    return img
+
+
+def hammer_shaft_texture() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 15, 15), fill=(96, 104, 111))
+    for y in (2, 6, 10, 14):
+        draw.line((0, y, 15, y), fill=(70, 77, 83))
+        draw.line((0, y + 1, 15, y + 1), fill=(140, 149, 156))
+    return img
+
+
 def sieve_inner_texture() -> Image.Image:
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -352,6 +397,42 @@ def sieve_model(*, fuel: bool) -> dict:
             "textures": tex, "elements": elements}
 
 
+def hammer_model(*, fuel: bool) -> dict:
+    side = f"exnihilosatellitium:block/machine_frame_side_{'fuel' if fuel else 'electric'}"
+    tex = {
+        "particle": side,
+        "side": side,
+        "top": "exnihilosatellitium:block/machine_hammer_top",
+        "leg": "exnihilosatellitium:block/machine_leg",
+        "anvil": "exnihilosatellitium:block/machine_hammer_anvil",
+        "head": "exnihilosatellitium:block/machine_hammer_head",
+        "shaft": "exnihilosatellitium:block/machine_hammer_shaft",
+        "inner": "exnihilosatellitium:block/machine_inner",
+    }
+
+    def face(texture):
+        return {"texture": texture}
+
+    def box(frm, to, texture, top=None):
+        return {"from": frm, "to": to,
+                "faces": {f: face(texture) for f in ("down", "up", "north", "south", "west", "east")}}
+
+    elements = [
+        box([1, 0, 1], [15, 4, 15], "#side"),
+        box([2, 4, 2], [4, 12, 4], "#leg"),
+        box([12, 4, 2], [14, 12, 4], "#leg"),
+        box([2, 4, 12], [4, 12, 14], "#leg"),
+        box([12, 4, 12], [14, 12, 14], "#leg"),
+        box([2, 12, 2], [14, 14, 14], "#top"),
+        box([5, 4, 5], [11, 6, 11], "#anvil"),
+        box([5, 7, 5], [11, 10, 11], "#head"),
+        box([7, 10, 7], [9, 12, 9], "#shaft"),
+    ]
+    # top plate should use top texture on the up face only
+    elements[5]["faces"]["up"] = face("#top")
+    return {"parent": "minecraft:block/block", "textures": tex, "elements": elements}
+
+
 def write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -363,8 +444,7 @@ def machine_assets(name: str, *, sieve: bool, fuel: bool) -> None:
     if sieve:
         model = sieve_model(fuel=fuel)
     else:
-        model = {"parent": "minecraft:block/cube_all",
-                 "textures": {"all": f"exnihilosatellitium:block/{name}"}}
+        model = hammer_model(fuel=fuel)
     write_json(ASSETS / "models" / "block" / f"{name}.json", model)
     write_json(ASSETS / "models" / "item" / f"{name}.json",
                {"parent": f"exnihilosatellitium:block/{name}"})
@@ -397,6 +477,10 @@ def main() -> None:
     sieve_leg_texture().save(ASSETS / "textures" / "block" / "machine_leg.png")
     sieve_mesh_texture().save(ASSETS / "textures" / "block" / "machine_mesh.png")
     sieve_inner_texture().save(ASSETS / "textures" / "block" / "machine_inner.png")
+    hammer_anvil_texture().save(ASSETS / "textures" / "block" / "machine_hammer_anvil.png")
+    hammer_head_texture().save(ASSETS / "textures" / "block" / "machine_hammer_head.png")
+    hammer_shaft_texture().save(ASSETS / "textures" / "block" / "machine_hammer_shaft.png")
+    hammer_top_texture().save(ASSETS / "textures" / "block" / "machine_hammer_top.png")
 
     gui_texture(electric=True).save(
         ASSETS / "textures" / "gui" / "electric_machine.png")
