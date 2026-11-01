@@ -134,7 +134,7 @@ def upgrade_texture(kind: str, tier: int) -> Image.Image:
 def gui_texture(*, electric: bool) -> Image.Image:
     img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    width, height = 176, 166
+    width, height = 176, 186
     draw.rectangle((0, 0, width - 1, height - 1), fill=(198, 198, 198))
     draw.line((0, 0, width - 1, 0), fill=(255, 255, 255))
     draw.line((0, 0, 0, height - 1), fill=(255, 255, 255))
@@ -142,14 +142,18 @@ def gui_texture(*, electric: bool) -> Image.Image:
     draw.line((1, height - 1, width - 1, height - 1), fill=(85, 85, 85))
     draw.line((1, 1, width - 2, 1), fill=(232, 232, 232))
 
-    slots = [(26, 22), (26, 46)]
+    slots = [(26, 20), (26, 44)]
     if electric:
-        slots += [(26 + i * 18, 64) for i in range(4)]
+        slots += [(26 + i * 18, 68) for i in range(4)]
     else:
-        slots += [(26, 64)]
-    slots += [(98 + column * 18, 22 + row * 18) for row in range(3) for column in range(3)]
-    slots += [(8 + column * 18, 84 + row * 18) for row in range(3) for column in range(9)]
-    slots += [(8 + column * 18, 142) for column in range(9)]
+        slots += [(26, 68)]
+    slots += [(98 + column * 18, 20 + row * 18) for row in range(3) for column in range(3)]
+    slots += [(8 + column * 18, 104 + row * 18) for row in range(3) for column in range(9)]
+    slots += [(8 + column * 18, 162) for column in range(9)]
+
+    # divider between the machine area and the player inventory
+    draw.line((8, 89, 168, 89), fill=(85, 85, 85))
+    draw.line((8, 90, 168, 90), fill=(232, 232, 232))
 
     for x, y in slots:
         draw.rectangle((x - 1, y - 1, x + 16, y + 16), fill=(139, 139, 139))

@@ -16,11 +16,11 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
             ResourceLocation.fromNamespaceAndPath(ExNihiloSatellitium.MOD_ID, "textures/gui/fuel_machine.png");
 
     private static final int FLAME_X = 8;
-    private static final int FLAME_Y = 46;
+    private static final int FLAME_Y = 48;
     private static final int FLAME_W = 14;
     private static final int FLAME_H = 14;
     private static final int PROGRESS_X = 52;
-    private static final int PROGRESS_Y = 34;
+    private static final int PROGRESS_Y = 32;
     private static final int PROGRESS_W = 20;
     private static final int PROGRESS_H = 6;
 
@@ -28,17 +28,18 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
                              final Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
-        this.imageHeight = 166;
+        this.imageHeight = 186;
         this.titleLabelX = 8;
         this.titleLabelY = 6;
         this.inventoryLabelX = 8;
-        this.inventoryLabelY = 73;
+        this.inventoryLabelY = 93;
     }
 
     @Override
     protected void renderBg(final GuiGraphics graphics, final float partialTick,
                             final int mouseX, final int mouseY) {
         graphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        MachineGui.drawGhosts(graphics, this.menu, this.leftPos, this.topPos);
 
         graphics.fill(this.leftPos + FLAME_X, this.topPos + FLAME_Y,
                 this.leftPos + FLAME_X + FLAME_W, this.topPos + FLAME_Y + FLAME_H,
@@ -51,7 +52,7 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
             graphics.fill(this.leftPos + FLAME_X,
                     this.topPos + FLAME_Y + FLAME_H - 1 - flame,
                     this.leftPos + FLAME_X + FLAME_W,
-                    this.topPos + FLAME_Y + FLAME_H,
+                    this.topPos + FLAME_Y + FLAME_H - 1,
                     0xFFF4A020);
         }
 
@@ -74,6 +75,9 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
                        final float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         this.renderTooltip(graphics, mouseX, mouseY);
+        MachineGui.drawStatus(graphics, this.font, this.menu,
+                this.leftPos + this.imageWidth - 8, this.topPos + 6);
+        MachineGui.drawHoverHint(graphics, this.font, this.menu, this.hoveredSlot, mouseX, mouseY);
         if (this.isHovering(FLAME_X, FLAME_Y, FLAME_W, FLAME_H, mouseX, mouseY)) {
             graphics.renderTooltip(this.font, Component.translatable(
                             "gui.exnihilosatellitium.burn",
