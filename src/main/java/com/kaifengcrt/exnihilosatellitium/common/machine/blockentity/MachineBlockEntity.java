@@ -14,6 +14,7 @@ import com.kaifengcrt.exnihilosatellitium.common.machine.menu.ElectricMachineMen
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.FuelMachineMenu;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -34,6 +35,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import java.util.List;
 
@@ -58,7 +62,9 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     public static final int DATA_BURN_MAX = 5;
     public static final int DATA_ACTIVE = 6;
     public static final int DATA_STATUS = 7;
-    public static final int DATA_COUNT = 8;
+    public static final int DATA_AUTO_OUTPUT = 8;
+    public static final int DATA_OUTPUT_MASK = 9;
+    public static final int DATA_COUNT = 10;
 
     public static final int TOOL_SLOT = 0;
     public static final int INPUT_SLOT = 1;
@@ -71,6 +77,12 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     private static final int FUEL_OUTPUT_START = FUEL_SLOT + 1;
     private static final double MAX_STACK = 64.0D;
 
+    /** One bit per {@link Direction#get3DDataValue()}; the auto-output target faces. */
+    public static final int FACE_DOWN = 1 << Direction.DOWN.get3DDataValue();
+    public static final int ALL_FACES = 0x3F;
+    /** How often the machine retries pushing leftovers into its output faces. */
+    private static final int EJECT_INTERVAL = 20;
+
     private final boolean electric;
     private final MachineInventory inventory;
     private final MachineEnergy energy;
@@ -79,6 +91,11 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     private int burnHalfTicks;
     private int burnHalfTotal;
     private boolean active;
+
+    /** Auto-output configuration: master switch plus the faces to push into. */
+    private boolean autoOutput;
+    private int outputMask = FACE_DOWN;
+    private int ejectCounter;
 
     protected MachineBlockEntity(final BlockEntityType<?> type, final BlockPos pos,
                                  final BlockState state, final boolean electric) {
@@ -225,6 +242,79 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         return this.outputSlotStart() + OUTPUT_SLOTS;
     }
 
+    // ---------------------------------------------------------- auto output
+
+    public boolean isAutoOutput() {
+        return this.autoOutput;
+    }
+
+    /** Bit mask of faces the machine ejects into; see {@link #FACE_DOWN}. */
+    public int getOutputMask() {
+        return this.outputMask;
+    }
+
+    public boolean outputsTo(final Direction direction) {
+        return (this.outputMask & (1 << direction.get3DDataValue())) != 0;
+    }
+
+    /**
+     * Applies the GUI configuration. Auto output needs at least one face, so an
+     * empty mask falls back to the bottom — the direction a chest is normally
+     * placed in. Enabling the switch pushes whatever is already buffered.
+     */
+    public void setOutputConfig(final int mask, final boolean autoOutput) {
+        final int clampedMask = mask & ALL_FACES;
+        final int effectiveMask = autoOutput && clampedMask == 0 ? FACE_DOWN : clampedMask;
+        if (this.outputMask == effectiveMask && this.autoOutput == autoOutput) {
+            return;
+        }
+        this.outputMask = effectiveMask;
+        this.autoOutput = autoOutput;
+        this.setChanged();
+        if (autoOutput) {
+            this.pushOutputs();
+        }
+    }
+
+    /**
+     * Pushes the output buffer into the inventories behind the enabled faces.
+     * One machine operation can fill several slots; every enabled face gets a
+     * chance, and whatever the neighbour refuses stays in the buffer.
+     */
+    private void pushOutputs() {
+        if (!this.autoOutput || this.outputMask == 0 || this.level == null
+                || this.level.isClientSide) {
+            return;
+        }
+        boolean changed = false;
+        for (final Direction direction : Direction.values()) {
+            if (!this.outputsTo(direction)) {
+                continue;
+            }
+            final IItemHandler target = this.level.getCapability(Capabilities.ItemHandler.BLOCK,
+                    this.worldPosition.relative(direction), direction.getOpposite());
+            if (target == null) {
+                continue;
+            }
+            for (int slot = this.outputSlotStart(); slot < this.outputSlotEnd(); slot++) {
+                final ItemStack stack = this.inventory.getItem(slot);
+                if (stack.isEmpty()) {
+                    continue;
+                }
+                final ItemStack remainder = ItemHandlerHelper.insertItemStacked(target,
+                        stack.copy(), false);
+                if (remainder.getCount() == stack.getCount()) {
+                    continue;
+                }
+                this.inventory.setItem(slot, remainder.isEmpty() ? ItemStack.EMPTY : remainder);
+                changed = true;
+            }
+        }
+        if (changed) {
+            this.setChanged();
+        }
+    }
+
     // ---------------------------------------------------------------- ticking
 
     public void serverTick() {
@@ -232,6 +322,10 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             return;
         }
         this.relocateInvalidSlotItems();
+        if (this.autoOutput && ++this.ejectCounter >= EJECT_INTERVAL) {
+            this.ejectCounter = 0;
+            this.pushOutputs();
+        }
         if (!this.canWork()) {
             if (this.work != 0) {
                 this.work = 0;
@@ -320,6 +414,9 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             if (!this.insertOutput(stack)) {
                 Block.popResource(this.level, this.worldPosition.above(), stack);
             }
+        }
+        if (this.autoOutput) {
+            this.pushOutputs();
         }
         this.level.playSound(null, this.worldPosition,
                 this.kind() == MachineKind.SIEVE ? SoundEvents.SAND_BREAK : SoundEvents.STONE_HIT,
@@ -509,6 +606,8 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             case DATA_BURN_MAX -> this.burnHalfTotal;
             case DATA_ACTIVE -> this.active ? 1 : 0;
             case DATA_STATUS -> this.currentStatus();
+            case DATA_AUTO_OUTPUT -> this.autoOutput ? 1 : 0;
+            case DATA_OUTPUT_MASK -> this.outputMask;
             default -> 0;
         };
     }
@@ -572,6 +671,8 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         tag.putBoolean("Active", this.active);
         tag.putInt("BurnHalfTicks", this.burnHalfTicks);
         tag.putInt("BurnHalfTotal", this.burnHalfTotal);
+        tag.putBoolean("AutoOutput", this.autoOutput);
+        tag.putInt("OutputMask", this.outputMask);
         if (this.energy != null) {
             tag.putInt("Energy", this.energy.getEnergyStored());
         }
@@ -595,6 +696,8 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         this.active = tag.getBoolean("Active");
         this.burnHalfTicks = tag.getInt("BurnHalfTicks");
         this.burnHalfTotal = tag.getInt("BurnHalfTotal");
+        this.autoOutput = tag.getBoolean("AutoOutput");
+        this.outputMask = tag.contains("OutputMask") ? tag.getInt("OutputMask") & ALL_FACES : FACE_DOWN;
         if (this.energy != null) {
             this.energy.setEnergyStored(tag.getInt("Energy"));
         }

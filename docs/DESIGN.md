@@ -1044,6 +1044,27 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 贴图：机器方块用 **32×32** 的 `machine_*` 贴图（2026-11-01 由 16×16 升级），
   `scripts/generate_machine_assets.py` 生成（Pillow）；`check-textures.py` 对 `machine_*` 允许 16/32。
 
+**自动输出（2026-11-01 追加）**
+
+- 机器可以自动把输出 12 格推进相邻容器，默认**关闭**（不改变已有漏斗/管道摆法）。
+  状态是 `AutoOutput` + `OutputMask` 两个字段：前者总开关，后者按 `Direction.get3DDataValue()`
+  每个面一位；默认掩码只有底面（`FACE_DOWN`），因为箱子通常放在机器下面。
+- 语义只覆盖**自动弹出**：掩码不限制 `MachineItemHandler`，漏斗/管道仍可从任意面抽取输出格
+  （已验证的「下方漏斗抽输出 / 上方漏斗补料」两套摆法都不用改配置）。
+- 触发时机：每完成一次操作立刻推一次；另外每 20 tick 重试一次，把「邻居满了 / 后来才清空」
+  的情况也补上。邻居满时余量留在输出格，不丢物品。
+- 配置 GUI（`MachineOutputScreen`）用 `ClientHooks.pushGuiLayer` 叠加在机器 GUI 上，
+  **不新开菜单**：机台菜单保持打开，改配置不会关界面或吞掉手上的物品。
+  6 个面按钮 + 总开关，改动以绝对值 payload 发到服务端，再由 `ContainerData`
+  （`DATA_AUTO_OUTPUT` / `DATA_OUTPUT_MASK`）回读，客户端不维护第二份权威状态。
+- 自动输出至少要有一个面：`setOutputConfig`（GUI/网络包路径）把空掩码回退到底面，
+  GUI 在取消最后一个面时自动关掉总开关；直接改 NBT 不走这条校验。
+- 机器 GUI 进度条右侧（`78,20`）的 16×16 图标按钮是入口，图标三帧（常态/悬停/开启）由
+  `generate_machine_assets.py` 生成；开启时按钮变绿，不进配置页也能看出来。
+  预览：[m10-output-button.png](images/m10-output-button.png)。
+- 数据包 `exnihilosatellitium:set_machine_output`（C2S）只接受 8 格以内的玩家，
+  `stillValid` 校验与方法同 GUI 距离。
+
 **验证（2026-11-01，RCON / forceload 0 0）**
 
 - 内能筛：写入木筛网 + 砂砾 64 + 煤 1，120 tick 后输入 63、筛网 damage 1、`BurnHalfTicks` 3200→2600、
@@ -1053,6 +1074,12 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   圆石规则 1 个 × 4 roll × 5 次 = 20 砂砾（时运生效）。
 - 内能锤：80 tick 一次，输入 63、锤 damage 1、`BurnHalfTicks` 2700、产出 1 砂砾。
 - 漏斗在机器下方只抽到砂砾（输出），机器内的锤/插件仍在；漏斗在上方成功把圆石补进输入槽。
+- 自动输出（2026-11-01 追加）：电动筛 `AutoOutput=1/OutputMask=1` + 下方箱子，跑完一件后
+  箱子拿到 `iron_crushed`，机器输出格为空；关掉 `AutoOutput` 后产物留在槽 6..10、箱子不变。
+- 自动输出换面：`OutputMask=2`（只推上方）→ 缓冲区 5 件 + 新产出的 1 件全部进上方箱子，
+  下方箱子不变。
+- 自动输出重试：无邻居时 3 个燧石留在槽 6；放上箱子后**没有新操作**，20 tick 内自动推进箱子。
+- 内能筛同配置同样生效（4 次产出 3 件进下方箱子，1 次 roll 空手）。
 - 存档实证：内能筛在作者世界里已处理 12 次（筛网 damage 12、末地石×5、紫颂果×1、末影珍珠×2）。
 - 放错槽位的物品会被弹到机器上方，不会把机器永久卡死。
 - **未验**：虚影/状态行/贴图的观感；配方未实际合成。

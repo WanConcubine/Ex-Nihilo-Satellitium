@@ -37,6 +37,8 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
     private static final int PROGRESS_Y = 26;
     private static final int PROGRESS_W = 24;
     private static final int PROGRESS_H = 16;
+    private static final int OUTPUT_BUTTON_X = 78;
+    private static final int OUTPUT_BUTTON_Y = 20;
 
     public FuelMachineScreen(final FuelMachineMenu menu, final Inventory playerInventory,
                              final Component title) {
@@ -47,6 +49,24 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
         this.titleLabelY = 6;
         this.inventoryLabelX = 8;
         this.inventoryLabelY = 93;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        this.addRenderableWidget(new OutputConfigButton(
+                this.leftPos + OUTPUT_BUTTON_X, this.topPos + OUTPUT_BUTTON_Y,
+                () -> this.menu.data().get(MachineBlockEntity.DATA_AUTO_OUTPUT) != 0,
+                Component.translatable("gui.exnihilosatellitium.output.button"),
+                button -> this.openOutputConfig()));
+    }
+
+    /** Opens the auto-output config as a layer, so this menu stays open. */
+    private void openOutputConfig() {
+        final MachineBlockEntity machine = this.menu.owner();
+        if (machine != null) {
+            this.minecraft.pushGuiLayer(new MachineOutputScreen(this.menu, machine.getBlockPos()));
+        }
     }
 
     @Override
