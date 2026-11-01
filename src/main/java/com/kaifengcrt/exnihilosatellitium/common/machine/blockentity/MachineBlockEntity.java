@@ -447,8 +447,18 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             return this.isValidInput(stack);
         }
         if (this.electric) {
-            return slot >= UPGRADE_SLOT_START && slot < UPGRADE_SLOT_START + UPGRADE_SLOTS
-                    && stack.getItem() instanceof UpgradeItem;
+            // one slot per upgrade type: speed in slot 2, fortune in slot 3,
+            // slots 4/5 are reserved for future upgrade types.
+            if (!(stack.getItem() instanceof UpgradeItem upgrade)) {
+                return false;
+            }
+            if (slot == UPGRADE_SLOT_START) {
+                return upgrade.type() == UpgradeType.SPEED;
+            }
+            if (slot == UPGRADE_SLOT_START + 1) {
+                return upgrade.type() == UpgradeType.FORTUNE;
+            }
+            return false;
         }
         if (slot == FUEL_SLOT) {
             return stack.getBurnTime(RecipeType.SMELTING) > 0;
