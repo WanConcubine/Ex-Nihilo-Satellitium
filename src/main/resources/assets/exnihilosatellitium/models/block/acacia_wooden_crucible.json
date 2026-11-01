@@ -1,0 +1,10 @@
+{
+  "parent": "exnihilosatellitium:block/crucible_base",
+  "textures": {
+    "particle": "minecraft:block/acacia_log",
+    "side": "minecraft:block/acacia_log",
+    "top": "minecraft:block/acacia_log_top",
+    "bottom": "minecraft:block/acacia_log",
+    "inside": "minecraft:block/stripped_acacia_log"
+  }
+}

@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.BarrelBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.CrucibleBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.blockentity.InfestedLeavesBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.SieveBlockEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -30,8 +31,18 @@ public final class ModBlockEntities {
                     .build(null));
 
     public static final RegistryObject<BlockEntityType<CrucibleBlockEntity>> CRUCIBLE =
-            BLOCK_ENTITIES.register("crucible", () -> BlockEntityType.Builder
-                    .of(CrucibleBlockEntity::new, ModBlocks.CRUCIBLE.get())
+            BLOCK_ENTITIES.register("crucible", () -> {
+                final java.util.List<Block> valid = new java.util.ArrayList<>();
+                valid.add(ModBlocks.CRUCIBLE.get());
+                ModBlocks.WOODEN_CRUCIBLES.forEach(block -> valid.add(block.get()));
+                return BlockEntityType.Builder
+                        .of(CrucibleBlockEntity::new, valid.toArray(new Block[0]))
+                        .build(null);
+            });
+
+    public static final RegistryObject<BlockEntityType<InfestedLeavesBlockEntity>> INFESTED_LEAVES =
+            BLOCK_ENTITIES.register("infested_leaves", () -> BlockEntityType.Builder
+                    .of(InfestedLeavesBlockEntity::new, ModBlocks.INFESTED_LEAVES.get())
                     .build(null));
 
     public static final RegistryObject<BlockEntityType<SieveBlockEntity>> SIEVE =

@@ -1,13 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "PPP",
-    "P P",
-    "PPP"
+    "x x",
+    "x x",
+    "xyx"
   ],
   "key": {
-    "P": {
+    "x": {
       "item": "minecraft:spruce_planks"
+    },
+    "y": {
+      "item": "minecraft:spruce_slab"
     }
   },
   "result": {

@@ -92,6 +92,10 @@
     {
       "item": "minecraft:prismarine_shard",
       "chance": 0.02
+    },
+    {
+      "item": "exnihilosatellitium:ancient_spores",
+      "chance": 0.0078
     }
   ]
 }

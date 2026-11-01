@@ -1,0 +1,29 @@
+{
+  "input": "exnihilosatellitium:crushed_netherrack",
+  "outputs": [
+    {
+      "item": "minecraft:quartz",
+      "chance": 0.2
+    },
+    {
+      "item": "minecraft:glowstone_dust",
+      "chance": 0.12
+    },
+    {
+      "item": "minecraft:nether_wart",
+      "chance": 0.1
+    },
+    {
+      "item": "minecraft:blaze_powder",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:magma_cream",
+      "chance": 0.04
+    },
+    {
+      "item": "minecraft:soul_sand",
+      "chance": 0.02
+    }
+  ]
+}

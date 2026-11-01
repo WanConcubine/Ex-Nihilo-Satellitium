@@ -5,17 +5,23 @@ import com.kaifengcrt.exnihilosatellitium.common.compost.CompostRegistry;
 import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
+import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -30,6 +36,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.registries.ForgeRegistries;
 
 /**
  * Barrel state: a 1000 mB fluid tank, a compost progress bar, and a solid
@@ -108,6 +115,15 @@ public class BarrelBlockEntity extends BlockEntity {
     private ItemStack solid = ItemStack.EMPTY;
     /** Fractional rain accumulation, reset when it cannot be added. */
     private float rainBuffer;
+    /**
+     * Witch-water spore progress: 0 = not sporing. Reaching {@link #COMPOST_TICKS}
+     * turns the full water tank into witch water (M6).
+     */
+    private int sporeProgress;
+    /** Doll rules: entity to spawn when cooking finishes, or null. */
+    private ResourceLocation pendingEntity;
+    private final java.util.List<Item> peacefulDrops = new java.util.ArrayList<>();
+    private int cookTicks;
 
     public BarrelBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.BARREL.get(), pos, state);
@@ -235,7 +251,30 @@ public class BarrelBlockEntity extends BlockEntity {
             if (!player.isCreative()) {
                 stack.shrink(1);
             }
-            this.setSolid(rule.result().copy());
+            if (rule.spawnsEntity()) {
+                this.startCooking(rule);
+            } else {
+                this.setSolid(rule.result().copy());
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        // Mushroom stew seeds a full water barrel (classic "throw it in" recipe).
+        if (stack.is(Items.MUSHROOM_STEW) && this.isFullWater()) {
+            if (!player.isCreative()) {
+                stack.shrink(1);
+                final ItemStack bowl = new ItemStack(Items.BOWL);
+                if (!player.getInventory().add(bowl)) {
+                    player.drop(bowl, false);
+                }
+            }
+            this.sporeProgress = Math.max(1, this.sporeProgress);
+            if (this.level != null) {
+                this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                        SoundSource.BLOCKS, 0.8F, 0.6F);
+            }
+            this.setChanged();
+            this.sync();
             return InteractionResult.SUCCESS;
         }
 
@@ -328,6 +367,9 @@ public class BarrelBlockEntity extends BlockEntity {
 
     public static void serverTick(final Level level, final BlockPos pos, final BlockState state,
                                   final BarrelBlockEntity barrel) {
+        if (barrel.tickCooking(level, pos)) {
+            return;
+        }
         if (barrel.dirtReady || barrel.hasSolid()) {
             return;
         }
@@ -357,6 +399,10 @@ public class BarrelBlockEntity extends BlockEntity {
             return;
         }
 
+        if (barrel.tickSpores(level, pos)) {
+            return;
+        }
+
         // A full barrel with the opposite fluid directly above solidifies
         // (the classic "put a lava/water source on top" setup). Flowing water
         // counts too: it is the same fluid as its source for the recipe lookup.
@@ -378,6 +424,146 @@ public class BarrelBlockEntity extends BlockEntity {
     /** Flowing water/lava map to their source fluid so the recipe table matches. */
     private static Fluid normalizeFluid(final Fluid fluid) {
         return fluid instanceof FlowingFluid flowing ? flowing.getSource() : fluid;
+    }
+
+    /** Dolls: consume the fluid and spawn the entity right away. */
+    private void startCooking(final BarrelRecipes.Recipe rule) {
+        this.pendingEntity = rule.entity();
+        this.peacefulDrops.clear();
+        this.peacefulDrops.addAll(rule.peacefulDrops());
+        this.cookTicks = rule.cookTicks();
+        this.tank.setFluid(FluidStack.EMPTY);
+        this.dirtReady = false;
+        this.compostProgress = 0;
+        this.compostTicks = 0;
+        this.setChanged();
+        this.sync();
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                    SoundSource.BLOCKS, 1.0F, 0.6F);
+        }
+        // Dolls convert on the right-click: peaceful drops the loot, otherwise the
+        // mob spawns right away. tickCooking only serves old saves that still
+        // carry a pending CookEntity.
+        if (this.level != null && !this.level.isClientSide) {
+            this.finishCooking(this.level);
+        }
+    }
+
+    /** @return true while cooking (the normal barrel tick must not run) */
+    private boolean tickCooking(final Level level, final BlockPos pos) {
+        if (this.pendingEntity == null) {
+            return false;
+        }
+        if (this.cookTicks > 0) {
+            this.cookTicks--;
+            if (this.cookTicks % 20 == 0 && level instanceof ServerLevel serverLevel) {
+                final boolean blaze = this.pendingEntity.getPath().contains("blaze");
+                serverLevel.sendParticles(blaze ? ParticleTypes.FLAME : ParticleTypes.PORTAL,
+                        pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
+                        6, 0.3D, 0.2D, 0.3D, 0.01D);
+            }
+            return true;
+        }
+
+        this.finishCooking(level);
+        return true;
+    }
+
+    /** Spawns the entity, or drops the peaceful loot, and empties the barrel. */
+    private void finishCooking(final Level level) {
+        if (!level.isClientSide) {
+            if (level.getDifficulty() != Difficulty.PEACEFUL) {
+                final EntityType<?> type = this.pendingEntity == null ? null
+                        : ForgeRegistries.ENTITY_TYPES.getValue(this.pendingEntity);
+                if (type != null) {
+                    final Entity entity = type.create(level);
+                    if (entity != null) {
+                        entity.moveTo(this.worldPosition.getX() + 0.5D, this.worldPosition.getY() + 1.0D,
+                                this.worldPosition.getZ() + 0.5D, level.random.nextFloat() * 360.0F, 0.0F);
+                        level.addFreshEntity(entity);
+                    }
+                }
+            } else if (!this.peacefulDrops.isEmpty()) {
+                final Item drop = this.peacefulDrops.get(level.random.nextInt(this.peacefulDrops.size()));
+                Block.popResource(level, this.worldPosition.above(), new ItemStack(drop));
+            }
+            level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                    SoundSource.BLOCKS, 1.0F, 0.4F);
+        }
+        this.pendingEntity = null;
+        this.peacefulDrops.clear();
+        this.cookTicks = 0;
+        this.setChanged();
+        this.sync();
+    }
+
+    /** True while a doll is cooking in this barrel (synced to the client). */
+    public boolean isCooking() {
+        return this.pendingEntity != null;
+    }
+
+    /** Seconds left before the entity spawns, for Jade. */
+    public int getCookSeconds() {
+        return (this.cookTicks + 19) / 20;
+    }
+
+    /** True when the tank holds a full 1000 mB of plain water. */
+    private boolean isFullWater() {
+        return this.tank.getFluidAmount() >= CAPACITY
+                && this.tank.getFluid().getFluid() == Fluids.WATER;
+    }
+
+    /** Mycelium in the 3x3x3 around the barrel, like the original getNearbyBlocks. */
+    private static int countMycelium(final Level level, final BlockPos pos) {
+        int count = 0;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (level.getBlockState(pos.offset(x, y, z)).is(net.minecraft.world.level.block.Blocks.MYCELIUM)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Witch water: a full water barrel next to mycelium (or seeded with mushroom
+     * stew) ferments. Original timing: {@code timer += 1 + mycelium / 2} per tick
+     * against MAX_COMPOSTING_TIME, so one mycelium takes 50 s.
+     *
+     * @return true when the tank became witch water this tick
+     */
+    private boolean tickSpores(final Level level, final BlockPos pos) {
+        if (this.compostProgress > 0 || this.hasSolid() || this.dirtReady) {
+            return false;
+        }
+        if (!this.isFullWater()) {
+            this.sporeProgress = 0;
+            return false;
+        }
+        final int mycelium = countMycelium(level, pos);
+        if (this.sporeProgress <= 0 && mycelium <= 0) {
+            return false;
+        }
+        this.sporeProgress += 1 + mycelium / 2;
+        if (this.sporeProgress < COMPOST_TICKS) {
+            return false;
+        }
+
+        this.sporeProgress = 0;
+        this.tank.setFluid(new FluidStack(ModFluids.WITCH_WATER.get(), CAPACITY));
+        this.setChanged();
+        this.sync();
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.WITCH,
+                    pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
+                    16, 0.35D, 0.15D, 0.35D, 0.02D);
+        }
+        level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.5F);
+        return true;
     }
 
     /** Open-to-sky barrels catch rain; ~100 s at rainfall 0.5 for a full barrel. */
@@ -451,6 +637,19 @@ public class BarrelBlockEntity extends BlockEntity {
         tag.putInt("Compost", this.compostProgress);
         tag.putInt("CompostTicks", this.compostTicks);
         tag.putBoolean("DirtReady", this.dirtReady);
+        tag.putInt("Spore", this.sporeProgress);
+        if (this.pendingEntity != null) {
+            tag.putString("CookEntity", this.pendingEntity.toString());
+        }
+        if (!this.peacefulDrops.isEmpty()) {
+            final net.minecraft.nbt.ListTag drops = new net.minecraft.nbt.ListTag();
+            for (final Item item : this.peacefulDrops) {
+                drops.add(net.minecraft.nbt.StringTag.valueOf(
+                        ForgeRegistries.ITEMS.getKey(item).toString()));
+            }
+            tag.put("PeacefulDrops", drops);
+        }
+        tag.putInt("CookTicks", this.cookTicks);
         if (this.hasSolid()) {
             tag.put("Solid", this.solid.save(new CompoundTag()));
         }
@@ -464,6 +663,21 @@ public class BarrelBlockEntity extends BlockEntity {
         this.compostProgress = tag.getInt("Compost");
         this.compostTicks = tag.getInt("CompostTicks");
         this.dirtReady = tag.getBoolean("DirtReady");
+        this.sporeProgress = tag.getInt("Spore");
+        this.pendingEntity = tag.contains("CookEntity")
+                ? ResourceLocation.tryParse(tag.getString("CookEntity")) : null;
+        this.peacefulDrops.clear();
+        if (tag.contains("PeacefulDrops")) {
+            for (final net.minecraft.nbt.Tag element
+                    : tag.getList("PeacefulDrops", net.minecraft.nbt.Tag.TAG_STRING)) {
+                final Item item = ForgeRegistries.ITEMS.getValue(
+                        ResourceLocation.tryParse(element.getAsString()));
+                if (item != null && item != Items.AIR) {
+                    this.peacefulDrops.add(item);
+                }
+            }
+        }
+        this.cookTicks = tag.getInt("CookTicks");
         this.solid = tag.contains("Solid") ? ItemStack.of(tag.getCompound("Solid")) : ItemStack.EMPTY;
 
         if (!tag.contains("CompostScale")) {

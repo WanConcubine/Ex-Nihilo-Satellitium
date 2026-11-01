@@ -1,11 +1,19 @@
 package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.GrassSeedsItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -38,6 +46,16 @@ public final class ModItems {
             registerBarrelItem("acacia_barrel", ModBlocks.ACACIA_BARREL);
     public static final RegistryObject<Item> DARK_OAK_BARREL =
             registerBarrelItem("dark_oak_barrel", ModBlocks.DARK_OAK_BARREL);
+    public static final RegistryObject<Item> MANGROVE_BARREL =
+            registerBarrelItem("mangrove_barrel", ModBlocks.MANGROVE_BARREL);
+    public static final RegistryObject<Item> CHERRY_BARREL =
+            registerBarrelItem("cherry_barrel", ModBlocks.CHERRY_BARREL);
+    public static final RegistryObject<Item> BAMBOO_BARREL =
+            registerBarrelItem("bamboo_barrel", ModBlocks.BAMBOO_BARREL);
+    public static final RegistryObject<Item> CRIMSON_BARREL =
+            registerBarrelItem("crimson_barrel", ModBlocks.CRIMSON_BARREL);
+    public static final RegistryObject<Item> WARPED_BARREL =
+            registerBarrelItem("warped_barrel", ModBlocks.WARPED_BARREL);
     public static final RegistryObject<Item> STONE_BARREL =
             registerBarrelItem("stone_barrel", ModBlocks.STONE_BARREL);
 
@@ -48,6 +66,11 @@ public final class ModItems {
             JUNGLE_BARREL,
             ACACIA_BARREL,
             DARK_OAK_BARREL,
+            MANGROVE_BARREL,
+            CHERRY_BARREL,
+            BAMBOO_BARREL,
+            CRIMSON_BARREL,
+            WARPED_BARREL,
             STONE_BARREL);
 
     public static final RegistryObject<Item> SIEVE =
@@ -70,6 +93,88 @@ public final class ModItems {
     public static final RegistryObject<Item> CRUCIBLE =
             ITEMS.register("crucible", () -> new BlockItem(ModBlocks.CRUCIBLE.get(),
                     new Item.Properties()));
+
+    /** M6: the 11 wooden crucible variants, registered after the porcelain one. */
+    public static final RegistryObject<Item> WOODEN_CRUCIBLE =
+            registerCrucibleItem("wooden_crucible", ModBlocks.WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> SPRUCE_WOODEN_CRUCIBLE =
+            registerCrucibleItem("spruce_wooden_crucible", ModBlocks.SPRUCE_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> BIRCH_WOODEN_CRUCIBLE =
+            registerCrucibleItem("birch_wooden_crucible", ModBlocks.BIRCH_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> JUNGLE_WOODEN_CRUCIBLE =
+            registerCrucibleItem("jungle_wooden_crucible", ModBlocks.JUNGLE_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> ACACIA_WOODEN_CRUCIBLE =
+            registerCrucibleItem("acacia_wooden_crucible", ModBlocks.ACACIA_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> DARK_OAK_WOODEN_CRUCIBLE =
+            registerCrucibleItem("dark_oak_wooden_crucible", ModBlocks.DARK_OAK_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> MANGROVE_WOODEN_CRUCIBLE =
+            registerCrucibleItem("mangrove_wooden_crucible", ModBlocks.MANGROVE_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> CHERRY_WOODEN_CRUCIBLE =
+            registerCrucibleItem("cherry_wooden_crucible", ModBlocks.CHERRY_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> BAMBOO_WOODEN_CRUCIBLE =
+            registerCrucibleItem("bamboo_wooden_crucible", ModBlocks.BAMBOO_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> CRIMSON_WOODEN_CRUCIBLE =
+            registerCrucibleItem("crimson_wooden_crucible", ModBlocks.CRIMSON_WOODEN_CRUCIBLE);
+    public static final RegistryObject<Item> WARPED_WOODEN_CRUCIBLE =
+            registerCrucibleItem("warped_wooden_crucible", ModBlocks.WARPED_WOODEN_CRUCIBLE);
+
+    public static final List<RegistryObject<Item>> WOODEN_CRUCIBLES = List.of(
+            WOODEN_CRUCIBLE,
+            SPRUCE_WOODEN_CRUCIBLE,
+            BIRCH_WOODEN_CRUCIBLE,
+            JUNGLE_WOODEN_CRUCIBLE,
+            ACACIA_WOODEN_CRUCIBLE,
+            DARK_OAK_WOODEN_CRUCIBLE,
+            MANGROVE_WOODEN_CRUCIBLE,
+            CHERRY_WOODEN_CRUCIBLE,
+            BAMBOO_WOODEN_CRUCIBLE,
+            CRIMSON_WOODEN_CRUCIBLE,
+            WARPED_WOODEN_CRUCIBLE);
+
+    /** M6: unfired porcelain bucket, smelted into the working bucket. */
+    public static final RegistryObject<Item> UNFIRED_PORCELAIN_BUCKET =
+            ITEMS.register("unfired_porcelain_bucket", () -> new Item(new Item.Properties().stacksTo(1)));
+
+    /** M6: universal 1000 mB bucket, accepts lava and witch water. */
+    public static final RegistryObject<Item> PORCELAIN_BUCKET =
+            ITEMS.register("porcelain_bucket", () -> new PorcelainBucketItem(
+                    new Item.Properties().stacksTo(1)));
+
+    /** M6: grass seeds turn dirt into grass; hammered netherrack / end stone. */
+    public static final RegistryObject<Item> GRASS_SEEDS =
+            ITEMS.register("grass_seeds", () -> new GrassSeedsItem(new Item.Properties()));
+    public static final RegistryObject<Item> CRUSHED_NETHERRACK =
+            ITEMS.register("crushed_netherrack", () -> new BlockItem(ModBlocks.CRUSHED_NETHERRACK.get(),
+                    new Item.Properties()));
+    public static final RegistryObject<Item> CRUSHED_END_STONE =
+            ITEMS.register("crushed_end_stone", () -> new BlockItem(ModBlocks.CRUSHED_END_STONE.get(),
+                    new Item.Properties()));
+
+    /** M6: dolls, the nether/end mob recipe (angry -> blaze, creepy -> enderman). */
+    public static final RegistryObject<Item> DOLL =
+            ITEMS.register("doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final RegistryObject<Item> ANGRY_DOLL =
+            ITEMS.register("angry_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final RegistryObject<Item> CREEPY_DOLL =
+            ITEMS.register("creepy_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final RegistryObject<Item> SHULKER_DOLL =
+            ITEMS.register("shulker_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final RegistryObject<Item> GUARDIAN_DOLL =
+            ITEMS.register("guardian_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+
+    /** M6: infested leaves item; the block-entity tag picks 0 % or mature. */
+    public static final RegistryObject<Item> INFESTED_LEAVES =
+            ITEMS.register("infested_leaves", () -> new InfestedLeavesBlockItem(
+                    ModBlocks.INFESTED_LEAVES.get(), new Item.Properties()));
+
+    /** M6: ancient spores turn dirt into mycelium (the witch water chain start). */
+    public static final RegistryObject<Item> ANCIENT_SPORES =
+            ITEMS.register("ancient_spores", () -> new AncientSporesItem(new Item.Properties()));
+
+    /** M6: witch water bucket (fluid id lives in {@link ModFluids}). */
+    public static final RegistryObject<Item> WITCH_WATER_BUCKET =
+            ITEMS.register("witch_water_bucket", () -> new BucketItem(ModFluids.WITCH_WATER,
+                    new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
 
     public static final RegistryObject<Item> DUST =
             ITEMS.register("dust", () -> new BlockItem(ModBlocks.DUST.get(), new Item.Properties()));
@@ -103,11 +208,23 @@ public final class ModItems {
                     new Item.Properties().stacksTo(1).durability(128), 2));
     public static final List<RegistryObject<Item>> CROOKS = List.of(WOODEN_CROOK, BONE_CROOK);
 
+    /** M6: silkworms infest leaves; cooked silkworms are a small snack. */
+    public static final RegistryObject<Item> SILKWORM =
+            ITEMS.register("silkworm", () -> new SilkwormItem(new Item.Properties()));
+    public static final RegistryObject<Item> COOKED_SILKWORM =
+            ITEMS.register("cooked_silkworm", () -> new Item(new Item.Properties()
+                    .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.6F).build())));
+
     private ModItems() {
     }
 
     private static RegistryObject<Item> registerBarrelItem(final String name,
                                                            final RegistryObject<? extends Block> block) {
+        return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+    }
+
+    private static RegistryObject<Item> registerCrucibleItem(final String name,
+                                                             final RegistryObject<? extends Block> block) {
         return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 

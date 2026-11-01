@@ -1,7 +1,9 @@
 package com.kaifengcrt.exnihilosatellitium.common.blockentity;
 
+import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
+import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -28,30 +30,35 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Crucible state: a fluid tank plus a solid "melt" queue.
  *
- * <p>Insert a meltable block with a right-click (up to {@link #MELT_CAPACITY} mB
- * of solid); while the block below is a heat source
+ * <p>Insert a meltable block with a right-click (up to the configured melt
+ * capacity, default {@link #DEFAULT_MELT_CAPACITY} mB of solid); while the block below is a heat source
  * ({@code crucible_heat/*.json}) the solid is converted into its fluid at
  * {@code speed} mB of solid per tick. The renderer shows the melt material while
  * the solid volume is larger than the fluid volume, and the fluid otherwise
  * (classic Ex Nihilo behaviour).</p>
  *
- * <p>The 1.20.1 branch has no config system yet, so the three tunables are
- * constants here; M6's wooden crucibles will reintroduce the passive-melt path.</p>
+ * <p>Wooden variants (see {@link ModTags.Blocks#WOODEN_CRUCIBLES}) melt without
+ * a heat source at a fixed passive speed and only accept water; they also reject
+ * hot fluids on the tank side, exactly like wooden barrels.</p>
  */
 public class CrucibleBlockEntity extends BlockEntity {
 
-    /** Tank capacity (main's config default). */
-    public static final int CAPACITY = 8000;
-    /** Solid (melt) capacity: one cobblestone is 250, so eight blocks fit. */
-    public static final int MELT_CAPACITY = 2000;
-    /** Multiplier on every heat source's mB/tick. */
-    public static final float HEAT_MULTIPLIER = 1.0F;
+    /** Wooden crucibles melt without a heat source, slowly (classic Creatio). */
+    public static final float WOODEN_PASSIVE_SPEED = 0.5F;
+    /** Wooden crucibles are not hot-fluid rated; same limit as wooden barrels. */
+    public static final int WOOD_MAX_TEMPERATURE = 433;
 
+    /** Default solid (melt) capacity; the live value comes from the config. */
+    public static final int DEFAULT_MELT_CAPACITY = 2000;
     private static final int SYNC_INTERVAL = 10;
 
-    private final FluidTank tank = new FluidTank(CAPACITY) {
+    private final FluidTank tank = new FluidTank(ExConfig.crucibleCapacity()) {
         @Override
         public int fill(final FluidStack resource, final FluidAction action) {
+            if (CrucibleBlockEntity.this.isWooden() && !resource.isEmpty()
+                    && resource.getFluid().getFluidType().getTemperature() > WOOD_MAX_TEMPERATURE) {
+                return 0;
+            }
             return super.fill(resource, action);
         }
 
@@ -94,7 +101,7 @@ public class CrucibleBlockEntity extends BlockEntity {
 
     /** 0..1 of the configured melt capacity. */
     public float getSolidRatio() {
-        return (float) Math.min(1.0D, this.solidVolume / MELT_CAPACITY);
+        return (float) Math.min(1.0D, this.solidVolume / ExConfig.crucibleMeltCapacity());
     }
 
     /** 0..1 of the configured fluid capacity. */
@@ -113,9 +120,9 @@ public class CrucibleBlockEntity extends BlockEntity {
         return this.pendingStack;
     }
 
-    /** True for the wooden variant (M6); the porcelain crucible is never wooden. */
+    /** True for the wooden variants: passive melting, water only. */
     public boolean isWooden() {
-        return false;
+        return this.getBlockState().is(ModTags.Blocks.WOODEN_CRUCIBLES);
     }
 
     public boolean canAccept(final CrucibleRecipes.Melt melt) {
@@ -135,7 +142,7 @@ public class CrucibleBlockEntity extends BlockEntity {
                 return false;
             }
         }
-        if (this.solidVolume + melt.solidAmount() > MELT_CAPACITY) {
+        if (this.solidVolume + melt.solidAmount() > ExConfig.crucibleMeltCapacity()) {
             return false;
         }
         return this.tank.getFluidAmount() + this.fluidTotal + melt.amount() <= this.tank.getCapacity();
@@ -165,7 +172,7 @@ public class CrucibleBlockEntity extends BlockEntity {
         if (this.isWooden()) {
             final FluidStack contained = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY);
             if (!contained.isEmpty()
-                    && contained.getFluid().getFluidType().getTemperature() > 433) {
+                    && contained.getFluid().getFluidType().getTemperature() > WOOD_MAX_TEMPERATURE) {
                 player.displayClientMessage(
                         Component.translatable("message.exnihilosatellitium.crucible.hot_fluid"), true);
                 return InteractionResult.SUCCESS;
@@ -194,13 +201,25 @@ public class CrucibleBlockEntity extends BlockEntity {
             crucible.syncCooldown = SYNC_INTERVAL;
         }
 
+        final int configured = ExConfig.crucibleCapacity();
+        if (crucible.tank.getCapacity() != configured) {
+            crucible.tank.setCapacity(configured);
+            final FluidStack current = crucible.tank.getFluid();
+            if (!current.isEmpty() && current.getAmount() > configured) {
+                crucible.tank.setFluid(new FluidStack(current.getFluid(), configured));
+            }
+            crucible.setChanged();
+            crucible.dirty = true;
+        }
+
         if (crucible.solidVolume <= 0.0D || crucible.meltFluid == Fluids.EMPTY
                 || crucible.fluidTotal <= 0 || crucible.solidTotal <= 0) {
             return;
         }
         final float speed = crucible.isWooden()
-                ? 0.5F
-                : CrucibleHeat.speedFor(level.getBlockState(pos.below())) * HEAT_MULTIPLIER;
+                ? WOODEN_PASSIVE_SPEED
+                : CrucibleHeat.speedFor(level.getBlockState(pos.below()))
+                        * ExConfig.crucibleHeatMultiplier();
         if (speed <= 0.0F) {
             return;
         }

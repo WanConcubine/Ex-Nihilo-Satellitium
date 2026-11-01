@@ -1,5 +1,6 @@
 package com.kaifengcrt.exnihilosatellitium.common.barrel;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
@@ -8,6 +9,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
@@ -28,15 +30,18 @@ import java.util.Set;
  * appears inside the barrel. The block entity keeps the "tank must be full"
  * rule, so this table only answers "base + additive -> what".</p>
  *
- * <p>Read by the block entity on the server and by JEI on the client (the
- * client's resource manager only exposes {@code assets/}, so processResources
- * mirrors this directory there).</p>
+ * <p>Rules with an {@code entity} (dolls) spawn that entity instead of putting
+ * a block in the barrel; in peaceful mode they drop {@code peaceful_drop}
+ * instead, and {@code result} mirrors that drop so JEI still has something to
+ * show.</p>
  */
 public final class BarrelRecipes {
 
-    /** One transformation; exactly one of {@code addedFluid} / {@code addedItem} is set. */
-    public record Recipe(Fluid base, @Nullable Fluid addedFluid, @Nullable Item addedItem,
-                         ItemStack result) {
+    /**
+     * One transformation; exactly one of {@code addedFluid} / {@code addedItem} is set.
+     */
+    public record Recipe(Fluid base, @Nullable Fluid addedFluid, @Nullable Item addedItem, ItemStack result,
+                         @Nullable ResourceLocation entity, List<Item> peacefulDrops, int cookTicks) {
 
         public boolean isFluidReaction() {
             return this.addedFluid != null;
@@ -44,6 +49,10 @@ public final class BarrelRecipes {
 
         public boolean isItemReaction() {
             return this.addedItem != null;
+        }
+
+        public boolean spawnsEntity() {
+            return this.entity != null;
         }
     }
 
@@ -73,10 +82,10 @@ public final class BarrelRecipes {
     /** The block produced by right-clicking a full barrel of {@code base} with {@code held}. */
     public static ItemStack resultForItem(final Fluid base, final ItemStack held) {
         final Recipe recipe = ruleForItem(base, held);
-        return recipe == null ? ItemStack.EMPTY : recipe.result().copy();
+        return recipe == null || recipe.spawnsEntity() ? ItemStack.EMPTY : recipe.result().copy();
     }
 
-    /** The rule matched by right-clicking {@code held} into a full barrel of {@code base}. */
+    /** The full rule matched by right-clicking {@code held} (may spawn an entity). */
     @Nullable
     public static Recipe ruleForItem(final Fluid base, final ItemStack held) {
         for (final Recipe recipe : active()) {
@@ -119,15 +128,64 @@ public final class BarrelRecipes {
                     continue;
                 }
 
-                final ResourceLocation resultId = ResourceLocation.tryParse(root.get("result").getAsString());
-                final Item resultItem = resultId == null ? null : ForgeRegistries.ITEMS.getValue(resultId);
-                if (resultItem == null) {
-                    ExNihiloSatellitium.LOGGER.warn("[barrel] unknown result {} in {}", resultId, id);
+                ResourceLocation entityId = null;
+                final List<Item> peacefulDrops = new ArrayList<>();
+                int cookTicks = 600;
+                if (root.has("entity")) {
+                    entityId = ResourceLocation.tryParse(root.get("entity").getAsString());
+                    if (entityId == null || !ForgeRegistries.ENTITY_TYPES.containsKey(entityId)) {
+                        ExNihiloSatellitium.LOGGER.warn("[barrel] unknown entity {} in {}", entityId, id);
+                        continue;
+                    }
+                    if (!root.has("peaceful_drop")) {
+                        ExNihiloSatellitium.LOGGER.warn("[barrel] entity rule {} needs peaceful_drop", id);
+                        continue;
+                    }
+                    final JsonElement dropElement = root.get("peaceful_drop");
+                    final List<String> dropIds = new ArrayList<>();
+                    if (dropElement.isJsonArray()) {
+                        for (final JsonElement element : dropElement.getAsJsonArray()) {
+                            dropIds.add(element.getAsString());
+                        }
+                    } else {
+                        dropIds.add(dropElement.getAsString());
+                    }
+                    for (final String rawId : dropIds) {
+                        final ResourceLocation dropId = ResourceLocation.tryParse(rawId);
+                        final Item drop = dropId == null ? null : ForgeRegistries.ITEMS.getValue(dropId);
+                        if (drop == null || drop == Items.AIR) {
+                            ExNihiloSatellitium.LOGGER.warn("[barrel] unknown peaceful_drop {} in {}",
+                                    dropId, id);
+                            continue;
+                        }
+                        peacefulDrops.add(drop);
+                    }
+                    if (peacefulDrops.isEmpty()) {
+                        continue;
+                    }
+                    cookTicks = root.has("cook_ticks") ? root.get("cook_ticks").getAsInt() : 600;
+                }
+                final ItemStack resultStack;
+                if (entityId != null) {
+                    resultStack = new ItemStack(peacefulDrops.get(0));
+                } else {
+                    final ResourceLocation resultId = ResourceLocation.tryParse(root.get("result").getAsString());
+                    final Item resultItem = resultId == null ? null : ForgeRegistries.ITEMS.getValue(resultId);
+                    if (resultItem == null || resultItem == Items.AIR) {
+                        ExNihiloSatellitium.LOGGER.warn("[barrel] unknown result {} in {}", resultId, id);
+                        continue;
+                    }
+                    resultStack = new ItemStack(resultItem);
+                }
+                final String addedKey = hasFluid
+                        ? "fluid:" + added.get("fluid").getAsString()
+                        : "item:" + added.get("item").getAsString();
+                if (!seen.add(baseId + "|" + addedKey)) {
+                    ExNihiloSatellitium.LOGGER.warn("[barrel] duplicate rule {} + {} in {}",
+                            baseId, addedKey, id);
                     continue;
                 }
-                final ItemStack resultStack = new ItemStack(resultItem);
 
-                final String addedKey;
                 if (hasFluid) {
                     final ResourceLocation fluidId = ResourceLocation.tryParse(added.get("fluid").getAsString());
                     final Fluid fluid = fluidId == null ? null : ForgeRegistries.FLUIDS.getValue(fluidId);
@@ -135,12 +193,8 @@ public final class BarrelRecipes {
                         ExNihiloSatellitium.LOGGER.warn("[barrel] unknown added fluid {} in {}", fluidId, id);
                         continue;
                     }
-                    addedKey = "fluid:" + fluidId;
-                    if (!seen.add(baseId + "|" + addedKey)) {
-                        ExNihiloSatellitium.LOGGER.warn("[barrel] duplicate rule {} + {} in {}", baseId, addedKey, id);
-                        continue;
-                    }
-                    built.add(new Recipe(base, fluid, null, resultStack));
+                    built.add(new Recipe(base, fluid, null, resultStack, entityId,
+                            List.copyOf(peacefulDrops), cookTicks));
                     fluidReactions++;
                 } else {
                     final ResourceLocation itemId = ResourceLocation.tryParse(added.get("item").getAsString());
@@ -149,12 +203,8 @@ public final class BarrelRecipes {
                         ExNihiloSatellitium.LOGGER.warn("[barrel] unknown added item {} in {}", itemId, id);
                         continue;
                     }
-                    addedKey = "item:" + itemId;
-                    if (!seen.add(baseId + "|" + addedKey)) {
-                        ExNihiloSatellitium.LOGGER.warn("[barrel] duplicate rule {} + {} in {}", baseId, addedKey, id);
-                        continue;
-                    }
-                    built.add(new Recipe(base, null, item, resultStack));
+                    built.add(new Recipe(base, null, item, resultStack, entityId,
+                            List.copyOf(peacefulDrops), cookTicks));
                     itemReactions++;
                 }
                 files++;

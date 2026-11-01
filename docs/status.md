@@ -10,7 +10,40 @@
 **M2 筛子 + 矿链已铺好**（三种筛网、4 张筛料表、12 种材料 4 碎块→方块→锭）；
 **M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、47 条锤表、10 张钩表、沙→尘土）；
 **M4 坩埚已铺好**（2026-11-01：瓷土 → 未烧制 → 烧制、39 条熔点 / 9 热源、
-熔料+流体双储、JEI 两页 + Jade）。**M6（蚕/人偶/巫水/瓷桶/木坩埚）仍未开始**。
+熔料+流体双储、JEI 两页 + Jade）。**M6 五刀已铺完**（2026-11-01：巫水 + 古代孢子、瓷桶、
+木坩埚 11 种、木桶补齐 12 种、粉碎下界岩/末地石 + 草种子、蚕/侵染树叶、5 种人偶），
+并且补上了 `crucible.*` config。**桶配方已按原版改正**（4 板 + 台阶，见下）。
+
+## 当前批次（2026-11-01，M6 + config + 桶配方修正）
+
+- **桶配方修正**：七种木桶/石桶的合成回到原版式样 `x x / x x / xyx`
+  （x=对应木板或 `stone`，y=对应台阶 / `smooth_stone_slab`）；之前是 8 块板的
+  `PPP/P P/PPP`，与主线 85cc392、原版都对不上。补齐红树/樱花/竹/绯红/诡异 5 种桶，
+  木桶总数 12（11 木材 + 石桶），合成/掉落/贴图/模型/`mineable/axe` 同步。
+- **config（小尾巴）**：新增 `common/config/ExConfig`（`ForgeConfigSpec`，`COMMON`），
+  键与主线一致：`crucible.capacity` / `crucible.meltCapacity` / `crucible.heatSpeedMultiplier`。
+  `CrucibleBlockEntity` 改为动态容量：tick 里发现配置变化就 `setCapacity` 并裁掉多余流体，
+  熔料上限/热源倍率实时读。生成的 `run/config/exnihilosatellitium-common.toml` 已核对。
+- **巫水 + 古代孢子**：`ModFluids`（`ForgeFlowingFluid` + 自定义 `WitchWaterFluidType`，
+  1.20.1 用 `initializeClient` 注册紫色水贴图）、`witch_water` 液方块 + 桶、
+  `barrel/*.json` 两条转化；满水桶 + 3×3×3 菌丝（或蘑菇煲起酵）按
+  `1 + 菌丝数/2` 累计 1000 tick 变巫水；沙筛 1/128 古代孢子，右键泥土→菌丝、右键牛→哞菇。
+- **瓷桶**：`PorcelainBucketItem` + Forge `FluidHandlerItemStack`（1000 mB，NBT 顶层
+  `Fluid: {FluidName, Amount}`），3 瓷土 → 未烧制 → 烧制；模型 predicate
+  `exnihilosatellitium:filled` + 流体层染色；能装熔岩/巫水，也能倒进木桶/坩埚。
+- **木坩埚 11 种**：`wooden_crucibles` 方块标签 + 同一 `CrucibleBlockEntity`；
+  `isWooden()` 走标签，被动 0.5 mB/t、只收水类熔料、`fill` 拒 >433 K。
+- **粉碎方块 + 草种子**：锤下界岩/末地石 → `crushed_netherrack` / `crushed_end_stone`
+  （锤表 49 条），两张筛料表进入 `sieve/`（6 输入 / 72 掉落）；泥土筛草种子。
+- **蚕 / 侵染树叶**：`silkworm` 右键树叶 → `infested_leaves`（BE 记 `Mimic`、0.0005/tick、
+  60% 后扩散、破坏按进度掉线）；BER 用 `WhiteningVertexConsumer` 按进度把原树叶混向白色；
+  物品形态用 `BlockEntityTag.Progress` 区分 0%/成熟，Jade 显示原树叶名与百分比。
+  1.20.1 没有 data component，因此走 NBT（这是与主线唯一的实现差异）。
+- **人偶 5 种**：`doll` / `angry_doll` / `creepy_doll` / `shulker_doll` / `guardian_doll`，
+  8 条合成（含两条镜像）；桶规则扩展 `entity` + `peaceful_drop`，右键立即生成生物 /
+  和平掉战利品（随机列表），旧存档的 `CookEntity` 倒计时仍可继续。
+- **顺手补的坑**：`dust`、`crucible`、`unfired_crucible` 三个方块此前**没有掉落表**
+  （挖掉不掉），本批一并补上；`check-textures.py` 同步主线的 64×64 人偶 / 16×64 蚕动画放行。
 
 ## 现在停在哪
 
@@ -106,6 +139,20 @@
 | 1.20.1 配方计数 | ℹ️ | 1.20.1 的 `Loaded 7 recipes` 是**配方类型数**，不是配方条数；别拿它当进度 |
 | 改名完整性 | ✅ | `git grep` 无旧 id/旧类名；jar 内 `mods.toml` 为 `exnihilosatellitium` / `Ex Nihilo: Satellitium` |
 
+| M6 巫水发酵 | ✅ | RCON：满水桶 + 菌丝，约 50 秒后 `FluidName=exnihilosatellitium:witch_water`、`Amount=1000` |
+| M6 巫水方块 | ✅ | RCON `setblock ... witch_water` 后 `execute if block` 命中 |
+| M6 桶规则（物品） | ✅ | RCON + FakePlayer `use()`：巫水 + 沙子 → `Solid: soul_sand`、桶清空 |
+| M6 人偶（非和平） | ✅ | RCON：熔岩 + 愤怒人偶 → 桶清空、附近生成烈焰人 |
+| M6 人偶（和平） | ✅ | RCON：水 + 守卫者人偶 → 桶清空、掉 `prismarine_crystals` |
+| M6 木坩埚 | ✅ | RCON：右键投橡树叶 → `MeltFluid=water`、0.5 mB/t 熔化；`wooden_crucibles` 标签生效 |
+| M6 瓷桶 capability | ✅ | RCON：1000 mB 巫水瓷桶右键木桶 → 桶内 1000 巫水；木桶满水右键瓷桶 → 桶满 |
+| M6 蚕 | ✅ | RCON：右键橡树叶 → `infested_leaves` + `Mimic` 保留原方块；进度按 0.0005/tick 增长 |
+| M6 侵染扩散 | ✅ | RCON：0.65 起 12 秒内相邻橡树叶变 `infested_leaves` |
+| M6 草种子/孢子 | ✅ | RCON：右键泥土 → `grass_block` / `mycelium` |
+| config 热改 | ✅ | 改 `capacity=3000` 后 8000 mB 坩埚被裁到 3000；改回 8000 不重新灌满（预期） |
+| 1.20.1 M6 表加载 | ✅ | `[barrel] 11 transforms (2 fluid, 9 item)`、`[sieve] 6 inputs, 72 drops`、`[hammer] 49` |
+| 1.20.1 build（M6） | ✅ | `./gradlew build --offline` 通过；`scripts/check-textures.py` 通过 |
+
 ## 交接清单（新会话先看）
 
 - 工作区：**`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`**（`1.20.1-forge` 的
@@ -118,19 +165,17 @@
 - 新增方块/物品的固定套路（M4 已验证）：注册 → BE → 数据表 + reload listener →
   渲染 → Jade（**`config.jade.plugin_<ns>.<uid>` 翻译必须有，缺了 Jade 直接崩客户端**）→
   JEI 分类（参考已移植的 `compat/jei/` 五页 + 坩埚两页）→ `check-textures.py`。
-- 分支还没有 config：M4 的容量/熔料/倍率是 `CrucibleBlockEntity` 里的常量。
+- config 已有：`common/config/ExConfig`（`run/config/exnihilosatellitium-common.toml`），
+  键是 `crucible.capacity` / `crucible.meltCapacity` / `crucible.heatSpeedMultiplier`；
+  热改由 `CrucibleBlockEntity` 每 tick 读取并裁剪。
 
 ## 下一步（按价值排序）
 
-1. **进游戏验收 M1.5 / M2 / M3 / M4 + JEI/Jade**：桶转化、筛四档料、锤/钩左键、坩埚投料熔化、
-   JEI 七个分类页。
-2. **M6，按 5 刀做**（每刀独立可验收）：
-   1) 巫水 + 古代孢子（自定义流体/桶/液方块、发酵、两条转化、沙筛 1/128）；
-   2) 瓷桶（通用 1000 mB，`fluid_contents` 组件 → 1.20.1 是 NBT）；
-   3) 木坩埚 11 种 + 木桶补齐到 12 种（木坩埚被动熔水、433 K 上限）；
-   4) 蚕 + 侵染树叶（BE 记原树叶、变白渲染、扩散、掉线、Jade 百分比）；
-   5) 人偶 5 种 + 8 条桶规则（右键立即生效；和平掉战利品、非和平生成生物）。
-3. **配置**：分支还没有 config，M4 的容量/倍率目前是常量，后续补 `ModConfig`。
+1. **进游戏验收 M1.5–M6 + JEI/Jade**：桶转化、12 种桶合成、筛四档料、锤/钩左键、坩埚投料熔化、
+   木坩埚被动熔水、巫水/瓷桶/蚕/人偶的画面与手感（RCON 逻辑已验，美术/交互未目视）。
+2. **M5（1.20.1 侧）**：按主线 M5 的范围补（含 datagen 视需要）。
+3. **M10 自动化（1.20.1 侧）**：四台机器 + 插件 + 自动输出；届时把 `machine.*`
+   配置键一并补进 `ExConfig`（键名与主线保持一致）。
 
 ## 已拍板的决策
 

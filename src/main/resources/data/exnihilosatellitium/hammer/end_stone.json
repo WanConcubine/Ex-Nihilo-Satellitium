@@ -1,0 +1,6 @@
+{
+  "input": "minecraft:end_stone",
+  "result": "exnihilosatellitium:crushed_end_stone",
+  "min": 1,
+  "max": 2
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "exnihilosatellitium:item/porcelain_bucket",
+    "layer1": "exnihilosatellitium:item/porcelain_bucket_fluid"
+  }
+}
