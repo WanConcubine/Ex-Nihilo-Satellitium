@@ -19,8 +19,10 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
   手动锤（`ToolEvents` 普通/创造路径）已全部改调它们，机器不再有第二份掉落逻辑。
 - **数值**：基础 80 tick（4 秒）/ 件；电动 20 FE/t；内能 200 燃烧值/件（1 煤 = 8 件）；
   速度 ×1.5/×2.5/×4，时运 = 额外 1/2/3 次整表 roll。全部走 `machine.*` config。
-- **GUI**：两个 Menu + 两个 Screen，进度条 / 能量条 / 火焰条 / tooltip；贴图由
-  `scripts/generate_machine_assets.py` 生成。
+- **GUI**：两个 Menu + 两个 Screen，进度条 / 能量条 / 火焰条 / tooltip；
+  空槽有物品虚影（筛网/锤、原料、燃料、速度/时运），标题右侧实时状态
+  （运行中/缺少工具/原料/能量/燃料/输出已满）；176×186，玩家物品栏下移，`物品栏` 不再压住插件槽。
+  贴图由 `scripts/generate_machine_assets.py` 生成。
 - **管道**：`MachineItemHandler` 只允许从输出 9 格抽取，避免漏斗抽走筛网 / 锤 / 插件；
   电动机器只进不出的能量能力。
 - **RCON 验证**：内能筛 / 电动筛 / 电动锤（速度 III + 时运 III）/ 内能锤 / 上下漏斗全部通过（见验证表）。
@@ -217,7 +219,10 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 | M10 电动锤 + 速度 III + 时运 III | ✅ | RCON：5 秒 5 次（20 tick/次）、输入 64→59、锤 damage 5、20 砂砾（1×4 roll×5） |
 | M10 内能锤 | ✅ | RCON：80 tick 一次、输入 63、锤 damage 1、`BurnHalfTicks` 2700、1 砂砾 |
 | M10 管道 | ✅ | RCON：下方漏斗只抽到砂砾，锤/插件仍在；上方漏斗把圆石补进输入槽 |
-| M10 GUI / 贴图 / 合成 | ⚠️ | Menu/Screen/配方已注册，`build` 通过；未进游戏开过 GUI、未目视贴图、未实际合成 |
+| M10 内能筛（存档实证） | ✅ | 2026-11-01 存档 `新的世界`：`(198,72,-489)` 丝筛网 damage 12、粉碎末地石 52、煤 62，
+  产出末地石×5 / 紫颂果×1 / 末影珍珠×2，`BurnHalfTicks` 1470——机器实际已处理 12 次 |
+| M10 GUI 引导 | ⚠️ | 虚影 / 悬停提示 / 状态行 / 加高布局已实现；未目视 |
+| M10 GUI / 贴图 / 合成 | ⚠️ | Menu/Screen/配方已注册，`build` 通过；贴图未目视、配方未实际合成 |
 | P0/P1 修复 | ⚠️ | 破坏返还、管道灌桶、F3+T 分离、红石/荧石未玩家实测 |
 | 旧内容目视 | ⚠️ | 桶/筛比例、Jade tooltip 等仍待作者确认；桶的两道外凸箍已按反馈删除（2026-10-31） |
 
@@ -270,6 +275,10 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 - **没有玩家时普通区块的 BE 不 tick**：RCON 测机器先 `forceload add`，否则会看到“摆放后只动了几十 tick 就停”。
 - **漏斗会把机器里所有槽位当可抽**：`InvWrapper` 全开会让漏斗抽走筛网/插件，必须用
   `MachineItemHandler` 限制抽取范围。
+- **`ContainerData` 客户端不能直接挂 BE**：BE 的 `set` 是空实现，菜单同步过来的数据写不进去，
+  进度/能量/火焰条会永远冻在初始值。客户端菜单要用 `SimpleContainerData`，服务端才用 BE。
+- **`renderBg` 里全局 pose 还没有平移到 `leftPos/topPos`**：自绘虚影/图标要自己加偏移，
+  否则全部画到屏幕左上角。
 - **`IContainerFactory` 菜单只调 `openMenu(provider)` 会崩客户端**：原版 `handleOpenScreen` 走
   `MenuType.create(id, inv)`，额外数据 buffer 为 `null`，客户端工厂 `readBlockPos()` 直接 NPE。
   必须 `openMenu(provider, buf -> buf.writeBlockPos(pos))`，让 NeoForge 发 `AdvancedOpenScreenPayload`

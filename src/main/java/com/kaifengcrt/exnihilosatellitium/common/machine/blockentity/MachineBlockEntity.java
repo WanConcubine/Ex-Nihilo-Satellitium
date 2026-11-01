@@ -165,6 +165,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         if (this.level == null || this.level.isClientSide) {
             return;
         }
+        this.ejectInvalidSlotItems();
         if (!this.canWork()) {
             if (this.work != 0) {
                 this.work = 0;
@@ -265,6 +266,23 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
                 SoundSource.BLOCKS, 0.35F,
                 this.kind() == MachineKind.SIEVE ? 0.9F : 0.7F);
         this.setChanged();
+    }
+
+    /**
+     * Safety net: any item that is not allowed in an input-side slot is popped
+     * out instead of silently blocking the machine forever. Output slots are
+     * machine-owned and never validated here.
+     */
+    private void ejectInvalidSlotItems() {
+        for (int slot = 0; slot < this.outputSlotStart(); slot++) {
+            final ItemStack stack = this.inventory.getItem(slot);
+            if (!stack.isEmpty() && !this.canPlaceInSlot(slot, stack)) {
+                this.inventory.setItem(slot, ItemStack.EMPTY);
+                if (this.level != null) {
+                    Block.popResource(this.level, this.worldPosition.above(), stack);
+                }
+            }
+        }
     }
 
     private boolean hasTool() {
