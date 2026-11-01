@@ -8,6 +8,10 @@
     {
       "item": "minecraft:apple",
       "chance": 0.05
+    },
+    {
+      "item": "exnihilosatellitium:silkworm",
+      "chance": 0.02
     }
   ]
 }
