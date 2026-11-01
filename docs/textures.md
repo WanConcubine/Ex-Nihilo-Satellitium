@@ -58,6 +58,8 @@ assets/exnihilosatellitium/textures/
   脚本同时写 blockstate / 方块模型 / 物品模型。要改机器外观就改脚本重跑，不要手改 PNG。
   GUI 贴图在 `textures/gui/`，检查脚本对它们豁免尺寸（允许 256×256 画布）；
   机器面板实际用到 176×186，玩家物品栏在 `y=104/162`。
+- 机器方块贴图（`machine_*`）是 **32×32**，`check-textures.py` 的方块规则对它们放行 16/32；
+  其余方块仍是 16×16。
 - 自动筛子改为四腿托盘模型（`models/block/{electric,fuel}_sieve.json`，10 个 element），
   贴图 `machine_frame_side_{electric,fuel}` / `machine_frame_top` / `machine_leg` /
   `machine_mesh`（cutout 网格）/ `machine_inner`，全部由同一个生成脚本产出；

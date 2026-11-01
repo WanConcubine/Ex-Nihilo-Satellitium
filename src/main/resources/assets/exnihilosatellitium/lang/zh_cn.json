@@ -84,6 +84,7 @@
   "gui.exnihilosatellitium.progress.hint": "进度：%s%%（点击查看 JEI）",
   "gui.exnihilosatellitium.slot.fortune": "时运插件",
   "gui.exnihilosatellitium.slot.fortune_only": "时运插件（上限 8）",
+  "gui.exnihilosatellitium.slot.fortune_only_1": "时运插件（上限 1）",
   "gui.exnihilosatellitium.slot.fuel": "燃料",
   "gui.exnihilosatellitium.slot.hammer": "锤子",
   "gui.exnihilosatellitium.slot.input.hammer": "可锤方块",

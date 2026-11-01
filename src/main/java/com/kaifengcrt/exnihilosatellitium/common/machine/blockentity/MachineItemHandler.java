@@ -35,6 +35,10 @@ public class MachineItemHandler implements IItemHandlerModifiable {
 
     @Override
     public int getSlotLimit(final int slot) {
+        if (this.owner.kind() == com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind.HAMMER
+                && slot == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
+            return 1;
+        }
         return Math.min(64, this.inventory.getMaxStackSize());
     }
 

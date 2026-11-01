@@ -397,6 +397,118 @@ def sieve_model(*, fuel: bool) -> dict:
             "textures": tex, "elements": elements}
 
 
+def machine_side_32(*, fuel: bool) -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    edge = RUST_DARK if fuel else EDGE
+    plate = RUST if fuel else PLATE
+    band = (176, 58, 46) if not fuel else (176, 90, 30)
+    draw.rectangle((0, 0, 31, 31), fill=edge)
+    draw.rectangle((2, 2, 29, 29), fill=plate)
+    draw.line((2, 2, 29, 2), fill=(190, 198, 204))
+    draw.line((2, 2, 2, 29), fill=(190, 198, 204))
+    draw.line((29, 3, 29, 29), fill=(70, 77, 83))
+    draw.line((3, 29, 29, 29), fill=(70, 77, 83))
+    # panel seam
+    draw.rectangle((5, 5, 26, 21), outline=(88, 96, 103))
+    draw.rectangle((6, 6, 25, 20), outline=(150, 159, 166))
+    # corner bolts
+    for x, y in ((4, 4), (27, 4), (4, 27), (27, 27)):
+        draw.rectangle((x, y, x + 1, y + 1), fill=(210, 218, 224))
+        draw.point((x + 1, y + 1), fill=(70, 77, 83))
+    # bottom band
+    draw.rectangle((0, 26, 31, 30), fill=band)
+    draw.line((0, 26, 31, 26), fill=(255, 196, 170) if not fuel else (255, 214, 150))
+    draw.line((0, 30, 31, 30), fill=(60, 20, 16))
+    return img
+
+
+def machine_top_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 31, 31), fill=(55, 61, 66))
+    draw.rectangle((2, 2, 29, 29), fill=(160, 169, 176))
+    draw.rectangle((5, 5, 26, 26), fill=(128, 137, 144))
+    draw.line((2, 2, 29, 2), fill=(210, 218, 224))
+    for x, y in ((3, 3), (27, 3), (3, 27), (27, 27)):
+        draw.rectangle((x, y, x + 1, y + 1), fill=(228, 234, 238))
+    return img
+
+
+def machine_leg_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 31, 31), fill=(46, 51, 56))
+    for x in (3, 11, 19, 27):
+        draw.line((x, 0, x, 31), fill=(34, 38, 42))
+        draw.line((x + 1, 0, x + 1, 31), fill=(72, 79, 85))
+    return img
+
+
+def machine_mesh_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    for x in range(0, 32, 4):
+        draw.line((x, 0, x, 31), fill=(202, 210, 216, 255))
+    for y in range(0, 32, 4):
+        draw.line((0, y, 31, y), fill=(178, 187, 194, 255))
+    return img
+
+
+def machine_inner_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 31, 31), fill=(118, 126, 133))
+    for x in range(2, 32, 6):
+        draw.line((x, 1, x, 30), fill=(100, 108, 115))
+    draw.line((0, 0, 31, 0), fill=(150, 158, 165))
+    return img
+
+
+def hammer_anvil_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 31, 31), fill=(62, 68, 74))
+    draw.rectangle((2, 2, 29, 29), fill=(88, 96, 103))
+    draw.rectangle((4, 4, 27, 12), fill=(120, 129, 136))
+    draw.line((4, 14, 27, 14), fill=(48, 53, 58))
+    draw.line((4, 4, 27, 4), fill=(160, 169, 176))
+    return img
+
+
+def hammer_head_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 31, 31), fill=(74, 81, 88))
+    draw.rectangle((2, 2, 29, 29), fill=(168, 177, 184))
+    draw.rectangle((4, 4, 27, 12), fill=(210, 218, 224))
+    draw.line((4, 14, 27, 14), fill=(120, 128, 135))
+    draw.line((4, 26, 27, 26), fill=(120, 128, 135))
+    return img
+
+
+def hammer_shaft_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 31, 31), fill=(96, 104, 111))
+    for y in (4, 12, 20, 28):
+        draw.line((0, y, 31, y), fill=(70, 77, 83))
+        draw.line((0, y + 1, 31, y + 1), fill=(140, 149, 156))
+    return img
+
+
+def hammer_top_32() -> Image.Image:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 31, 31), fill=(55, 61, 66))
+    draw.rectangle((2, 2, 29, 29), fill=(150, 159, 166))
+    draw.rectangle((6, 6, 25, 25), fill=(126, 134, 141))
+    draw.line((2, 2, 29, 2), fill=(203, 210, 215))
+    for x, y in ((4, 4), (27, 4), (4, 27), (27, 27)):
+        draw.rectangle((x, y, x + 1, y + 1), fill=(228, 234, 238))
+    return img
+
+
 def hammer_model(*, fuel: bool) -> dict:
     side = f"exnihilosatellitium:block/machine_frame_side_{'fuel' if fuel else 'electric'}"
     tex = {
@@ -469,18 +581,18 @@ def main() -> None:
                        {"parent": "minecraft:item/generated",
                         "textures": {"layer0": f"exnihilosatellitium:item/{name}"}})
 
-    sieve_side_texture(fuel=False).save(
+    machine_side_32(fuel=False).save(
         ASSETS / "textures" / "block" / "machine_frame_side_electric.png")
-    sieve_side_texture(fuel=True).save(
+    machine_side_32(fuel=True).save(
         ASSETS / "textures" / "block" / "machine_frame_side_fuel.png")
-    sieve_top_texture().save(ASSETS / "textures" / "block" / "machine_frame_top.png")
-    sieve_leg_texture().save(ASSETS / "textures" / "block" / "machine_leg.png")
-    sieve_mesh_texture().save(ASSETS / "textures" / "block" / "machine_mesh.png")
-    sieve_inner_texture().save(ASSETS / "textures" / "block" / "machine_inner.png")
-    hammer_anvil_texture().save(ASSETS / "textures" / "block" / "machine_hammer_anvil.png")
-    hammer_head_texture().save(ASSETS / "textures" / "block" / "machine_hammer_head.png")
-    hammer_shaft_texture().save(ASSETS / "textures" / "block" / "machine_hammer_shaft.png")
-    hammer_top_texture().save(ASSETS / "textures" / "block" / "machine_hammer_top.png")
+    machine_top_32().save(ASSETS / "textures" / "block" / "machine_frame_top.png")
+    machine_leg_32().save(ASSETS / "textures" / "block" / "machine_leg.png")
+    machine_mesh_32().save(ASSETS / "textures" / "block" / "machine_mesh.png")
+    machine_inner_32().save(ASSETS / "textures" / "block" / "machine_inner.png")
+    hammer_anvil_32().save(ASSETS / "textures" / "block" / "machine_hammer_anvil.png")
+    hammer_head_32().save(ASSETS / "textures" / "block" / "machine_hammer_head.png")
+    hammer_shaft_32().save(ASSETS / "textures" / "block" / "machine_hammer_shaft.png")
+    hammer_top_32().save(ASSETS / "textures" / "block" / "machine_hammer_top.png")
 
     gui_texture(electric=True).save(
         ASSETS / "textures" / "gui" / "electric_machine.png")

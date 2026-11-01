@@ -34,6 +34,8 @@ def allowed_sizes(path: Path) -> set[tuple[int, int]]:
     """Item icons may ship at 64x64 (dolls); block textures stay 16x16."""
     if "textures" in path.parts and "item" in path.parts:
         return {(16, 16), (64, 64)}
+    if path.name.startswith("machine_"):
+        return {(16, 16), (32, 32)}
     return {(16, 16)}
 
 

@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.common.machine.menu;
 import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
 import com.kaifengcrt.exnihilosatellitium.common.machine.block.MachineBlock;
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineInventory;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -55,6 +56,16 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
         @Override
         public boolean mayPlace(final ItemStack stack) {
             return this.container.canPlaceItem(this.getContainerSlot(), stack);
+        }
+
+        @Override
+        public int getMaxStackSize(final ItemStack stack) {
+            if (this.container instanceof MachineInventory inventory
+                    && inventory.owner().kind() == MachineKind.HAMMER
+                    && this.getContainerSlot() == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
+                return 1;
+            }
+            return super.getMaxStackSize(stack);
         }
     }
 
@@ -172,8 +183,11 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
                     : "gui.exnihilosatellitium.slot.input.hammer");
         }
         if (this.electric) {
-            return Component.translatable(index == MachineBlockEntity.UPGRADE_SLOT_START
-                    ? "gui.exnihilosatellitium.slot.speed_only"
+            if (index == MachineBlockEntity.UPGRADE_SLOT_START) {
+                return Component.translatable("gui.exnihilosatellitium.slot.speed_only");
+            }
+            return Component.translatable(this.kind == MachineKind.HAMMER
+                    ? "gui.exnihilosatellitium.slot.fortune_only_1"
                     : "gui.exnihilosatellitium.slot.fortune_only");
         }
         return Component.translatable("gui.exnihilosatellitium.slot.fuel");
