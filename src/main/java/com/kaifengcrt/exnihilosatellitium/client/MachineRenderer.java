@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -70,11 +69,15 @@ public final class MachineRenderer implements BlockEntityRenderer<MachineBlockEn
             if (input.getItem() instanceof BlockItem blockItem) {
                 final BlockState state = blockItem.getBlock().defaultBlockState();
                 if (!state.isAir()) {
-                    final float thickness = Math.max(0.004F, 0.16F * remaining);
+                    // The pile has to stay inside the tray interior (3..13 px):
+                    // a full width pile cuts through the walls and z-fights with
+                    // their outer faces. 0.6 wide leaves a 1 px gap on each side,
+                    // and 10.5 px keeps it just above the mesh (10.35).
+                    final float thickness = Math.max(0.004F, 0.125F * remaining);
                     pose.pushPose();
-                    pose.translate(0.5F, 10.35F / 16.0F, 0.5F);
-                    pose.translate(-0.4375F, 0.0F, -0.4375F);
-                    pose.scale(0.875F, thickness, 0.875F);
+                    pose.translate(0.5F, 10.5F / 16.0F, 0.5F);
+                    pose.translate(-0.3F, 0.0F, -0.3F);
+                    pose.scale(0.6F, thickness, 0.6F);
                     Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, pose, buffer,
                             LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
                             ModelData.EMPTY, RenderType.solid());
@@ -82,7 +85,7 @@ public final class MachineRenderer implements BlockEntityRenderer<MachineBlockEn
                 }
             } else {
                 pose.pushPose();
-                pose.translate(0.5F, 10.42F / 16.0F, 0.5F);
+                pose.translate(0.5F, 10.5F / 16.0F, 0.5F);
                 pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90.0F));
                 pose.scale(0.5F, 0.5F, 0.5F);
                 Minecraft.getInstance().getItemRenderer().renderStatic(input, ItemDisplayContext.FIXED,

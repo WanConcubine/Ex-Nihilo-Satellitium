@@ -274,6 +274,9 @@ M10 落地时把这条真正兑现了：`SieveRolls` / `HammerRolls` 成为唯�
 - **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
   同步内缩；采用 **vanilla-sampled**：桶身直接引用 `oak_planks` / `spruce_planks`（侧面
   `rotation: 90`）。2026-10-31 按作者要求删掉了两道外凸箍（原来 8 个 0.5px 体素）。
+  2026-11-01：前后墙的 **1×15 端面**（外侧四条竖棱）去掉了 `rotation: 90` —— 1 格宽的
+  UV 矩形再旋转会把木纹压成 15:1 的细条纹，看起来像棱上有一排乱线；不旋转后是干净的
+  1px 木纹边（作者反馈，离线渲染确认过）。
 - **物品模型**：恢复为开口 block model（移除封闭盖），靠 `display` 变换在物品栏/手持
   显示 3D 空心桶。
 - **客户端 `BarrelRenderer`**：液面 + 堆肥/泥土内容 box，按 fill 高度上升；堆肥计时期间
@@ -972,9 +975,12 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   顶板（12..14）+ 中间铁砧（4..6）/ 锤头（7..10）/ 连杆（10..12），整体也内缩 1px、
   高度 14；碰撞 `getShape` 同为 1..15 × 0..14。
 - **工作动画**（`client/MachineRenderer`，BER）：锤头是一个独立方块实体渲染的 6×3×6 金属头，
-  工作周期内从上方 4px 压到铁砧；输入物以小模型摆在铁砧上。筛子把输入物摆在网格上并左右
-  抖动 0.06 格。`Active` 必须写进 `saveAdditional`（否则 `getUpdateTag` 同步不到客户端，
-  BER 永远当停机）。
+  工作周期内从上方 4px 压到铁砧；输入物以小模型摆在铁砧上。筛子把输入物压成薄层摆在网格上，
+  随进度变薄（不再左右抖动）。
+  **料层必须留在托盘内壁以内**：整块渲染到 0.875 会穿过盘壁（1..15）并与盘壁外侧面
+  z-fighting，表现为「料层和边缘交替闪烁」；现在 x/z 缩到 0.6（3.2..12.8 px）、
+  底面抬到 10.5 px（网格顶面 10.35），四周留 ~0.2 px 缝（2026-11-01 修）。
+  `Active` 必须写进 `saveAdditional`（否则 `getUpdateTag` 同步不到客户端，BER 永远当停机）。
   方块模型里不再放静态锤头（物品模型单独保留静态头，图标不会空）。
 - **工作时粒子**（`MachineBlock#animateTick`，服务端 `active` 变化时同步 BE）：筛子在托盘上方
   冒 `CRIT`，电动加 `ELECTRIC_SPARK`、内能加 `SMOKE`；锤子在铁砧/锤头处冒 `CRIT`，
@@ -1053,15 +1059,20 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   （已验证的「下方漏斗抽输出 / 上方漏斗补料」两套摆法都不用改配置）。
 - 触发时机：每完成一次操作立刻推一次；另外每 20 tick 重试一次，把「邻居满了 / 后来才清空」
   的情况也补上。邻居满时余量留在输出格，不丢物品。
-- 配置 GUI（`MachineOutputScreen`）用 `ClientHooks.pushGuiLayer` 叠加在机器 GUI 上，
+- 配置 GUI（`MachineOutputScreen`）用 `Minecraft#pushGuiLayer` 叠在机器 GUI 上，
   **不新开菜单**：机台菜单保持打开，改配置不会关界面或吞掉手上的物品。
-  6 个面按钮 + 总开关，改动以绝对值 payload 发到服务端，再由 `ContainerData`
+  入口是机器面板**左侧突出的标签页**（代码绘制的 22×28 标签 + 16×16 三帧图标），
+  点开后配置面板从机器面板左边缘向**左伸出**（132×168，与 GUI 左边界齐平），
+  不铺全屏黑底，只带一层淡阴影；空间不够时 `max(2, guiLeft - 132)` 兜底。
+- 面按钮按**玩家相对方向**标注：上 / 下 / 前 / 后 / 左 / 右（两列三行，成对排列），
+  映射在打开面板时用 `player.getDirection()` 冻结（容器界面里相机不能转）；
+  世界方向（东南西北）只放在 tooltip（`自动输出到前（东）`）。
+- 6 个面按钮 + 总开关，改动以绝对值 payload 发到服务端，再由 `ContainerData`
   （`DATA_AUTO_OUTPUT` / `DATA_OUTPUT_MASK`）回读，客户端不维护第二份权威状态。
 - 自动输出至少要有一个面：`setOutputConfig`（GUI/网络包路径）把空掩码回退到底面，
   GUI 在取消最后一个面时自动关掉总开关；直接改 NBT 不走这条校验。
-- 机器 GUI 进度条右侧（`78,20`）的 16×16 图标按钮是入口，图标三帧（常态/悬停/开启）由
-  `generate_machine_assets.py` 生成；开启时按钮变绿，不进配置页也能看出来。
-  预览：[m10-output-button.png](images/m10-output-button.png)。
+- 图标三帧（常态/悬停/开启）由 `generate_machine_assets.py` 生成；开启时图标变绿，
+  不进配置页也能看出来。预览：[m10-output-button.png](images/m10-output-button.png)。
 - 数据包 `exnihilosatellitium:set_machine_output`（C2S）只接受 8 格以内的玩家，
   `stillValid` 校验与方法同 GUI 距离。
 
