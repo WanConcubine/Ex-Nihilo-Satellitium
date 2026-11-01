@@ -35,7 +35,7 @@
       },
       "tier": "common",
       "rarity": 18,
-      "ingot": "#forge:ingots/copper",
+      "ingot": "minecraft:copper_ingot",
       "source": "classic",
       "enabled": true
     },

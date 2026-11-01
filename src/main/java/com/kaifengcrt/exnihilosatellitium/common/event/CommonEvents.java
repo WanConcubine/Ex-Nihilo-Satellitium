@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -18,5 +19,6 @@ public final class CommonEvents {
     @SubscribeEvent
     public static void onAddReloadListeners(final AddReloadListenerEvent event) {
         event.addListener(new CompostReloadListener());
+        event.addListener(new SieveReloadListener());
     }
 }

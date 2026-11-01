@@ -1,0 +1,97 @@
+{
+  "input": "minecraft:sand",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:iron_crushed",
+      "chance": 0.2
+    },
+    {
+      "item": "exnihilosatellitium:gold_crushed",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:copper_crushed",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:tin_crushed",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:silver_crushed",
+      "chance": 0.02222
+    },
+    {
+      "item": "exnihilosatellitium:lead_crushed",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:nickel_crushed",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:platinum_crushed",
+      "chance": 0.00781
+    },
+    {
+      "item": "exnihilosatellitium:aluminum_crushed",
+      "chance": 0.125
+    },
+    {
+      "item": "exnihilosatellitium:osmium_crushed",
+      "chance": 0.1
+    },
+    {
+      "item": "exnihilosatellitium:zinc_crushed",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:uranium_crushed",
+      "chance": 0.01111
+    },
+    {
+      "item": "minecraft:cactus",
+      "chance": 0.03125
+    },
+    {
+      "item": "minecraft:sugar_cane",
+      "chance": 0.04167
+    },
+    {
+      "item": "minecraft:cocoa_beans",
+      "chance": 0.03
+    },
+    {
+      "item": "minecraft:kelp",
+      "chance": 0.04
+    },
+    {
+      "item": "minecraft:tube_coral",
+      "chance": 0.02
+    },
+    {
+      "item": "minecraft:prismarine_crystals",
+      "chance": 0.02
+    },
+    {
+      "item": "minecraft:brain_coral",
+      "chance": 0.01
+    },
+    {
+      "item": "minecraft:bubble_coral",
+      "chance": 0.01
+    },
+    {
+      "item": "minecraft:fire_coral",
+      "chance": 0.01
+    },
+    {
+      "item": "minecraft:horn_coral",
+      "chance": 0.01
+    },
+    {
+      "item": "minecraft:prismarine_shard",
+      "chance": 0.02
+    }
+  ]
+}

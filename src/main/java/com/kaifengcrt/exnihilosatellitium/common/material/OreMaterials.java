@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -57,6 +58,7 @@ public final class OreMaterials {
                 final JsonObject name = entry.getAsJsonObject("name");
                 final String en = name.get("en_us").getAsString();
                 final String zh = name.has("zh_cn") ? name.get("zh_cn").getAsString() : en;
+                final String ingot = readIngot(entry, id);
 
                 if (!ID.matcher(id).matches()) {
                     ExNihiloSatellitium.LOGGER.error("[materials] bad id '{}', skipped", id);
@@ -75,12 +77,36 @@ public final class OreMaterials {
                     ExNihiloSatellitium.LOGGER.error("[materials] duplicate id '{}', later entry skipped", id);
                     continue;
                 }
-                out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity));
+                out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity, ingot));
             }
         } catch (Exception exception) {
             ExNihiloSatellitium.LOGGER.error("[materials] could not read {}: {}", RESOURCE, exception.toString());
         }
         ExNihiloSatellitium.LOGGER.info("[materials] loaded {} entries", out.size());
         return List.copyOf(out);
+    }
+
+    /**
+     * Optional {@code ingot}: an existing item id to smelt into (for example
+     * {@code minecraft:iron_ingot}). {@code null} means "register our own
+     * {@code <id>_ingot}". Tags are not supported yet: tags are not loaded when
+     * this table is read, so a {@code #...} value falls back to our own ingot.
+     */
+    private static String readIngot(final JsonObject entry, final String id) {
+        if (!entry.has("ingot") || entry.get("ingot").isJsonNull()) {
+            return null;
+        }
+        final String value = entry.get("ingot").getAsString();
+        if (value.startsWith("#")) {
+            ExNihiloSatellitium.LOGGER.warn("[materials] {}: tag ingot '{}' is not supported yet, "
+                    + "registering own {}_ingot", id, value, id);
+            return null;
+        }
+        if (ResourceLocation.tryParse(value) == null) {
+            ExNihiloSatellitium.LOGGER.error("[materials] {}: bad ingot '{}', registering own {}_ingot",
+                    id, value, id);
+            return null;
+        }
+        return value;
     }
 }

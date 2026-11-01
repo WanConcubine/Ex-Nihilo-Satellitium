@@ -1,6 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -46,6 +47,20 @@ public final class ModItems {
             ACACIA_BARREL,
             DARK_OAK_BARREL,
             STONE_BARREL);
+
+    public static final RegistryObject<Item> SIEVE =
+            ITEMS.register("sieve", () -> new BlockItem(ModBlocks.SIEVE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WOOD_MESH =
+            ITEMS.register("wood_mesh", () -> new MeshItem(
+                    new Item.Properties().stacksTo(1).durability(10), 1));
+    public static final RegistryObject<Item> SILK_MESH =
+            ITEMS.register("silk_mesh", () -> new MeshItem(
+                    new Item.Properties().stacksTo(1).durability(64), 2));
+    public static final RegistryObject<Item> IRON_MESH =
+            ITEMS.register("iron_mesh", () -> new MeshItem(
+                    new Item.Properties().stacksTo(1).durability(256), 3));
+    public static final List<RegistryObject<Item>> MESHES = List.of(WOOD_MESH, SILK_MESH, IRON_MESH);
 
     private ModItems() {
     }
