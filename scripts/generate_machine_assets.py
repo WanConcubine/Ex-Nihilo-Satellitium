@@ -312,24 +312,18 @@ def sieve_model(*, fuel: bool) -> dict:
         return out
 
     side_uv = [0, 0, 16, 16]
-    rim_uv = [0, 0, 16, 4]
+    rim_uv = [0, 0, 16, 3]
     elements = []
-    # solid body 5..13: no see-through gaps below the rim
+    # fully solid body from the ground up: no legs, no see-through gaps
     elements.append({
-        "from": [0, 5, 0], "to": [16, 13, 16],
+        "from": [0, 0, 0], "to": [16, 13, 16],
         "faces": {
             "down": face("#side"), "up": face("#inner"),
             "north": face("#side", side_uv), "south": face("#side", side_uv),
             "west": face("#side", side_uv), "east": face("#side", side_uv),
         },
     })
-    # four 2x2 legs 0..5
-    for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
-        elements.append({
-            "from": [x, 0, z], "to": [x + 2, 5, z + 2],
-            "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
-        })
-    # 1 px rim 13..14 around a shallow mesh tray
+    # thin 1 px rim 13..14 around the shallow mesh tray
     walls = (
         ("north", [0, 13, 0, 16, 14, 1]),
         ("south", [0, 13, 15, 16, 14, 16]),
@@ -342,7 +336,6 @@ def sieve_model(*, fuel: bool) -> dict:
         inner = {"north": "south", "south": "north", "west": "east", "east": "west"}[outer]
         faces[inner] = face("#inner")
         elements.append({"from": box[:3], "to": box[3:], "faces": faces})
-    # mesh surface just above the body top
     elements.append({
         "from": [1, 13.05, 1], "to": [15, 13.2, 15],
         "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},

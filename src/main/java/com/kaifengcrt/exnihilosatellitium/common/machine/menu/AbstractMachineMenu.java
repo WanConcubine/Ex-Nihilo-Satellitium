@@ -142,11 +142,11 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
                     ? Items.SAND : Items.COBBLESTONE);
         }
         if (this.electric) {
-            if (index == MachineBlockEntity.UPGRADE_SLOT_START) {
+            // all four slots take either type, so show one neutral upgrade ghost
+            if (index >= MachineBlockEntity.UPGRADE_SLOT_START
+                    && index < MachineBlockEntity.UPGRADE_SLOT_START
+                            + MachineBlockEntity.UPGRADE_SLOTS) {
                 return new ItemStack(ModItems.SPEED_UPGRADE_1.get());
-            }
-            if (index == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
-                return new ItemStack(ModItems.FORTUNE_UPGRADE_1.get());
             }
             return ItemStack.EMPTY;
         }
@@ -172,9 +172,7 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
                     : "gui.exnihilosatellitium.slot.input.hammer");
         }
         if (this.electric) {
-            return Component.translatable(index == MachineBlockEntity.UPGRADE_SLOT_START
-                    ? "gui.exnihilosatellitium.slot.speed"
-                    : "gui.exnihilosatellitium.slot.fortune");
+            return Component.translatable("gui.exnihilosatellitium.slot.upgrade");
         }
         return Component.translatable("gui.exnihilosatellitium.slot.fuel");
     }

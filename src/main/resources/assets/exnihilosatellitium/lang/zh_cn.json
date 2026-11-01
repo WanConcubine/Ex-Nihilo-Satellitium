@@ -89,6 +89,7 @@
   "gui.exnihilosatellitium.slot.input.sieve": "可筛原料",
   "gui.exnihilosatellitium.slot.mesh": "筛网",
   "gui.exnihilosatellitium.slot.speed": "速度插件",
+  "gui.exnihilosatellitium.slot.upgrade": "升级插件（速度 / 时运）",
   "gui.exnihilosatellitium.status.no_energy": "缺少能量",
   "gui.exnihilosatellitium.status.no_fuel": "缺少燃料",
   "gui.exnihilosatellitium.status.no_input": "缺少原料",
@@ -239,7 +240,7 @@
   "message.exnihilosatellitium.crucible.hot_fluid": "木坩埚装不了熔岩",
   "message.exnihilosatellitium.need_mesh": "需要先放入筛网",
   "tooltip.exnihilosatellitium.fortune_upgrade": "额外 %s 次独立判定",
-  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "可叠加：每多一个额外判定约 80%",
+  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "叠加：第 1 个全额，之后每个按 80% 递减；小数次数按概率补 1 次判定",
   "tooltip.exnihilosatellitium.speed_upgrade": "筛/锤速度 ×%s",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "可叠加：每多一个约 80% 加成，且每个升级 +25% FE/t"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "叠加：第 1 个全额，之后每个按前一个的 80% 算；每个物品 +25% FE/t"
 }
