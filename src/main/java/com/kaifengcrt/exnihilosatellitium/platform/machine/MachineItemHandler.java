@@ -1,5 +1,8 @@
-package com.kaifengcrt.exnihilosatellitium.common.machine.blockentity;
+package com.kaifengcrt.exnihilosatellitium.platform.machine;
 
+import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineInventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
@@ -7,6 +10,9 @@ import net.neoforged.neoforge.items.IItemHandlerModifiable;
  * Pipe/hopper view of a machine. Insertion follows the same slot rules as the
  * menu, but extraction is limited to the output buffer — otherwise a hopper
  * under the machine would happily pull out the mesh, hammer and upgrades.
+ *
+ * <p>Platform glue (1.21.1 capability types); a 1.20.1 port re-implements this
+ * against {@code ForgeCapabilities.ITEM_HANDLER}.</p>
  */
 public class MachineItemHandler implements IItemHandlerModifiable {
 
@@ -35,7 +41,7 @@ public class MachineItemHandler implements IItemHandlerModifiable {
 
     @Override
     public int getSlotLimit(final int slot) {
-        if (this.owner.kind() == com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind.HAMMER
+        if (this.owner.kind() == MachineKind.HAMMER
                 && slot == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
             return 1;
         }

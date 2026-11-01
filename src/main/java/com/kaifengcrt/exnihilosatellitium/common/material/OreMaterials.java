@@ -5,8 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.ModList;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,12 +33,29 @@ public final class OreMaterials {
     private static final String RESOURCE = "/exnihilosatellitium/materials.json";
     private static final Set<String> TIERS = Set.of("common", "uncommon", "rare", "epic");
 
-    private static final List<OreMaterial> ALL = load();
+    private static List<OreMaterial> ALL;
 
     private OreMaterials() {
     }
 
+    /**
+     * Reads the table once. Must run in the mod constructor <em>before</em> the
+     * ore registries, because every material registers its own items/blocks.
+     */
+    public static synchronized void init() {
+        if (ALL == null) {
+            ALL = load();
+        }
+    }
+
+    /**
+     * @throws IllegalStateException when called before {@link #init()}
+     */
     public static List<OreMaterial> all() {
+        if (ALL == null) {
+            throw new IllegalStateException(
+                    "OreMaterials.init() must run in the mod constructor, before registries");
+        }
         return ALL;
     }
 
@@ -192,7 +209,7 @@ public final class OreMaterials {
                 continue;
             }
             final String mod = candidate.has("mod") ? candidate.get("mod").getAsString() : null;
-            if (mod != null && !ModList.get().isLoaded(mod)) {
+            if (mod != null && !Platform.isModLoaded(mod)) {
                 continue;
             }
             ExNihiloSatellitium.LOGGER.info("[materials] {} smelts into {}{}", id, item,

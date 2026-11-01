@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.client.screen;
 import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.AbstractMachineMenu;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
@@ -70,7 +71,7 @@ public final class MachineGui {
      * classes are not resolved when JEI is absent.
      */
     public static boolean openJei(final AbstractMachineMenu menu) {
-        if (!net.neoforged.fml.ModList.get().isLoaded("jei")) {
+        if (!Platform.isModLoaded("jei")) {
             return false;
         }
         return com.kaifengcrt.exnihilosatellitium.compat.jei.MachineJeiPlugin.showFor(

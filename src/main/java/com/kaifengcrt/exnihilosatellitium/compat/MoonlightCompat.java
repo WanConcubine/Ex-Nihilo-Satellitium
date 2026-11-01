@@ -1,9 +1,9 @@
 package com.kaifengcrt.exnihilosatellitium.compat;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.neoforged.fml.ModList;
 import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
@@ -36,7 +36,7 @@ public final class MoonlightCompat {
 
     /** 月光魔法是否已加载。 */
     public static boolean isLoaded() {
-        return ModList.get() != null && ModList.get().isLoaded(MOD_ID);
+        return Platform.isModLoaded(MOD_ID);
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.kaifengcrt.exnihilosatellitium.common.blockentity;
 
-import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
+import com.kaifengcrt.exnihilosatellitium.common.config.ConfigValues;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
@@ -50,7 +50,7 @@ public class CrucibleBlockEntity extends BlockEntity {
     public static final int DEFAULT_MELT_CAPACITY = 2000;
     private static final int SYNC_INTERVAL = 10;
 
-    private final FluidTank tank = new FluidTank(ModConfig.crucibleCapacity()) {
+    private final FluidTank tank = new FluidTank(ConfigValues.crucibleCapacity()) {
         @Override
         public int fill(final FluidStack resource, final FluidAction action) {
             if (CrucibleBlockEntity.this.isWooden() && !resource.isEmpty()
@@ -99,7 +99,7 @@ public class CrucibleBlockEntity extends BlockEntity {
 
     /** 0..1 of the configured melt capacity. */
     public float getSolidRatio() {
-        return (float) Math.min(1.0D, this.solidVolume / ModConfig.crucibleMeltCapacity());
+        return (float) Math.min(1.0D, this.solidVolume / ConfigValues.crucibleMeltCapacity());
     }
 
     /** 0..1 of the configured fluid capacity. */
@@ -140,7 +140,7 @@ public class CrucibleBlockEntity extends BlockEntity {
                 return false;
             }
         }
-        if (this.solidVolume + melt.solidAmount() > ModConfig.crucibleMeltCapacity()) {
+        if (this.solidVolume + melt.solidAmount() > ConfigValues.crucibleMeltCapacity()) {
             return false;
         }
         return this.tank.getFluidAmount() + this.fluidTotal + melt.amount() <= this.tank.getCapacity();
@@ -199,7 +199,7 @@ public class CrucibleBlockEntity extends BlockEntity {
             crucible.syncCooldown = SYNC_INTERVAL;
         }
 
-        final int configured = ModConfig.crucibleCapacity();
+        final int configured = ConfigValues.crucibleCapacity();
         if (crucible.tank.getCapacity() != configured) {
             crucible.tank.setCapacity(configured);
             final FluidStack current = crucible.tank.getFluid();
@@ -217,7 +217,7 @@ public class CrucibleBlockEntity extends BlockEntity {
         final float speed = crucible.isWooden()
                 ? WOODEN_PASSIVE_SPEED
                 : CrucibleHeat.speedFor(level.getBlockState(pos.below()))
-                        * ModConfig.crucibleHeatMultiplier();
+                        * ConfigValues.crucibleHeatMultiplier();
         if (speed <= 0.0F) {
             return;
         }

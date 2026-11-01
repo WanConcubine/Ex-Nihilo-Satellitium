@@ -78,28 +78,15 @@
 | 网络 | `SimpleChannel`，仅同步必要的客户端状态（流体、进度） |
 | 数据生成 | `DataGenerator`（blockstates / models / loot / tags / recipes） |
 | 兼容 | JEI 插件、`mods.toml` optional dependency、事件隔离 |
-| 配置 | `ForgeConfigSpec`（common / client / server） |
+| 配置 | `ModConfigSpec`（common）；core 只读 `ConfigValues` 门面 |
 
 ### 包结构
 
-```
-com.kaifengcrt.exnihilosatellitium
-├── ExNihiloSatellitium.java        # 入口
-├── registry/                    # DeferredRegister
-│   ├── ModBlocks.java
-│   ├── ModItems.java
-│   └── ModCreativeTabs.java
-├── common/                      # 与加载器无关的逻辑
-│   ├── block/
-│   ├── blockentity/
-│   ├── item/
-│   ├── recipe/
-│   └── menu/
-├── data/                        # 数据生成
-├── client/                      # 客户端渲染/屏幕
-├── compat/                      # JEI、月光魔法等
-└── config/
-```
+顶层只有四类：`registry/`（DeferredRegister）、`common/`（core 逻辑）、`client/`（渲染/界面）、
+`compat/`（JEI / Jade / 月光魔法），外加每版重写的 `platform/`。core 与平台之间只隔四个窄门面：
+`ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers`。
+
+具体文件清单见 [status.md](status.md) 的「文件地图」（唯一出处，别在本文件再抄一份）。
 
 ## 5. 里程碑
 
@@ -176,7 +163,7 @@ M10 落地时把这条真正兑现了：`SieveRolls` / `HammerRolls` 成为唯�
 
 - `mods.toml` 里声明 **optional** 依赖（`mandatory=false, ordering=AFTER`），
   不装月光魔法时本模组必须能独立启动。
-- 代码侧统一走 `compat/MoonlightCompat`：只检查 `ModList` + 按注册名查
+- 代码侧统一走 `compat/MoonlightCompat`：只检查 `Platform.isModLoaded` + 按注册名查
   `BuiltInRegistries`，**不 import 对方任何类**，避免编译期耦合和版本脆断。
 - 内容联动优先用**数据包**（配方 / 掉落 / 堆肥值）；自定义表按 id 覆盖，不解析条件。
   代码只负责少量运行时判断。
@@ -1108,3 +1095,26 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 - 存档实证：内能筛在作者世界里已处理 12 次（筛网 damage 12、末地石×5、紫颂果×1、末影珍珠×2）。
 - 放错槽位的物品会被弹到机器上方，不会把机器永久卡死。
 - **未验**：虚影/状态行/贴图的观感；配方未实际合成。
+
+## 28. P1 薄门面：core / platform 分层（2026-11-01）
+
+目标不是抽象，而是**让 1.20.1 的改动面收敛到 `platform/` 一层**（[porting.md](porting.md) §3）。
+判断标准一句话：**1.20.1 要重写的文件才进顶层 `platform/`**。
+
+- 新顶层包 `platform/`：`NeoForgeModProbe`、`config/ModConfig`（`ModConfigSpec` 实现 core 的
+  `ConfigSource`）、`machine/{MachineEnergy,MachineItemHandler,MachineHooks}`。
+- core 侧四个窄门面：
+  - `common/config/{ConfigSource,ConfigValues}`：**委托读** spec，所以配置热改/`/reload` 行为不变；
+    没装 source 时抛带说明的 `IllegalStateException`。
+  - `common/platform/{ModProbe,Platform}`：`isLoaded` / `version`；`ModProbe.NONE` 是“都没装”的空实现。
+  - `platform/machine/MachineHooks`：BE 唯一的能力入口 `insertIntoNeighbour(...)`。
+  - `client/GuiLayers`：`Minecraft#pushGuiLayer` 的版本适配点。
+- 机器能量拆两半：core 的 `MachineEnergyBuffer`（纯整数：容量、接收 1024 上限、内部 drain、直接 set）
+  + 平台的 `MachineEnergy`（`EnergyStorage` 适配器，`maxExtract=0`）。BE 存档键仍是 `Energy`，
+  旧存档不需要迁移。
+- `OreMaterials` 从“静态初始化时读 `ModList`”改成显式 `init()`（构造期、注册之前）+
+  `Platform.isModLoaded`；漏调会立刻抛异常，而不是到世界加载才炸。
+- 守卫脚本：`KNOWN` 清空，`common/config`、`common/platform` 加入受检目录；
+  `MachineBlockEntity` 仍单独受检（core 状态机，能力只走门面）。
+- 验证：`./gradlew build` 通过、守卫 0 泄漏、`runServer` 起来后 RCON 抽验 20 FE/t、
+  自动输出进下方箱子、漏斗只抽输出格（明细见 [status.md](status.md) 验证表）。

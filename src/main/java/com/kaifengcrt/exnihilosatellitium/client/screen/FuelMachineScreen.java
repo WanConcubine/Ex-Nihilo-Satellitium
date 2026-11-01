@@ -1,7 +1,9 @@
 package com.kaifengcrt.exnihilosatellitium.client.screen;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.client.GuiLayers;
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.FuelMachineMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -67,7 +69,7 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
         if (machine != null) {
             final Direction facing = this.minecraft.player != null
                     ? this.minecraft.player.getDirection() : Direction.NORTH;
-            this.minecraft.pushGuiLayer(
+            GuiLayers.push(this.minecraft,
                     new MachineOutputScreen(this.menu, machine.getBlockPos(), facing));
         }
     }
@@ -124,7 +126,7 @@ public class FuelMachineScreen extends AbstractContainerScreen<FuelMachineMenu> 
                             this.menu.data().get(MachineBlockEntity.DATA_BURN_MAX) / 2),
                     mouseX, mouseY);
         } else if (this.isHovering(PROGRESS_X, PROGRESS_Y, PROGRESS_W, PROGRESS_H, mouseX, mouseY)) {
-            final String progressKey = net.neoforged.fml.ModList.get().isLoaded("jei")
+            final String progressKey = Platform.isModLoaded("jei")
                     ? "gui.exnihilosatellitium.progress.hint"
                     : "gui.exnihilosatellitium.progress";
             graphics.renderTooltip(this.font, Component.translatable(progressKey,

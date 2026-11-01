@@ -1,6 +1,10 @@
 package com.kaifengcrt.exnihilosatellitium;
 
-import com.kaifengcrt.exnihilosatellitium.common.config.ModConfig;
+import com.kaifengcrt.exnihilosatellitium.common.config.ConfigValues;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
+import com.kaifengcrt.exnihilosatellitium.platform.NeoForgeModProbe;
+import com.kaifengcrt.exnihilosatellitium.platform.config.ModConfig;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModCreativeTabs;
@@ -29,6 +33,12 @@ public final class ExNihiloSatellitium {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public ExNihiloSatellitium(final IEventBus modBus, final ModContainer modContainer) {
+        // Platform facades first: the material table and every core getter read
+        // through them, and registries below need the loaded material list.
+        Platform.install(new NeoForgeModProbe());
+        ConfigValues.install(ModConfig.INSTANCE);
+        OreMaterials.init();
+
         ModFluids.register(modBus);
         ModBlocks.register(modBus);
         ModBlockEntities.register(modBus);
