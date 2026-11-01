@@ -11,10 +11,24 @@
 [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
 GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**自动输出配置也已实现**（服务端 RCON 验过，
-GUI 待目视）。下一步是补 M4/M6/M10 的画面与右键验收；M5/M7 余项（config 扩展、datagen）、
-M8 月光魔法、M9 发布仍未开始。
+GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。下一批是**双版本重构**：
+先做 P1 薄门面、P2 数据管线，再把 1.20.1 分支补到 M2（见 [porting.md](porting.md)）。
+M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，M10 自动输出配置）
+## 当前批次（2026-11-01，双版本 / supported mods / 移植审计）
+
+- **supported mods**：`materials.json` 的 `ingots` 有序候选（`{"item": ..., "mod": ...}`），
+  启动时取第一个已加载模组的锭，都没装就回退自有锭；熔炼配方按 `neoforge:mod_loaded` 生成，
+  base 配方用 `neoforge:not(...)` 兜底。首个接入 **Mekanism 1.21.1**（tin / lead / osmium / uranium）。
+  服务端已验证：有 Mek 时这 4 种自有锭不注册、熔炉产出 `mekanism:ingot_*`；无 Mek 时回退自有锭。
+- **双版本恢复**：`1.20.1-forge` 分支从 `e0bc177` 恢复并推送；`legacy/1.20.1-forge` tag
+  本地+远端删除；AGENTS/status/README/parity/DESIGN 全部改成双版本（复盘见
+  [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
+- **移植审计**：[porting.md](porting.md) 记录分层契约、1.20.1↔1.21.1 API 差异、P0–P4 顺序；
+  `scripts/check-core-imports.py` 守住 core（4 个已知漏点，新增 NeoForge import 直接失败）。
+- **下一批从 P1 开始**（见「下一步」）；画面验收（M4/M6/M10 + 自动输出 GUI）仍然待做。
+
+## 上一批次（2026-11-01，M10 自动输出配置）
 
 - **自动输出**：机器新增 `AutoOutput`（总开关，默认关）+ `OutputMask`（6 个面各一位，默认只推底面）。
   每完成一次操作立刻推一次，另有 20 tick 重试；邻居拒收的余量留在输出格。
@@ -43,7 +57,7 @@ M8 月光魔法、M9 发布仍未开始。
   熔成 `mekanism:ingot_*`（自有锭在那 4 种里不再注册）。Thermal 只有 1.20.1，接在 1.20.1 分支。
   图标三帧预览：[m10-output-button.png](images/m10-output-button.png)。
 
-## 上一批次（2026-11-01，M10 自动化）
+## 更早（2026-11-01，M10 自动化）
 
 - **四台机器**：`electric_sieve` / `electric_hammer`（FE，4 个插件槽）与
   `fuel_sieve` / `fuel_hammer`（烧原版熔炉燃料，无插件槽）；共享一个 `MachineBlock` + 两个 BE 类型。
@@ -64,7 +78,7 @@ M8 月光魔法、M9 发布仍未开始。
   工作动画（锤头下压、筛料薄层）、粒子、JEI 点击、shift-click 槽位规则。
 - **未验**：机器配方未实际合成；自动输出配置 GUI 的画面/点击（服务端行为已 RCON 验过，见当前批次）。
 
-## 上一批次（2026-11-01 提交，M6）
+## 更早（2026-11-01 提交，M6）
 
 - **巫水**：自定义流体 + 桶 + 液方块；满水桶 + 菌丝（或蘑菇煲）发酵，`Spore` 进度存 NBT。
 - **古代孢子**：沙筛 1/128；右键泥土 → 菌丝、右键牛 → 哞菇。
@@ -162,7 +176,8 @@ M8 月光魔法、M9 发布仍未开始。
 
 ## 交接清单（下次会话先做）
 
-- **先跑** `./gradlew build` + `python3 scripts/check-textures.py`。
+- **先读** [porting.md](porting.md)；本批从 **P1 薄门面** 开始（清单见「下一步」）。
+- **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`。
 - 进游戏验收（服务端逻辑都已验过，剩下“看得见/摸得着”的）：
   - **M4 坩埚**：1 块圆石只占 12.5%、8 块满 2000、第 9 块被拒；沙子/尘土 100、花岗岩 250；
     桶/瓶抽流体；熔料↔流体显示切换；Jade 熔料剩余 + 热源速度；三个配置键热改；JEI 两页。
@@ -201,6 +216,7 @@ M8 月光魔法、M9 发布仍未开始。
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
 | `./gradlew build` | ✅ | 2026-10-31：`BUILD SUCCESSFUL`；JEI 依赖走 `maven.blamejared.com` |
+| `python3 scripts/check-core-imports.py` | ✅ | core 层无 NeoForge import；4 个已知漏点（OreMaterials + 3 个机器平台文件）以警告列出 |
 | `python3 scripts/check-textures.py` | ✅ | 方块/物品 16×16、蚕动画 16×64 + mcmeta、坩埚贴图存在；无 `minecraft:item/*` 引用 |
 | 数据表 JSON | ✅ | 47 hammer / 10 crook / 19 melt / 9 heat / 5 barrel / 65 compost / 4 sieve；全部可解析 |
 | 客户端启动（最后一次） | ✅ | 2026-10-31 00:16：`[hammer] 47`、`[crook] 10`、`[crucible] 6`、`[jei] 47/6/5/3/10`；无 missing model/texture |
@@ -290,12 +306,15 @@ M8 月光魔法、M9 发布仍未开始。
 
 ## 下一步（按价值排序）
 
-1. **补 M4 / M6 / M10 的画面与右键验收**（含新的自动输出配置 GUI）：清单见上一节；这一环没过不算完。
-2. **M7 余项**：config 扩展、datagen；JEI 已补全。
-3. **工程收尾**：advancement 树、mod 图标（`neoforge.mods.toml` 还没有 `logoFile`）、CI 加纹理检查、
-   零测试（tech-debt P3 #37）。
-4. **M8 月光魔法联动**：目前只有 `MoonlightCompat` 占位。
-5. **M9 发布**：等验收与 M7/M8 收尾后再做。
+1. **P1 薄门面**（[porting.md](porting.md) §3）：`ConfigValues`、`Platform` + `ModProbe`、
+   `MachineHooks`、`GuiLayers`；做完把 `check-core-imports.py` 的 known 清到 0。
+2. **P2 数据管线**：生成器 `--target 1.21.1|1.20.1` + `scripts/port_data.py`
+   （路径/`result.id`↔`result.item`/`neoforge:`↔`forge:` 条件），让数据只维护一份。
+3. **1.20.1 分支补 M2**（筛子 + 矿链 + 材料表），然后接 Thermal（它只有 1.20.1）。
+4. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI）：清单见交接清单。
+5. **M7 余项**：config 扩展、datagen；JEI 已补全。
+6. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
+7. **M8 月光魔法联动** / **M9 发布**。
 
 ## 已拍板的决策
 
