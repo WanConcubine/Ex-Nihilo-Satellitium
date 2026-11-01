@@ -46,18 +46,21 @@ public final class MachineRenderer implements BlockEntityRenderer<MachineBlockEn
                 .getItem(MachineBlockEntity.INPUT_SLOT);
         final float ticks = Math.max(1, machine.ticksPerOperation());
         final float phase = ((level.getGameTime() % (long) ticks) + partialTick) / ticks;
+        // Fallback: animate whenever material is loaded, even if the Active sync
+        // has not arrived yet; a loaded machine with a stall still looks alive.
+        final boolean animating = machine.isActive() || !input.isEmpty();
 
         if (machine.kind() == MachineKind.HAMMER) {
             // raised at the start of the cycle, slams down onto the anvil at the end
-            final float lift = machine.isActive()
+            final float lift = animating
                     ? (1.0F - phase) * (4.0F / 16.0F) - (1.2F / 16.0F) : 0.0F;
             this.renderHead(pose, buffer, lift);
             if (!input.isEmpty()) {
                 this.renderItem(level, input, pose, buffer, 0.5F, 6.0F / 16.0F, 0.5F, 0.22F);
             }
         } else if (!input.isEmpty()) {
-            final float jitter = machine.isActive()
-                    ? (float) Math.sin((level.getGameTime() + partialTick) * 2.0F) * 0.06F : 0.0F;
+            final float jitter = animating
+                    ? (float) Math.sin((level.getGameTime() + partialTick) * 2.0F) * 0.10F : 0.0F;
             this.renderItem(level, input, pose, buffer,
                     0.5F + jitter, 10.42F / 16.0F, 0.5F + jitter, 0.30F);
         }
