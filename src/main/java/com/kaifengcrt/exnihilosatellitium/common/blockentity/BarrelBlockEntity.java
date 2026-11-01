@@ -453,6 +453,11 @@ public class BarrelBlockEntity extends BlockEntity {
             this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
                     SoundSource.BLOCKS, 1.0F, 0.6F);
         }
+        // Peaceful: no mob can spawn, so skip the 30 s cook and drop right away.
+        if (this.level != null && !this.level.isClientSide
+                && this.level.getDifficulty() == Difficulty.PEACEFUL) {
+            this.finishCooking(this.level);
+        }
     }
 
     /** @return true while cooking (the normal barrel tick must not run) */
@@ -471,6 +476,12 @@ public class BarrelBlockEntity extends BlockEntity {
             return true;
         }
 
+        this.finishCooking(level);
+        return true;
+    }
+
+    /** Spawns the entity, or drops the peaceful loot, and empties the barrel. */
+    private void finishCooking(final Level level) {
         if (!level.isClientSide) {
             if (level.getDifficulty() != Difficulty.PEACEFUL) {
                 final EntityType<?> type = BuiltInRegistries.ENTITY_TYPE
@@ -478,23 +489,23 @@ public class BarrelBlockEntity extends BlockEntity {
                 if (type != null) {
                     final Entity entity = type.create(level);
                     if (entity != null) {
-                        entity.moveTo(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
-                                level.random.nextFloat() * 360.0F, 0.0F);
+                        entity.moveTo(this.worldPosition.getX() + 0.5D, this.worldPosition.getY() + 1.0D,
+                                this.worldPosition.getZ() + 0.5D, level.random.nextFloat() * 360.0F, 0.0F);
                         level.addFreshEntity(entity);
                     }
                 }
             } else if (!this.peacefulDrops.isEmpty()) {
                 final Item drop = this.peacefulDrops.get(level.random.nextInt(this.peacefulDrops.size()));
-                Block.popResource(level, pos.above(), new ItemStack(drop));
+                Block.popResource(level, this.worldPosition.above(), new ItemStack(drop));
             }
-            level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.4F);
+            level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                    SoundSource.BLOCKS, 1.0F, 0.4F);
         }
         this.pendingEntity = null;
         this.peacefulDrops.clear();
         this.cookTicks = 0;
         this.setChanged();
         this.sync();
-        return true;
     }
 
     /** True while a doll is cooking in this barrel (synced to the client). */
