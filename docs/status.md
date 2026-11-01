@@ -282,6 +282,11 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 
 ## 交接清单（下次会话先做）
 
+- **1.20.1 分支**：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`
+  （`1.20.1-forge` @ `fde30e7`），已到 **M4**，下一步是 **M6 五刀**（巫水+孢子 → 瓷桶 →
+  木坩埚+木桶 → 蚕 → 人偶）。分支的 `docs/status.md` 里有完整的交接清单、构建/客户端命令
+  （`runClient -PdevMods`）和固定套路。新会话在分支工作区开工即可。
+
 - **先读** [porting.md](porting.md) §3 的 P2 记录；本批从 **1.20.1 分支补 M2** 开始（清单见「下一步」）。
 - **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`
   + `python3 scripts/check-data-paths.py`（后两条必须 `0 known leak(s)` / `passed for 1.21.1`）。
