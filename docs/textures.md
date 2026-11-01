@@ -54,7 +54,8 @@ assets/exnihilosatellitium/textures/
 ```
 
 - **M10 机器（2026-11-01）**：4 张 16×16 方块贴图（电动/内能 × 筛/锤）+ 6 张插件图标 +
-  2 张 176×166 GUI 背景，全部由 `python3 scripts/generate_machine_assets.py` 用 Pillow 逐像素生成；
+  2 张 176×186 GUI 背景 + 1 张 16×48 三帧按钮图标（`output_config.png`：常态/悬停/开启），
+  全部由 `python3 scripts/generate_machine_assets.py` 用 Pillow 逐像素生成；
   脚本同时写 blockstate / 方块模型 / 物品模型。要改机器外观就改脚本重跑，不要手改 PNG。
   GUI 贴图在 `textures/gui/`，检查脚本对它们豁免尺寸（允许 256×256 画布）；
   机器面板实际用到 176×186，玩家物品栏在 `y=104/162`。

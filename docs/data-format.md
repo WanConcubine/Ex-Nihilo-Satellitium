@@ -626,9 +626,22 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | `Energy` | int | 电动版内部 FE；内能版没有这个键 |
 | `BurnHalfTicks` | int | 内能版剩余燃料，单位是**半个**燃烧 tick（煤 1600 tick = 3200） |
 | `BurnHalfTotal` | int | 当前这根燃料的总量，用于 GUI 火焰条 |
+| `AutoOutput` | boolean | 自动输出总开关；默认 `false`（缺键 = 关） |
+| `OutputMask` | int | 自动输出面：每个面一位，位号 = `Direction.get3DDataValue()`（下 0 / 上 1 / 北 2 / 南 3 / 西 4 / 东 5）；缺键时默认 1（底面） |
 
 - 槽位：`0` 工具（筛网 / 锤）、`1` 输入；电动 `2..5` 插件、`6..14` 输出；内能 `2` 燃料、`3..11` 输出。
 - 机器记录的 `Work` 在断电/断料时归零（不做半程存档）。
+
+### 自动输出
+
+- `AutoOutput` 打开后，每完成一次操作立刻把输出 12 格推进 `OutputMask` 点亮的面；
+  另有 20 tick 的重试，邻居满了再清空也能补推。邻居拒收的余量留在输出格。
+- 掩码只影响自动弹出；`ItemHandler.BLOCK` 不受影响，漏斗/管道仍可从任意面抽输出格。
+- `AutoOutput=true` 且 `OutputMask=0`：GUI 提交（`setOutputConfig`）会回退为底面，
+  直接 `/data merge` 写 0 不会推送（没有目标面）。
+- GUI 入口：机器界面进度条右侧（78,20）的 16×16 图标 → `MachineOutputScreen`（叠加层，不关菜单）。
+- 网络包 `exnihilosatellitium:set_machine_output`（C2S）：`{BlockPos pos, boolean autoOutput, int mask}`，
+  服务端用 `stillValid`（8 格）校验，只写绝对值，不做切换。
 
 ### 配置
 
@@ -662,6 +675,19 @@ data get block 0 120 0
 - 内能版的 `BurnHalfTicks` 是半 tick 单位：写 3200 = 一根煤。
 - **必须在 `forceload` 的区块里测**（没有玩家时，普通区块的 BE 不 tick）。
 - 管道验证：机器下方放漏斗只会抽到输出格；上方漏斗可以把料补进输入格。
+
+自动输出（RCON）：
+
+```mcfunction
+setblock 0 119 0 minecraft:chest
+data merge block 0 120 0 {AutoOutput:1b, OutputMask:1}
+# 等一件产出后
+data get block 0 119 0
+data merge block 0 120 0 {AutoOutput:0b}
+```
+
+- `OutputMask` 用位或组合：`1` 下 / `2` 上 / `4` 北 / `8` 南 / `16` 西 / `32` 东（例如 `3` = 上下都推）。
+- `/data merge` 会走 `loadAdditional`，所以可以直接在 RCON 里开关自动输出。
 
 ### 能力
 

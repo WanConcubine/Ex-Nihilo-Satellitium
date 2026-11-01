@@ -10,7 +10,8 @@ Outputs (all overwritten, deterministic):
       fuel_sieve,fuel_hammer}.png            16x16
   assets/exnihilosatellitium/textures/item/{speed,fortune}_upgrade_{1,2,3}.png
   assets/exnihilosatellitium/textures/gui/{electric_machine,fuel_machine,
-      energy_fill,fuel_fill,energy_icon,fuel_icon,arrow_track,arrow_fill}.png
+      energy_fill,fuel_fill,energy_icon,fuel_icon,arrow_track,arrow_fill,
+      output_config}.png
   blockstates/*.json, models/block/*.json, models/item/*.json
 
 GUI layout (176x186): machine area 0..88, divider 89/90, inventory label 93,
@@ -238,6 +239,31 @@ def arrow_fill() -> Image.Image:
     inner = [(1, 6), (13, 6), (13, 2), (21, 8), (13, 14), (13, 9), (1, 9)]
     draw.polygon(inner, fill=(244, 244, 244, 255))
     draw.line((1, 7, 12, 7), fill=(255, 255, 255, 255))
+    return img
+
+
+def output_config_icon() -> Image.Image:
+    """16x48 strip for the auto-output button: idle / hover / enabled."""
+    img = Image.new("RGBA", (16, 48), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    for frame in range(3):
+        top = frame * 16
+        active = frame == 2
+        hover = frame == 1
+        arrow = (56, 160, 84) if active else ((170, 236, 252) if hover else (60, 186, 220))
+        # machine wall on the left
+        draw.rectangle((1, top + 2, 4, top + 13), fill=EDGE)
+        draw.rectangle((2, top + 3, 4, top + 12), fill=PLATE)
+        draw.line((2, top + 3, 2, top + 12), fill=(203, 210, 215))
+        if hover:
+            draw.rectangle((2, top + 3, 4, top + 12), outline=(220, 228, 234))
+        # arrow leaving the wall to the right
+        draw.rectangle((4, top + 7, 8, top + 8), fill=arrow)
+        draw.polygon([(8, top + 4), (14, top + 7), (14, top + 8), (8, top + 11)],
+                     fill=arrow)
+        if active:
+            draw.rectangle((11, top + 2, 14, top + 5), fill=EDGE)
+            draw.rectangle((12, top + 3, 13, top + 4), fill=(110, 220, 130))
     return img
 
 
@@ -626,6 +652,7 @@ def main() -> None:
     flame_icon().save(ASSETS / "textures" / "gui" / "fuel_icon.png")
     arrow_track().save(ASSETS / "textures" / "gui" / "arrow_track.png")
     arrow_fill().save(ASSETS / "textures" / "gui" / "arrow_fill.png")
+    output_config_icon().save(ASSETS / "textures" / "gui" / "output_config.png")
     print("machine assets written")
 
 
