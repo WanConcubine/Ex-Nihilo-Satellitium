@@ -95,7 +95,7 @@ STAGES = ("broken", "crushed", "powdered")
 
 # name -> (outline, shadow, base, light, highlight)
 PALETTES = {
-    "iron": ("#3A3A3A", "#6F6F6F", "#B0B0B0", "#D4D4D4", "#F2F2F2"),
+    "iron": ("#4A2E22", "#8A5A44", "#C08060", "#E2A684", "#F7CFB4"),
     "gold": ("#4A3600", "#947000", "#D6A400", "#F2CE44", "#FFF2A0"),
     "copper": ("#4A2418", "#86422E", "#BE6546", "#E08A62", "#F6B78E"),
     "tin": ("#344A44", "#6E8880", "#A2B8B0", "#C6D8D0", "#EAF4EE"),

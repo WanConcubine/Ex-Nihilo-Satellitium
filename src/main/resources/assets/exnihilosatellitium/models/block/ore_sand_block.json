@@ -1,10 +1,8 @@
 {
   "parent": "minecraft:block/block",
-  "render_type": "minecraft:translucent",
   "textures": {
     "particle": "minecraft:block/sand",
-    "base": "minecraft:block/sand",
-    "ore": "exnihilosatellitium:block/ore_mask_sand"
+    "all": "minecraft:block/sand"
   },
   "elements": [
     {
@@ -20,70 +18,32 @@
       ],
       "faces": {
         "down": {
-          "texture": "#base",
-          "cullface": "down"
-        },
-        "up": {
-          "texture": "#base",
-          "cullface": "up"
-        },
-        "north": {
-          "texture": "#base",
-          "cullface": "north"
-        },
-        "south": {
-          "texture": "#base",
-          "cullface": "south"
-        },
-        "west": {
-          "texture": "#base",
-          "cullface": "west"
-        },
-        "east": {
-          "texture": "#base",
-          "cullface": "east"
-        }
-      }
-    },
-    {
-      "from": [
-        -0.01,
-        -0.01,
-        -0.01
-      ],
-      "to": [
-        16.01,
-        16.01,
-        16.01
-      ],
-      "faces": {
-        "down": {
-          "texture": "#ore",
+          "texture": "#all",
           "tintindex": 0,
           "cullface": "down"
         },
         "up": {
-          "texture": "#ore",
+          "texture": "#all",
           "tintindex": 0,
           "cullface": "up"
         },
         "north": {
-          "texture": "#ore",
+          "texture": "#all",
           "tintindex": 0,
           "cullface": "north"
         },
         "south": {
-          "texture": "#ore",
+          "texture": "#all",
           "tintindex": 0,
           "cullface": "south"
         },
         "west": {
-          "texture": "#ore",
+          "texture": "#all",
           "tintindex": 0,
           "cullface": "west"
         },
         "east": {
-          "texture": "#ore",
+          "texture": "#all",
           "tintindex": 0,
           "cullface": "east"
         }
