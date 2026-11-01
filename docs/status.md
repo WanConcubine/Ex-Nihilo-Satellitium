@@ -14,11 +14,30 @@ GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**�
 GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
 `ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
 `check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
-`scripts/port_data.py`、`scripts/check-data-paths.py`。下一批是**把 1.20.1 分支补到 M2**
-（用 port_data 铺数据，见 [porting.md](porting.md)）。
+`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M2**（筛子 + 矿链，
+分支提交 `9b92322`）。下一批是 1.20.1 的 M1.5 / JEI，或主线的 P3 状态机拆分。
 M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，P2 数据管线）
+## 当前批次（2026-11-01，1.20.1 M2）
+
+- **分支**：`1.20.1-forge` @ `9b92322`（worktree：`../Ex-Nihilo-Satellitium-1.20.1`），
+  主线 `main` 不受影响。构建用 Temurin 17（ForgeGradle 47.4.28）。
+- **筛子**：`SieveBlock` / `SieveBlockEntity` / `SieveRenderer` 按 1.20.1 API 重写
+  （`Block#use` → `InteractionResult`、`saveAdditional(CompoundTag)`、`load()`、
+  `BlockRenderDispatcher#renderSingleBlock`、`ForgeRegistries` 查表）；`MESH` 状态、
+  进度式做工、破坏返还、三种筛网（10/64/256 耐久）。
+- **数据**：`sieve/{dirt,sand,gravel}.json`（3 输入 / 48 掉落）；第 4 张 `dust` 表需要 M3 的
+  尘土方块，先不装。83 条配方（7 桶 + 36 碎块→方块 + 36 熔炼 + 筛子/三网）。
+- **矿链**：9 种材料注册自有锭（tin/silver/lead/nickel/platinum/aluminum/osmium/zinc/uranium），
+  铜改成 `minecraft:copper_ingot`；`forge:ores` / `forge:ingots` 标签齐全。
+- **M1 资产同步**（`d138cf9`）：矿方块单层染色 + 暖铁碎块 + 木桶去箍/去 `rotation:90`，
+  与主线一致。
+- **未做**：`dust` 筛料表、JEI（分支没有 JEI 依赖）、M1.5 桶内转化、M3 锤/钩。
+- **验证**：`./gradlew build` 通过；`check-textures.py` 通过；`runServer` 起来后 RCON 验过
+  筛子方块/`mesh` 状态/`Mesh`+`Contents` NBT、锭物品存在、`[sieve] loaded 3 inputs, 48 drops`。
+  **右键筛料、耐久、掉落需要玩家**——客户端已重新启动，等作者操作验收。
+
+## 上一批次（2026-11-01，P2 数据管线）
 
 - **`scripts/data_target.py`**：`DataTarget` 一处管住两版的路径与字段——`recipe/`↔`recipes/`、
   `loot_table/`↔`loot_tables/`、`tags/block|item`↔`tags/blocks|items`、`result.id`↔`result.item`、
@@ -44,7 +63,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 - **未做**：1.20.1 分支本身还没铺数据、没补 M2；生成器产物里的 `render_type` 等**资产**差异不在
   本批范围（P2 只管 `data/`）。
 
-## 上一批次（2026-11-01，P1 薄门面）
+## 更早（2026-11-01，P1 薄门面）
 
 - **分层落地**：新增顶层 `platform/` 包，只放每版要重写的胶水
   （`NeoForgeModProbe`、`config/ModConfig`、`machine/{MachineEnergy,MachineItemHandler,MachineHooks}`）。
@@ -359,6 +378,11 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 | 筛料渲染溢出 | ⚠️ | 作者截图确认料层与盘壁交替渲染；已改为 0.6 宽 + 抬到 10.5 px，**待目视** |
 | 木桶/石桶竖棱 | ⚠️ | 作者反馈棱上渲染怪；已去掉 4 个 1×15 端面的 `rotation:90`（离线渲染对比确认条纹消失），**待目视** |
 | 机器镐挖掘 | ⚠️ | 已加 `mineable/pickaxe` + `needs_stone_tool`（石镐及以上掉方块），**待游戏内挖一次确认** |
+| 1.20.1 M2 build | ✅ | `1.20.1-forge` @ `9b92322`：`./gradlew build`（Temurin 17）通过 |
+| 1.20.1 M2 筛子结构 | ✅ | RCON：`setblock ... sieve`、`[mesh=0/3]` 命中、`data merge` 的 `Mesh`/`Contents` 读回 |
+| 1.20.1 M2 数据 | ✅ | `[sieve] loaded 3 inputs, 48 drops`；`[compost] loaded 65`；83 个 recipe JSON |
+| 1.20.1 M2 锭物品 | ✅ | RCON `summon item ... tin_ingot` → `Tin Ingot`（9 种自有锭） |
+| 1.20.1 M2 右键筛料 | ⚠️ | 需要玩家右键（客户端已启动）；未由 agent 实测 |
 | P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (145 recipes, 69 loot tables, 41 tags)` |
 | P2 生成器幂等 | ✅ | 1.21.1 四个生成器写入仓库副本后 `diff -r` 与仓库逐字节一致（含 lang/筛表） |
 | P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |

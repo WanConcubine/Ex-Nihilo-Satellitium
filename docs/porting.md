@@ -14,6 +14,9 @@
   `machine/{MachineEnergy,MachineItemHandler,MachineHooks}`）、`registry/*`（8 个）、
   `client/*`（渲染/界面）、`common/event/*`、`common/network/*`、`common/item/*`、
   `common/block/*`、`common/blockentity/*`、`compat/*`。
+- **1.20.1 分支现状（2026-11-01，`9b92322`）**：已从 M1 补到 **M2**——筛子 + 三种筛网 +
+  矿链（4 碎块→方块→锭，9 种自有锭）+ 3 张筛料表；JEI 未接（分支没有 JEI 依赖）、
+  `dust` 筛料表等 M3、M1.5 桶内转化未开始。分支构建用 Temurin 17。
 - 数据：**145 个 recipe + 69 个 loot_table + 41 个 tag** 是 vanilla 类型，路径/格式随版本变
   （1.21 单数、`result.id`；1.20.1 复数、`result.item`）；自定义表（sieve/hammer/crook/compost/
   barrel/crucible_*）是我们自己的目录，**两版同构**。
@@ -86,6 +89,14 @@ docs/        本文件 + status/parity 的版本标注。
 - 验证：四个生成器对当前 1.21.1 树重跑 **零 diff**；`--target 1.20.1 --out` 产物通过
   `check-data-paths.py`；`port_data.py` 产物同样通过，且与生成器产物在 **240 个文件**上逐字节一致
   （只有合并型标签和筛表因“空树 / 完整树”上下文不同而不同）。
+
+### 1.20.1 分支：M2 之后
+
+- [x] M2 代码/数据已铺（`9b92322`）：`SieveBlock`/`SieveBlockEntity`/`SieveRenderer`、
+  三网、3 张筛料表、36 条碎块→方块 + 36 条熔炼、`forge:ores`/`forge:ingots`。
+- [ ] JEI：先给分支加 JEI 15 依赖（`compileOnly`/`runtimeOnly`），再移植筛子/桶分类。
+- [ ] `dust` 筛料表：需要先把 M3 的尘土方块注册进来。
+- [ ] M1.5 桶内方块转化；之后 M3 锤/钩。
 
 ### P3 —— 状态机拆分（为移植也为测试）
 
