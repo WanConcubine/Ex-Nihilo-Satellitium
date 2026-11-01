@@ -3,7 +3,6 @@
 
 Outputs (all under src/main/resources):
   assets/exnihilosatellitium/textures/item/<m>_<stage>.png     (copied from art)
-  assets/exnihilosatellitium/textures/block/ore_mask_<kind>.png
   assets/exnihilosatellitium/models/block/ore_<kind>_block.json (3 shared models)
   assets/exnihilosatellitium/blockstates/<m>_ore_<kind>.json
   assets/exnihilosatellitium/models/item/<m>_ore_<kind>.json
@@ -24,7 +23,6 @@ ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src/main/resources"
 ASSETS = RES / "assets/exnihilosatellitium"
 ART_ITEMS = ROOT / "art/items/ore_pieces"
-ART_BLOCKS = ROOT / "art/blocks/ore_overlay"
 
 MATERIALS = json.load(open(RES / "exnihilosatellitium/materials.json", encoding="utf-8"))["materials"]
 STAGES = ("broken", "crushed", "powdered")
@@ -56,20 +54,20 @@ def ensure_item_texture(mid, stage):
 
 
 def block_model(kind):
+    """单层染色：一个完整 cube，所有面 tintindex 0。
+
+    之前的“底图 + 叠加层”双层模型在世界里能染色，但物品栏里叠加层不出现，
+    且底块内缩会留缝。改用最标准的单层 tint（草/树叶同一条路径）。
+    """
     base = f"minecraft:block/{KINDS[kind]}"
     return {
         "parent": "minecraft:block/block",
-        "render_type": "minecraft:translucent",
-        "textures": {"particle": base, "base": base,
-                     "ore": f"exnihilosatellitium:block/ore_mask_{kind}"},
-        "elements": [
-            {"from": [0, 0, 0], "to": [16, 16, 16],
-             "faces": {f: {"texture": "#base", "cullface": f}
-                       for f in ("down", "up", "north", "south", "west", "east")}},
-            {"from": [-0.01, -0.01, -0.01], "to": [16.01, 16.01, 16.01],
-             "faces": {f: {"texture": "#ore", "tintindex": 0, "cullface": f}
-                       for f in ("down", "up", "north", "south", "west", "east")}},
-        ],
+        "textures": {"particle": base, "all": base},
+        "elements": [{
+            "from": [0, 0, 0], "to": [16, 16, 16],
+            "faces": {f: {"texture": "#all", "tintindex": 0, "cullface": f}
+                      for f in ("down", "up", "north", "south", "west", "east")},
+        }],
     }
 
 
@@ -85,10 +83,6 @@ def loot_table(mid, kind):
 
 def main():
     for kind in KINDS:
-        src = ART_BLOCKS / f"ore_mask_{kind}.png"
-        dst = ASSETS / "textures/block" / f"ore_mask_{kind}.png"
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src, dst)
         write_json(ASSETS / f"models/block/ore_{kind}_block.json", block_model(kind))
 
     shovel = []

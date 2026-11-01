@@ -5,7 +5,6 @@
     "side": "minecraft:block/stone",
     "top": "minecraft:block/smooth_stone",
     "inner": "minecraft:block/stone",
-    "bottom": "minecraft:block/stone",
-    "hoop": "minecraft:block/deepslate_tiles"
+    "bottom": "minecraft:block/stone"
   }
 }
