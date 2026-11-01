@@ -992,9 +992,15 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
 
 **GUI**
 
-- 两个 `MenuType`（`electric_machine` / `fuel_machine`）、两个 `Screen`；
-  进度条、能量条、火焰条、tooltip（FE / 燃料 tick / 进度百分比）都在 screen 里画。
-- `ContainerData` 7 项：`work / ticksPerOperation / energy / energyCapacity / burnHalfTicks / burnHalfTotal / active`。
+- 两个 `MenuType`（`electric_machine` / `fuel_machine`）、两个 `Screen`，尺寸 **176×186**；
+  玩家物品栏下移到 `y=104/162`，`物品栏` 标签在分隔线下方，不再和插件槽重叠。
+- 空槽虚影（40% 灰度水洗）：工具槽 = 筛网/锤、输入槽 = 沙/圆石、燃料槽 = 煤、
+  电动前两个插件槽 = 速度 I / 时运 I；悬停显示槽位说明。
+- 标题右侧状态行（服务端算、`ContainerData` 下发）：运行中 / 缺少工具 / 缺少原料 /
+  缺少能量 / 缺少燃料 / 输出已满（`DATA_STATUS`）。
+- `ContainerData` 8 项：`work / ticksPerOperation / energy / energyCapacity / burnHalfTicks /
+  burnHalfTotal / active / status`。**客户端用 `SimpleContainerData`** 接收同步值；
+  直接用 BE 会把 `set` 吃掉，进度条冻住（踩坑记录见 status.md）。
 - 贴图：`textures/block/{electric,fuel}_{sieve,hammer}.png` 16×16、`textures/gui/{electric,fuel}_machine.png`，
   由 `scripts/generate_machine_assets.py` 生成（Pillow），模型统一 `cube_all`。
 
@@ -1007,4 +1013,6 @@ Creatio 的 **Wooden Crucible**（mcmod 条目 71289）：「坩埚的木质版�
   圆石规则 1 个 × 4 roll × 5 次 = 20 砂砾（时运生效）。
 - 内能锤：80 tick 一次，输入 63、锤 damage 1、`BurnHalfTicks` 2700、产出 1 砂砾。
 - 漏斗在机器下方只抽到砂砾（输出），机器内的锤/插件仍在；漏斗在上方成功把圆石补进输入槽。
-- **未验**：GUI 外观 / 打开菜单 / 右键手感 / 贴图在游戏里的观感；配方未实际合成。
+- 存档实证：内能筛在作者世界里已处理 12 次（筛网 damage 12、末地石×5、紫颂果×1、末影珍珠×2）。
+- 放错槽位的物品会被弹到机器上方，不会把机器永久卡死。
+- **未验**：虚影/状态行/贴图的观感；配方未实际合成。
