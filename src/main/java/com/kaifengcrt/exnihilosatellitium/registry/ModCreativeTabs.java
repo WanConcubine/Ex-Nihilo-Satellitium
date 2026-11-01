@@ -6,6 +6,7 @@ import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,6 +28,8 @@ public final class ModCreativeTabs {
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.PORCELAIN.get());
                 ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
+                output.accept(ModItems.SIEVE.get());
+                ModItems.MESHES.forEach(mesh -> output.accept(mesh.get()));
                 for (final OreMaterial material : OreMaterials.all()) {
                     final var entries = ModOreItems.byMaterial().get(material.id());
                     for (final String kind : ModOreBlocks.KINDS) {
@@ -36,6 +39,10 @@ public final class ModCreativeTabs {
                     }
                     for (final String stage : ModOreItems.STAGES) {
                         output.accept(entries.get(stage).get());
+                    }
+                    final RegistryObject<Item> ingot = entries.get("ingot");
+                    if (ingot != null) {
+                        output.accept(ingot.get());
                     }
                 }
             })

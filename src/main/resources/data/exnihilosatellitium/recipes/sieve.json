@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    "xyx",
+    "z z"
+  ],
+  "key": {
+    "x": {
+      "tag": "minecraft:planks"
+    },
+    "y": {
+      "tag": "minecraft:wooden_slabs"
+    },
+    "z": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "result": {
+    "item": "exnihilosatellitium:sieve"
+  }
+}

@@ -1,34 +1,34 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-10-29
+> 最后更新：2026-11-01
 > 先看这 20 行，细节再翻 [DESIGN.md](DESIGN.md)、[data-format.md](data-format.md)、[textures.md](textures.md)。
 
 ## 一句话
 
-**M1 木桶 + 七种材质变体已完成**（橡木/云杉/白桦/丛林/金合欢/深色橡木/石桶；
-共享 BE、堆肥 → DIRT、1000 mB 流体、比较器、内缩 vanilla-sampled 模型、Jade tooltip）；
-**M1.5 桶内方块转化、M2 筛子还没开始**。
+**M1 木桶 + 七种材质变体已完成**（橡木/云杉/白桦/丛林/金合欢/深色橡木/石桶）；
+**M2 筛子 + 矿链已铺好**（2026-11-01）：筛子方块/BE/渲染、三种筛网、3 个筛料表、
+4 碎块→矿方块→12 种锭（9 种自有锭）、`forge:ores`/`forge:ingots` 标签；
+**M1.5 桶内方块转化、M3 锤/钩、JEI 仍未开始**。
 
 ## 现在停在哪
 
-- 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium`。
-- **2026-10-29 矿物六态入游**：按 `materials.json` 动态注册 36 个方块（矿砾/矿砂/矿尘）
-  + 36 个物品（破碎/粉碎/粉末），12 种材料，创意标签 72 条。方块 = vanilla 底 +
-  遮罩 + `BlockColor`，模型带 `parent: block/block` 才有 3D 物品图标。
-  **但它们目前没有任何配方，也拿不到**——纯展示，等 M2 接上筛子与合成。
-- **2026-10-29 定位入档**：DESIGN 写明项目是「1.7.10 版 Ex Nihilo 1 经典复刻」，
-  **联动是本职**（§6.1），承自 Ex Astris 的是**自动化思路**（§6.2：判定单一来源、
-  FE 能源、升级插件）。新增 [parity.md](parity.md) 逐项对照表；DESIGN §6.4 定义
-  **材料表 + 自持矿物链**，表结构见 [data-format.md](data-format.md) §8。**代码未改动。**
-- **2026-10-28 正式改名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；
-  mod id、Java 包、assets/data 命名空间改为 `exnihilosatellitium`。
-  改名前的旧世界不兼容，需要新世界（目前没有发布，影响只在本地测试档）。
-- 上一个功能提交：v6.5 矿粒碎块边缘定稿（`5efa076`）。
-- 本次改动：正式改名（mod id / Java 包 / assets+data 命名空间）+ 重跑构建、服务端和
-  客户端资源加载；提交见 `git log -1`。随后又清掉工作区路径、构建缓存、旧日志里的旧名残留。
-- 开发服 `run/server.properties` 的 `online-mode` / `enforce-secure-profile` 已恢复为 `true`；
-  测试用的临时平台已清掉，spawn / gamerule 已复原。
-- Jade 插件类已在 jar 里，但**没有装 Jade 做过真实 tooltip 验收**。
+- 工作区：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`（`1.20.1-forge` 分支的
+  git worktree，主工作区仍在 `main`）。
+- **2026-11-01 M1 资产与主线同步**（`d138cf9`）：矿物方块改成主线那套**单层染色** cube
+  （去掉双层遮罩 / `ore_mask_*`）、铁碎块换**暖铁色**、木桶去掉两道外凸箍与侧面
+  `rotation: 90`；`scripts/generate_ore_variants.py` 跟着改，重跑不会变回去。
+- **2026-11-01 M2 铺到分支**：
+  - 筛子：`SieveBlock` + `SieveBlockEntity` + `SieveRenderer`（1.20.1 的 `use` / NBT /
+    `renderSingleBlock` 签名），`MESH` 方块状态、进度条式做工、破坏返还、右键装网/下料；
+  - 三种筛网：木 10 / 丝 64 / 铁 256 耐久，只在创意栏与合成里出现；
+  - 数据：`sieve/{dirt,sand,gravel}.json`（3 输入 / 48 掉落），`forge:ores`、
+    `forge:ingots` 标签，`recipes/` 下 83 条配方（7 桶 + 36 碎块→方块 + 36 熔炼 + 筛子/网）；
+  - 矿链：12 种材料 × 4 碎块 → 矿方块 → 熔炼成锭；9 种没有现成锭的材料（tin/silver/lead/
+    nickel/platinum/aluminum/osmium/zinc/uranium）注册自有 `<m>_ingot`，铜改成原版铜锭。
+  - **没有做**：`dust` 筛料表（需要 M3 的尘土方块）、JEI（这条分支还没引入 JEI 依赖）。
+- **M1.5 桶内转化**（水+熔岩等）仍未开始。
+- 开发服：`run/server.properties` 现在是测试用（`level-name=m2-test`、RCON `eni`、
+  `online-mode=false`）；要和主线一样正式联调时记得改回 `true`。
 
 ## 验证状态
 
@@ -52,19 +52,21 @@
 | 合成配方 | ⚠️ | 7 个 JSON 都加载成功；没有玩家实测合成格 |
 | 矿物六态注册 | ✅ | 客户端 `/give` 与创意标签可见 72 条；`[materials] loaded 12 entries` |
 | 矿物六态纹理 | ✅ | 作者目视通过：原版底 + 遮罩 + 罩色，物品栏为 3D 方块 |
-| 矿物链配方 | ❌ | 无筛子/锤子/合成/熔炼，36 个方块与 36 个物品目前不可获得 |
+| 矿物链配方 | ✅ | 83 条 recipe JSON 在 mod 数据包里；36 条 4 碎块→方块、36 条方块→锭（RCON 验证锭物品存在） |
+| M2 筛子方块/ BE | ✅ | RCON：`setblock ... sieve`、`[mesh=0/3]` 状态命中、`data merge` 的 `Mesh`/`Contents` 读回 |
+| M2 筛料表 | ✅ | `/reload` 日志 `[sieve] loaded 3 inputs, 48 drops`；`dust` 表按计划未装 |
+| M2 筛子玩法（右键/掉落/耐久） | ⚠️ | 需要玩家右键；客户端目视待作者验收 |
+| 27/28 资源模型 | ✅ | 客户端资源加载无 missing model/texture（筛子 frame/mesh、9 种锭、矿方块） |
+| 1.20.1 配方计数 | ℹ️ | 1.20.1 的 `Loaded 7 recipes` 是**配方类型数**，不是配方条数；别拿它当进度 |
 | 改名完整性 | ✅ | `git grep` 无旧 id/旧类名；jar 内 `mods.toml` 为 `exnihilosatellitium` / `Ex Nihilo: Satellitium` |
 
 ## 下一步（按价值排序）
 
-1. **进游戏 5 分钟验收**（最便宜）：
-   - 放七种桶，看颜色/箍/内壁是否可区分，比例是否一致；
-   - 物品栏图标是否是空心 3D 桶；
-   - 塞树苗看堆肥 box、粒子、50 秒颜色过渡；DIRT 后右键取泥土；
-   - 装 Jade 看 tooltip。
-2. **M2 筛子 + 筛网 + 数据驱动掉落**：空岛循环真正跑起来的关键。
-3. **M1.5 桶内方块转化**：水 + 熔岩 → 石/黑曜石；也可以在这里给石桶加“只装熔岩”的差异化。
-4. **M3 锤子 + 钩子**：锤碎圆石/砂砾，钩树叶出树苗/蚕。
+1. **进游戏验收 M2**：放筛子 → 右键木网 → 右键砂砾/沙子/泥土 → 看进度条、料层变薄、
+   掉落物；网耐久耗尽消失；潜行右键取回网/料；矿物链合成 + 熔炼。
+2. **JEI**：这条分支还没接 JEI 依赖；M2 的筛子页要等依赖加进来再补。
+3. **M1.5 桶内方块转化**：水 + 熔岩 → 石/黑曜石；石桶的差异化可以一起做。
+4. **M3 锤子 + 钩子**：锤碎圆石/砂砾，钩树叶出树苗/蚕；`dust` 方块接进来后再补第 4 张筛料表。
 
 ## 已拍板的决策
 

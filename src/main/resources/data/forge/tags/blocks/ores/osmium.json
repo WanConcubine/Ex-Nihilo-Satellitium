@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "exnihilosatellitium:osmium_ore_dust",
+    "exnihilosatellitium:osmium_ore_gravel",
+    "exnihilosatellitium:osmium_ore_sand"
+  ]
+}
