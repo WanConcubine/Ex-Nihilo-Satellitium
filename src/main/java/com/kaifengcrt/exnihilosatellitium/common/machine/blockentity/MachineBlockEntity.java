@@ -56,7 +56,8 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     public static final int DATA_BURN = 4;
     public static final int DATA_BURN_MAX = 5;
     public static final int DATA_ACTIVE = 6;
-    public static final int DATA_COUNT = 7;
+    public static final int DATA_STATUS = 7;
+    public static final int DATA_COUNT = 8;
 
     public static final int TOOL_SLOT = 0;
     public static final int INPUT_SLOT = 1;
@@ -396,8 +397,38 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
             case DATA_BURN -> this.burnHalfTicks;
             case DATA_BURN_MAX -> this.burnHalfTotal;
             case DATA_ACTIVE -> this.active ? 1 : 0;
+            case DATA_STATUS -> this.currentStatus();
             default -> 0;
         };
+    }
+
+    /**
+     * Why the machine is or is not running, for the GUI status line.
+     * 0 running, 1 no tool, 2 no input, 3 no energy, 4 output full, 5 no fuel.
+     */
+    public int currentStatus() {
+        if (!this.hasTool()) {
+            return 1;
+        }
+        if (!this.hasOutputSpace()) {
+            return 4;
+        }
+        final ItemStack input = this.inventory.getItem(INPUT_SLOT);
+        if (input.isEmpty() || !this.isValidInput(input)) {
+            return 2;
+        }
+        if (this.electric) {
+            return this.energyPerTick() > 0 && this.energy.getEnergyStored() < this.energyPerTick()
+                    ? 3 : 0;
+        }
+        if (this.burnHalfTicks < this.burnHalfPerTick() && !this.hasFuel()) {
+            return 5;
+        }
+        return 0;
+    }
+
+    private boolean hasFuel() {
+        return this.inventory.getItem(FUEL_SLOT).getBurnTime(RecipeType.SMELTING) > 0;
     }
 
     @Override
