@@ -262,7 +262,7 @@ public final class ModItems {
     private static DeferredHolder<Item, Item> registerUpgrade(final String name,
                                                               final UpgradeType type, final int tier) {
         return ITEMS.register(name, () -> new UpgradeItem(
-                new Item.Properties().stacksTo(16), type, tier));
+                new Item.Properties().stacksTo(8), type, tier));
     }
 
     public static void register(final IEventBus modBus) {

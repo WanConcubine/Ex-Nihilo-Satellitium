@@ -89,6 +89,7 @@
   "gui.exnihilosatellitium.slot.input.sieve": "Siftable input",
   "gui.exnihilosatellitium.slot.mesh": "Mesh",
   "gui.exnihilosatellitium.slot.speed": "Speed upgrade",
+  "gui.exnihilosatellitium.slot.upgrade": "Upgrade (speed or fortune)",
   "gui.exnihilosatellitium.status.no_energy": "No FE",
   "gui.exnihilosatellitium.status.no_fuel": "No fuel",
   "gui.exnihilosatellitium.status.no_input": "Needs input",
@@ -239,7 +240,7 @@
   "message.exnihilosatellitium.crucible.hot_fluid": "A wooden crucible cannot hold lava",
   "message.exnihilosatellitium.need_mesh": "Needs a mesh",
   "tooltip.exnihilosatellitium.fortune_upgrade": "Adds %s extra independent roll(s)",
-  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "Stacks: each extra upgrade adds 80% of the previous extra rolls",
+  "tooltip.exnihilosatellitium.fortune_upgrade.stack": "Stacks: 1st is full, each further one counts 80%; a fractional extra roll is rolled as a chance",
   "tooltip.exnihilosatellitium.speed_upgrade": "Sifts and crushes %s× faster",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Stacks: each extra upgrade adds 80% of the previous bonus and +25% FE/t"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Stacks: 1st is full, each further one counts 80%; +25% FE/t per item"
 }
