@@ -15,7 +15,7 @@
 | 1 | 木桶 + 堆肥 → 泥土 | `BarrelBlock` / `BarrelBlockEntity` + 7 材质变体 | ✅ | 1000 分制、50 秒成土 |
 | 2 | 木桶储流体（水 / 熔岩，1000 mB） | `FluidTank` + `IFluidHandler` | ✅ | 石桶同 BE |
 | 3 | 比较器读堆肥进度 | `getComparatorOutput` | ✅ | 逻辑已写，未实测 ⚠️ |
-| 4 | 桶内方块转化（水 + 熔岩 → 石 / 黑曜石） | — | ❌ | M1.5 |
+| 4 | 桶内方块转化（水 + 熔岩 → 石 / 黑曜石） | `BarrelRecipes` + `barrel/*.json`（4 条） | 🚧 | RCON 验过固化，右键取固体待玩家 |
 | 5 | 筛子 + 筛网（木 / 丝 / 铁） | `SieveBlock` + `MeshItem` ×3 | 🚧 | 代码+数据就位，待进游戏操作 |
 | 6 | 筛子掉落数据驱动（JSON 可改） | `sieve/*.json` + `SieveRegistry` reload | 🚧 | 3 输入 / 48 掉落已加载 |
 | 7 | 锤子：圆石 → 砂砾 → 沙子 → 尘土 | — | ❌ | M3 |
