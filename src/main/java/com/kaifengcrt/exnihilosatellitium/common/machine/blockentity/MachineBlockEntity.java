@@ -173,25 +173,18 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     }
 
     /**
-     * Expected extra rolls. Fortune stacks diminishing: tier I/II/III adds 1/2/3,
-     * each further upgrade adds half of the previous value.
+     * Fortune stacking by proc chance: the first fortune item always procs, each
+     * further one has 80% of the previous chance (100%, 80%, 64%, ...). When an
+     * item procs it adds its tier as extra independent rolls.
      */
-    public double fortuneBonus() {
-        double bonus = 0.0D;
-        double weight = 1.0D;
+    public int fortuneExtraRolls() {
+        int rolls = 0;
+        double chance = 1.0D;
         for (final UpgradeItem upgrade : this.upgradesOf(UpgradeType.FORTUNE)) {
-            bonus += upgrade.tier() * weight;
-            weight *= 0.8D;
-        }
-        return bonus;
-    }
-
-    /** Whole extra rolls plus one probabilistic roll for the fractional part. */
-    private int fortuneExtraRolls() {
-        final double bonus = this.fortuneBonus();
-        int rolls = (int) Math.floor(bonus);
-        if (this.level != null && this.level.random.nextDouble() < bonus - rolls) {
-            rolls++;
+            if (this.level != null && this.level.random.nextDouble() < chance) {
+                rolls += upgrade.tier();
+            }
+            chance *= 0.8D;
         }
         return rolls;
     }
