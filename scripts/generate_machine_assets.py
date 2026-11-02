@@ -7,12 +7,12 @@ Run with the bundled Pillow environment:
 
 Outputs (all overwritten, deterministic):
   assets/exnihilosatellitium/textures/block/{electric_sieve,electric_hammer,
-      fuel_sieve,fuel_hammer}.png            16x16
+      fuel_sieve,fuel_hammer}.png            32x32
   assets/exnihilosatellitium/textures/item/{speed,fortune}_upgrade_{1,2,3}.png
   assets/exnihilosatellitium/textures/gui/{electric_machine,fuel_machine,
       energy_fill,fuel_fill,energy_icon,fuel_icon,arrow_track,arrow_fill,
       output_config}.png
-  blockstates/*.json, models/block/*.json, models/item/*.json
+  (blockstates and machine models come from datagen: `./gradlew runData`)
 
 GUI layout (176x186): machine area 0..88, divider 89/90, inventory label 93,
 player inventory 104..158, hotbar 162..178.
@@ -20,7 +20,6 @@ player inventory 104..158, hotbar 162..178.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -366,63 +365,6 @@ def sieve_inner_texture() -> Image.Image:
     return img
 
 
-def sieve_model(*, fuel: bool) -> dict:
-    side = f"exnihilosatellitium:block/machine_frame_side_{'fuel' if fuel else 'electric'}"
-    tex = {
-        "particle": side,
-        "side": side,
-        "top": "exnihilosatellitium:block/machine_frame_top",
-        "leg": "exnihilosatellitium:block/machine_leg",
-        "mesh": "exnihilosatellitium:block/machine_mesh",
-        "inner": "exnihilosatellitium:block/machine_inner",
-    }
-
-    def face(texture, uv=None):
-        out = {"texture": texture}
-        if uv:
-            out["uv"] = uv
-        return out
-
-    side_uv = [0, 0, 16, 16]
-    rim_uv = [0, 0, 16, 6]
-    elements = []
-    # thin 1x1 legs (0..10), inset 1 px so adjacent machines never share a plane
-    for x, z in ((1, 1), (14, 1), (1, 14), (14, 14)):
-        elements.append({
-            "from": [x, 0, z], "to": [x + 1, 8.95, z + 1],
-            "faces": {f: face("#leg") for f in ("down", "up", "north", "south", "west", "east")},
-        })
-    # thin tray bottom 9..10
-    elements.append({
-        "from": [1, 9, 1], "to": [15, 10, 15],
-        "faces": {
-            "down": face("#side"), "up": face("#inner"),
-            "north": face("#side"), "south": face("#side"),
-            "west": face("#side"), "east": face("#side"),
-        },
-    })
-    # thin 4 px tray walls 10..14, mesh at the tray bottom
-    walls = (
-        ("north", [1, 10, 1, 15, 14, 3]),
-        ("south", [1, 10, 13, 15, 14, 15]),
-        ("west", [1, 10, 3, 3, 14, 13]),
-        ("east", [13, 10, 3, 15, 14, 13]),
-    )
-    for outer, box in walls:
-        faces = {f: face("#side") for f in ("down", "up", "north", "south", "west", "east")}
-        faces["up"] = face("#top")
-        faces[outer] = face("#side", side_uv)
-        inner = {"north": "south", "south": "north", "west": "east", "east": "west"}[outer]
-        faces[inner] = face("#inner")
-        elements.append({"from": box[:3], "to": box[3:], "faces": faces})
-    elements.append({
-        "from": [3, 10.2, 3], "to": [13, 10.35, 13],
-        "faces": {f: face("#mesh") for f in ("down", "up", "north", "south", "west", "east")},
-    })
-    return {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
-            "textures": tex, "elements": elements}
-
-
 def machine_side_32(*, fuel: bool) -> Image.Image:
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -550,64 +492,6 @@ def hammer_top_32() -> Image.Image:
     return img
 
 
-def hammer_model(*, fuel: bool, head: bool = True) -> dict:
-    side = f"exnihilosatellitium:block/machine_frame_side_{'fuel' if fuel else 'electric'}"
-    tex = {
-        "particle": side,
-        "side": side,
-        "top": "exnihilosatellitium:block/machine_hammer_top",
-        "leg": "exnihilosatellitium:block/machine_leg",
-        "anvil": "exnihilosatellitium:block/machine_hammer_anvil",
-        "head": "exnihilosatellitium:block/machine_hammer_head",
-        "shaft": "exnihilosatellitium:block/machine_hammer_shaft",
-        "inner": "exnihilosatellitium:block/machine_inner",
-    }
-
-    def face(texture):
-        return {"texture": texture}
-
-    def box(frm, to, texture, top=None):
-        return {"from": frm, "to": to,
-                "faces": {f: face(texture) for f in ("down", "up", "north", "south", "west", "east")}}
-
-    elements = [
-        box([1, 0, 1], [15, 4, 15], "#side"),
-        box([2, 4, 2], [4, 12, 4], "#leg"),
-        box([12, 4, 2], [14, 12, 4], "#leg"),
-        box([2, 4, 12], [4, 12, 14], "#leg"),
-        box([12, 4, 12], [14, 12, 14], "#leg"),
-        box([2, 12, 2], [14, 14, 14], "#top"),
-        box([5, 4, 5], [11, 6, 11], "#anvil"),
-        box([7, 10, 7], [9, 12, 9], "#shaft"),
-    ]
-    if head:
-        elements.append(box([5, 7, 5], [11, 10, 11], "#head"))
-    # top plate should use top texture on the up face only
-    elements[5]["faces"]["up"] = face("#top")
-    return {"parent": "minecraft:block/block", "textures": tex, "elements": elements}
-
-
-def write_json(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-
-
-def machine_assets(name: str, *, sieve: bool, fuel: bool) -> None:
-    write_json(ASSETS / "blockstates" / f"{name}.json",
-               {"variants": {"": {"model": f"exnihilosatellitium:block/{name}"}}})
-    if sieve:
-        write_json(ASSETS / "models" / "block" / f"{name}.json", sieve_model(fuel=fuel))
-        write_json(ASSETS / "models" / "item" / f"{name}.json",
-                   {"parent": f"exnihilosatellitium:block/{name}"})
-    else:
-        # the block model has no head (the BER renders the moving head), but the
-        # item model keeps a static head so the icon is not an empty press
-        write_json(ASSETS / "models" / "block" / f"{name}.json",
-                   hammer_model(fuel=fuel, head=False))
-        write_json(ASSETS / "models" / "item" / f"{name}.json",
-                   hammer_model(fuel=fuel, head=True))
-
-
 def main() -> None:
     for name, fuel, sieve in (
             ("electric_sieve", False, True),
@@ -616,16 +500,12 @@ def main() -> None:
             ("fuel_hammer", True, False)):
         block_texture(name, fuel=fuel, sieve=sieve).save(
             ASSETS / "textures" / "block" / f"{name}.png")
-        machine_assets(name, sieve=sieve, fuel=fuel)
 
     for kind in ("speed", "fortune"):
         for tier in (1, 2, 3):
             name = f"{kind}_upgrade_{tier}"
             upgrade_texture(kind, tier).save(
                 ASSETS / "textures" / "item" / f"{name}.png")
-            write_json(ASSETS / "models" / "item" / f"{name}.json",
-                       {"parent": "minecraft:item/generated",
-                        "textures": {"layer0": f"exnihilosatellitium:item/{name}"}})
 
     machine_side_32(fuel=False).save(
         ASSETS / "textures" / "block" / "machine_frame_side_electric.png")

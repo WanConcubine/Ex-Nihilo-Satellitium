@@ -34,5 +34,11 @@ public final class ModDataGen {
                 event.getLookupProvider()));
         generator.addProvider(event.includeServer(),
                 new ModRecipes(output, event.getLookupProvider()));
+        // Blockstates first: the item provider validates block-item parents against
+        // the models that provider generated (ExistingFileHelper#trackGenerated).
+        generator.addProvider(event.includeClient(),
+                new ModBlockStates(output, event.getExistingFileHelper()));
+        generator.addProvider(event.includeClient(),
+                new ModItemModels(output, event.getExistingFileHelper()));
     }
 }

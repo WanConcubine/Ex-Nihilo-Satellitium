@@ -70,8 +70,8 @@
 | 31 | **状态表把堆肥标签写成“已对齐”** | `docs/status.md` 堆肥相关行 | 与 P0 #4 的 `grass`/`short_grass` 差异冲突，交接会误判 | 修数据或改成 ⚠️ 并链接本文件 |
 | 32 | ~~**调试代码留在生产源**~~（debug 类/OreColors 分支已删；`CommonEvents` 的 `[debug]` 日志仍留） | `OreColors.java:60-89`；`OreDebugScreen.java`；`OreDebugScreenshot.java`；`CommonEvents.java:35-37` | 生产 jar 多三个 debug 类和一个系统属性钩子；日志噪音 | 移到 test/dev 源集，或用 `@EventBusSubscriber` 的 dev-only 条件；至少删掉截图钩子 |
 | 33 | **`MoonlightCompat` 实际未被调用，且 `item()` 返回 AIR 而不是 null** | `MoonlightCompat.java:48-58`；全仓无 `logStatus`/`item` 调用 | M8 之前是死代码；一旦使用 `hasItem()` 永远为 true | 先修 `getOptional`；在 M8 实现前保留但标注“未接线” |
-| 34 | **生成脚本与文档命令不一致**：`generate_sieve_assets.py` 不在常用命令里，`generate_barrel_variants.py` 却是坏的 | `docs/status.md` 常用命令；`docs/data-format.md:183` | 维护者不知道哪个脚本该跑，容易跑到旧脚本 | 统一脚本清单；给每个脚本加 `--check`（只校验不写） |
-| 35 | **`check-textures.py` 只查 models/textures，不查 blockstates 引用和 data JSON** | `scripts/check-textures.py:40-52` | 生成器写错 blockstate 路径/模型名时，纹理检查仍通过 | 增加 blockstates → models、loot/recipe id 的基础存在性检查 |
+| 34 | ~~**生成脚本与文档命令不一致**：`generate_sieve_assets.py` 不在常用命令里，`generate_barrel_variants.py` 却是坏的~~（2026-11-02：模型/配方归 datagen，坏的脚本已删；常用命令已更新） | `docs/status.md` 常用命令 | — | — |
+| 35 | ~~**`check-textures.py` 只查 models/textures，不查 blockstates 引用和 data JSON**~~（2026-11-02：已加 blockstate→模型、模型 parent 引用检查，并同时扫 main + generated；data JSON 的存在性仍不查） | `scripts/check-textures.py` | recipe/loot 里写错 id 仍能过检查 | 可选：把 `check-data-paths.py` 扩成「引用的物品/方块必须存在」 |
 | 36 | **`processResources` 把 data 表复制进 assets，jar 内有两份** | `build.gradle` 的 `processResources` | 包体增大；专用服客户端读不到服务端数据包，JEI 只能显示内置镜像 | 已接受并在 data-format §14 写清；单人/局域网 JEI 优先服务端表，专用服客户端需同装数据包 |
 
 ## P3：清理与路线图（潜在债）
@@ -80,7 +80,7 @@
 |---|---|---|
 | 37 | **零自动化测试** | `src/test` 不存在；`build` 的 `test` 是 NO-SOURCE。最值得补：`SieveRegistry`/`BarrelRecipes`/`CompostRegistry` 的解析、重复/坏 id、`BarrelBlockEntity.fill` 状态机、`SieveBlockEntity` 结算 |
 | 38 | **数据格式没有 schema/版本** | `sieve`/`barrel`/`compost`/`materials` 都是 de facto API；字段改名/新增无版本号、无迁移、无 `--check`。建议给每个格式写 JSON Schema 或 Java 校验器 |
-| 39 | **datagen 只覆盖 tags/loot/recipe** | 2026-11-02：`runData` 已接管方块/物品标签 + 方块掉落表 + **133 条配方**（`ModRecipes`，`src/generated/resources`）；剩 12 条 `*_smelting_mekanism` 手写（产物是未在 datagen classpath 上的模组物品）、模型/blockstate 仍是 Python、语言仍是手写 JSON；config 已齐（`crucible.*` + `machine.*`） |
+| 39 | ~~**datagen 只覆盖 tags/loot**~~（2026-11-02 三批完成）：`runData` 接管方块/物品标签、方块掉落表、133 条配方、71 个 blockstate + 173 个模型；仍手写：12 条 `*_smelting_mekanism`、15 个手绘几何模型、语言文件（265 键，按决策保持 JSON） |
 | 40 | **BE NBT 没有 `DataVersion`** | 桶有 `CompostScale` 迁移，筛子只有 `Work`/`Contents`/`Mesh`；未来改字段只能猜。建议加 `DataVersion` 或 `SieveVersion` |
 | 41 | **`BarrelBlockEntity` 单类 489 行，职责过多** | 流体/堆肥/降雨/固体/比较器/NBT 都在一个类；拆出 `BarrelTank`/`CompostState`/`SolidState` 后，P0 #3 这类状态互斥更容易守住 |
 | 42 | **`getSolid()`/`getMesh()`/`getContents()` 直接返回内部 ItemStack** | `BarrelBlockEntity:132`、`SieveBlockEntity:46,61`；渲染器只读所以现在没事，但外部一改就穿透 BE 状态 | 返回 `copy()` 或只读视图 |
@@ -91,7 +91,7 @@
 
 ## 建议的修复顺序（最小改动优先）
 
-1. **P0 #1** 修 `generate_barrel_variants.py`（避免下一次跑脚本产生坏数据）。
+1. ~~**P0 #1** 修 `generate_barrel_variants.py`~~（2026-11-02：脚本已删除，数据归 datagen）。
 2. **P0 #4** 修 `grass`/`short_grass` + `getOptional`（一处数据 + 三个 registry 的校验习惯）。
 3. **P0 #3** 给 `BarrelBlockEntity.fill` 加状态互斥（管道/自动化前必须做）。
 4. **P0 #2** 补筛子/桶的破坏返还（玩家最容易被吞物品）。

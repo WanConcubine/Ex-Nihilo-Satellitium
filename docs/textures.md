@@ -82,9 +82,9 @@ assets/exnihilosatellitium/textures/
 映射出瓷白 / 陶土两套桶身，再从 `water_bucket.png` 提取水体像素做白色遮罩
 `porcelain_bucket_fluid.png`（不要拿 water_bucket 当桶身，会把桶口挖成镂空）；
 模型用 `exnihilosatellitium:filled` predicate 在空桶/满桶之间切换，遮罩由 `ItemColor` 按流体上色。
-七种材质的 blockstate、子模型、物品模型、配方和掉落表由
-`python3 scripts/generate_barrel_variants.py` 从同一张表生成，几何仍只维护
-`models/block/barrel_base.json`。新增木种 = 在脚本表里加一行 + 补 lang。
+12 种桶的 blockstate、子模型、物品模型、配方和掉落表由 datagen 从
+`datagen/WoodTypes`（一张表）生成，几何仍只维护手写的
+`models/block/barrel_base.json`。新增木种 = 在 `WoodTypes` 加一行 + 补 lang 两行 + `runData`。
 
 ## 矿物方块：单层 tint（现状）
 

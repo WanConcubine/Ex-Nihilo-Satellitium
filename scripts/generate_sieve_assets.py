@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
-"""Sieve assets + sift tables from materials.json.
+"""Sieve textures + the hand-written sift tables.
 
-Writes: blockstate/multipart, frame + mesh models, mesh item models, mesh
-textures (16x16 own pixels), lang entries, and data/<ns>/sieve/*.json.
+Datagen owns the blockstate (multipart), the frame/mesh models and the item
+models (`./gradlew runData`). This script writes the rest:
 
-Recipe/loot/tag paths follow `--target`, see scripts/data_target.py.
+  textures/block/sieve_mesh_<name>.png   16x16 own pixels
+  textures/item/<name>_mesh.png          icon derived from the mesh texture
+  data/<ns>/sieve/*.json                 sift tables merged from materials.json
+  lang entries merges
 
-    python3 scripts/generate_sieve_assets.py [--target 1.21.1|1.20.1] [--out DIR]
+    python3 scripts/generate_sieve_assets.py [--out DIR]
+
+`--out` writes a preview tree; the sift tables merge on top of whatever is there
+(so preview on an empty dir produces only the generated drops).
 """
 import argparse
 import json
 import pathlib
 
-import data_target
-from PIL import Image, ImageDraw
+from PIL import Image
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 # Read-only inputs. Writes go to RES; --out redirects them.
@@ -22,13 +27,10 @@ RES = SOURCE
 ASSETS = RES / "assets/exnihilosatellitium"
 MOD_ID = "exnihilosatellitium"
 
-TARGET = data_target.get(data_target.DEFAULT)
-
 MATS = [m for m in json.load(open(SOURCE / f"{MOD_ID}/materials.json", encoding="utf-8"))["materials"]
         if m.get("enabled", True)]
 
 MESH_COLORS = {"wood": (122, 88, 52), "silk": (232, 232, 228), "iron": (188, 190, 196)}
-MESH_NO = {"wood": 1, "silk": 2, "iron": 3}
 # 档位不是换色：编织密度不同。pitch=网格间距，strand=线宽
 # 三档同结构（斜向编织），只换色；铁网没有单独贴图，按木网配色推
 MESH_PITCH, MESH_STRAND = 6, 2
@@ -40,11 +42,6 @@ def rarity_of(material):
         return rarity
     print(f"warning: {material['id']}: per-kind rarity object is not implemented; using rarity.gravel")
     return rarity["gravel"]
-
-
-def write_json(path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def mesh_texture(name):
@@ -74,36 +71,9 @@ def mesh_texture(name):
     img.save(out)
 
 
-def frame_model():
-    """Matched to the original ModelSieve: four 1x11x1 legs, a 4px rim at y 10..14."""
-    plank = "minecraft:block/oak_planks"
-    face = {f: {"texture": "#wood"} for f in ("up", "down", "north", "south", "west", "east")}
-    legs = [
-        ([1, 0, 1], [2, 11, 2]), ([14, 0, 1], [15, 11, 2]),
-        ([1, 0, 14], [2, 11, 15]), ([14, 0, 14], [15, 11, 15]),
-    ]
-    rim = [
-        ([0, 10, 0], [16, 14, 1]), ([0, 10, 15], [16, 14, 16]),
-        ([0, 10, 1], [1, 14, 15]), ([15, 10, 1], [16, 14, 15]),
-    ]
-    elements = [{"from": f, "to": t, "faces": face} for f, t in legs + rim]
-    return {
-        "parent": "minecraft:block/block",
-        "textures": {"particle": plank, "wood": plank},
-        "elements": elements,
-    }
-
-
-def mesh_model(name):
-    tex = f"exnihilosatellitium:block/sieve_mesh_{name}"
-    return {
-        "render_type": "minecraft:cutout",
-        "textures": {"particle": tex, "mesh": tex},
-        "elements": [{
-            "from": [1, 11.0, 1], "to": [15, 11.02, 15],
-            "faces": {"up": {"texture": "#mesh"}, "down": {"texture": "#mesh"}},
-        }],
-    }
+def write_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def merge_table(path, input_id, generated, suffix, material_ids):
@@ -138,48 +108,19 @@ def merge_table(path, input_id, generated, suffix, material_ids):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--target", choices=data_target.TARGETS, default=data_target.DEFAULT)
     parser.add_argument("--out", type=pathlib.Path, default=None,
                         help="write the resource tree here instead of src/main/resources")
     args = parser.parse_args(argv)
 
-    global RES, ASSETS, TARGET
-    TARGET = data_target.get(args.target)
+    global RES, ASSETS
     if args.out is not None:
         RES = args.out
         ASSETS = RES / "assets/exnihilosatellitium"
 
     for name in MESH_COLORS:
         mesh_texture(name)
-        write_json(ASSETS / f"models/block/sieve_mesh_{name}.json", mesh_model(name))
-    write_json(ASSETS / "models/block/sieve_frame.json", frame_model())
-    write_json(ASSETS / "models/item/sieve.json", {"parent": "exnihilosatellitium:block/sieve_frame"})
-    write_json(ASSETS / "blockstates/sieve.json", {"multipart": [
-        {"apply": {"model": "exnihilosatellitium:block/sieve_frame"}},
-        {"when": {"mesh": "1"}, "apply": {"model": "exnihilosatellitium:block/sieve_mesh_wood"}},
-        {"when": {"mesh": "2"}, "apply": {"model": "exnihilosatellitium:block/sieve_mesh_silk"}},
-        {"when": {"mesh": "3"}, "apply": {"model": "exnihilosatellitium:block/sieve_mesh_iron"}},
-    ]})
-
-    for name in MESH_COLORS:
-        write_json(ASSETS / f"models/item/{name}_mesh.json",
-                   {"parent": "minecraft:item/generated",
-                    "textures": {"layer0": f"exnihilosatellitium:item/{name}_mesh"}})
         Image.open(ASSETS / f"textures/block/sieve_mesh_{name}.png").save(
             ASSETS / f"textures/item/{name}_mesh.png")
-
-    # loot table + axe tag
-    write_json(RES / TARGET.loot_path(MOD_ID, "blocks/sieve"), {
-        "type": "minecraft:block", "pools": [{
-            "rolls": 1.0, "bonus_rolls": 0.0,
-            "conditions": [{"condition": "minecraft:survives_explosion"}],
-            "entries": [{"type": "minecraft:item", "name": "exnihilosatellitium:sieve"}],
-        }]})
-    axe_path = RES / TARGET.tag_path("minecraft", "block", "mineable/axe")
-    axe = json.loads(axe_path.read_text(encoding="utf-8"))
-    if "exnihilosatellitium:sieve" not in axe["values"]:
-        axe["values"].append("exnihilosatellitium:sieve")
-        write_json(axe_path, axe)
 
     # sift tables
     vanilla = {

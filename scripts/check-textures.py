@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Fail the build if shipped assets still depend on vanilla textures.
 
+Scans both resource roots (hand-written `src/main/resources` and the datagen
+output `src/generated/resources`); a file in the generated tree wins.
+
 Checks:
   - every model texture reference to this mod resolves to an existing PNG
   - no model texture reference points at minecraft:item/* (vanilla block
     textures are allowed for the vanilla-sampled style)
+  - every blockstate reference to this mod resolves to an existing model
+  - every model `parent` reference to this mod resolves to an existing model
   - every block texture is 16x16; item textures may be 16x16 or 64x64
     (the dolls ship at 64x64; PNG header only, no Pillow needed)
   - animated textures (a sibling .mcmeta with an "animation" block) are
@@ -23,11 +28,26 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "exnihilosatellitium"
-MODELS = ASSETS / "models"
-TEXTURES = ASSETS / "textures"
+NAMESPACE = "exnihilosatellitium"
+# Later roots win, matching the resource-pack precedence of the Gradle source set.
+ASSET_ROOTS = [
+    ROOT / "src" / "main" / "resources" / "assets" / NAMESPACE,
+    ROOT / "src" / "generated" / "resources" / "assets" / NAMESPACE,
+]
 
 errors: list[str] = []
+
+
+def merged(subdirectory: str, suffix: str) -> dict[str, Path]:
+    """Relative path (without the subdirectory) -> file, across both roots."""
+    files: dict[str, Path] = {}
+    for root in ASSET_ROOTS:
+        base = root / subdirectory
+        if not base.is_dir():
+            continue
+        for path in base.rglob(f"*{suffix}"):
+            files[str(path.relative_to(base))[:-len(suffix)]] = path
+    return files
 
 
 def allowed_sizes(path: Path) -> set[tuple[int, int]]:
@@ -47,14 +67,15 @@ def png_size(path: Path) -> tuple[int, int]:
     return struct.unpack(">II", header[16:24])
 
 
-def texture_path(reference: str) -> Path | None:
-    if reference.startswith("exnihilosatellitium:"):
-        rel = reference.split(":", 1)[1]
-        return TEXTURES / f"{rel}.png"
-    return None
+def our_reference(reference: str) -> str | None:
+    """`exnihilosatellitium:block/foo` -> `block/foo`; other namespaces -> None."""
+    prefix, _, path = reference.partition(":")
+    if prefix != NAMESPACE or not path:
+        return None
+    return path
 
 
-def walk_textures(node: object, model: Path) -> None:
+def walk_textures(node: object, model: str, textures: dict[str, Path]) -> None:
     if isinstance(node, dict):
         for key, value in node.items():
             if key == "textures" and isinstance(value, dict):
@@ -70,30 +91,63 @@ def walk_textures(node: object, model: Path) -> None:
                     if reference.startswith("minecraft:"):
                         errors.append(f"{model}: layer '{layer}' points at unsupported vanilla resource {reference}")
                         continue
-                    path = texture_path(reference)
-                    if path is not None and not path.exists():
-                        errors.append(f"{model}: layer '{layer}' missing texture {path}")
+                    rel = our_reference(reference)
+                    if rel is not None and rel not in textures:
+                        errors.append(f"{model}: layer '{layer}' missing texture {rel}.png")
             else:
-                walk_textures(value, model)
-    elif isinstance(node, list):
-        for item in node:
-            walk_textures(item, model)
+                walk_textures(value, model, textures)
+
+
+def check_blockstate_references(name: str, data: dict, models: dict[str, Path]) -> None:
+    references: list[str] = []
+    for entry in data.get("variants", {}).values():
+        for model in entry if isinstance(entry, list) else [entry]:
+            if isinstance(model, dict) and isinstance(model.get("model"), str):
+                references.append(model["model"])
+    for part in data.get("multipart", []):
+        apply = part.get("apply")
+        for model in apply if isinstance(apply, list) else [apply]:
+            if isinstance(model, dict) and isinstance(model.get("model"), str):
+                references.append(model["model"])
+    for reference in references:
+        rel = our_reference(reference)
+        if rel is not None and rel not in models:
+            errors.append(f"blockstates/{name}.json: missing model {rel}")
+
+
+def check_model_parent(name: str, data: dict, models: dict[str, Path]) -> None:
+    parent = data.get("parent")
+    if not isinstance(parent, str):
+        return
+    rel = our_reference(parent)
+    if rel is not None and rel not in models:
+        errors.append(f"models/{name}.json: missing parent model {rel}")
 
 
 def main() -> int:
-    if not MODELS.exists():
-        print("no models directory; nothing to check")
-        return 0
+    models = merged("models", ".json")
+    blockstates = merged("blockstates", ".json")
+    textures = merged("textures", ".png")
 
-    for model in sorted(MODELS.rglob("*.json")):
+    for name in sorted(models):
         try:
-            data = json.loads(model.read_text(encoding="utf-8"))
+            data = json.loads(models[name].read_text(encoding="utf-8"))
         except json.JSONDecodeError as exception:
-            errors.append(f"{model}: invalid JSON ({exception})")
+            errors.append(f"models/{name}.json: invalid JSON ({exception})")
             continue
-        walk_textures(data, model)
+        walk_textures(data, f"models/{name}.json", textures)
+        check_model_parent(name, data, models)
 
-    for png in sorted(TEXTURES.rglob("*.png")):
+    for name in sorted(blockstates):
+        try:
+            data = json.loads(blockstates[name].read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exception:
+            errors.append(f"blockstates/{name}.json: invalid JSON ({exception})")
+            continue
+        check_blockstate_references(name, data, models)
+
+    for name in sorted(textures):
+        png = textures[name]
         try:
             width, height = png_size(png)
         except ValueError as exception:
@@ -123,7 +177,8 @@ def main() -> int:
             print("  -", error)
         return 1
 
-    print("texture check passed")
+    print(f"texture check passed ({len(models)} models, {len(blockstates)} blockstates, "
+          f"{len(textures)} textures)")
     return 0
 
 

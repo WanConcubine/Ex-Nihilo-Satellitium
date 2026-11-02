@@ -1,0 +1,33 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "exnihilosatellitium:block/sieve_frame"
+      }
+    },
+    {
+      "apply": {
+        "model": "exnihilosatellitium:block/sieve_mesh_wood"
+      },
+      "when": {
+        "mesh": "1"
+      }
+    },
+    {
+      "apply": {
+        "model": "exnihilosatellitium:block/sieve_mesh_silk"
+      },
+      "when": {
+        "mesh": "2"
+      }
+    },
+    {
+      "apply": {
+        "model": "exnihilosatellitium:block/sieve_mesh_iron"
+      },
+      "when": {
+        "mesh": "3"
+      }
+    }
+  ]
+}

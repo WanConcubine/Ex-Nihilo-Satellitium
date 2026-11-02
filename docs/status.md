@@ -19,13 +19,36 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 `crucible.*`/`machine.*` config；分支提交 `6a733e8`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
-**M7 datagen 已验证两批**（2026-11-02）：第一批 `runData` 生成方块/物品标签 + 方块掉落表，
-第二批生成 **133 条配方**（`ModRecipes`，从注册表 + `materials.json` 推导，不生成 advancement），
-输出到 `src/generated/resources`，旧的手写 tag/loot/recipe JSON 已删除；只剩 12 条
-`*_smelting_mekanism` 手写（datagen 引用不了未注册的模组物品）。模型/blockstate 与语言文件
-仍在 `src/main/resources`（下一批）。M8 月光魔法、M9 发布仍未开始。
+**M7 datagen 已验证三批**（2026-11-02）：标签 + 方块掉落表、**133 条配方**（`ModRecipes`，
+从注册表 + `materials.json` 推导，不生成 advancement）、**244 个 blockstate/model**
+（`ModBlockStates` + `ModItemModels`，物品模型从注册表推导），输出到 `src/generated/resources`，
+旧的手写 tag/loot/recipe/model JSON 已删除。仍手写：12 条 `*_smelting_mekanism`（datagen 引用
+不了未注册的模组物品）、15 个手绘几何模型、全部语言文件（265 键，建议保持 JSON）。
+M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-02，M7 datagen 第二批：配方）
+## 当前批次（2026-11-02，M7 datagen 第三批：blockstate / model）
+
+- **`ModBlockStates`**：71 个 blockstate（70 个单 variant + 筛子 multipart：frame + 三档 mesh）
+  + 29 个机械方块模型（12 桶 + 12 木坩埚 + 火/未烧制坩埚 + dust/crushed×2 + 侵染树叶）。
+- **`ModItemModels`**：144 个物品模型，**从注册表推导**——方块物品 parent 指向方块模型
+  （`sieve` → `sieve_frame`、矿块 → 共享的 `ore_<kind>_block`），其余 `item/generated`，
+  锤/钩 `item/handheld`，瓷桶两层 + `filled` predicate。
+- **共享木种表** `datagen/WoodTypes`：`ModRecipes` 的桶/坩埚配方与模型都从它派生。
+- **保留手绘**：`barrel_base`/`crucible_base`/3 个矿块/筛框与三张网/四台机器（13 个方块模型）
+  + `electric_hammer`/`fuel_hammer` 两个带 elements 的物品模型；PNG 全部仍由 Python/art 出。
+- **provider 顺序**：blockstates 必须先于 item models（物品模型用 `getExistingFile` 校验方块模型父级，
+  依赖前一个 provider 的 `trackGenerated`）。
+- **Python 生成器收尾**：删掉 `generate_barrel_variants.py` / `generate_wooden_crucible_variants.py`
+  （只写 JSON）；`generate_ore_variants.py` 只留贴图 + 锤表 + lang；`generate_sieve_assets.py`
+  只留筛网纹理 + 筛表 + lang；`generate_machine_assets.py` 只留 PNG。三者原地重跑零 diff。
+- **`check-textures.py` 升级**：同时扫 `src/main` + `src/generated`，新增 blockstate→模型、
+  模型 parent 两条引用检查（负向测试通过）。
+- **验证**：`compare-models.py` → `259 old, 244 generated, 244 identical` / `MATCH`（15 个 old-only
+  都是手绘文件）；删旧文件后 `runData` `written: 0`；`build` + 三个守卫全过；客户端启动无
+  missing model/texture。**画面仍待作者目视**（桶/坩埚/筛子/机器/矿块）。
+- **下一批**：语言默认不动；M7 只剩这个待定项。
+
+## 上一批次（2026-11-02，M7 datagen 第二批：配方）
 
 - **`ModRecipes extends RecipeProvider`**：9 材料 × （3 打包 + 3 熔炼）、12 桶、11 木坩埚、
   筛子 + 3 网、6 锤（含下界合金锻造）/2 钩、4 机器、6 插件、8 人偶、瓷土/坩埚/瓷桶、熟蚕 3 条
@@ -476,6 +499,11 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 | M7 datagen 第二批（服务端） | ✅ | `runServer`：`Loaded 1423 recipes`（与迁移前同）、`[debug] our recipes=133`、无 recipe 解析错误 |
 | M7 配方语义 | ✅ | 生成物只多出 codec 默认字段（`count:1` / `category:"misc"`）；没有 advancement 文件 |
 | M7 datagen 移植链路 | ✅ | `port_data.py` 现在合并 main + generated：145 recipe / 69 loot / 41 tag / 126 other，`check-data-paths --target 1.20.1` 通过（只读 main 的旧默认会漏 133 配方） |
+| M7 datagen 第三批（模型） | ✅ | 2026-11-02：`ModBlockStates` 71 blockstate + 29 模型、`ModItemModels` 144 物品模型；`compare-models.py` → `259 old, 244 generated, 244 identical` |
+| M7 datagen 第三批（守卫） | ✅ | `check-textures.py` 现在同时扫 main+generated，并检查 blockstate→模型、parent 引用；故意写坏会报错 |
+| M7 datagen 第三批（客户端） | ✅ | `runClient` 启动完成、纹理图集生成，日志无 `missing model` / `unable to load model` / missing texture |
+| M7 datagen 第三批（生成器） | ✅ | 三个 Python 生成器原地重跑 `git status` 无资产 diff；不再写 blockstates/models |
+| M7 datagen 第三批（画面） | ⚠️ | 桶/坩埚/筛子/机器/矿块的观感未目视（客户端已启动待看） |
 | P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
 | P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |
 | P1 ConfigValues | ✅ | RCON：电动筛 217 tick，`Energy` 20000→15660（正好 20 FE/t） |
@@ -492,8 +520,8 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
    清单见交接清单。
 3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
-4. **M7 余项**：datagen 第三批 = 模型/blockstate（施工单见 [datagen.md](datagen.md) §4）；
-   语言默认保持 JSON。配方（第二批）已完成。config 与 JEI 已齐。
+4. **M7 余项**：只剩语言文件（建议保持手写 JSON，见 [datagen.md](datagen.md) §4.6）；
+   标签/掉落/配方/模型四批都已完成。config 与 JEI 已齐。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
 
@@ -613,22 +641,27 @@ python3 scripts/check-data-paths.py                  # 数据目录/字段/命�
 # 数据管线（P2）
 python3 scripts/port_data.py --out build/port-1.20.1 --force     # 1.21.1 -> 1.20.1 数据
 python3 scripts/check-data-paths.py --target 1.20.1 --root build/port-1.20.1
-python3 scripts/generate_ore_variants.py --target 1.20.1 --out build/gen-1.20.1   # 生成器同理
+
+# datagen（标签 / 掉落 / 配方 / blockstate+model）
+./gradlew runData --offline
+python3 scripts/compare-recipes.py --expect-old-only '*_mekanism.json'
+python3 scripts/compare-models.py --expect-old-only 'models/block:barrel_base'  # 完整清单见 datagen.md §4.4
 
 # 推送（SakuraCat 代理；SSH 22 会被代理拒，走 ssh.github.com:443）
 GIT_SSH_COMMAND='ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes \
   -o ProxyCommand="nc -X connect -x 127.0.0.1:12450 %h %p"' \
   git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin main
-python3 scripts/generate_barrel_variants.py          # 11 种木桶 + 石桶 JSON
-python3 scripts/generate_ore_variants.py             # 矿物链资源/配方/锭
+python3 scripts/generate_ore_variants.py             # 矿物链物品贴图 + 锤表 + lang（JSON 归 datagen）
 python3 art/items/tools/restyle.py                   # 锤/钩/蚕/熟蚕/尘土贴图 + 预览
 python3 art/blocks/crucible/restyle.py               # 坩埚模型/贴图（Creatio 现代化）
-python3 scripts/generate_machine_assets.py           # M10 机器方块/插件/GUI 贴图与模型
+python3 scripts/generate_machine_assets.py           # M10 机器方块/插件/GUI 贴图（模型归 datagen）
 ./gradlew runServer   # RCON：localhost:25575 / eni
 ./gradlew runClient
 ```
 
-> `generate_ore_variants.py`、两个 restyle 脚本都依赖 Pillow；系统 Python 没有时用 DSH 自带 Python 跑。
+> `generate_ore_variants.py`、`generate_sieve_assets.py`、`generate_machine_assets.py`、
+> 两个 restyle 脚本都依赖 Pillow；系统 Python 没有时用 DSH 自带 Python 跑。
+> 生成器现在**只写 PNG + 手写玩法表**：blockstate / 模型 / 配方 / 掉落 / 标签都归 `runData`。
 
 ## 文件地图
 

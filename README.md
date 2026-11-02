@@ -61,8 +61,8 @@
 ./gradlew build        # 产物在 build/libs/
 ./gradlew runClient    # 开发客户端
 ./gradlew runServer    # 开发服务端
+./gradlew runData      # 重生成标签 / 掉落表 / 配方 / blockstate+模型
 python3 scripts/check-textures.py   # 确保没有原版贴图占位
-python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶的 JSON
 ```
 
 首次构建会下载 Gradle、NeoForge、Minecraft 依赖并反编译，耗时较长（约 5–15 分钟），
