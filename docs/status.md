@@ -27,6 +27,19 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 **科技模组锭接入（2026-11-02）**：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
 zinc → Create；运行时取第一个已加载模组的锭，自有锭只作兜底。**M8 月光魔法、M9 发布仍未开始。**
 
+## 0.1.0 已发布（2026-11-02）
+
+- **tag / 远端**：主线 `v0.1.0`（`d4a6dc2`）、1.20.1 分支 `v0.1.0-1.20.1`（`35d98d4`），
+  两条线都已推到 `origin`（推送走 SakuraCat 代理：`ssh.github.com:443`，见下方常用命令）。
+- **产物**：`build/libs/exnihilosatellitium-0.1.0.jar`（1.21.1 / 649 KB，
+  sha256 `2f3d1af5…ecb49`）、分支同名 jar（1.20.1 / 587 KB，sha256 `1168ca77…3e1ba`）。
+- **打包口径**：jar 里剔除 datagen 的 `.cache/`，带上 `LICENSE` + `THIRD-PARTY.md` 与
+  `icon.png`（`art/icon/generate.py`，128×128）；与源码比对 0 缺失，只多出给 JEI 用的
+  `assets/.../{barrel,sieve,...}` 镜像。
+- **发布材料**：`CHANGELOG.md`（首版内容 / 兼容矩阵 / 已知限制 / 安装）、README「下载与安装」。
+- **还差**：CurseForge / Modrinth 的商店页与文件上传需要所有者操作（本机没有 API key 与 `gh`），
+  文案见 CHANGELOG；上传后再把下载链接补进 README。
+
 ## 当前批次（2026-11-02，泥土筛石子 + 锌矿接入 Create 粉碎）
 
 - **石子**：四种（圆石 / 安山岩 / 花岗岩 / 闪长岩），**筛泥土每次必出四种、每种 4-6 个**
