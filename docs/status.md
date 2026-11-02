@@ -19,14 +19,14 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 `crucible.*`/`machine.*` config；分支提交 `6a733e8`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
-**M7 datagen（主线三批 / 1.20.1 分支只有第一批）**：主线由 `runData` 生成标签 + 方块掉落表 +
-**133 条配方**（`ModRecipes`）+ **244 个 blockstate/model**（`ModBlockStates` + `ModItemModels`），
-输出到 `src/generated/resources`，旧的手写 tag/loot/recipe/model JSON 已删除；仍手写 12 条
-`*_smelting_mekanism`（datagen 引用不了未注册的模组物品）、15 个手绘几何模型、全部语言文件。
-**1.20.1 分支只做了第一批**（标签 41 + 掉落表 69，`0b7df76`），配方与模型仍是手写 JSON，
-主线第二/三批待移植（[datagen.md](datagen.md) §5）。
+**M7 datagen（两条线各三批）**：`runData` 生成标签 41 + 方块掉落表 69 + **配方 137**
+（`ModRecipes`）+ **71 个 blockstate + 177 个模型**（`ModBlockStates` + `ModItemModels`），
+输出到 `src/generated/resources`；仍手写 39 条配方（27 条 `*_smelting_<mod>` 候选变体 +
+12 条 `create:crushing`，产物都是对方模组的物品）、15 个手绘模型、全部语言文件。
+1.20.1 分支在 2026-11-02 晚补齐同样三批，见 [datagen.md](datagen.md) §5。
 **科技模组锭接入（2026-11-02）**：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
-zinc → Create；运行时取第一个已加载模组的锭，自有锭只作兜底。**M8 月光魔法、M9 发布仍未开始。**
+zinc → Create；运行时取第一个已加载模组的锭，自有锭只作兜底。
+**M9 发布：0.1.0 已发（两条线都有 tag）；M8 月光魔法联动仍未开始。**
 
 ## 0.1.0 已发布（2026-11-02）
 
