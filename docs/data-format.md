@@ -223,7 +223,8 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `name` | ✅ | 显示名，至少给 `en_us`；缺 `zh_cn` 时回退 `en_us` |
 | `tier` | ✅ | `common` / `uncommon` / `rare` / `epic`，校验数值区间用（见下） |
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。需要分筛料微调时写成对象 `{"gravel":18,"sand":32,"dust":48}` |
-| `ingot` | ❌ | 已有锭：写物品名（`minecraft:iron_ingot`）或标签（`#forge:ingots/copper`，取标签里第一个物品）。填了就熔炼到它，不重复造锭；解析不到则该材料的熔炼配方跳过并报错 |
+| `ingot` | ❌ | **无条件**复用某个锭：写具体物品名（`minecraft:iron_ingot`）。填了就熔炼到它，不注册自有锭。标签（`#forge:ingots/copper`）**不支持**：读表时标签还没加载，会打警告并按自有锭处理 |
+| `ingots` | ❌ | **受支持模组的有序候选**：`[{"item": "thermal:tin_ingot", "mod": "thermal_foundation"}]`。运行时取第一个 `mod` 已加载的候选；都不在就注册自有 `<id>_ingot`。数据侧 base 配方 `not(or(...))`、第 i 条变体 `mod_loaded(i) + not(之前所有候选)`。**注意 mod id 与物品命名空间可能不同**（Thermal：`thermal_foundation` / `thermal:`） |
 | `owner_mod` | ❌ | 主要来源模组，只用于自检与文档 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；表外骨架行默认 `false` |

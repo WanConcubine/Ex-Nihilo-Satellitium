@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModList;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +59,12 @@ public final class OreMaterials {
                 final JsonObject name = entry.getAsJsonObject("name");
                 final String en = name.get("en_us").getAsString();
                 final String zh = name.has("zh_cn") ? name.get("zh_cn").getAsString() : en;
-                final String ingot = readIngot(entry, id);
+                // An unconditional "ingot" wins over the candidate list, so the
+                // candidates are dropped in that case.
+                final String explicitIngot = readIngot(entry, id);
+                final List<OreMaterial.IngotCandidate> candidates = explicitIngot == null
+                        ? readIngotCandidates(entry, id) : List.of();
+                final String ingot = resolveIngot(explicitIngot, candidates, id);
 
                 if (!ID.matcher(id).matches()) {
                     ExNihiloSatellitium.LOGGER.error("[materials] bad id '{}', skipped", id);
@@ -77,7 +83,8 @@ public final class OreMaterials {
                     ExNihiloSatellitium.LOGGER.error("[materials] duplicate id '{}', later entry skipped", id);
                     continue;
                 }
-                out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity, ingot));
+                out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity, ingot,
+                        candidates));
             }
         } catch (Exception exception) {
             ExNihiloSatellitium.LOGGER.error("[materials] could not read {}: {}", RESOURCE, exception.toString());
@@ -108,5 +115,68 @@ public final class OreMaterials {
             return null;
         }
         return value;
+    }
+
+    /**
+     * Parses the ordered {@code ingots} candidate list ({@code {"item": "...",
+     * "mod": "..."}}). Entries without {@code item} or with an unparseable id are
+     * skipped with a log line; a missing {@code mod} makes the candidate
+     * unconditional.
+     */
+    private static List<OreMaterial.IngotCandidate> readIngotCandidates(final JsonObject entry,
+                                                                      final String id) {
+        final JsonElement candidates = entry.get("ingots");
+        if (candidates == null || !candidates.isJsonArray()) {
+            return List.of();
+        }
+        final List<OreMaterial.IngotCandidate> out = new ArrayList<>();
+        for (final JsonElement element : candidates.getAsJsonArray()) {
+            if (!element.isJsonObject()) {
+                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping a non-object ingots entry", id);
+                continue;
+            }
+            final JsonObject candidate = element.getAsJsonObject();
+            if (!candidate.has("item")) {
+                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping an ingots entry without 'item'", id);
+                continue;
+            }
+            final String item = candidate.get("item").getAsString();
+            if (ResourceLocation.tryParse(item) == null) {
+                ExNihiloSatellitium.LOGGER.error("[materials] {}: bad ingots item '{}', skipped", id, item);
+                continue;
+            }
+            final String mod = candidate.has("mod") ? candidate.get("mod").getAsString() : null;
+            out.add(new OreMaterial.IngotCandidate(item, mod));
+        }
+        return List.copyOf(out);
+    }
+
+    /**
+     * Resolves the ingot the ore blocks smelt into: the first candidate whose mod
+     * is loaded, else our own {@code <id>_ingot} (returned as {@code null}).
+     *
+     * <p>The hand-written conditional smelting recipes carry the same order, so the
+     * JSON data and this runtime resolution agree without the recipe existing twice
+     * at load time.</p>
+     */
+    private static String resolveIngot(final String explicit,
+                                       final List<OreMaterial.IngotCandidate> candidates,
+                                       final String id) {
+        if (explicit != null) {
+            return explicit;
+        }
+        for (final OreMaterial.IngotCandidate candidate : candidates) {
+            if (candidate.mod() != null && !isModLoaded(candidate.mod())) {
+                continue;
+            }
+            ExNihiloSatellitium.LOGGER.info("[materials] {} smelts into {}{}", id, candidate.item(),
+                    candidate.mod() == null ? "" : " from " + candidate.mod());
+            return candidate.item();
+        }
+        return null;
+    }
+
+    private static boolean isModLoaded(final String mod) {
+        return ModList.get() != null && ModList.get().isLoaded(mod);
     }
 }
