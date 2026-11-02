@@ -1295,7 +1295,7 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
 「空岛拿不到的资源」接到匠魂的炉子上。
 
 1. **碧空 / 末影黏液草种子**。匠魂自己有这两个种子，但只认 `DirtType`（原版泥土 / 黏液泥土），
-   **右键草方块不生效**。所以本项目注册自己的两个条件物品，右键草方块直接换成
+   **右键草方块不生效**。所以本项目注册自己的两个条件物品，右键草方块或泥土直接换成
    `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`：
    - 物品只在 `tconstruct` 在场时注册（`ModItems` 条件注册，缺失时字段 `null`）；
      创造栏 / JEI 都不会出现，筛表条目用 `"mod": "tconstruct"` 在物品解析前过滤。
@@ -1317,7 +1317,7 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
 验证：只装 Tinkers 时 `[materials] cobalt → tconstruct:cobalt_ingot`、`[sieve] 92 drops`；
 RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；两个种子 `summon` 正常；
 不装 Tinkers 时 `[sieve] 90 drops`（种子条目被过滤）且没有 unknown item/recipe。
-**右键草方块、匠魂炉实际熔化、JEI 页还没进游戏**。
+**右键草方块/泥土、匠魂炉实际熔化、JEI 页还没进游戏**。
 
 坑：Tinkers 的熔炼 `result` 是流体（`tag` + `amount`），没有 `item`/`id`；`check-data-paths.py`
 已改成只对 item/id result 检查版本键，否则 78 条熔炼会全部误报。
