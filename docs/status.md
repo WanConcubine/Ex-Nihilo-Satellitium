@@ -29,22 +29,21 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 
 ## 当前批次（2026-11-02，泥土筛石子 + 锌矿接入 Create 粉碎）
 
-- **石子**：四种（圆石 / 安山岩 / 花岗岩 / 闪长岩），**筛泥土每成功一次出 4-6 个**，
-  4 个合成 1 块对应石头。为此筛表新增可选的 `min` / `max`（默认 1，闭区间），
+- **石子**：四种（圆石 / 安山岩 / 花岗岩 / 闪长岩），**筛泥土每次必出四种、每种 4-6 个**
+  （100%，一次泥土 ≈ 4-6 块石头），4 个合成 1 块对应石头。为此筛表新增可选的 `min` / `max`（默认 1，闭区间），
   手动筛、机器筛、JEI 全部走同一份数据：`SieveDrop` 带数量，`SieveRolls` 按数量出栈，
   JEI 在概率下面多一行「掉落 4-6 个」。
 - **贴图**：`art/items/pebbles/generate.py`，16×16 自有像素，四套调色板（圆石中灰、
   安山岩浅灰、闪长岩近白、花岗岩粉褐），同一轮廓只换色。
-- **Create 粉碎**：Create 对别人家的矿用标签（`forge:ores/<m>` / 1.21.1 的 `c:ores/<m>`），
-  我们的矿块本来就在标签里，所以 8 种材料直接能进粉碎轮；**锌是唯一例外**——Create 把自己
-  的锌矿写成具体物品 `create:zinc_ore`，标签不管用。于是补了 3 条 `create:crushing`
-  （`zinc_ore_{gravel,sand,dust}_crushing.json`），条件 `create`，产物与 Create 自己的
-  锌矿配方一致。
+- **Create 粉碎（审计后补全）**：Thermal 磨粉机全走 `forge:ores/<m>` 标签，所以我们的 12 种
+  矿块都能进；Create 则分两种——**8 种材料走标签**（直接能吃），**铁/金/铜/锌是具体物品**
+  （`minecraft:iron_ore`、`create:zinc_ore` 之类），标签不管用。于是补了 **12 条**
+  `create:crushing`（4 材料 × 砾/砂/尘），条件 `create`，产物与 Create 自己的同名矿石配方一致。
 - **两版字段名不同**：1.21.1 是 `results[].id` + `processing_time`，1.20.1 是
   `results[].item` + `processingTime`，不能共用一份 JSON（见 [data-format.md](data-format.md) §8）。
-- **验证（1.20.1 分支，装 Thermal + Create）**：机器筛喂 16 泥土 → 圆石石子 13、安山岩 9、
-  闪长岩 4（累计 26 个 / 7 次 = 3.7 个每次，符合 4-6）；`[sieve] loaded 6 inputs, 76 drops`；
-  0 条解析错误（三条 `create:crushing` 被 Create 6.0.8 接受，粉碎轮 JEI 页待目视）。
+- **验证（1.20.1 分支，装 Thermal + Create）**：机器筛喂 16 泥土 → 7 次成功出
+  圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100% 出）；`[sieve] 6 inputs, 76 drops`；
+  0 条解析错误（12 条 `create:crushing` 都被 Create 6.0.8 接受，粉碎轮 JEI 页待目视）。
 - **未验**：手动筛的右键手感、JEI 数量行、粉碎轮实际输出——都要作者进游戏。
 
 ## 上一批次（2026-11-02，科技模组锭接入：Mekanism / Thermal / Create）
@@ -554,9 +553,10 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 | 科技模组锭（1.20.1 分支） | ✅ | 无模组：0 条解析错误、27 条变体跳过、`tin_ore_gravel → tin_ingot`；`conditions` 键生效 |
 | 科技模组锭（Thermal/Create） | ✅ | 1.20.1 分支真装 Thermal Foundation 11.0.6.70 + Create 6.0.8：`tin/silver/lead/nickel → thermal:*_ingot`、`zinc → create:zinc_ingot`，RCON 熔炉实测通过，自有锭未注册 |
 | 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
-| 泥土筛石子（数量） | ✅ | 分支机器筛：7 次成功 → 圆石 13 / 安山岩 9 / 闪长岩 4，每次成功 4-6 个 |
+| 泥土筛石子（数量） | ✅ | 分支机器筛：7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%） |
 | 泥土筛石子（贴图/模型） | ✅ | 4 张 16×16 贴图 + 模型（主线 datagen 自动、分支手写）；`check-textures` 通过 |
-| 锌矿接 Create 粉碎 | ✅ | 分支装 Create 6.0.8：3 条 `create:crushing` 0 解析错误；实际粉碎轮输出待目视 |
+| 矿块接 Create 粉碎 | ✅ | 分支装 Create 6.0.8：12 条 `create:crushing`（铁/金/铜/锌 ×3）0 解析错误；粉碎轮实际输出待目视 |
+| 矿块接 Thermal 磨粉机 | ✅ | 全部走 `forge:ores/<m>` 标签（Thermal 自己的配方），无需我们补 |
 | 筛表 min/max 兼容 | ✅ | 老表不写 `min`/`max` 仍按 1 件；`[sieve] 6 inputs, 76 drops`，无警告 |
 | P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
 | P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |

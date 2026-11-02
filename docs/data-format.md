@@ -345,21 +345,28 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
 - 粉碎/粉末现在有两条通路：4 块合成 + M3 锤子降档（矿砾→粉碎、矿砂→粉末）。
 
-### 第三方机器：机械动力（Create）粉碎
+### 第三方机器：矿块能不能进别人家的机器
 
-Create 对**别人家的矿**用标签（`forge:ores/<m>` / 1.21.1 的 `c:ores/<m>`，配方里带
-`tag_empty` 判定），我们的矿砾/矿砂/矿尘本来就在这些标签里，所以 tin/lead/silver/nickel/
-platinum/aluminum/osmium/uranium 都能直接进粉碎轮。**锌是唯一的例外**：Create 把它自己的锌矿
-写成了具体物品（`create:zinc_ore`），标签不管用，所以我们在自己的数据里补了三条
-`create:crushing`（`<m>_ore_{gravel,sand,dust}_crushing.json`），产物与 Create 自己的锌矿配方一致
-（1 个粉碎锌 + 0.75 概率再来一个 + 0.75 经验粒 + 0.125 圆石），条件是 `create` 已加载。
+判据是**标签**，不是配方——除了少数「对方把自己家的矿写成具体物品」的情况。
+
+| 材料 | Thermal 磨粉机（`thermal:pulverizer`） | Create 粉碎（`create:crushing`） |
+|---|---|---|
+| iron / gold / copper | ✅ 走 `forge:ores/<m>` 标签 | ❌ 对方用具体物品（`minecraft:iron_ore` 等）→ **我们补 3 条/材料** |
+| tin / silver / lead / nickel | ✅ 走标签 | ✅ 走 `forge:ores/<m>` 标签 |
+| platinum / aluminum / osmium / uranium | —（Thermal 没有这些金属） | ✅ 走标签 |
+| zinc | —（Thermal 没有锌） | ❌ 对方用 `create:zinc_ore` → **我们补 3 条** |
+
+要补的只有 **Create 侧的铁/金/铜/锌**，共 12 条 `*_ore_{gravel,sand,dust}_crushing.json`：
+产物与 Create 自己的同名矿石配方一致（铁 1+0.75、铜 5+0.25、金 1+0.75+2 经验粒、锌 1+0.75，
+都带 0.125 圆石），条件是 `create` 已加载。其余 8 种材料本来就躺在 `forge:ores/<m>` /
+`c:ores/<m>` 标签里，对方的标签配方直接吃。
 
 两个版本的 `create:crushing` 字段名不同，**不能共用一份 JSON**：
 
 | 版本 | 结果数组 | 时间字段 |
 |---|---|---|
-| 1.21.1 | `"results": [{"id": "create:crushed_raw_zinc", "chance": 0.75}]` | `processing_time` |
-| 1.20.1 | `"results": [{"item": "create:crushed_raw_zinc", "chance": 0.75}]` | `processingTime` |
+| 1.21.1 | `"results": [{"id": "create:crushed_raw_iron", "count": 1, "chance": 0.75}]` | `processing_time` |
+| 1.20.1 | `"results": [{"item": "create:crushed_raw_iron", "chance": 0.75}]` | `processingTime` |
 
 ## 9. 筛子 JSON（M2）
 
@@ -371,7 +378,7 @@ platinum/aluminum/osmium/uranium 都能直接进粉碎轮。**锌是唯一的例
   "outputs": [
     { "item": "exnihilosatellitium:iron_broken", "chance": 0.2 },
     { "item": "minecraft:flint", "chance": 0.25 },
-    { "item": "exnihilosatellitium:cobblestone_pebble", "chance": 0.2, "min": 4, "max": 6 }
+    { "item": "exnihilosatellitium:cobblestone_pebble", "chance": 1.0, "min": 4, "max": 6 }
   ]
 }
 ```
@@ -386,8 +393,8 @@ platinum/aluminum/osmium/uranium 都能直接进粉碎轮。**锌是唯一的例
   **仓库里只改 `data/` 这一份**，构建时自动复制。
 - 当前有 6 个输入、76 掉落：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
-  `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **四种石子 4-6 个**：
-  圆石/安山岩/花岗岩/闪长岩，四个石子合成一块对应石头），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
+  `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **四种石子各 4-6 个、100% 出**
+  （圆石/安山岩/花岗岩/闪长岩，四个石子合成一块对应石头；一次泥土 ≈ 4-6 块石头）），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
   管珊瑚、海晶砂粒与**古代孢子**（`ancient_spores`，1/128，M6 巫水链起点）；
   `crushed_netherrack` 出石英/荧石/下界疣/烈焰粉/岩浆膏/灵魂沙，`crushed_end_stone` 出紫颂果/末影珍珠（2026-11-01 删掉“筛回末地石”，避免原地循环）；
   `sand` 另有 5 种珊瑚（管/脑/气泡/火/角）各 1% 与海晶碎片 2%（海晶碎片只从沙出，砂砾不出）。

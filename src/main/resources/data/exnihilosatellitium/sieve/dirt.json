@@ -35,25 +35,25 @@
     },
     {
       "item": "exnihilosatellitium:cobblestone_pebble",
-      "chance": 0.2,
+      "chance": 1.0,
       "min": 4,
       "max": 6
     },
     {
       "item": "exnihilosatellitium:andesite_pebble",
-      "chance": 0.2,
+      "chance": 1.0,
       "min": 4,
       "max": 6
     },
     {
       "item": "exnihilosatellitium:granite_pebble",
-      "chance": 0.2,
+      "chance": 1.0,
       "min": 4,
       "max": 6
     },
     {
       "item": "exnihilosatellitium:diorite_pebble",
-      "chance": 0.2,
+      "chance": 1.0,
       "min": 4,
       "max": 6
     }
