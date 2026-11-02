@@ -6,7 +6,8 @@
 ## 1. 项目是什么
 
 - **双版本目标**：**1.21.1 / NeoForge 21.1.x / Java 21**（主线 `main`）+ **1.20.1 / Forge 47.4 /
-  Java 17**（`1.20.1-forge` 分支，目前停在 M1，待补 M2–M10），mod id `exnihilosatellitium`。
+  Java 17**（`1.20.1-forge` 分支，已到 M10），mod id `exnihilosatellitium`。
+- 两条线都已发 **0.1.0**：主线 tag `v0.1.0`、分支 tag `v0.1.0-1.20.1`（2026-11-02）。
 - 独立实现的 Ex Nihilo 风格空岛模组；**不是** Ex Nihilo 的官方续作。
 - 许可证 **MIT**；第三方声明见 [THIRD-PARTY.md](THIRD-PARTY.md)。
 
@@ -68,18 +69,22 @@ com/kaifengcrt/exnihilosatellitium/
 ├── ExNihiloSatellitium.java        # 入口，注册 DeferredRegister
 ├── registry/                    # ModBlocks / ModItems / ModBlockEntities / CreativeTabs
 ├── common/
-│   ├── block/BarrelBlock.java   # 形状、交互分发、ticker、比较器
+│   ├── block/                   # BarrelBlock / SieveBlock / CrucibleBlock / MachineBlock...
 │   ├── blockentity/             # 状态机、FluidTank、NBT、粒子/音效
 │   ├── barrel/                  # BarrelRecipes：barrel/*.json 转化表
 │   ├── material/                # 材料表读取（materials.json，注册期决定内容）
-│   ├── compost/                # JSON 注册表 + reload listener
-│   ├── sieve/                   # SieveRegistry + reload listener
-│   ├── hammer/                  # 锤子 crush 表 + reload listener
-│   ├── crook/                   # 钩子叶表 + reload listener
-│   ├── event/                   # CommonEvents（reload）、CapabilityEvents（流体能力）
+│   ├── compost/                 # JSON 注册表 + reload listener
+│   ├── sieve/                   # SieveRegistry / SieveDrop + reload listener
+│   ├── hammer/ crook/           # 锤表 / 叶表 + reload listener
+│   ├── crucible/                # 熔点 + 热源表 + reload listener
+│   ├── machine/                 # 四台机器：状态机、SieveRolls / HammerRolls（判定唯一入口）
+│   ├── config/ platform/        # 窄门面：ConfigValues / Platform / MachineHooks
+│   ├── event/                   # CommonEvents（reload）、CapabilityEvents（能力）
 │   └── tag/ModTags.java
-├── client/                      # BarrelRenderer、OreColors（染色）、BER 注册
-└── compat/                      # MoonlightCompat、jade、jei（可选软依赖）
+├── client/                      # BER（桶/筛/机器/蚕）、OreColors、GUI 屏
+├── compat/                      # MoonlightCompat、jade、jei（可选软依赖）
+├── platform/                    # 每版重写的胶水（1.20.1 只重写这一层）
+└── datagen/                     # runData：标签、掉落、配方、blockstate/模型（主线三批）
 ```
 
 - 方块状态尽量少；自定义进度放 BE，`getUpdateTag`/`getUpdatePacket` 同步。
@@ -91,6 +96,7 @@ com/kaifengcrt/exnihilosatellitium/
 | 文档 | 写什么 |
 |---|---|
 | [docs/status.md](docs/status.md) | **当前状态**：停在哪、验证表、下一步、坑 |
+| [docs/history.md](docs/history.md) | **历史批次叙事**（2026-11 之前的“上一批次/更早”，只追溯用，不再维护） |
 | [docs/tech-debt.md](docs/tech-debt.md) | **技术债审计**：P0–P3、证据、建议修复顺序 |
 | [docs/DESIGN.md](docs/DESIGN.md) | 原则、目标、核心循环、架构、里程碑、决策记录 |
 | [docs/parity.md](docs/parity.md) | **复刻对照表**：经典项与 Ex Astris 的逐项状态、分档 |

@@ -172,17 +172,22 @@
 
 ## 5. 1.20.1 分支
 
-- 只做了第一批（`0b7df76`）：标签 + 掉落表。配方、模型仍是手写。
+- **只做了第一批**（`0b7df76`）：方块/物品标签 + 方块掉落表（4 个 provider）。配方（160 条）与
+  blockstate/模型（71 个 blockstate + 42 方块模型 + 150 物品模型）在这条线**仍是手写 JSON**；
+  主线第二、三批待移植。
 - **`port_data.py` 已改成合并读**：默认 `--source src/main/resources src/generated/resources`
-  （后者覆盖前者）。第一批把标签/掉落表、第二批把配方搬进 generated 之后，只读 main 的旧默认
-  会漏掉 133 条配方 / 69 张掉落表 / 41 个标签；现在跑出来是 145 recipe / 69 loot / 41 tag / 126 other，
-  `check-data-paths.py --target 1.20.1` 通过。
-- 移植第二批时注意：
+  （后者覆盖前者）。只读 main 的旧默认会漏掉 generated 里的配方/标签/掉落；现在跑出来是
+  **176 recipe / 69 loot / 41 tag / 126 other**，`check-data-paths.py --target 1.20.1` 通过。
+- 移植第二、三批时注意：
   - 1.20.1 没有 `RecipeOutput`：`buildRecipes(Consumer<FinishedRecipe> out)`，
     `RecipeBuilder#save` 第二参数是 `String` id，`ResourceLocation` 要自己拼；
-  - 条件用 `IConditionBuilder` 的 `modLoaded(...)` / `not(...)` + `ConditionalRecipe.builder()`；
-  - 目录是 `recipes/`（复数）、`result.item`；`data_target.py` 已能改这些，但 Java provider 要手写一遍；
-  - `OreMaterial` 的 `ingotCandidates` 改动要一起带过去。
+  - **配方条件用裸 `conditions` 键**（不是 `forge:conditions`，写错会被 Forge 静默忽略然后按无条件
+    解析）；类型是 `forge:mod_loaded` / `forge:not` / `forge:or`。`IConditionBuilder` +
+    `ConditionalRecipe.builder()` 是另一套 `forge:conditional` 配方类型，我们不用；
+  - 目录是 `recipes/`（复数）、`result.item`；`data_target.py` 能转这些，但 Java provider 要重写一遍；
+  - `BlockStateProvider` / `ItemModelProvider` 在 `net.minecraftforge.client.model.generators`；
+  - `OreMaterial.ingotCandidates` 已经同步过去（分支 `OreMaterials` 用 `ModList` 探测模组）。
+  - 分支的 `docs/datagen.md` 有更细的移植清单。
 
 ## 6. 环境与命令
 
@@ -209,7 +214,7 @@ python3 scripts/check-textures.py
   要恢复就删掉那个文件（或整个 `.cache/`）再跑。`processResources` 还会因为
   `src/main` 与 `src/generated` 同名资源直接失败，这也是删旧文件必须一次删干净的原因。
 - 服务端冒烟：`runServer`，日志看 `Loaded ... recipes`、`[barrel] 12 transforms`、
-  `[sieve] 6 inputs, 72 drops`，无 missing tag/loot/recipe。
+  `[sieve] 6 inputs, 76 drops`，无 missing tag/loot/recipe。
 - 两条线都已发布并推到 `origin`（2026-11-02：主线 `v0.1.0`、1.20.1 分支 `v0.1.0-1.20.1`）。
 
 ## 7. 新会话开场清单
