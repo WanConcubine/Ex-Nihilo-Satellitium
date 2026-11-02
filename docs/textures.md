@@ -50,6 +50,8 @@ assets/exnihilosatellitium/textures/
 └── item/
     ├── porcelain.png            # 瓷土（自有）
     ├── ancient_spores.png       # 古代孢子（M6，脚本生成，紫色）
+    ├── crimson_nylium_spores.png # 绯红菌岩孢子（2026-11-02，脚本生成，红色）
+    ├── warped_nylium_spores.png  # 诡异菌岩孢子（2026-11-02，脚本生成，青色）
     └── witch_water_bucket.png   # 巫水桶（M6，原版水桶重着色）
 ```
 
@@ -76,6 +78,8 @@ assets/exnihilosatellitium/textures/
 
 古代孢子图标由 `art/items/ancient_spores/generate.py` 逐像素生成（紫色系，和巫水同一套色板），
 要改就改脚本重跑，不要手改 PNG。
+绯红 / 诡异菌岩孢子与草种子共用 `art/items/sieve_extras/generate.py`：16×16 自有像素，
+红 / 青两套 4 色板（轮廓 / 阴影 / 底色 / 高光），只换色不动轮廓。
 
 木桶没有自有 PNG；`art/barrel/*` 是早期自绘实验，不参与游戏。
 瓷桶（M6）是物品桶：`art/items/porcelain_bucket/generate.py` 用原版 `bucket.png`（空桶，带桶沿）

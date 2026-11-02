@@ -58,6 +58,11 @@
 - 掉落表按“筛料 + 网档”分开，1.7.10 里是代码注册（`SieveRegistry.register(block, item, meta, rarity)`），
   `rarity` 的语义是 **`1/N`**（`rand.nextInt(rarity) == 0`）。*（已确认）*
 - 本项目把这张表数据化；`rarity` 仍按 `1/N` 解释。
+- **泥土筛与树**：经典 Ex Nihilo 的泥土筛出「树种子」，是空岛砍完第一棵树后重新长树的来源；
+  具体树苗清单按本项目平衡表（见 [parity](parity.md) #14）。
+- **1.16+ Sequentia 的下界树链路**：碎下界岩筛出绯红 / 诡异菌岩孢子，右键下界岩变菌岩，
+  之后用原版骨粉催菌 / 催巨菌。本项目照这条**链路**实现（贴图 / 数值自有，见
+  [parity](parity.md) #18）。
 
 ## 4. 锤子（Hammer）与钩子（Crook）
 
