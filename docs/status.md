@@ -21,6 +21,7 @@
   （x=对应木板或 `stone`，y=对应台阶 / `smooth_stone_slab`）；之前是 8 块板的
   `PPP/P P/PPP`，与主线 85cc392、原版都对不上。补齐红树/樱花/竹/绯红/诡异 5 种桶，
   木桶总数 12（11 木材 + 石桶），合成/掉落/贴图/模型/`mineable/axe` 同步。
+- **流动熔岩热源**：按所有者决定，源方块与流动熔岩都按 **0.2**，不再区分 `level`。
 - **config（小尾巴）**：新增 `common/config/ExConfig`（`ForgeConfigSpec`，`COMMON`），
   键与主线一致：`crucible.capacity` / `crucible.meltCapacity` / `crucible.heatSpeedMultiplier`。
   `CrucibleBlockEntity` 改为动态容量：tick 里发现配置变化就 `setCapacity` 并裁掉多余流体，
@@ -169,6 +170,8 @@
 | M6 巫水发酵 | ✅ | RCON：满水桶 + 菌丝，约 50 秒后 `FluidName=exnihilosatellitium:witch_water`、`Amount=1000` |
 | M6 巫水方块 | ✅ | RCON `setblock ... witch_water` 后 `execute if block` 命中 |
 | M6 桶规则（物品） | ✅ | RCON + FakePlayer `use()`：巫水 + 沙子 → `Solid: soul_sand`、桶清空 |
+| 桶：水+牛奶→史莱姆/粘液球 | ✅ | RCON 2026-11-02：满水 + 牛奶桶 → 桶清空、空桶返还；Normal 生成史莱姆、Peaceful 掉 `slime_ball` |
+| 流动熔岩热源 | ✅ | 2026-11-02 拍板：流动熔岩与源方块都按 0.2（`crucible_heat/lava.json` 只匹配方块 id） |
 | M6 人偶（非和平） | ✅ | RCON：熔岩 + 愤怒人偶 → 桶清空、附近生成烈焰人 |
 | M6 人偶（和平） | ✅ | RCON：水 + 守卫者人偶 → 桶清空、掉 `prismarine_crystals` |
 | M6 木坩埚 | ✅ | RCON：右键投橡树叶 → `MeltFluid=water`、0.5 mB/t 熔化；`wooden_crucibles` 标签生效 |
