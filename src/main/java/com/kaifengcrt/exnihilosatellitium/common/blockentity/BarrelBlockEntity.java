@@ -239,6 +239,24 @@ public class BarrelBlockEntity extends BlockEntity {
 
         final ItemStack stack = player.getItemInHand(hand);
 
+        // Item rules win over the generic fluid-container path. A milk bucket is
+        // both an item and (when Forge's milk fluid is enabled) a fluid handler,
+        // but the classic rule is "milk poured into a full water barrel".
+        final BarrelRecipes.Recipe rule = this.itemMixRule(stack);
+        if (rule != null) {
+            final ItemStack remainder = remainderFor(stack);
+            if (!player.isCreative()) {
+                stack.shrink(1);
+                giveRemainder(player, remainder);
+            }
+            if (rule.spawnsEntity()) {
+                this.startCooking(rule);
+            } else {
+                this.setSolid(rule.result().copy());
+            }
+            return InteractionResult.SUCCESS;
+        }
+
         if (isFluidContainer(stack)) {
             if (this.compostProgress > 0) {
                 return InteractionResult.PASS;
@@ -255,19 +273,6 @@ public class BarrelBlockEntity extends BlockEntity {
                 return InteractionResult.SUCCESS;
             }
             return InteractionResult.PASS;
-        }
-
-        final BarrelRecipes.Recipe rule = this.itemMixRule(stack);
-        if (rule != null) {
-            if (!player.isCreative()) {
-                stack.shrink(1);
-            }
-            if (rule.spawnsEntity()) {
-                this.startCooking(rule);
-            } else {
-                this.setSolid(rule.result().copy());
-            }
-            return InteractionResult.SUCCESS;
         }
 
         // Mushroom stew seeds a full water barrel (classic "throw it in" recipe).
@@ -314,6 +319,25 @@ public class BarrelBlockEntity extends BlockEntity {
         this.setChanged();
         this.sync();
         return InteractionResult.SUCCESS;
+    }
+
+
+    /** Empty bucket for a milk bucket, or the item's own crafting remainder. */
+    private static ItemStack remainderFor(final ItemStack used) {
+        final ItemStack remainder = used.getCraftingRemainingItem();
+        if (!remainder.isEmpty()) {
+            return remainder;
+        }
+        return used.is(Items.MILK_BUCKET) ? new ItemStack(Items.BUCKET) : ItemStack.EMPTY;
+    }
+
+    private static void giveRemainder(final Player player, final ItemStack remainder) {
+        if (remainder.isEmpty()) {
+            return;
+        }
+        if (!player.getInventory().add(remainder)) {
+            player.drop(remainder, false);
+        }
     }
 
     /** Turns the tank contents into a block; the fluid is consumed. */
