@@ -45,3 +45,6 @@ art/blocks/ore_overlay/.vanilla_textures/
 # Python bytecode from the art/scripts generators
 __pycache__/
 *.pyc
+
+# DataGen incremental cache
+src/generated/resources/.cache/
