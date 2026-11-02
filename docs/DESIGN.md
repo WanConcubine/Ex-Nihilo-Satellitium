@@ -1192,3 +1192,29 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
 - 验收：`scripts/compare-models.py`（variant 键序、multipart 段序都按语义比较）对
   259 旧 / 244 新给出 `244 identical`；删旧文件后 `runData` `written: 0`；客户端启动无
   missing model/texture。细节见 [datagen.md](datagen.md) §4。
+
+## 32. 科技模组锭接入：只接「空岛上拿不到的基础资源」（2026-11-02）
+
+定位先说清楚：**我们负责让基础资源的来源在空岛上说得通，合金由科技模组自己做**。
+所以这一轮只做「同一块矿砾熔成谁家的锭」，不加新金属、不加合金、不占 `c:dusts` 标签。
+
+- **一个材料一条有序候选表**（`materials.json` 的 `ingots`）：tin/lead → `mekanism` →
+  `thermal_foundation`；silver/nickel → `thermal_foundation`；zinc → `create`；
+  osmium/uranium → `mekanism`；platinum/aluminum 保持自有锭。顺序 = 优先级，运行时
+  `OreMaterials` 取第一个已加载的模组；都不在就注册并使用自有锭。
+- **数据侧必须和运行时同构**：base 配方带 `not(or(候选 mod...))`，第 i 条的变体带
+  `mod_loaded(i)` **加上** 对它之前所有候选的 `not(mod_loaded(...))`。少了后半截，两个
+  科技模组同时装时同一输入会匹配两条熔炼配方，结果取决于加载顺序。
+- **两条线的机制不同、键名也不同**：NeoForge 1.21.1 读 `neoforge:conditions`，Forge 1.20.1
+  读**裸 `conditions`**（`RecipeManager` 在解析前判定）。写错键不会报错——Forge 直接忽略，
+  然后按无条件解析，于是未安装模组的 `thermal:`/`create:` 物品变成 `Unknown item`，
+  整个配方表只剩 7 个类型。这正是 P2 的 `port_data.py` 之前的转换错误（`forge:conditions`），
+  现在改成 `conditions`，并给 `check-data-paths.py` 加了「键必须对」的检查。
+- **为什么变体仍是手写**：产物是别的模组的物品，datagen 里的 `ItemStack` 必须指向已注册的
+  `Item`（同 §30 的 Mekanism 结论）。base 由 `ModRecipes` 生成，变体手写，两边用同一张表。
+- **两条线共用一份 `materials.json`**：Thermal 只在 1.20.1 存在，主线的表里也留着它的候选，
+  在 1.21.1 上永远不命中、对应的 15 条变体也永远不加载——换来的是「一份表、两条线不漂移」。
+- 验证：主线装 Mekanism 时熔炉烧 `tin_ore_gravel` 得到 `mekanism:ingot_tin`、自有 `tin_ingot`
+  不注册；不装 Create 时 `zinc_ore_gravel` 回退自有锭；1.20.1 分支无模组时 0 条解析错误、
+  27 条变体全部按条件跳过。Thermal/Create 的真机验证本机没有 jar，只做了静态等价。
+  细节见 [data-format.md](data-format.md) §8 与 [status.md](status.md) 验证表。

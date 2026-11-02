@@ -52,6 +52,10 @@
         {
           "item": "mekanism:ingot_tin",
           "mod": "mekanism"
+        },
+        {
+          "item": "thermal:tin_ingot",
+          "mod": "thermal_foundation"
         }
       ],
       "source": "classic",
@@ -66,6 +70,12 @@
       },
       "tier": "uncommon",
       "rarity": 45,
+      "ingots": [
+        {
+          "item": "thermal:silver_ingot",
+          "mod": "thermal_foundation"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -82,6 +92,10 @@
         {
           "item": "mekanism:ingot_lead",
           "mod": "mekanism"
+        },
+        {
+          "item": "thermal:lead_ingot",
+          "mod": "thermal_foundation"
         }
       ],
       "source": "classic",
@@ -96,6 +110,12 @@
       },
       "tier": "uncommon",
       "rarity": 32,
+      "ingots": [
+        {
+          "item": "thermal:nickel_ingot",
+          "mod": "thermal_foundation"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -150,6 +170,12 @@
       },
       "tier": "common",
       "rarity": 24,
+      "ingots": [
+        {
+          "item": "create:zinc_ingot",
+          "mod": "create"
+        }
+      ],
       "source": "estimate",
       "enabled": true
     },

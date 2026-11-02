@@ -310,14 +310,33 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | ~~`data/c/tags/item/raw_materials/<id>.json`~~ | **已删除（2026-10-31）**：破碎/粉碎/粉末不是原矿，不能进 `c:raw_materials`，否则别的模组会把它们当原矿处理，绕过「4 块 → 方块 → 熔炼」链条 |
 | `data/c/tags/{block,item}/ores.json` | 把本项目材料的 `#c:ores/<id>` 子标签挂到根标签（只含矿砾/矿砂/矿尘方块，对应 1.7.10 把矿方块注册给 TE/TC 的做法） |
 
-- **受支持模组（`ingots` 候选）**：每个候选生成
-  `<m>_ore_<kind>_smelting_<mod>.json`（条件 `neoforge:mod_loaded`）；base
-  `<m>_ore_<kind>_smelting.json` 的结果是自有锭，条件是对所有候选 mod 的 `neoforge:not`。
-  运行时 `OreMaterials` 用同一个顺序解析，命中的候选模组在场时**不注册自有锭**，
-  `c:ingots/<id>` 里的自有锭条目写成 `required: false`（物品不存在时标签跳过）。
-  - 现在接入的是 **Mekanism**：tin / lead / osmium / uranium 熔成 `mekanism:ingot_*`。
+- **受支持模组（`ingots` 候选）**：有序数组，**第一个已加载模组的锭胜出**。数据侧是
+  「一条 base + 每条候选一个变体」：
+  - base `<m>_ore_<kind>_smelting.json` → 自有锭，条件 `not(or(候选 mod...))`；
+  - 变体 `<m>_ore_<kind>_smelting_<mod>.json` → 候选的锭，条件
+    `mod_loaded(本模组)` **加上** 对该候选之前所有 mod 的 `not(mod_loaded(...))`。
+    没有这串否定，两个模组同时在场时同一输入会匹配两条熔炼配方。
+  - 运行时 `OreMaterials` 用同一个顺序解析，命中的候选模组在场时**不注册自有锭**，
+    `c:ingots/<id>` 里的自有锭条目写成 `required: false`（物品不存在时标签跳过）。
+
+  | 材料 | 候选（按优先级） |
+  |---|---|
+  | tin / lead | `mekanism` → `thermal_foundation` |
+  | silver / nickel | `thermal_foundation` |
+  | zinc | `create` |
+  | osmium / uranium | `mekanism` |
+  | platinum / aluminum | 无候选（永远自有锭） |
+
+  - **mod id ≠ 物品命名空间**：Thermal 的模组 id 是 `thermal_foundation`，锭却注册在
+    `thermal:` 里。条件写 mod id，物品写命名空间，两边都要对。
+  - **两个版本的配方条件键不同**：1.21.1 用 `neoforge:conditions`，1.20.1 用**裸 `conditions`**
+    （Forge 的 `RecipeManager` 只认这个；写 `forge:conditions` 会被静默忽略，然后按无条件解析，
+    结果是「未知物品」报错或条件失效）。两者都是**解析前**判定，所以未安装模组的变体可以
+    安全地指向不存在的物品。
+  - **Thermal 只在 1.20.1 存在**：主线的材料表同样带着它的候选（两条线共用一个
+    `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 15 条变体配方也永远不会加载。
   - 加一个模组 = 在材料里加一行候选 + 手写 `<m>_ore_<kind>_smelting_<mod>.json` +
-    重跑 `./gradlew runData`（base 配方会自动带 `not(...)` 条件）；id 必须按对方 jar 核对。
+    重跑 `./gradlew runData`（base 配方会自动重算条件）；id 必须按对方 jar 核对。
   - **换模组会改变物品存在性**：已有存档里拿到的自有锭，装上受支持模组后会变成未知物品
     （日志报错并消失）。开世界前定好模组列表。
 - 铁/金/铜的 `ingot` 指向原版锭，所以 36 个熔炼配方里它们熔到 `minecraft:*_ingot`；

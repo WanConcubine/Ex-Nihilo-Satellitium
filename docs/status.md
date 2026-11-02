@@ -24,9 +24,34 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 （`ModBlockStates` + `ModItemModels`，物品模型从注册表推导），输出到 `src/generated/resources`，
 旧的手写 tag/loot/recipe/model JSON 已删除。仍手写：12 条 `*_smelting_mekanism`（datagen 引用
 不了未注册的模组物品）、15 个手绘几何模型、全部语言文件（265 键，建议保持 JSON）。
-M8 月光魔法、M9 发布仍未开始。
+**科技模组锭接入（2026-11-02）**：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
+zinc → Create；运行时取第一个已加载模组的锭，自有锭只作兜底。**M8 月光魔法、M9 发布仍未开始。**
 
-## 当前批次（2026-11-02，M7 datagen 第三批：blockstate / model）
+## 当前批次（2026-11-02，科技模组锭接入：Mekanism / Thermal / Create）
+
+- **目标**：只保证「空岛上拿不到的基础资源」有来源；合金交给科技模组自己做。所以这轮只做
+  **锭接入**，不加新金属、不加合金、不碰粉尘标签。
+- **材料表**（两条线共用一份 `materials.json`）：tin/lead → `mekanism` → `thermal_foundation`；
+  silver/nickel → `thermal_foundation`；zinc → `create`；osmium/uranium → `mekanism`；
+  platinum/aluminum 保持自有锭。优先级 = 数组顺序，运行时取第一个已加载的。
+- **数据**：每个「材料 × 候选」一条变体配方，条件是本模组在场 **且** 它之前的候选都不在
+  （否则两个模组同时装会匹配两条）。base 配方条件由 `ModRecipes` 自动算成
+  `not(or(...))`（1.21.1）／手写在 1.20.1 分支。
+- **踩到的真坑**：Forge 1.20.1 的配方条件键是**裸 `conditions`**，不是 `forge:conditions`。
+  写错不会报「未知条件」——Forge 直接忽略，然后按无条件解析，于是未安装模组的
+  `thermal:`/`create:` 物品炸出 27 条 `Unknown item`，整个配方表只剩 7 个类型。
+  `port_data.py` 之前把 `neoforge:conditions` 转成 `forge:conditions`，正是这个错误；
+  已改成 `conditions`，`check-data-paths.py` 也加了「键必须对」的检查（负向测试能红）。
+- **验证（主 1.21.1，装 Mekanism 10.7.19.85）**：`[materials] tin/lead/osmium/uranium
+  smelts into mekanism:ingot_*`；熔炉烧 `tin_ore_gravel` 产出 `mekanism:ingot_tin`；
+  `exnihilosatellitium:tin_ingot` 未注册（`summon` 得到 Air）；烧 `zinc_ore_gravel`
+  产出自有 `zinc_ingot`（Create 不在场，兜底分支生效）。
+- **验证（1.20.1 分支，无科技模组）**：0 条 recipe 解析错误，27 条变体按条件跳过，
+  `tin_ore_gravel → tin_ingot` 正常。
+- **未验**：真装 Thermal / Create 的路径（本机没有这两个 jar）；它们与 Mek 走同一套
+  条件机制，静态等价。
+
+## 上一批次（2026-11-02，M7 datagen 第三批：blockstate / model）
 
 - **`ModBlockStates`**：71 个 blockstate（70 个单 variant + 筛子 multipart：frame + 三档 mesh）
   + 29 个机械方块模型（12 桶 + 12 木坩埚 + 火/未烧制坩埚 + dust/crushed×2 + 侵染树叶）。
@@ -504,6 +529,11 @@ M8 月光魔法、M9 发布仍未开始。
 | M7 datagen 第三批（客户端） | ✅ | `runClient` 启动完成、纹理图集生成，日志无 `missing model` / `unable to load model` / missing texture |
 | M7 datagen 第三批（生成器） | ✅ | 三个 Python 生成器原地重跑 `git status` 无资产 diff；不再写 blockstates/models |
 | M7 datagen 第三批（画面） | ⚠️ | 桶/坩埚/筛子/机器/矿块的观感未目视（客户端已启动待看） |
+| 科技模组锭（主 1.21.1 + Mek） | ✅ | 熔炉烧 `tin_ore_gravel` → `mekanism:ingot_tin`；自有 `tin_ingot` 未注册；`[materials]` 日志 4 条 |
+| 科技模组锭（主，兜底） | ✅ | 无 Create：烧 `zinc_ore_gravel` → `exnihilosatellitium:zinc_ingot` |
+| 科技模组锭（1.20.1 分支） | ✅ | 无模组：0 条解析错误、27 条变体跳过、`tin_ore_gravel → tin_ingot`；`conditions` 键生效 |
+| 科技模组锭（Thermal/Create） | ⚠️ | 本机没有这两个 jar，只做了静态等价验证 |
+| 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
 | P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
 | P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |
 | P1 ConfigValues | ✅ | RCON：电动筛 217 tick，`Energy` 20000→15660（正好 20 FE/t） |
