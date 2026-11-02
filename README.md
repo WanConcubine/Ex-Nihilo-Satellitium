@@ -1,6 +1,7 @@
 # 无中生有：众星捧月 / Ex Nihilo: Satellitium
 
-> 面向 Minecraft **1.21.1 NeoForge** 的空岛资源获取模组，从零重写。
+> 面向 Minecraft **1.21.1 NeoForge** 的空岛资源获取模组，从零重写（另有 **1.20.1 Forge**
+> 分支，玩法内容相同）。
 > **非官方作品**，与 Ex Nihilo 系列及其作者没有隶属关系。
 
 “众星捧月”取“群星环绕核心循环”的意思：木桶、筛子、锤子、坩埚都围绕同一条空岛资源链。
@@ -15,6 +16,20 @@
 （Wiki、MC百科、视频）与 GPLv3 仓库中的功能性思路（内缩桶身、内容物渲染）；
 具体实现为本项目原创。部分贴图/模型明确采用 **MIT 许可的 Ex Nihilo: Creatio**
 （锤/钩/蚕/尘土/坩埚），逐项登记在 [THIRD-PARTY.md](THIRD-PARTY.md)。
+
+## 下载与安装
+
+| 版本 | 加载器 | 文件 |
+|---|---|---|
+| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-0.1.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | 同一版本号，由 `1.20.1-forge` 分支构建 |
+
+1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
+2. 把 jar 放进 `mods/`。
+3. 可选：**JEI**（配方查询）、**Jade**（方块信息）、**Create / Mekanism / Thermal**
+   （金属锭与矿石块的互通）。
+
+首个版本的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术栈
 

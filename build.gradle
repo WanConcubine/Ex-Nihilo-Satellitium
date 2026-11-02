@@ -102,6 +102,12 @@ tasks.named('processResources', ProcessResources).configure {
     from('src/main/resources/data/exnihilosatellitium/crook') {
         into 'assets/exnihilosatellitium/crook'
     }
+
+    // Release hygiene: the datagen hash cache is bookkeeping, not content, and
+    // the licence/third-party notices must travel with the jar.
+    exclude '.cache/**'
+    from(rootProject.file('LICENSE'))
+    from(rootProject.file('THIRD-PARTY.md'))
 }
 
 tasks.named('jar', Jar).configure {
