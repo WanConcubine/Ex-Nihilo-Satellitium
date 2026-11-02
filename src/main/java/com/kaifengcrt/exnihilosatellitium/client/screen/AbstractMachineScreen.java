@@ -104,15 +104,20 @@ public abstract class AbstractMachineScreen<T extends AbstractMachineMenu>
 
     @Override
     public boolean mouseClicked(final double mouseX, final double mouseY, final int button) {
+        // Check the progress arrow before the container handles the click: the
+        // vanilla handler consumes clicks that land on the GUI background in some
+        // paths, which used to swallow the JEI shortcut.
+        final boolean overProgress = mouseX >= this.leftPos + PROGRESS_X - 1
+                && mouseX < this.leftPos + PROGRESS_X + PROGRESS_W + 1
+                && mouseY >= this.topPos + PROGRESS_Y - 1
+                && mouseY < this.topPos + PROGRESS_Y + PROGRESS_H + 1;
+        if (button == 0 && overProgress && MachineGui.openJei(this.menu)) {
+            return true;
+        }
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
         if (this.outputPanel.isInside(mouseX, mouseY)) {
-            return true;
-        }
-        if (button == 0
-                && this.isHovering(PROGRESS_X, PROGRESS_Y, PROGRESS_W, PROGRESS_H, mouseX, mouseY)
-                && MachineGui.openJei(this.menu)) {
             return true;
         }
         return false;

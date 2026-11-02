@@ -188,7 +188,8 @@
 | M10 漏斗补料 | ✅ | RCON：上方漏斗把箱子里的沙补进输入槽（机器沙 28、箱子剩 33） |
 | M10 config | ✅ | `run/config/exnihilosatellitium-common.toml` 生成 `crucible.*` + `machine.*` |
 | M10 客户端冒烟 | ✅ | 进存档无 missing model/texture；JEI 37 hammer / 11 barrel / 6 sieve / 10 crook |
-| M10 GUI/动画 | ⚠️ | 画面、抽屉、BER 动画、槽位拖拽待作者目视 |
+| M10 JEI 箭头 | ✅ | 2026-11-02 实测：点进度箭头后 `screen = mezz.jei.gui.recipes.RecipesGui`（空输入打开分类）；修复前是 `super.mouseClicked` 先吞掉点击 |
+| M10 GUI/动画 | ⚠️ | 抽屉、BER 动画、槽位拖拽、有输入时的 JEI 聚焦待作者目视 |
 
 ## 一次性验收清单（作者进游戏）
 
