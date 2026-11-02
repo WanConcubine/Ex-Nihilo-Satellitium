@@ -1,0 +1,6 @@
+{
+  "base": "minecraft:water",
+  "added": { "item": "minecraft:milk_bucket" },
+  "entity": "minecraft:slime",
+  "peaceful_drop": "minecraft:slime_ball"
+}

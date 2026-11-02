@@ -385,13 +385,22 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   满桶 + 人偶 → 清空流体、倒计时；结束时非和平模式在桶上方生成实体，和平模式掉 `peaceful_drop`，
   桶恢复空桶。JEI 里显示 `peaceful_drop` 作为结果。
   两个都有 / 都没有 → 跳过该文件并打 `[barrel]` 警告。
+  **物品规则优先于流体容器路径**：牛奶桶既是物品、又可能是流体容器（Forge 的牛奶流体），
+  先匹配 `added.item` 再走 `FluidUtil`；规则消耗物品后把 `getCraftingRemainingItem()` 还给玩家
+  （牛奶桶 → 空桶）。
+  ```json
+  { "base": "minecraft:water", "added": { "item": "minecraft:milk_bucket" },
+    "entity": "minecraft:slime", "peaceful_drop": "minecraft:slime_ball" }
+  ```
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
-- 当前 7 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
-  熔岩+荧石粉→末地石、水+尘土→粘土块（`water_dust_clay.json`）；
-  M6 巫水两条：巫水+沙子→灵魂沙（`witch_water_sand_soul_sand.json`）、
-  巫水+橡树苗→深色橡树苗（`witch_water_sapling_dark_oak.json`）。
+- 当前 12 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
+  熔岩+荧石粉→末地石、水+尘土→粘土块（`water_dust_clay.json`）、
+  水+牛奶桶→史莱姆/粘液球（`water_milk_slime.json`）；
+  巫水+沙子→灵魂沙（`witch_water_sand_soul_sand.json`）、
+  巫水+橡树苗→深色橡树苗（`witch_water_sapling_dark_oak.json`）；
+  人偶 4 条：熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者。
 - **删掉 JSON 桶就不反应**：不会退回硬编码。
 
 ## 11. JEI 分类

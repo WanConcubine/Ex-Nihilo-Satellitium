@@ -357,6 +357,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 | 桶：红石/荧石掺料 | ⚠️ | 已进 `barrel/*.json`；未玩家实测 |
 | 桶：流动水 → 黑曜石 | ✅ | RCON：满熔岩桶，上方放水源、桶顶格是 `water[level=8]` 流动水，1.5 秒后 `Solid=obsidian`（`FlowingFluid#getSource()` 归一化） |
 | 桶：水+尘土→粘土 | ⚠️ | JSON 已写；未实测 |
+| 桶：水+牛奶→史莱姆/粘液球 | ✅ | RCON 2026-11-02：满水 + 牛奶桶 → 桶清空、空桶返还；Normal 生成史莱姆、Peaceful 掉 `slime_ball` |
 | 巫水：满水 + 菌丝发酵 | ✅ | RCON：满水木桶 + 2 菌丝，约 25 秒变 `exnihilosatellitium:witch_water`，`Spore` 归零 |
 | 巫水：蘑菇煲起酵 | ✅ | RCON：只写 `Spore:1` 无菌丝，约 50 秒后变巫水 |
 | 巫水：流体方块 | ✅ | RCON `setblock ... exnihilosatellitium:witch_water` 成功并可被 `execute if block` 命中 |
@@ -474,7 +475,8 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 - **物品贴图**：自有或采用 Creatio（MIT）；Sequentia 是 CC BY-NC-SA，只作风格对照，不采用。
 - **锤/钩**：6 锤 / 2 钩，左键唯一路径；粉粉尘→自身是安全兜底，不作为 JEI 配方展示。
 - **坩埚**：熔料与流体分开记，熔料 1:1 产出流体；固体 > 流体显示熔料，反之流体；
-  容量/熔料/热源倍率走 config，热源与熔点走数据包。
+  容量/熔料/热源倍率走 config，热源与熔点走数据包。**流动熔岩与源方块都按 0.2**
+  （2026-11-02 所有者决定；`crucible_heat` 只按方块 id 匹配，不加 `level` 范围）。
 - **坩埚被破坏时内容物一起消失**（只掉方块本体），不做返还：忠于 1.7.10 原版，
   也避免“先熔满再挖走”当免费流体袋。
 - **数据包优先**：所有玩法表可覆盖/新增；单人 JEI 优先服务端表，专用服客户端回退内置镜像。
