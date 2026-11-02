@@ -47,7 +47,7 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 
 - **碧空 / 末影黏液草种子**：`sky_slime_grass_seeds` / `ender_slime_grass_seeds`，
   **只在 `tconstruct` 在场时注册**（`ModItems` 条件注册；缺失时字段为 `null`，创造栏/JEI 不出现）。
-  右键**草方块** → `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`；
+  右键**草方块或泥土** → `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`；
   泥土筛 2% / 1%，筛表条目带 `"mod": "tconstruct"`，没匠魂时整条不参与加载、也不刷 unknown item。
   贴图 / 模型手写，因为 datagen 在无匠魂时不会注册这两个物品。
 - **钴**（第 13 种材料）：`materials.json` 加 `cobalt`，候选 `tconstruct:cobalt_ingot`；
@@ -67,7 +67,7 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
     `summon` 两个种子物品名字正常；目标黏液草方块 `setblock` 成功。
   - 不装 Tinkers：`[sieve] 90 drops`（两个种子条目被 `mod` 过滤掉），无 unknown recipe/item 报错。
   - 主线 1.21.1：`[sieve] 90 drops`、`Loaded 1433 recipes`、`[compost] 67 entries`。
-  - **右键草方块、匠魂炉实际熔化、JEI 页仍未进游戏**。
+  - **右键草方块/泥土、匠魂炉实际熔化、JEI 页仍未进游戏**。
 - **配方计数**：`runData` 生成 **143** 条（137 + cobalt 6）；主线手写 **57** 条
   （45 条候选变体 + 12 条 `create:crushing`）；1.20.1 再手写 78 条匠魂熔炼 → **135** 条。
 
@@ -359,7 +359,7 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 | 匠魂钴 | ✅ | 只装 Tinkers：`[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |
 | 匠魂熔炼配方 | ⚠️ | 78 条 `tconstruct:melting` 按 Tinkers 自己的格式生成，加载无报错；匠魂炉实际熔化未跑 |
 | 下界合金碎片 | ✅ | 碎下界岩 0.4%，双线都加；`[sieve] 90`（无匠魂）/ 92（有匠魂） |
-| 匠魂草方块右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块 → `*_vanilla_slime_grass`；需要玩家右键实测 |
+| 匠魂草种子右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块或泥土 → `*_vanilla_slime_grass`；需要玩家右键实测 |
 | 钴碎块贴图 | ✅ | broken 用下界岩红棕基底，其余钴形态蓝色；`check-textures` 通过 |
 | 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
 | 泥土筛石子（数量） | ✅ | 分支机器筛：7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%） |
