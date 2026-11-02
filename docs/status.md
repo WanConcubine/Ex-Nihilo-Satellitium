@@ -20,7 +20,7 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
 
 ## 当前批次（2026-11-02 晚，Tinkers' Construct 3 接入）
 
-- **碧空 / 末影黏液草种子**：只在 `tconstruct` 在场时注册；右键草方块 →
+- **碧空 / 末影黏液草种子**：只在 `tconstruct` 在场时注册；右键草方块或泥土 →
   `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`；泥土筛 2% / 1%，
   条目带 `"mod": "tconstruct"`，无匠魂不加载、不刷 unknown item。模型/贴图手写。
 - **钴**（第 13 种材料）：候选 `tconstruct:cobalt_ingot`，无匠魂回退自有钴锭；
@@ -34,7 +34,7 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
     `[sieve] 92 drops`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；
     两个种子 `summon` 正常；目标黏液草方块 `setblock` 成功。
   - 不装 Tinkers：`[sieve] 90 drops`，无 unknown recipe/item 报错。
-  - **右键草方块、匠魂炉实际熔化、JEI 页未进游戏**。
+  - **右键草方块/泥土、匠魂炉实际熔化、JEI 页未进游戏**。
 - **配方计数**：143 generated + 135 手写 = **278**；手写含 45 候选变体 + 12 crushing +
   78 匠魂熔炼。
 
@@ -133,7 +133,7 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
 | 匠魂钴 | ✅ | `[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |
 | 匠魂熔炼配方 | ⚠️ | 78 条 `tconstruct:melting` 格式对齐，加载无报错；匠魂炉实际熔化未跑 |
 | 下界合金碎片 | ✅ | 碎下界岩 0.4%；`[sieve] 90`（无匠魂）/ 92（有匠魂） |
-| 匠魂草方块右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块 → `*_vanilla_slime_grass`；需玩家实测 |
+| 匠魂草种子右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块或泥土 → `*_vanilla_slime_grass`；需玩家实测 |
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|

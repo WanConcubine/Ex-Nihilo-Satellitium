@@ -16,8 +16,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * Tinkers-only grass seed: right-click a vanilla grass block to turn it into a
- * Tinkers slime grass block (the "vanilla soil" variant).
+ * Tinkers-only grass seed: right-click a vanilla grass block or dirt to turn it
+ * into a Tinkers slime grass block (the "vanilla soil" variant).
  *
  * <p>The target block is looked up by id at use time, so this class never links
  * against Tinkers classes; the item itself is only registered when
@@ -36,7 +36,8 @@ public class TinkersGrassSeedItem extends Item {
     public InteractionResult useOn(final UseOnContext context) {
         final Level level = context.getLevel();
         final BlockPos pos = context.getClickedPos();
-        if (!level.getBlockState(pos).is(Blocks.GRASS_BLOCK)) {
+        if (!level.getBlockState(pos).is(Blocks.GRASS_BLOCK)
+                && !level.getBlockState(pos).is(Blocks.DIRT)) {
             return InteractionResult.PASS;
         }
         final ResourceLocation id = ResourceLocation.tryParse(this.targetBlockId);
