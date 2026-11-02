@@ -213,7 +213,7 @@ python3 scripts/check-textures.py
   要恢复就删掉那个文件（或整个 `.cache/`）再跑。`processResources` 还会因为
   `src/main` 与 `src/generated` 同名资源直接失败，这也是删旧文件必须一次删干净的原因。
 - 服务端冒烟：`runServer`，日志看 `Loaded ... recipes`、`[barrel] 12 transforms`、
-  `[sieve] 6 inputs, 87 drops`，无 missing tag/loot/recipe。
+  `[sieve] 6 inputs, 88 drops`，无 missing tag/loot/recipe。
 - 两条线都已发布并推到 `origin`（2026-11-02：主线 `v0.1.0`、1.20.1 分支 `v0.1.0-1.20.1`）。
 
 ## 7. 新会话开场清单
