@@ -16,6 +16,18 @@
 具体实现与像素图均为本项目的原创。详见 [docs/DESIGN.md](docs/DESIGN.md) 与
 [THIRD-PARTY.md](THIRD-PARTY.md)。
 
+## 下载与安装
+
+| 版本 | 加载器 | 文件 |
+|---|---|---|
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-0.1.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
+
+1. 装好 Forge 47.4.x（Java 17），把 jar 放进 `mods/`。
+2. 可选：**JEI**（配方查询，`runClient -PdevMods` 时从 `libs/` 加载）、**Jade**（方块信息）、
+   **Create / Thermal Foundation**（金属锭与矿石块的互通）。
+
+完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
+
 ## 技术栈
 
 | 项目 | 版本 |

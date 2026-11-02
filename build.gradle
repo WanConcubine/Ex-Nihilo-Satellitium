@@ -219,6 +219,12 @@ tasks.named('processResources', ProcessResources).configure {
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
+
+    // Release hygiene: the datagen hash cache is bookkeeping, not content, and
+    // the licence/third-party notices must travel with the jar.
+    exclude '.cache/**'
+    from(rootProject.file('LICENSE'))
+    from(rootProject.file('THIRD-PARTY.md'))
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
