@@ -148,7 +148,7 @@ python3 scripts/check-textures.py
 - `runData` 后检查 `git status`：`.cache` 应被忽略，generated JSON 应显式提交。
 - 服务端冒烟：`runServer`，日志看 `Loaded ... recipes`、`[barrel] 12 transforms`、
   `[sieve] 6 inputs, 72 drops`，无 missing tag/loot/recipe。
-- 两条线都**未 push**（2026-11-02：main ahead 7，分支 ahead 8）。
+- 两条线都**未 push**（2026-11-02：main ahead 8，分支 ahead 8）。
 
 ## 7. 新会话开场清单
 
