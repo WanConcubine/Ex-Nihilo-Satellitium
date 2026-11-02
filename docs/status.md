@@ -19,7 +19,9 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 `crucible.*`/`machine.*` config；分支提交 `6a733e8`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
-M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开始。
+**M7 datagen 第一批已完成**（2026-11-02：`runData` 生成方块/物品标签 + 方块掉落表，
+输出到 `src/generated/resources`，旧的手写 tag/loot JSON 已删除）；配方、模型/blockstate、
+语言文件仍在 `src/main/resources`（下一批）。M8 月光魔法、M9 发布仍未开始。
 
 ## 当前批次（2026-11-01，1.20.1 M10）
 
@@ -461,7 +463,7 @@ M5/M7 余项（config 扩展、datagen）、M8 月光魔法、M9 发布仍未开
 2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
    清单见交接清单。
 3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
-4. **M7 余项**：config 扩展、datagen；JEI 已补全。
+4. **M7 余项**：datagen 第二批（配方、模型/blockstate、语言）；config 与 JEI 已齐。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
 

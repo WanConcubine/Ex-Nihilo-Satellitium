@@ -22,6 +22,7 @@ import data_target
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "src/main/resources"
+GENERATED = ROOT / "src/generated/resources"
 
 FORBIDDEN_DIRS = {
     "1.21.1": (("recipes",), ("loot_tables",), ("tags", "blocks"), ("tags", "items")),
@@ -109,27 +110,29 @@ def _walk_strings(node):
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--root", type=Path, default=SOURCE,
-                        help="resource root to check (default: src/main/resources)")
+    parser.add_argument("--root", type=Path, default=None,
+                        help="resource root to check (default: src/main/resources + src/generated/resources)")
     parser.add_argument("--target", choices=data_target.TARGETS, default=data_target.DEFAULT)
     args = parser.parse_args(argv)
 
     target = data_target.get(args.target)
-    data = args.root / "data"
-    if not data.is_dir():
-        print(f"no data/ directory under {args.root}")
-        return 1
+    roots = [args.root] if args.root is not None else [SOURCE, GENERATED]
 
     errors: list[str] = []
     recipes = loots = tags = 0
-    for namespace in sorted(entry for entry in data.iterdir() if entry.is_dir()):
-        check_namespace(namespace, target, errors)
-        recipes += len(list((namespace / target.recipe_dir).rglob("*.json"))) \
-            if (namespace / target.recipe_dir).is_dir() else 0
-        loots += len(list((namespace / target.loot_dir).rglob("*.json"))) \
-            if (namespace / target.loot_dir).is_dir() else 0
-        if (namespace / "tags").is_dir():
-            tags += len(list((namespace / "tags").rglob("*.json")))
+    for root in roots:
+        data = root / "data"
+        if not data.is_dir():
+            print(f"no data/ directory under {root}")
+            return 1
+        for namespace in sorted(entry for entry in data.iterdir() if entry.is_dir()):
+            check_namespace(namespace, target, errors)
+            recipes += len(list((namespace / target.recipe_dir).rglob("*.json"))) \
+                if (namespace / target.recipe_dir).is_dir() else 0
+            loots += len(list((namespace / target.loot_dir).rglob("*.json"))) \
+                if (namespace / target.loot_dir).is_dir() else 0
+            if (namespace / "tags").is_dir():
+                tags += len(list((namespace / "tags").rglob("*.json")))
 
     if errors:
         print(f"data layout check failed for {target.name}:")

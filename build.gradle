@@ -40,6 +40,12 @@ neoForge {
         server {
             server()
         }
+        data {
+            data()
+            programArguments.addAll '--mod', 'exnihilosatellitium', '--all',
+                    '--output', file('src/generated/resources').absolutePath,
+                    '--existing', file('src/main/resources').absolutePath
+        }
     }
 
     mods {
@@ -48,6 +54,8 @@ neoForge {
         }
     }
 }
+
+sourceSets.main.resources.srcDir 'src/generated/resources'
 
 tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [

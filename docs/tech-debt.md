@@ -80,7 +80,7 @@
 |---|---|---|
 | 37 | **零自动化测试** | `src/test` 不存在；`build` 的 `test` 是 NO-SOURCE。最值得补：`SieveRegistry`/`BarrelRecipes`/`CompostRegistry` 的解析、重复/坏 id、`BarrelBlockEntity.fill` 状态机、`SieveBlockEntity` 结算 |
 | 38 | **数据格式没有 schema/版本** | `sieve`/`barrel`/`compost`/`materials` 都是 de facto API；字段改名/新增无版本号、无迁移、无 `--check`。建议给每个格式写 JSON Schema 或 Java 校验器 |
-| 39 | **无 datagen / 通用 config** | M7 未做；材料表/筛/锤等仍靠 Python 脚本 + 手写 JSON；目前只有坩埚三项 config（`capacity` / `meltCapacity` / `heatSpeedMultiplier`） |
+| 39 | **datagen 只覆盖 tags/loot** | 2026-11-02：`runData` 已接管方块/物品标签 + 方块掉落表（`src/generated/resources`）；配方、模型/blockstate、语言仍是 Python/手写；config 已齐（`crucible.*` + `machine.*`） |
 | 40 | **BE NBT 没有 `DataVersion`** | 桶有 `CompostScale` 迁移，筛子只有 `Work`/`Contents`/`Mesh`；未来改字段只能猜。建议加 `DataVersion` 或 `SieveVersion` |
 | 41 | **`BarrelBlockEntity` 单类 489 行，职责过多** | 流体/堆肥/降雨/固体/比较器/NBT 都在一个类；拆出 `BarrelTank`/`CompostState`/`SolidState` 后，P0 #3 这类状态互斥更容易守住 |
 | 42 | **`getSolid()`/`getMesh()`/`getContents()` 直接返回内部 ItemStack** | `BarrelBlockEntity:132`、`SieveBlockEntity:46,61`；渲染器只读所以现在没事，但外部一改就穿透 BE 状态 | 返回 `copy()` 或只读视图 |
