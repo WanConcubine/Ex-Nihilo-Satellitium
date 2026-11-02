@@ -34,7 +34,7 @@ public final class SieveRolls {
         for (int roll = 0; roll < rolls; roll++) {
             for (final SieveDrop drop : drops) {
                 if (random.nextFloat() < drop.chance()) {
-                    outputs.add(new ItemStack(drop.item()));
+                    outputs.add(new ItemStack(drop.item(), drop.count(random)));
                 }
             }
         }
