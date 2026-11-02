@@ -59,7 +59,9 @@ def _check_recipe(path: Path, target: data_target.DataTarget) -> list[str]:
         return [f"{path}: invalid JSON ({exception})"]
 
     result = data.get("result")
-    if isinstance(result, dict):
+    # Tinkers' melting/casting recipes return a fluid (`tag` + `amount`) instead of
+    # an item, so only item results have to carry the target version's key.
+    if isinstance(result, dict) and ("item" in result or "id" in result):
         expected = target.result_key
         wrong = "item" if expected == "id" else "id"
         if expected not in result:

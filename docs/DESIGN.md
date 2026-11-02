@@ -1288,3 +1288,36 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
 - 坑：IE 在专用服会尝试加载 client 类并打 `DISTXFORM` 报错（IE 自己的事，server 仍然 Done），
   别当成本项目错误；它的 crusher 只认 `forge:ores`（1.20.1），不吃 `c:ores`。
 - 合金（steel / electrum / constantan）不接，避免抢科技模组的中间产物。
+
+## 36. Tinkers' Construct 3 联动（2026-11-02，1.20.1）
+
+这一批只做 **1.20.1**（Tinkers 3.12.1 + Mantle 1.11.117 真装）。目标不是复刻匠魂，而是把
+「空岛拿不到的资源」接到匠魂的炉子上。
+
+1. **碧空 / 末影黏液草种子**。匠魂自己有这两个种子，但只认 `DirtType`（原版泥土 / 黏液泥土），
+   **右键草方块不生效**。所以本项目注册自己的两个条件物品，右键草方块直接换成
+   `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`：
+   - 物品只在 `tconstruct` 在场时注册（`ModItems` 条件注册，缺失时字段 `null`）；
+     创造栏 / JEI 都不会出现，筛表条目用 `"mod": "tconstruct"` 在物品解析前过滤。
+   - datagen 在没有匠魂时看不到这两个物品，**模型/贴图必须手写**（`models/item/*_slime_grass_seeds.json`）；
+     泥土筛 2% / 1%。
+2. **钴**。`materials.json` 加第 13 种材料 `cobalt`，候选 `tconstruct:cobalt_ingot`；
+   没匠魂时回退自有 `cobalt_ingot`。碎下界岩筛 `cobalt_broken` 1%，然后走普通
+   4→矿砾块→熔炼链。**broken 贴图的下界岩红棕基底**由 `STONE_PALETTES` 覆盖，
+   不再用其他矿碎块的煤灰底。
+3. **下界合金碎片**。碎下界岩 0.4%，**双线都加**（用户明确要求）；不参与匠魂熔炼。
+4. **匠魂熔炼**。13 材料 × 6 形态 = **78 条** `tconstruct:melting`：
+   - 物品（broken / crushed / powdered）→ **60 mB**（1/2 粗金属）；
+   - 方块（ore_gravel / ore_sand / ore_dust）→ **240 mB**（2× 粗金属）；
+   - 流体用 `forge:molten_<m>` 标签，温度复制 Tinkers 自己的锭配方，时间按 90 mB 换算；
+   - 全部带 `conditions: mod_loaded(tconstruct)`；没匠魂时整批跳过。
+5. **阿迪特不做**。Tinkers 3.12.1 已移除阿迪特（没有 `molten_ardite` / `ardite_ingot`，
+   只有残留贴图）；等所有者说的「工匠巧思」拓展重现 1/2 代阿迪特后再按同一套加。
+
+验证：只装 Tinkers 时 `[materials] cobalt → tconstruct:cobalt_ingot`、`[sieve] 92 drops`；
+RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；两个种子 `summon` 正常；
+不装 Tinkers 时 `[sieve] 90 drops`（种子条目被过滤）且没有 unknown item/recipe。
+**右键草方块、匠魂炉实际熔化、JEI 页还没进游戏**。
+
+坑：Tinkers 的熔炼 `result` 是流体（`tag` + `amount`），没有 `item`/`id`；`check-data-paths.py`
+已改成只对 item/id result 检查版本键，否则 78 条熔炼会全部误报。

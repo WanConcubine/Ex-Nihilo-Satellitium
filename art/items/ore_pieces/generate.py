@@ -89,6 +89,10 @@ POWDERED = """
 
 STONE = ("#141414", "#2E2E2E", "#4A4A4A", "#6A6A6A", "#8A8A8A")
 
+# Some nether materials sit in a netherrack chunk, not a coal-grey stone one.
+NETHERRACK_STONE = ("#2A0D0D", "#4A1414", "#6B1D1D", "#8A2A2A", "#A83A3A")
+STONE_PALETTES = {"cobalt": NETHERRACK_STONE}
+
 BROKEN_LIGHTS = ((6, 4), (7, 4), (6, 5))
 
 STAGES = ("broken", "crushed", "powdered")
@@ -106,6 +110,7 @@ PALETTES = {
     "platinum": ("#30424C", "#6C8490", "#A2BAC6", "#C6DEE8", "#EAF8FE"),
     "uranium": ("#1E3A10", "#3E7A20", "#6FBF3A", "#A6E36A", "#D8F8A0"),
     "zinc": ("#34414A", "#6C7C86", "#9EACB4", "#C2D0D8", "#E2F0F6"),
+    "cobalt": ("#0E2238", "#1F4C7A", "#3F7BD9", "#6FA8E8", "#B8D8FA"),
 }
 
 
@@ -126,7 +131,7 @@ def inside(grid, x, y):
 
 
 def broken(metal):
-    stone = [hex_rgb(c) for c in STONE]
+    stone = [hex_rgb(c) for c in STONE_PALETTES.get(metal, STONE)]
     metal_palette = [hex_rgb(c) for c in PALETTES[metal]]
     grid = [list(row) for row in parse_template(BROKEN)]
     for x, y in BROKEN_LIGHTS:

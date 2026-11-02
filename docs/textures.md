@@ -52,6 +52,8 @@ assets/exnihilosatellitium/textures/
     ├── ancient_spores.png       # 古代孢子（M6，脚本生成，紫色）
     ├── crimson_nylium_spores.png # 绯红菌岩孢子（2026-11-02，脚本生成，红色）
     ├── warped_nylium_spores.png  # 诡异菌岩孢子（2026-11-02，脚本生成，青色）
+    ├── sky_slime_grass_seeds.png # 碧空黏液草种子（2026-11-02，脚本生成，天蓝）
+    ├── ender_slime_grass_seeds.png # 末影黏液草种子（2026-11-02，脚本生成，紫）
     └── witch_water_bucket.png   # 巫水桶（M6，原版水桶重着色）
 ```
 
@@ -80,6 +82,8 @@ assets/exnihilosatellitium/textures/
 要改就改脚本重跑，不要手改 PNG。
 绯红 / 诡异菌岩孢子与草种子共用 `art/items/sieve_extras/generate.py`：16×16 自有像素，
 红 / 青两套 4 色板（轮廓 / 阴影 / 底色 / 高光），只换色不动轮廓。
+碧空 / 末影黏液草种子也在同一脚本里（天蓝 / 紫两套色板）；它们只在 1.20.1 + 匠魂时注册，
+所以模型是手写的 `models/item/*_slime_grass_seeds.json`，datagen 不会生成。
 
 木桶没有自有 PNG；`art/barrel/*` 是早期自绘实验，不参与游戏。
 瓷桶（M6）是物品桶：`art/items/porcelain_bucket/generate.py` 用原版 `bucket.png`（空桶，带桶沿）
@@ -132,8 +136,8 @@ assets/exnihilosatellitium/textures/
 `ItemPowderedBase`），不是每种金属一张 PNG。我们按同样思路**重绘三种不同剪影**：
 
 - `art/items/ore_pieces/generate.py`：每种金属 × 三种阶段，输出
-  铁/金/铜/锡/铅/银/镍/铝/铂/铀/锌 共 **33 张 16×16 PNG**，以及
-  `preview_stages_v65.png`（四种金属的三阶段对比）、`preview_all_v65.png`（全部 11 种）和
+  铁/金/铜/锡/铅/银/镍/铝/铂/铀/锌/锇/钴 共 **39 张 16×16 PNG**，以及
+  `preview_stages_v65.png`（四种金属的三阶段对比）、`preview_all_v65.png`（全部材料）和
   `reference_vs_v65_broken.png`（旧版 vs 当前版）。
 - 剪影区分：
   - `broken` = **暗色石质大块 + 金属色矿点**（参考旧 Ex Nihilo 的深色矿石块，不是整块金属色）；
@@ -141,8 +145,9 @@ assets/exnihilosatellitium/textures/
   - `powdered` = 宽底粉堆 + 颗粒/团块。
   三者在 16×16 下必须一眼能分。
 - `broken` 边缘：轮廓保持完整，**左上受光内边 + 右下暗边**，不画整圈黑线、不加缺口，保证一眼是一块。
-- 风格：暗色 1px 边、透明背景、左上光源、4–5 阶；`broken` 的石体用共享深灰调，
-  矿点用金属亮色；`crushed` / `powdered` 用金属色阶。颜色参考 1.20 原版矿物/锭，
+- 风格：暗色 1px 边、透明背景、左上光源、4–5 阶；`broken` 的石体默认用共享深灰调，
+  但 **钴（以及以后从匠魂拓展来的阿迪特）用下界岩红棕基底**（`STONE_PALETTES`），
+  矿点仍用金属亮色；`crushed` / `powdered` 用金属色阶。颜色参考 1.20 原版矿物/锭，
   但**不复制**旧 Ex Nihilo 或原版 PNG。
 - 已经进 `assets/textures/item/<m>_<stage>.png`（由 `scripts/generate_ore_variants.py`
   从 `art/` 复制/生成），并保证 16×16。

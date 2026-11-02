@@ -19,14 +19,15 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 `crucible.*`/`machine.*` config；分支提交 `6a733e8`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
-**M7 datagen（两条线各三批）**：`runData` 生成标签 41 + 方块掉落表 69 + **配方 137**
-（`ModRecipes`）+ **71 个 blockstate + 179 个模型**（`ModBlockStates` + `ModItemModels`），
-输出到 `src/generated/resources`；仍手写 54 条配方（42 条 `*_smelting_<mod>` 候选变体 +
+**M7 datagen（两条线各三批）**：`runData` 生成标签 41 + 方块掉落表 69 + **配方 143**
+（`ModRecipes`）+ **74 个 blockstate + 201 个模型**（`ModBlockStates` + `ModItemModels`），
+输出到 `src/generated/resources`；仍手写 57 条配方（45 条 `*_smelting_<mod>` 候选变体 +
 12 条 `create:crushing`，产物都是对方模组的物品）、15 个手绘模型、全部语言文件。
-1.20.1 分支在 2026-11-02 晚补齐同样三批，见 [datagen.md](datagen.md) §5。
+1.20.1 分支在 2026-11-02 晚补齐同样三批，并再加 78 条匠魂熔炼，见 [datagen.md](datagen.md) §5。
 **科技模组锭接入（2026-11-02）**：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
-zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/aluminum/uranium），
-运行时取第一个已加载模组的锭，自有锭只作兜底。
+zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/aluminum/uranium）
+和 **Tinkers' Construct 钴**（`tconstruct:cobalt_ingot`），运行时取第一个已加载模组的锭，
+自有锭只作兜底。
 **M9 发布：0.1.0 已发（两条线都有 tag）；M8 月光魔法联动仍未开始。**
 
 ## 0.1.0 已发布（2026-11-02）
@@ -42,34 +43,44 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 - **还差**：CurseForge / Modrinth 的商店页与文件上传需要所有者操作（本机没有 API key 与 `gh`），
   文案见 CHANGELOG；上传后再把下载链接补进 README。
 
-## 当前批次（2026-11-02 晚，Immersive Engineering 接入）
+## 当前批次（2026-11-02 晚，Tinkers' Construct 3 接入）
 
-- **IE 锭候选（只针对 1.20.1，IE 没有 1.21.1 版）**：silver / nickel → Thermal → IE；
-  lead → Mekanism → Thermal → IE；aluminum → IE（原来是自有锭）；uranium → Mekanism → IE。
-  **只接基础锭，不接 steel / electrum / constantan 这些合金**。
-- **15 条手写熔炼变体**（5 材料 × 砾/砂/尘），条件是「IE 在场 **且** 它之前的候选都不在」；
-  base 配方由 `runData` 重算成 `not(or(所有候选))`。两条线共用 `materials.json`，主线保留
-  IE 候选和变体（在 1.21.1 上永远不会命中），避免两份表漂移。
-- **IE 粉碎机**：输入走 `forge:ores/<m>` 标签；1.20.1 的 12 种矿块本来就在这个标签里，
-  所以不需要补配方。产物是 IE 自己的 dust（我们的矿尘按既定设计不占 `forge:dusts`）。
+- **碧空 / 末影黏液草种子**：`sky_slime_grass_seeds` / `ender_slime_grass_seeds`，
+  **只在 `tconstruct` 在场时注册**（`ModItems` 条件注册；缺失时字段为 `null`，创造栏/JEI 不出现）。
+  右键**草方块** → `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`；
+  泥土筛 2% / 1%，筛表条目带 `"mod": "tconstruct"`，没匠魂时整条不参与加载、也不刷 unknown item。
+  贴图 / 模型手写，因为 datagen 在无匠魂时不会注册这两个物品。
+- **钴**（第 13 种材料）：`materials.json` 加 `cobalt`，候选 `tconstruct:cobalt_ingot`；
+  无匠魂时回退自有 `cobalt_ingot`。碎下界岩筛 `cobalt_broken` 1%，走普通 4→块→熔炼链；
+  **broken 贴图改用下界岩红棕基底**（`STONE_PALETTES`），不再用其他矿碎块的煤炭灰底。
+- **下界合金碎片**：碎下界岩 0.4%，**双线都加**。
+- **匠魂熔炼**：13 材料 × 6 形态 = **78 条** `tconstruct:melting`（1.20.1 分支）：
+  - 碎块 / 粉碎 / 粉末物品 → **60 mB**（1/2 粗金属）；
+  - 对应矿砾 / 矿砂 / 矿尘方块 → **240 mB**（2× 粗金属）；
+  - 流体用 `forge:molten_<m>`，温度取 Tinkers 自己的锭配方，时间按 90 mB 锭等比缩放；
+  - 全部带 `conditions: mod_loaded(tconstruct)`，没匠魂时整批跳过。
+- **阿迪特暂不做**：Tinkers 3.12.1 已移除阿迪特（无 `molten_ardite` / `ardite_ingot`），
+  等「工匠巧思」拓展（重现 1/2 代阿迪特）再按同一套加。
 - **验证**：
-  - 1.20.1 分支只装 IE：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部解析到
-    `immersiveengineering:ingot_*`；RCON 熔炉实测 `aluminum_ore_gravel → ingot_aluminum`、
-    `silver_ore_sand → ingot_silver`。
-  - 1.20.1 分支同时装 Thermal + Create + IE：tin/silver/lead/nickel → Thermal、zinc → Create、
-    aluminum/uranium → IE；0 条 `Unknown item`。
-  - 主线 1.21.1 不装 IE：`Loaded 1427 recipes`，RCON 熔炉
-    `aluminum_ore_gravel → 自有 aluminum_ingot`；15 条 IE 变体不加载。
-  - **IE 粉碎机多方块本身还没跑**；只核对了「矿块在 `forge:ores` 标签里、IE 配方输入也是该标签」。
-- **配方计数**：137 条 generated + 54 条手写 = **191**；其中 42 条是 `*_smelting_<mod>` 候选变体。
+  - 1.20.1 只装 Tinkers 3.12.1 + Mantle 1.11.117：`[materials] cobalt → tconstruct:cobalt_ingot`；
+    `[sieve] 6 inputs, 92 drops`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；
+    `summon` 两个种子物品名字正常；目标黏液草方块 `setblock` 成功。
+  - 不装 Tinkers：`[sieve] 90 drops`（两个种子条目被 `mod` 过滤掉），无 unknown recipe/item 报错。
+  - 主线 1.21.1：`[sieve] 90 drops`、`Loaded 1433 recipes`、`[compost] 67 entries`。
+  - **右键草方块、匠魂炉实际熔化、JEI 页仍未进游戏**。
+- **配方计数**：`runData` 生成 **143** 条（137 + cobalt 6）；主线手写 **57** 条
+  （45 条候选变体 + 12 条 `create:crushing`）；1.20.1 再手写 78 条匠魂熔炼 → **135** 条。
 
-## 上一批次（2026-11-02，树的起点：树苗 / 竹子 / 下界菌岩孢子）
+## 上一批次（2026-11-02，Immersive Engineering 接入）
 
-- 泥土筛 9 种树苗（合计 31%/次）+ 竹子 5% → **6 输入 / 88 掉落**；竹子物品本身就是竹笋，
-  没有新增自定义物品。
-- 碎下界岩筛**菌岩孢子**各 5% → 右键下界岩变菌岩 → 原版骨粉催菌 / 催巨菌；
-  绯红 / 诡异木桶、木坩埚因此有了来源。新物品有自有贴图 / 模型 / 堆肥 100。
-- 双线 `[sieve] 88 drops` / `[compost] 67 entries`；右键菌岩、骨粉链与 JEI 页仍待作者目视。
+- silver / nickel → Thermal → IE；lead → Mek / Thermal → IE；aluminum → IE；uranium → Mek → IE；
+  15 条熔炼变体，IE 粉碎机走 `forge:ores/<m>` 标签（不补配方）。
+- 只装 IE 时 5 材料全部解析到 IE；Thermal+Create+IE 同时装时优先级正确；主线无 IE 回退自有铝锭。
+
+## 更早批次（2026-11-02，树的起点：树苗 / 竹子 / 下界菌岩孢子）
+
+- 泥土筛 9 种树苗（合计 31%/次）+ 竹子 5%；碎下界岩筛菌岩孢子各 5% + 骨粉催菌/巨菌；
+  新物品贴图 / 模型 / 堆肥 100。当时 `[sieve] 88 drops` / `[compost] 67 entries`。
 
 ## 历史批次（详细见 [history.md](history.md)）
 
@@ -226,7 +237,7 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 | `./gradlew build` | ✅ | 2026-11-02：`BUILD SUCCESSFUL`（`--offline`）；JEI 依赖走 `maven.blamejared.com` |
 | `python3 scripts/check-core-imports.py` | ✅ | core 层无 NeoForge import；`0 known leak(s)` |
 | `python3 scripts/check-textures.py` | ✅ | 方块/物品 16×16、蚕动画 16×64 + mcmeta、坩埚贴图存在；无 `minecraft:item/*` 引用 |
-| 数据表 JSON | ✅ | 47 hammer / 10 crook / 19 melt / 9 heat / 5 barrel / 67 compost / 6 sieve；全部可解析 |
+| 数据表 JSON | ✅ | 50 hammer / 10 crook / 19 melt / 9 heat / 5 barrel / 67 compost / 6 sieve；全部可解析 |
 | 客户端启动（最后一次） | ✅ | 2026-10-31 00:16：`[hammer] 47`、`[crook] 10`、`[crucible] 6`、`[jei] 47/6/5/3/10`；无 missing model/texture |
 | 客户端启动（当前代码） | ✅ | 2026-10-31 09:26 客户端日志：`[jei] 35 hammer` / `19 meltables, 9 heat sources` / `5 barrel, 65 compost` / `4 sieve` / `10 crook`；`[sieve] 4 inputs, 52 drops`；无 missing model/texture |
 | 桶：堆肥→泥土 | ✅ | 2026-10-29：苹果 +100 / 仙人掌 +100 / 树叶 +125，满 1000 后 `dirt=true` |
@@ -320,7 +331,7 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 | 1.20.1 M3 手感 | ⚠️ | 锤左键链路/耐久、骨钩 ×1.5 待玩家 |
 | 1.20.1 M4 坩埚 | ✅ | 表加载 39/9；RCON 篝火 0.25、熄灭停、火把 0.1；JEI 两页注册 |
 | 1.20.1 M4 交互 | ⚠️ | 右键投料/取流体、Jade 画面待玩家 |
-| P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (191 recipes, 69 loot tables, 41 tags)` |
+| P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (200 recipes, 72 loot tables, 44 tags)`；Tinkers 流体 result 已豁免 item 键检查 |
 | P2 生成器幂等 | ✅ | 1.21.1 四个生成器写入仓库副本后 `diff -r` 与仓库逐字节一致（含 lang/筛表） |
 | P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |
 | P2 生成器 1.20.1 | ✅ | `--target 1.20.1 --out`：107 recipe / 60 loot / 39 tag 通过守卫；与 port 产物 240 文件逐字节一致 |
@@ -342,8 +353,14 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 | IE 锭候选（1.20.1，仅 IE） | ✅ | 1.20.1 分支装 IE 10.2.0-183：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 → `immersiveengineering:ingot_*` |
 | IE 熔炼 RCON | ✅ | IE-only 分支：熔炉烧 `aluminum_ore_gravel` → `ingot_aluminum`，烧 `silver_ore_sand` → `ingot_silver` |
 | IE 优先级（Thermal+Create+IE） | ✅ | `[materials]`：tin/silver/lead/nickel → Thermal、zinc → Create、aluminum/uranium → IE；0 条 `Unknown item` |
-| IE 粉碎机（标签） | ⚠️ | 12 种矿块在 `forge:ores/<m>` 里，IE 的 crusher 输入也用该标签；多方块本身未跑 |
+| IE 粉碎机（标签） | ⚠️ | 13 种矿块在 `forge:ores/<m>` 里，IE 的 crusher 输入也用该标签；多方块本身未跑 |
 | IE 主 1.21.1 回退 | ✅ | 主线无 IE：`Loaded 1427 recipes`；熔炉烧 `aluminum_ore_gravel` → 自有 `aluminum_ingot`；IE 变体不加载 |
+| 匠魂种子（条件物品） | ✅ | 只装 Tinkers：`summon` 两个种子物品成功；不装：`[sieve] 90` vs 92，无 unknown item |
+| 匠魂钴 | ✅ | 只装 Tinkers：`[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |
+| 匠魂熔炼配方 | ⚠️ | 78 条 `tconstruct:melting` 按 Tinkers 自己的格式生成，加载无报错；匠魂炉实际熔化未跑 |
+| 下界合金碎片 | ✅ | 碎下界岩 0.4%，双线都加；`[sieve] 90`（无匠魂）/ 92（有匠魂） |
+| 匠魂草方块右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块 → `*_vanilla_slime_grass`；需要玩家右键实测 |
+| 钴碎块贴图 | ✅ | broken 用下界岩红棕基底，其余钴形态蓝色；`check-textures` 通过 |
 | 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
 | 泥土筛石子（数量） | ✅ | 分支机器筛：7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%） |
 | 泥土筛树苗 | ✅ | 主线/分支 `[sieve] 6 inputs, 88 drops`；1.20.1 机器筛 8 次 → 橡木/金合欢树苗各 1（旧 5 种，≈22%） |
@@ -377,8 +394,8 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
    标签/掉落/配方/模型四批都已完成。config 与 JEI 已齐。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
-7. **更多 supported mods**：IE 已接（1.20.1）；下一批可看 Tinkers' Construct（钴，先核对
-   1.20.1 金属表）/ IE 1.21.1（等它发布）/ 其它科技模组的锭，按
+7. **更多 supported mods**：IE + Tinkers 钴已接（1.20.1）；下一批等「工匠巧思」拓展补阿迪特
+   （Tinkers 3 本体已移除），再看 IE 1.21.1 / 其它科技模组，按
    [data-format.md](data-format.md) §8 的规则加候选 + 手写变体即可（只接基础资源，不接合金）。
 
 ## 已拍板的决策
@@ -478,6 +495,14 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
   IE 没有 1.21.1 版，主线只保留候选 / 变体。
 - **IE 在专用服会打 `DISTXFORM` 报错**：那是 IE 自己尝试加载 client 类，server 仍然 `Done`，
   不要当成本项目的错误。
+- **Tinkers 3 已经移除阿迪特**：3.12.1 没有 `molten_ardite` / `ardite_ingot`，只有残留的
+  贴图文件；不要在 Tinkers 3 上硬加，等「工匠巧思」这类重现 1/2 代金属的拓展。
+- **条件物品不能交给 datagen**：`sky/ender_slime_grass_seeds` 只在 `tconstruct` 在场时注册，
+  `runData` 没有匠魂 → 不会生成模型；这两个模型/贴图必须手写。条件物品的创造栏也要 null 检查。
+- **匠魂熔炼的 `result` 是流体**（`{tag, amount}`，没有 `item`/`id`）：`check-data-paths.py`
+  现在只对带 item/id 的 result 检查版本键，否则 78 条熔炼会被误报。
+- **筛表 `mod` 字段**：`"mod": "tconstruct"` 的条目在模组缺失时**在查物品之前**跳过，
+  这样条件物品不会刷 unknown item；没有这个字段的条目行为不变。
 - **数据表客户端只认 `assets/`**：`processResources` 把 `barrel/`、`compost/`、`sieve/`、`hammer/`、
   `crook/`、`crucible_melt/`、`crucible_heat/` 镜像到 `assets/`；data 仍是唯一源。
 - **RCON 测桶前先 `forceload add`**；测熔炉要自己写 `CookTimeTotal`。
