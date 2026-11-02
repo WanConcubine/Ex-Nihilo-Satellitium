@@ -10,7 +10,7 @@ are identical on both versions. The *vanilla-typed* JSON is not:
 | loot dir        | `loot_table/`               | `loot_tables/`              |
 | tag dirs        | `tags/block`, `tags/item`   | `tags/blocks`, `tags/items` |
 | recipe result   | `result.id`                 | `result.item`               |
-| conditions      | `neoforge:conditions` etc.  | `forge:conditions` etc.     |
+| conditions      | `neoforge:conditions`       | `conditions` (bare key)     |
 | common tags     | `c:`                        | `forge:`                    |
 
 `DataTarget` is imported by the asset/data generators (one script can emit
@@ -93,7 +93,10 @@ class DataTarget:
 
     @property
     def condition_key(self) -> str:
-        return "forge:conditions" if self.legacy else "neoforge:conditions"
+        # Forge 1.20.1's RecipeManager reads the *bare* `conditions` key and
+        # evaluates it before parsing the recipe body; `forge:conditions` is
+        # silently ignored, which then parses (and fails on) the unknown item.
+        return "conditions" if self.legacy else "neoforge:conditions"
 
     def mod_loaded(self, modid: str) -> dict:
         prefix = "forge" if self.legacy else "neoforge"
@@ -126,7 +129,7 @@ def _to_legacy(node):
         out = {}
         for key, value in node.items():
             if key == "neoforge:conditions":
-                key = "forge:conditions"
+                key = "conditions"  # Forge 1.20.1 reads the bare key
             if key == "result" and isinstance(value, dict) and "id" in value:
                 value = {("item" if k == "id" else k): v for k, v in value.items()}
             out[key] = _to_legacy(value)

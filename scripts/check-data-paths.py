@@ -70,6 +70,13 @@ def _check_recipe(path: Path, target: data_target.DataTarget) -> list[str]:
     foreign = "neoforge" if target.legacy else "forge"
     if f"{foreign}:conditions" in data:
         problems.append(f"{path}: use `{target.condition_key}`, not `{foreign}:conditions`")
+    # The two loaders read different keys: NeoForge wants `neoforge:conditions`,
+    # Forge's RecipeManager reads the bare `conditions`. A wrong key is silently
+    # ignored, so the recipe then parses (and fails on) its conditional items.
+    expected_key = target.condition_key
+    for key in ("conditions", "forge:conditions", "neoforge:conditions"):
+        if key in data and key != expected_key:
+            problems.append(f"{path}: recipe conditions must use `{expected_key}`, not `{key}`")
     for text in _walk_strings(data):
         if text.startswith(f"{foreign}:"):
             problems.append(f"{path}: `{text}` is not a {target.name} condition id")
