@@ -25,13 +25,13 @@
 - 旧的手写 `data/**/tags/**`、`data/**/loot_table(s)/**`、133 条手写配方、244 个
   blockstate/model JSON 已删除。
 - `scripts/check-data-paths.py` 会同时扫 `src/main/resources` 和 `src/generated/resources`，
-  当前输出 `145 recipes, 69 loot tables, 41 tags`（145 = 133 生成 + 12 手写，见 §3）。
+  当前输出 `160 recipes, 69 loot tables, 41 tags`（160 = 133 条 base 生成 + 27 条候选变体手写，见 §3.3）。
 
 ## 2. 范围与状态
 
 | 类别 | 迁移前来源 | 数量 | 状态 |
 |---|---|---|---|
-| 配方 | 手写 JSON | 145 | ✅ 133 条进 `RecipeProvider`；12 条 `*_mekanism` 仍手写 |
+| 配方 | 手写 JSON | 160 | ✅ 133 条 base 进 `RecipeProvider`；27 条 `*_smelting_<mod>` 仍手写 |
 | 模型 / blockstate | Python 生成器 | 244 | ✅ 244 条进 provider；13 个手绘几何模型 + 2 个物品几何模型留手写 |
 | 语言 | 手写 `en_us` / `zh_cn` | 265 键 | ⬜ 建议**保持 JSON**（双语手维护），除非所有者要求迁 |
 | 自定义玩法表 | JSON + reload listener | sieve/hammer/crook/compost/barrel/crucible_* | 不属于原版 datagen，暂不迁 |
@@ -63,20 +63,25 @@
    `category` 字段（默认 `misc`）；用 `CookingBookCategory.MISC` 保持行为一致。同理所有合成
    配方用 `RecipeCategory.MISC`（对应 `crafting_book_category: misc`）。
 
-### 3.3 为什么 12 条 `*_mekanism` 还是手写
+### 3.3 为什么 27 条 `*_smelting_<mod>` 还是手写
 
-`tin/lead/osmium/uranium` 的 `*_smelting_mekanism` 产物是 `mekanism:ingot_*`。datagen 里
+`mekanism` / `thermal_foundation` / `create` 的变体产物是对方模组的锭（`mekanism:ingot_tin`、
+`thermal:tin_ingot`、`create:zinc_ingot`）。datagen 里
 `ItemStack` 必须指向**已注册**的 `Item`，而 Mekanism 不在 `runData` 的 classpath 上（它是可选
 软依赖），无法构造。所以：
 
 - 生成的是**兜底**配方：产物 `exnihilosatellitium:<id>_ingot`，带
   `neoforge:conditions: [{type: neoforge:not, value: {type: neoforge:mod_loaded, modid: mekanism}}]`；
-- 12 条 `<id>_ore_{gravel,sand,dust}_smelting_mekanism.json` 留在
-  `src/main/resources/data/exnihilosatellitium/recipe/`，条件相反。
+- 27 条 `<id>_ore_{gravel,sand,dust}_smelting_<mod>.json` 留在
+  `src/main/resources/data/exnihilosatellitium/recipe/`，条件是「本模组在场 **且** 它之前的候选
+  都不在」（否则两个科技模组同时装会匹配两条熔炼配方）；base 由 datagen 生成，
+  条件自动是 `not(or(...))`。
 
 `ModRecipes` 的 `smeltingTarget(...)` 在候选存在时**总是**指向自有锭，与 datagen 机器上装了
 哪些模组无关；若候选材料的自有锭没注册（即 runData 时该模组在 classpath 上），直接抛异常，
-避免静默少生成配方。将来接第二个 supported mod 时，照这个规则再加手写变体。
+避免静默少生成配方。接新的 supported mod 时照这个规则再加手写变体，注意**两个版本的条件键不同**：
+1.21.1 是 `neoforge:conditions`，1.20.1 是裸 `conditions`（写 `forge:conditions` 会被 Forge
+静默忽略，然后按无条件解析 → `Unknown item`）。
 
 为此 `OreMaterial` 多了 `ingotCandidates`（原始有序候选列表），`OreMaterials` 把解析拆成
 `readIngotCandidates` + `resolveIngot`；`ingot` 仍是**运行时已解析**的结果，注册/标签逻辑不变。
