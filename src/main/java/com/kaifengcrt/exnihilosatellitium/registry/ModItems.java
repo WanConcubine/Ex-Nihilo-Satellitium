@@ -10,6 +10,7 @@ import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.NyliumSporesItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.TinkersGrassSeedItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
 import net.minecraft.core.particles.ParticleTypes;
@@ -20,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -225,6 +227,18 @@ public final class ModItems {
             ITEMS.register("ancient_spores", () -> new AncientSporesItem(new Item.Properties()));
 
     /**
+     * Tinkers-only grass seeds. Right-click a vanilla grass block to turn it into
+     * Tinkers' slime grass. Both fields stay {@code null} when Tinkers is absent,
+     * so the items do not exist in that profile at all.
+     */
+    public static final RegistryObject<Item> SKY_SLIME_GRASS_SEEDS =
+            registerTinkersGrassSeeds("sky_slime_grass_seeds",
+                    "tconstruct:sky_vanilla_slime_grass");
+    public static final RegistryObject<Item> ENDER_SLIME_GRASS_SEEDS =
+            registerTinkersGrassSeeds("ender_slime_grass_seeds",
+                    "tconstruct:ender_vanilla_slime_grass");
+
+    /**
      * Nether-tree start: crushing netherrack drops these spores, and right-clicking
      * netherrack with them grows the matching nylium. Vanilla bone meal does the rest.
      */
@@ -298,6 +312,16 @@ public final class ModItems {
     private static RegistryObject<Item> registerCrucibleItem(final String name,
                                                              final RegistryObject<? extends Block> block) {
         return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+    }
+
+    /** Conditional item: absent unless Tinkers is on the mod list. */
+    private static RegistryObject<Item> registerTinkersGrassSeeds(final String name,
+                                                                  final String targetBlock) {
+        if (ModList.get() == null || !ModList.get().isLoaded("tconstruct")) {
+            return null;
+        }
+        return ITEMS.register(name, () -> new TinkersGrassSeedItem(
+                new Item.Properties(), targetBlock));
     }
 
     public static void register(final IEventBus modBus) {

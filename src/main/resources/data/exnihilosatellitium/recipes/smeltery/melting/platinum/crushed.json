@@ -1,0 +1,18 @@
+{
+  "type": "tconstruct:melting",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "ingredient": {
+    "item": "exnihilosatellitium:platinum_crushed"
+  },
+  "result": {
+    "amount": 60,
+    "tag": "forge:molten_platinum"
+  },
+  "temperature": 970,
+  "time": 43
+}

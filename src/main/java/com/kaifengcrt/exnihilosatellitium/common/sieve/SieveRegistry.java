@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -65,6 +66,12 @@ public final class SieveRegistry {
                 final List<SieveDrop> list = new ArrayList<>();
                 for (final JsonElement element : outputs) {
                     final JsonObject drop = element.getAsJsonObject();
+                    // Optional gate for soft-dependency drops (e.g. Tinkers seeds):
+                    // skip before touching the item registry, so an absent mod is silent.
+                    final String requiredMod = drop.has("mod") ? drop.get("mod").getAsString() : null;
+                    if (requiredMod != null && !Platform.isModLoaded(requiredMod)) {
+                        continue;
+                    }
                     final ResourceLocation itemId = ResourceLocation.tryParse(drop.get("item").getAsString());
                     final Item item = itemId == null ? null : ForgeRegistries.ITEMS.getValue(itemId);
                     final float chance = drop.get("chance").getAsFloat();

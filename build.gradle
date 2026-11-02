@@ -192,6 +192,13 @@ dependencies {
         // IE 10.x is the 1.20.1 line; it has no hard dependencies.
         runtimeOnly fg.deobf("libs:ImmersiveEngineering-1.20.1:10.2.0-183")
     }
+    if (project.hasProperty("techMods") && file("libs/Mantle-1.20.1-1.11.117.jar").exists()) {
+        // Tinkers' Construct 3 requires Mantle.
+        runtimeOnly fg.deobf("libs:Mantle-1.20.1:1.11.117")
+    }
+    if (project.hasProperty("techMods") && file("libs/TConstruct-1.20.1-3.12.1.231.jar").exists()) {
+        runtimeOnly fg.deobf("libs:TConstruct-1.20.1:3.12.1.231")
+    }
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

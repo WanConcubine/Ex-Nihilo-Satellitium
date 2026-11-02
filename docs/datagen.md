@@ -15,13 +15,14 @@
 | `ModBlockTags` | 方块标签：`forge:ores/<m>`、`mineable/*`、`#exnihilosatellitium:wooden_crucibles` | 18 |
 | `ModItemTags` | 物品标签：`forge:ores|ingots/<m>`、`#exnihilosatellitium:compostable` | 23 |
 | `ModLootTables` | 方块自掉表 | 69 |
-| `ModRecipes` | 配方（矿石链、桶/坩埚、筛/网、锤/钩、机器/插件、人偶、瓷、石子） | 137 |
-| `ModBlockStates` | blockstate + 机械方块模型 | 71 + 29 |
-| `ModItemModels` | 物品模型（从注册表推导） | 150 |
+| `ModRecipes` | 配方（矿石链、桶/坩埚、筛/网、锤/钩、机器/插件、人偶、瓷、石子、钴） | 143 |
+| `ModBlockStates` | blockstate + 机械方块模型 | 74 + 29 |
+| `ModItemModels` | 物品模型（从注册表推导） | 157 |
 
-- 当前整个 `data/` 树：**191 recipe / 69 loot_tables / 41 tags**（137 条生成 + 54 条手写）。
-- 手写保留：42 条 `*_smelting_<mod>` 候选变体（产物是对方模组的物品）、12 条 `create:crushing`、
-  13 个手绘方块模型、2 个手绘物品模型（`electric_hammer` / `fuel_hammer`）。
+- 当前整个 `data/` 树：**278 recipe / 72 loot_tables / 44 tags**（143 条生成 + 135 条手写）。
+- 手写保留：45 条 `*_smelting_<mod>` 候选变体、12 条 `create:crushing`、78 条匠魂熔炼、
+  13 个手绘方块模型、2 个手绘物品模型（`electric_hammer` / `fuel_hammer`），
+  以及 2 个条件物品模型（匠魂种子；只有匠魂在场才注册）。
 
 ## 2. 1.20.1 侧的三个 API 坑（移植时踩过）
 

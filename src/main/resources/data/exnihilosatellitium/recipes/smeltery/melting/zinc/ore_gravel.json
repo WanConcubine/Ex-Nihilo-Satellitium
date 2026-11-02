@@ -1,0 +1,18 @@
+{
+  "type": "tconstruct:melting",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "ingredient": {
+    "item": "exnihilosatellitium:zinc_ore_gravel"
+  },
+  "result": {
+    "amount": 240,
+    "tag": "forge:molten_zinc"
+  },
+  "temperature": 420,
+  "time": 125
+}

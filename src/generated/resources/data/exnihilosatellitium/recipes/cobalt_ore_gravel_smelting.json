@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "forge:not",
+      "value": {
+        "type": "forge:mod_loaded",
+        "modid": "tconstruct"
+      }
+    }
+  ],
+  "cookingtime": 200,
+  "experience": 0.1,
+  "group": "",
+  "ingredient": {
+    "item": "exnihilosatellitium:cobalt_ore_gravel"
+  },
+  "result": {
+    "item": "exnihilosatellitium:cobalt_ingot"
+  }
+}
