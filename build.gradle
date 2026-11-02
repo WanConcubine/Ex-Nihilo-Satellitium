@@ -188,6 +188,10 @@ dependencies {
         // Expansion's press dies, so without it the log fills with Unknown item.
         runtimeOnly fg.deobf("libs:thermal_expansion-1.20.1:11.0.1.29")
     }
+    if (project.hasProperty("techMods") && file("libs/ImmersiveEngineering-1.20.1-10.2.0-183.jar").exists()) {
+        // IE 10.x is the 1.20.1 line; it has no hard dependencies.
+        runtimeOnly fg.deobf("libs:ImmersiveEngineering-1.20.1:10.2.0-183")
+    }
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
