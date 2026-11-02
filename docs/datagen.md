@@ -3,7 +3,7 @@
 > 2026-11-02。第一批（标签 + 方块掉落表）、第二批（配方）、第三批（blockstate/model）
 > 已在主线完成并提交。
 > 本文是**施工单 + 现状记录**：新会话从这里开始，不要重做已完成的批次。
-> 1.20.1 分支只做了第一批；第二批配方还没移植过去（见 §5）。
+> 1.20.1 分支的三批也已补完（2026-11-02 晚，见 §5）。
 
 ## 1. 现状
 
@@ -170,24 +170,23 @@
 265 个键、中英双语、含 Jade/JEI 配置键。`LanguageProvider` 会把它们搬进 Java，维护成本高于收益。
 建议保留 `assets/exnihilosatellitium/lang/*.json`，只在新增内容时手加；除非所有者明确要求。
 
-## 5. 1.20.1 分支
+## 5. 1.20.1 分支（三批已完成，2026-11-02 晚）
 
-- **只做了第一批**（`0b7df76`）：方块/物品标签 + 方块掉落表（4 个 provider）。配方（160 条）与
-  blockstate/模型（71 个 blockstate + 42 方块模型 + 150 物品模型）在这条线**仍是手写 JSON**；
-  主线第二、三批待移植。
-- **`port_data.py` 已改成合并读**：默认 `--source src/main/resources src/generated/resources`
-  （后者覆盖前者）。只读 main 的旧默认会漏掉 generated 里的配方/标签/掉落；现在跑出来是
-  **176 recipe / 69 loot / 41 tag / 126 other**，`check-data-paths.py --target 1.20.1` 通过。
-- 移植第二、三批时注意：
-  - 1.20.1 没有 `RecipeOutput`：`buildRecipes(Consumer<FinishedRecipe> out)`，
-    `RecipeBuilder#save` 第二参数是 `String` id，`ResourceLocation` 要自己拼；
-  - **配方条件用裸 `conditions` 键**（不是 `forge:conditions`，写错会被 Forge 静默忽略然后按无条件
-    解析）；类型是 `forge:mod_loaded` / `forge:not` / `forge:or`。`IConditionBuilder` +
-    `ConditionalRecipe.builder()` 是另一套 `forge:conditional` 配方类型，我们不用；
-  - 目录是 `recipes/`（复数）、`result.item`；`data_target.py` 能转这些，但 Java provider 要重写一遍；
-  - `BlockStateProvider` / `ItemModelProvider` 在 `net.minecraftforge.client.model.generators`；
-  - `OreMaterial.ingotCandidates` 已经同步过去（分支 `OreMaterials` 用 `ModList` 探测模组）。
-  - 分支的 `docs/datagen.md` 有更细的移植清单。
+分支上 `runData` 现在生成：标签 41 + 掉落表 69 + **配方 137** + **71 个 blockstate + 177 个模型**。
+手写只剩 39 条配方（27 条 `*_smelting_<mod>` 候选变体 + 12 条 `create:crushing`，产物都是
+对方模组的物品）和 15 个手绘模型（13 方块 + 2 物品）。
+
+移植时踩到并记进分支 `docs/datagen.md` 的三个坑：
+
+1. `RecipeBuilder.save(out, String)` 的 id **必须带命名空间**，否则文件落到 `data/minecraft/recipes/`；
+   而且 id 等于产物默认 id 时会抛异常 → 分支用 `save(out, name, builder)` 助手分流。
+2. 配方条件键是**裸 `conditions`**（不是 `forge:conditions`）；新类 `datagen/DatagenRecipe`
+   负责挂条件并丢掉 advancement。
+3. **`runData` 不能装科技模组**：Thermal/Create 已挂到 `-PtechMods` 后面（`runData` 不传），
+   否则 `OreMaterials` 解析到对方锭、生成直接失败，对方的 datagen provider 还会污染输出树。
+
+- `port_data.py` 仍可用：`--source src/main/resources src/generated/resources` 合并读，
+  当前产物 **176 recipe / 69 loot / 41 tag / 126 other**，`check-data-paths --target 1.20.1` 通过。
 
 ## 6. 环境与命令
 
