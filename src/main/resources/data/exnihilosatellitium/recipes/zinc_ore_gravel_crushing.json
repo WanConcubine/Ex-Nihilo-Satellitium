@@ -1,0 +1,32 @@
+{
+  "type": "create:crushing",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "exnihilosatellitium:zinc_ore_gravel"
+    }
+  ],
+  "results": [
+    {
+      "item": "create:crushed_raw_zinc"
+    },
+    {
+      "item": "create:crushed_raw_zinc",
+      "chance": 0.75
+    },
+    {
+      "item": "create:experience_nugget",
+      "chance": 0.75
+    },
+    {
+      "item": "minecraft:cobblestone",
+      "chance": 0.125
+    }
+  ],
+  "processingTime": 250
+}
