@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "misc",
+  "cookingtime": 600,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "exnihilosatellitium:silkworm"
+  },
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:cooked_silkworm"
+  }
+}

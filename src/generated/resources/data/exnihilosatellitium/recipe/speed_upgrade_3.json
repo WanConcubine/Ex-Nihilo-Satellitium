@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "S": {
+      "item": "minecraft:sugar"
+    },
+    "U": {
+      "item": "exnihilosatellitium:speed_upgrade_2"
+    }
+  },
+  "pattern": [
+    "DSD",
+    "SUS",
+    "DSD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:speed_upgrade_3"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "v": {
+      "item": "minecraft:nether_wart"
+    },
+    "w": {
+      "item": "exnihilosatellitium:doll"
+    },
+    "x": {
+      "item": "minecraft:blaze_powder"
+    },
+    "y": {
+      "item": "minecraft:redstone"
+    },
+    "z": {
+      "item": "minecraft:glowstone_dust"
+    }
+  },
+  "pattern": [
+    "xyx",
+    "zwz",
+    "xvx"
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:angry_doll"
+  }
+}

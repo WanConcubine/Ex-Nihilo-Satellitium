@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    "xx ",
+    " x ",
+    " x "
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:wooden_crook"
+  }
+}

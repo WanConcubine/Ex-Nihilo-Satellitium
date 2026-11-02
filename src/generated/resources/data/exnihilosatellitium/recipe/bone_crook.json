@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "minecraft:bone"
+    }
+  },
+  "pattern": [
+    "xx ",
+    " x ",
+    " x "
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:bone_crook"
+  }
+}

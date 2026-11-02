@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "minecraft:iron_ingot"
+    },
+    "y": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    " x ",
+    " yx",
+    "y  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:iron_hammer"
+  }
+}

@@ -1,6 +1,6 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-01
+> 最后更新：2026-11-02
 > 先看这 20 行；细节再翻 [DESIGN.md](DESIGN.md)、[data-format.md](data-format.md)、[textures.md](textures.md)。
 
 ## 一句话
@@ -19,11 +19,33 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 `crucible.*`/`machine.*` config；分支提交 `6a733e8`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
-**M7 datagen 第一批已完成**（2026-11-02：`runData` 生成方块/物品标签 + 方块掉落表，
-输出到 `src/generated/resources`，旧的手写 tag/loot JSON 已删除）；配方、模型/blockstate、
-语言文件仍在 `src/main/resources`（下一批）。M8 月光魔法、M9 发布仍未开始。
+**M7 datagen 已验证两批**（2026-11-02）：第一批 `runData` 生成方块/物品标签 + 方块掉落表，
+第二批生成 **133 条配方**（`ModRecipes`，从注册表 + `materials.json` 推导，不生成 advancement），
+输出到 `src/generated/resources`，旧的手写 tag/loot/recipe JSON 已删除；只剩 12 条
+`*_smelting_mekanism` 手写（datagen 引用不了未注册的模组物品）。模型/blockstate 与语言文件
+仍在 `src/main/resources`（下一批）。M8 月光魔法、M9 发布仍未开始。
 
-## 当前批次（2026-11-01，1.20.1 M10）
+## 当前批次（2026-11-02，M7 datagen 第二批：配方）
+
+- **`ModRecipes extends RecipeProvider`**：9 材料 × （3 打包 + 3 熔炼）、12 桶、11 木坩埚、
+  筛子 + 3 网、6 锤（含下界合金锻造）/2 钩、4 机器、6 插件、8 人偶、瓷土/坩埚/瓷桶、熟蚕 3 条
+  = **133 条**；id 与旧手写 JSON 完全一致。
+- **不生成 advancement**：`withoutAdvancements(...)` 包一层 `RecipeOutput`，丢掉
+  `AdvancementHolder`（本项目从来没发过 `advancement/recipes/**`，多 133 个会改变配方书解锁）。
+- **烹饪直接构造 `SmeltingRecipe`/`SmokingRecipe`/`CampfireCookingRecipe` + `MISC` 书类别**，
+  等同旧 JSON 缺省值；合成统一 `RecipeCategory.MISC`。
+- **12 条 `*_smelting_mekanism` 保留手写**：产物是 `mekanism:ingot_*`，不在 datagen classpath
+  上，`ItemStack` 构造不出来；生成的是带 `not(mod_loaded(mekanism))` 的兜底配方。
+- **`OreMaterial` 加 `ingotCandidates`**（原始有序候选）：`OreMaterials` 拆成
+  `readIngotCandidates` + `resolveIngot`，`ingot` 仍是运行时解析结果，注册/标签逻辑不变。
+- **语义对比脚本** `scripts/compare-recipes.py`：shaped 拆成去空行空列的格子、shapeless 多重集、
+  烹饪比六字段；结果 `145 old, 133 generated, 12 old-only (0 unexpected), 0 new-only, 0 different`。
+- **验证**：`runData` 幂等（删旧文件后重跑 `written: 0`）；`build` + 三个守卫全过
+  （`check-data-paths` 仍是 145 recipes / 69 loot / 41 tags）；`runServer` `Loaded 1423 recipes`、
+  `our recipes=133`、无解析错误。
+- **下一批**：模型/blockstate（施工单见 [datagen.md](datagen.md) §4），语言保持 JSON。
+
+## 上一批次（2026-11-01，1.20.1 M10）
 
 - **分支**：`1.20.1-forge`（worktree `../Ex-Nihilo-Satellitium-1.20.1`）；客户端
   `./gradlew runClient -PdevMods`，服务端 `./gradlew runServer`。
@@ -304,6 +326,8 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 - **先读** [porting.md](porting.md) §3 的 P2 记录；本批从 **1.20.1 分支补 M2** 开始（清单见「下一步」）。
 - **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`
   + `python3 scripts/check-data-paths.py`（后两条必须 `0 known leak(s)` / `passed for 1.21.1`）。
+- **datagen 自检**：`./gradlew runData --offline` 后 `git status` 应为空（已迁移的两批稳定）；
+  配方要重新比对时用 `python3 scripts/compare-recipes.py --expect-old-only '*_mekanism.json'`。
 - **数据管线验收（不需要进游戏）**：
   `python3 scripts/port_data.py --out build/port-1.20.1 --force` →
   `python3 scripts/check-data-paths.py --target 1.20.1 --root build/port-1.20.1`；
@@ -447,6 +471,11 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 | P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |
 | P2 生成器 1.20.1 | ✅ | `--target 1.20.1 --out`：107 recipe / 60 loot / 39 tag 通过守卫；与 port 产物 240 文件逐字节一致 |
 | P2 1.20.1 分支 | ⚠️ | 分支本身还没铺数据、没补 M2 |
+| M7 datagen 第二批（配方） | ✅ | 2026-11-02：`ModRecipes` 生成 133 条；`compare-recipes.py` → `145 old, 133 generated, 12 old-only (0 unexpected), 0 new-only, 0 different` |
+| M7 datagen 幂等 | ✅ | 删掉 133 条手写配方后再跑 `runData`：`HashCache ... written: 0`，没有旧文件复活 |
+| M7 datagen 第二批（服务端） | ✅ | `runServer`：`Loaded 1423 recipes`（与迁移前同）、`[debug] our recipes=133`、无 recipe 解析错误 |
+| M7 配方语义 | ✅ | 生成物只多出 codec 默认字段（`count:1` / `category:"misc"`）；没有 advancement 文件 |
+| M7 datagen 移植链路 | ✅ | `port_data.py` 现在合并 main + generated：145 recipe / 69 loot / 41 tag / 126 other，`check-data-paths --target 1.20.1` 通过（只读 main 的旧默认会漏 133 配方） |
 | P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
 | P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |
 | P1 ConfigValues | ✅ | RCON：电动筛 217 tick，`Energy` 20000→15660（正好 20 FE/t） |
@@ -463,7 +492,8 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
    清单见交接清单。
 3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
-4. **M7 余项**：datagen 第二批（配方、模型/blockstate、语言）；施工单见 [datagen.md](datagen.md)。config 与 JEI 已齐。
+4. **M7 余项**：datagen 第三批 = 模型/blockstate（施工单见 [datagen.md](datagen.md) §4）；
+   语言默认保持 JSON。配方（第二批）已完成。config 与 JEI 已齐。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
 

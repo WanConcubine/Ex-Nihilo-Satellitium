@@ -84,7 +84,13 @@ public final class OreMaterials {
                     final JsonObject name = entry.getAsJsonObject("name");
                     final String en = name.get("en_us").getAsString();
                     final String zh = name.has("zh_cn") ? name.get("zh_cn").getAsString() : en;
-                    final String ingot = resolveIngot(entry, id);
+                    // An unconditional "ingot" wins over the candidate list, so the
+                    // candidates are dropped in that case (datagen then emits a single
+                    // condition-free smelting recipe, exactly like the runtime).
+                    final String explicitIngot = readIngot(entry, id);
+                    final List<OreMaterial.IngotCandidate> candidates = explicitIngot == null
+                            ? readIngotCandidates(entry, id) : List.of();
+                    final String ingot = resolveIngot(explicitIngot, candidates, id);
 
                     if (!ID.matcher(id).matches()) {
                         ExNihiloSatellitium.LOGGER.error("[materials] bad id '{}', skipped", id);
@@ -107,7 +113,8 @@ public final class OreMaterials {
                         ExNihiloSatellitium.LOGGER.error("[materials] duplicate id '{}', later entry skipped", id);
                         continue;
                     }
-                    out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity, ingot));
+                    out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity, ingot,
+                            candidates));
                 } catch (final Exception exception) {
                     ExNihiloSatellitium.LOGGER.error("[materials] bad entry skipped: {}", exception.toString());
                 }
@@ -172,27 +179,20 @@ public final class OreMaterials {
     }
 
     /**
-     * Resolves the ingot the ore blocks smelt into.
+     * Parses the ordered {@code ingots} candidate list ({@code {"item": "...",
+     * "mod": "..."}}). The raw list is kept on {@link OreMaterial} so datagen can
+     * emit the same {@code mod_loaded} conditions the runtime resolves here.
      *
-     * <p>{@code ingot} is an unconditional override. Otherwise {@code ingots} is
-     * an ordered candidate list ({@code {"item": "...", "mod": "..."}}) and the
-     * first entry whose mod is loaded wins; when no entry matches we register
-     * our own {@code <id>_ingot}, matching the classic "create the ingot if no
-     * other mod supplies one" behaviour.</p>
-     *
-     * <p>The generated smelting recipes carry the same order as
-     * {@code neoforge:mod_loaded} conditions, so the JSON data and this runtime
-     * resolution agree without the recipe existing twice at load time.</p>
+     * <p>Entries without {@code item} or with an unparseable id are skipped with a
+     * log line; a missing {@code mod} makes the candidate unconditional.</p>
      */
-    private static String resolveIngot(final JsonObject entry, final String id) {
-        final String explicit = readIngot(entry, id);
-        if (explicit != null) {
-            return explicit;
-        }
+    private static List<OreMaterial.IngotCandidate> readIngotCandidates(final JsonObject entry,
+                                                                       final String id) {
         final JsonElement candidates = entry.get("ingots");
         if (candidates == null || !candidates.isJsonArray()) {
-            return null;
+            return List.of();
         }
+        final List<OreMaterial.IngotCandidate> out = new ArrayList<>();
         for (final JsonElement element : candidates.getAsJsonArray()) {
             if (!element.isJsonObject()) {
                 ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping a non-object ingots entry", id);
@@ -209,12 +209,36 @@ public final class OreMaterials {
                 continue;
             }
             final String mod = candidate.has("mod") ? candidate.get("mod").getAsString() : null;
-            if (mod != null && !Platform.isModLoaded(mod)) {
+            out.add(new OreMaterial.IngotCandidate(item, mod));
+        }
+        return List.copyOf(out);
+    }
+
+    /**
+     * Resolves the ingot the ore blocks smelt into.
+     *
+     * <p>{@code ingot} is an unconditional override. Otherwise {@code ingots} is
+     * an ordered candidate list and the first entry whose mod is loaded wins;
+     * when no entry matches we register our own {@code <id>_ingot}, matching the
+     * classic "create the ingot if no other mod supplies one" behaviour.</p>
+     *
+     * <p>The generated smelting recipes carry the same order as
+     * {@code neoforge:mod_loaded} conditions, so the JSON data and this runtime
+     * resolution agree without the recipe existing twice at load time.</p>
+     */
+    private static String resolveIngot(final String explicit,
+                                       final List<OreMaterial.IngotCandidate> candidates,
+                                       final String id) {
+        if (explicit != null) {
+            return explicit;
+        }
+        for (final OreMaterial.IngotCandidate candidate : candidates) {
+            if (candidate.mod() != null && !Platform.isModLoaded(candidate.mod())) {
                 continue;
             }
-            ExNihiloSatellitium.LOGGER.info("[materials] {} smelts into {}{}", id, item,
-                    mod == null ? "" : " from " + mod);
-            return item;
+            ExNihiloSatellitium.LOGGER.info("[materials] {} smelts into {}{}", id, candidate.item(),
+                    candidate.mod() == null ? "" : " from " + candidate.mod());
+            return candidate.item();
         }
         return null;
     }
