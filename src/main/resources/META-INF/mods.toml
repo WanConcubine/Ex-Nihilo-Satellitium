@@ -23,6 +23,8 @@ modId="${mod_id}" #mandatory
 version="${mod_version}" #mandatory
 # A display name for the mod
 displayName="${mod_name}" #mandatory
+# A path to the mod logo, relative to the jar root
+logoFile="icon.png"
 # A URL to query for updates for this mod. See the JSON update specification https://docs.minecraftforge.net/en/latest/misc/updatechecker/
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
