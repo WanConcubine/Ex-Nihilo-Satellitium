@@ -75,6 +75,7 @@ com/kaifengcrt/exnihilosatellitium/
 | 文档 | 写什么 |
 |---|---|
 | [docs/status.md](docs/status.md) | **当前状态**：停在哪、验证表、下一步、坑 |
+| [docs/history.md](docs/history.md) | **历史批次叙事**（2026-11-01 ～ 02 的批次流水，只追溯用，不再维护） |
 | [docs/DESIGN.md](docs/DESIGN.md) | 原则、目标、核心循环、架构、里程碑、决策记录 |
 | [docs/parity.md](docs/parity.md) | **复刻对照表**：经典项与 Ex Astris 的逐项状态、分档 |
 | [docs/data-format.md](docs/data-format.md) | 堆肥 JSON、物品标签、NBT 键、命令、比较器 |
