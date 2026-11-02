@@ -463,7 +463,7 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
    清单见交接清单。
 3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
-4. **M7 余项**：datagen 第二批（配方、模型/blockstate、语言）；config 与 JEI 已齐。
+4. **M7 余项**：datagen 第二批（配方、模型/blockstate、语言）；施工单见 [datagen.md](datagen.md)。config 与 JEI 已齐。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
 
