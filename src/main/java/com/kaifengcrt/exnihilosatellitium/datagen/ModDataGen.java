@@ -32,5 +32,7 @@ public final class ModDataGen {
                 List.of(new LootTableProvider.SubProviderEntry(ModLootTables::new,
                         LootContextParamSets.BLOCK)),
                 event.getLookupProvider()));
+        generator.addProvider(event.includeServer(),
+                new ModRecipes(output, event.getLookupProvider()));
     }
 }

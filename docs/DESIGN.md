@@ -1139,3 +1139,25 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
   清理已移除材料的残留。之前直接重跑会把 M2/M6 手加的 13 条筛出物（沙 12 + 砂砾 1）删掉。
 - 验收：生成器对当前树重跑零 diff；port 产物过守卫；生成器产物与 port 产物在 240 个文件上
   逐字节一致（只剩合并型标签与筛表的上下文差异）。
+
+## 30. M7 datagen 第二批：配方（2026-11-02）
+
+问题：145 条配方是手写 JSON，id、形状、条件都要和 `materials.json`、注册表人工对齐；
+新增材料时最容易被漏掉。第一批已经把标签/掉落表收进 `runData`，这批收配方。
+
+- `datagen/ModRecipes` 从**注册表 + 材料表**推导：矿链 81 条一条循环出，桶/坩埚按木种表，
+  机器/插件/人偶按内容分节手写，共 **133 条**；id 与旧 JSON 逐一相同。
+- **不生成 advancement**：`RecipeBuilder#save` 默认会写 `advancement/recipes/**`，本项目从没发过，
+  多 133 个会改变配方书解锁。用一层 `RecipeOutput` 包装丢掉 `AdvancementHolder`，
+  但保留 builder 的 `unlockedBy(...)`（它自己的 `ensureValid` 要非空 criteria）。
+- **烹饪不用 `SimpleCookingRecipeBuilder`**：builder 按产物推导 `food`/`blocks` 书类别，旧 JSON 缺省
+  是 `misc`。直接构造 `SmeltingRecipe`/`SmokingRecipe`/`CampfireCookingRecipe` +
+  `CookingBookCategory.MISC`；合成配方统一 `RecipeCategory.MISC`。
+- **12 条 `*_smelting_mekanism` 留下手写**：`ItemStack` 必须指向已注册的 `Item`，而 Mekanism 不在
+  datagen classpath 上。生成的是带 `not(mod_loaded(mekanism))` 的兜底配方，候选材料在
+  `smeltingTarget(...)` 里**总是**回退自有锭，不受 runData 环境的模组影响。
+- 支撑改动：`OreMaterial` 增加 `ingotCandidates`（原始有序候选），`OreMaterials` 拆成
+  `readIngotCandidates` + `resolveIngot`；`ingot` 仍是运行时解析结果，注册与标签不变。
+- 验收：`scripts/compare-recipes.py`（shaped 去空行空列成格子、shapeless 多重集、烹饪六字段、
+  条件规范化）对 145 旧 / 133 新给出 `0 different`；删旧文件后 `runData` `written: 0`；
+  `runServer` `Loaded 1423 recipes` 与迁移前一致。细节见 [datagen.md](datagen.md)。

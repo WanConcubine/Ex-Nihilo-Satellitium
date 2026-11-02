@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "v": {
+      "item": "minecraft:nether_wart"
+    },
+    "w": {
+      "item": "exnihilosatellitium:doll"
+    },
+    "x": {
+      "item": "minecraft:ink_sac"
+    },
+    "y": {
+      "item": "minecraft:redstone"
+    },
+    "z": {
+      "item": "minecraft:lapis_lazuli"
+    }
+  },
+  "pattern": [
+    "xyx",
+    "zwz",
+    "xvx"
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:creepy_doll"
+  }
+}

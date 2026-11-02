@@ -32,7 +32,11 @@ from pathlib import Path
 import data_target
 
 ROOT = Path(__file__).resolve().parents[1]
+# Hand-written resources and the datagen output are one logical tree; recipes,
+# loot tables and tags now live in the generated half (datagen batches 1 + 2),
+# while the gameplay tables and assets stay hand-written.
 SOURCE = ROOT / "src/main/resources"
+GENERATED = ROOT / "src/generated/resources"
 
 # Tag kinds whose directory name differs between the versions.
 TAG_KINDS = ("block", "item")
@@ -72,8 +76,9 @@ def detect_source_target(root: Path) -> str:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--source", type=Path, default=SOURCE,
-                        help="resource root to read (default: src/main/resources)")
+    parser.add_argument("--source", type=Path, nargs="+", default=[SOURCE, GENERATED],
+                        help="resource root(s) to read; later roots win on duplicate paths "
+                             "(default: src/main/resources src/generated/resources)")
     parser.add_argument("--target", choices=data_target.TARGETS, default="1.20.1",
                         help="target layout (only 1.21.1 -> 1.20.1 is implemented)")
     parser.add_argument("--out", type=Path, default=ROOT / "build" / "port-1.20.1",
@@ -87,12 +92,18 @@ def main(argv=None) -> int:
                          "(the 1.20.1 branch is still at M1)")
     target = data_target.get(args.target)
 
-    source_layout = detect_source_target(args.source)
+    sources: list[Path] = args.source
+    for source in sources:
+        if not (source / "data").is_dir():
+            raise SystemExit(f"no data/ directory under {source}")
+    source_layout = detect_source_target(sources[0])
     if source_layout == args.target:
-        raise SystemExit(f"{args.source} is already in the {args.target} layout")
+        raise SystemExit(f"{sources[0]} is already in the {args.target} layout")
 
     out: Path = args.out
-    if out.resolve() in (ROOT.resolve(), args.source.resolve(), (ROOT / "src").resolve()):
+    forbidden = {ROOT.resolve(), (ROOT / "src").resolve(),
+                 *(source.resolve() for source in sources)}
+    if out.resolve() in forbidden:
         raise SystemExit(f"refusing to write the port into {out}")
     if out.exists() and any(out.iterdir()):
         if not args.force:
@@ -100,11 +111,16 @@ def main(argv=None) -> int:
         shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
 
+    # Merge the roots into one relative-path -> file map; a later root overrides
+    # an earlier one, which is the same precedence the resource pack uses.
+    files: dict[Path, Path] = {}
+    for source in sources:
+        for path in (source / "data").rglob("*"):
+            if path.is_file():
+                files[path.relative_to(source / "data")] = path
+
     counts = {"recipe": 0, "loot": 0, "tag": 0, "copied": 0}
-    for path in sorted((args.source / "data").rglob("*")):
-        if not path.is_file():
-            continue
-        relative = path.relative_to(args.source / "data")
+    for relative, path in sorted(files.items()):
         destination = out / map_path(relative, target)
         destination.parent.mkdir(parents=True, exist_ok=True)
 
