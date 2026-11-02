@@ -1,0 +1,18 @@
+{
+  "type": "tconstruct:melting",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "ingredient": {
+    "item": "exnihilosatellitium:cobalt_ore_dust"
+  },
+  "result": {
+    "amount": 240,
+    "tag": "forge:molten_cobalt"
+  },
+  "temperature": 950,
+  "time": 173
+}

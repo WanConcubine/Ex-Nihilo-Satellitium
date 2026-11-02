@@ -251,9 +251,32 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   当前 schema 只有一件事（筛砂砾/沙子/尘土），下界与末地变体留到 M2 实现时再扩字段，
   现在不要在表里硬塞。
 - **当前候选（2026-11-02）**：tin → Mekanism → Thermal；lead → Mekanism → Thermal → IE；
-  silver/nickel → Thermal → IE；zinc → Create；osmium → Mekanism；uranium → Mekanism → IE；
+  silver/nickel → Thermal → IE；zinc → Create；**cobalt → Tinkers**
+  （`tconstruct:cobalt_ingot`；无匠魂时自有钴锭）；osmium → Mekanism；uranium → Mekanism → IE；
   aluminum → IE；platinum 无候选。IE 只在 1.20.1 有版本，锭 id 是 `ingot_aluminum` 这类；
   它的 crusher 输入走 `forge:ores/<m>`，我们的矿块已在标签里。
+
+### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
+
+**路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
+13 材料 × 6 形态 = 78 条。
+
+```json
+{
+  "type": "tconstruct:melting",
+  "conditions": [{ "type": "forge:mod_loaded", "modid": "tconstruct" }],
+  "ingredient": { "item": "exnihilosatellitium:cobalt_broken" },
+  "result": { "amount": 60, "tag": "forge:molten_cobalt" },
+  "temperature": 950,
+  "time": 43
+}
+```
+
+- 物品（broken / crushed / powdered）→ 60 mB；方块（ore_gravel / ore_sand / ore_dust）→ 240 mB。
+- result 是流体（`tag` + `amount`，没有 item/id）；`check-data-paths.py` 只对 item/id result
+  检查版本键。
+- 温度取 Tinkers 自己的锭配方，时间按 90 mB 锭等比缩放；没匠魂时整批条件跳过。
+- 阿迪特不在这一批：Tinkers 3.12.1 已移除，等「工匠巧思」拓展。
 
 ## 9. 桶转化 JSON（M1.5/M6）
 

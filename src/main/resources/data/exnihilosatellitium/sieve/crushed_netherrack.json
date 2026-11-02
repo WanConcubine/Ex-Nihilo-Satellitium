@@ -32,6 +32,14 @@
     {
       "item": "exnihilosatellitium:warped_nylium_spores",
       "chance": 0.05
+    },
+    {
+      "item": "exnihilosatellitium:cobalt_broken",
+      "chance": 0.01
+    },
+    {
+      "item": "minecraft:netherite_scrap",
+      "chance": 0.004
     }
   ]
 }

@@ -11,6 +11,7 @@
     "#forge:ores/aluminum",
     "#forge:ores/osmium",
     "#forge:ores/zinc",
+    "#forge:ores/cobalt",
     "#forge:ores/uranium"
   ]
 }

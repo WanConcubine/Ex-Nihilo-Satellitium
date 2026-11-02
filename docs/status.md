@@ -7,45 +7,49 @@
 
 **M1 木桶 + 七种材质变体已完成**；**M1.5 桶内方块转化已铺好**（2026-11-01：水+熔岩→圆石、
 熔岩+水→黑曜石、熔岩+红石→下界岩、熔岩+荧石→末地石，木桶限温 + 接雨水）；
-**M2 筛子 + 矿链已铺好**（三种筛网、4 张筛料表、12 种材料 4 碎块→方块→锭）；
-**M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、47 条锤表、10 张钩表、沙→尘土）；
+**M2 筛子 + 矿链已铺好**（三种筛网、4 张筛料表、13 种材料 4 碎块→方块→锭）；
+**M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、50 条锤表、10 张钩表、沙→尘土）；
 **M4 坩埚已铺好**（2026-11-01：瓷土 → 未烧制 → 烧制、39 条熔点 / 9 热源、
 熔料+流体双储、JEI 两页 + Jade）。**M6 五刀已铺完**（2026-11-01：巫水 + 古代孢子、瓷桶、
 木坩埚 11 种、木桶补齐 12 种、粉碎下界岩/末地石 + 草种子、蚕/侵染树叶、5 种人偶）；
 **M10 自动化也已铺完**（四台机器 + 6 个插件 + 自动输出 + GUI/JEI/BER）；
 `crucible.*` 与 `machine.*` config 全部就位。**桶配方已按原版改正**（4 板 + 台阶，见下）。
 **科技模组锭接入**（2026-11-02）：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
-zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/uranium）；运行时取第一个
-已加载的模组，自有锭只作兜底。
+zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/uranium）与
+Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已加载的模组，自有锭只作兜底。
 
-## 当前批次（2026-11-02 晚，Immersive Engineering 接入）
+## 当前批次（2026-11-02 晚，Tinkers' Construct 3 接入）
 
-- **IE 锭候选（1.20.1）**：silver / nickel → Thermal → IE；lead → Mekanism → Thermal → IE；
-  aluminum → IE（原来是自有锭）；uranium → Mekanism → IE。只接基础锭，不接合金。
-- **15 条手写熔炼变体**（5 材料 × 砾/砂/尘），条件「IE 在场且之前的候选都不在」；
-  base 由 `runData` 重算 `not(or(所有候选))`。两条线共用 `materials.json`，主线保留 IE 候选
-  和变体（1.21.1 上永不命中）。
-- **IE 粉碎机**：输入走 `forge:ores/<m>` 标签；12 种矿块本来就在标签里，不需要补 IE 配方。
-  产物是 IE 自己的 dust（我们的矿尘不占 `forge:dusts`）。
+- **碧空 / 末影黏液草种子**：只在 `tconstruct` 在场时注册；右键草方块 →
+  `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`；泥土筛 2% / 1%，
+  条目带 `"mod": "tconstruct"`，无匠魂不加载、不刷 unknown item。模型/贴图手写。
+- **钴**（第 13 种材料）：候选 `tconstruct:cobalt_ingot`，无匠魂回退自有钴锭；
+  碎下界岩 1% 出 `cobalt_broken`；broken 贴图用下界岩红棕基底。
+- **下界合金碎片**：碎下界岩 0.4%。
+- **匠魂熔炼**：13 材料 × 6 形态 = 78 条 `tconstruct:melting`；物品 60 mB、方块 240 mB；
+  流体 `forge:molten_<m>`，温度取匠魂锭配方；条件 `mod_loaded(tconstruct)`。
+- **阿迪特暂不做**：Tinkers 3.12.1 已移除，等「工匠巧思」拓展。
 - **验证**：
-  - 只装 IE：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 →
-    `immersiveengineering:ingot_*`；RCON 熔炉 `aluminum_ore_gravel → ingot_aluminum`、
-    `silver_ore_sand → ingot_silver`。
-  - Thermal + Create + IE：tin/silver/lead/nickel → Thermal、zinc → Create、
-    aluminum/uranium → IE；0 条 `Unknown item`。
-  - IE 粉碎机多方块未跑，只核对了标签与配方输入。
-- **配方计数**：137 条 generated + 54 条手写 = **191**；其中 42 条是候选变体。
+  - 只装 Tinkers 3.12.1 + Mantle 1.11.117：`[materials] cobalt → tconstruct:cobalt_ingot`；
+    `[sieve] 92 drops`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；
+    两个种子 `summon` 正常；目标黏液草方块 `setblock` 成功。
+  - 不装 Tinkers：`[sieve] 90 drops`，无 unknown recipe/item 报错。
+  - **右键草方块、匠魂炉实际熔化、JEI 页未进游戏**。
+- **配方计数**：143 generated + 135 手写 = **278**；手写含 45 候选变体 + 12 crushing +
+  78 匠魂熔炼。
 
-## 上一批次（2026-11-02，树的起点：树苗 / 竹子 / 下界菌岩孢子）
+## 上一批次（2026-11-02，Immersive Engineering 接入）
 
-- 泥土筛 9 种树苗（31%/次）+ 竹子 5% → 88 掉落；竹子物品本身就是竹笋，不新增自定义物品。
-- 碎下界岩筛菌岩孢子各 5% → 右键下界岩变菌岩 → 原版骨粉催菌 / 催巨菌；
-  绯红 / 诡异木桶、木坩埚因此有了来源；新物品有自有贴图 / 模型 / 堆肥 100。
-- 双线 `[sieve] 88 drops` / `[compost] 67 entries`；右键与 JEI 仍待目视。
+- silver/nickel → Thermal → IE；lead → Mek/Thermal → IE；aluminum → IE；uranium → Mek → IE；
+  15 条变体；IE 粉碎机走 `forge:ores` 标签。只装 IE 与 Thermal+Create+IE 两种组合都已验。
+
+## 更早批次（2026-11-02，树的起点：树苗 / 竹子 / 下界菌岩孢子）
+
+- 泥土筛 9 种树苗 + 竹子；碎下界岩筛菌岩孢子各 5% + 骨粉链；当时 88 掉落 / 67 compost。
 
 ## 更早批次（2026-11-02，datagen 第二、三批移植）
 
-- **配方（第二批）**：`datagen/ModRecipes` 生成 **137 条**（133 条 base + 4 条石子→石头），
+- **配方（第二批）**：`datagen/ModRecipes` 生成 **143 条**（133 条 base + 4 条石子→石头 + 6 条钴），
   手写只剩 54 条（42 条 `*_smelting_<mod>` 候选变体 + 12 条 `create:crushing`），
   原来的 137 个手写文件已删除。
 - **blockstate / 模型（第三批）**：`ModBlockStates` 生成 71 个 blockstate + 29 个机械模型，
@@ -92,7 +96,7 @@ zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/ura
 - **泥土筛石子（2026-11-02 追加）**：四种石子（圆石/安山岩/花岗岩/闪长岩），筛泥土每次必出
   四种、每种 4-6 个（100%），4 个合成一块对应石头；筛表新增 `min`/`max`（默认 1），手动筛/机器筛共用 `SieveRolls`，
   JEI 多一行数量。贴图 `art/items/pebbles/generate.py`（16×16），模型与配方手写。
-- **矿块接 Create 粉碎**：Thermal 磨粉机全走 `forge:ores/<m>` 标签（我们 12 种都能进）；
+- **矿块接 Create 粉碎**：Thermal 磨粉机全走 `forge:ores/<m>` 标签（我们 13 种都能进）；
   Create 只有铁/金/铜/锌用具体物品，其余走标签。补 **12 条** `create:crushing`
   （铁/金/铜/锌 × 砾/砂/尘），条件 `create`，字段用 1.20.1 的 `results[].item` + `processingTime`。
 - **验证（追加）**：机器筛 7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%），
@@ -112,8 +116,8 @@ zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/ura
   泥土筛石子、0.1.0 发布。
 
 ## 验证状态
-| datagen 配方移植 | ✅ | `ModRecipes` 生成 137 条；`compare-recipes.py` → 176 old / 137 generated / 0 different |
-| datagen 模型移植 | ✅ | 71 blockstate + 29 方块模型 + 150 物品模型；`compare-models.py` → 248 identical（当批） |
+| datagen 配方移植 | ✅ | `ModRecipes` 生成 143 条（当批 compare 为 137）；0 different |
+| datagen 模型移植 | ✅ | 71 blockstate + 29 方块模型 + 157 物品模型；`compare-models.py` → 248 identical（当批） |
 | datagen 幂等 | ✅ | 删旧文件后重跑 `runData`：`written: 0` |
 | datagen 服务端 | ✅ | 0 条 recipe 解析错误；`[sieve] 76 drops` / `[barrel] 12` / `[hammer] 49` |
 | datagen 客户端 | ✅ | 启动到菜单，0 条 missing model/texture |
@@ -124,7 +128,12 @@ zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/ura
 | IE 锭候选（仅 IE） | ✅ | 只装 IE 10.2.0-183：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 → `immersiveengineering:ingot_*` |
 | IE 熔炼 RCON | ✅ | 熔炉烧 `aluminum_ore_gravel` → `ingot_aluminum`，烧 `silver_ore_sand` → `ingot_silver` |
 | IE 优先级（Thermal+Create+IE） | ✅ | `[materials]`：tin/silver/lead/nickel → Thermal、zinc → Create、aluminum/uranium → IE；0 条 `Unknown item` |
-| IE 粉碎机（标签） | ⚠️ | 12 种矿块在 `forge:ores/<m>`，IE crusher 输入也是该标签；多方块本身未跑 |
+| IE 粉碎机（标签） | ⚠️ | 13 种矿块在 `forge:ores/<m>`，IE crusher 输入也是该标签；多方块本身未跑 |
+| 匠魂种子（条件物品） | ✅ | 只装 Tinkers：`summon` 两个种子成功；不装：`[sieve] 90` vs 92，无 unknown item |
+| 匠魂钴 | ✅ | `[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |
+| 匠魂熔炼配方 | ⚠️ | 78 条 `tconstruct:melting` 格式对齐，加载无报错；匠魂炉实际熔化未跑 |
+| 下界合金碎片 | ✅ | 碎下界岩 0.4%；`[sieve] 90`（无匠魂）/ 92（有匠魂） |
+| 匠魂草方块右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块 → `*_vanilla_slime_grass`；需玩家实测 |
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|

@@ -1,7 +1,9 @@
 package com.kaifengcrt.exnihilosatellitium;
 
 import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.kaifengcrt.exnihilosatellitium.compat.MoonlightCompat;
+import com.kaifengcrt.exnihilosatellitium.platform.ForgeModProbe;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.common.network.ModNetwork;
 import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
@@ -37,6 +39,7 @@ public final class ExNihiloSatellitium {
     public ExNihiloSatellitium(final FMLJavaModLoadingContext context) {
         final IEventBus modBus = context.getModEventBus();
 
+        Platform.install(new ForgeModProbe());
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ExConfig.SPEC);
 
         ModBlocks.register(modBus);

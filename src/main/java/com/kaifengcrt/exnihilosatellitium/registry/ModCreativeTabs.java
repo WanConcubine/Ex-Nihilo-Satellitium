@@ -51,6 +51,12 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CRUSHED_NETHERRACK.get());
                 output.accept(ModItems.CRUSHED_END_STONE.get());
                 output.accept(ModItems.ANCIENT_SPORES.get());
+                if (ModItems.SKY_SLIME_GRASS_SEEDS != null) {
+                    output.accept(ModItems.SKY_SLIME_GRASS_SEEDS.get());
+                }
+                if (ModItems.ENDER_SLIME_GRASS_SEEDS != null) {
+                    output.accept(ModItems.ENDER_SLIME_GRASS_SEEDS.get());
+                }
                 output.accept(ModItems.CRIMSON_NYLIUM_SPORES.get());
                 output.accept(ModItems.WARPED_NYLIUM_SPORES.get());
                 output.accept(ModItems.DOLL.get());
