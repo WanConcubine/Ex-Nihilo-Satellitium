@@ -33,9 +33,16 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
   写错不报错——`RecipeManager` 直接忽略，然后按无条件解析，未安装模组的 `thermal:`/`create:`
   物品炸出 27 条 `Unknown item`（而且 `Loaded 7 recipes` 里的 7 其实是**配方类型数**，
   不是配方数，别被骗）。改成 `conditions` 后 0 条解析错误。
-- **验证**：无科技模组时 27 条变体全部按条件跳过、`tin_ore_gravel` 熔成自有 `tin_ingot`、
+- **验证（无科技模组）**：27 条变体全部按条件跳过、`tin_ore_gravel` 熔成自有 `tin_ingot`、
   `[materials] loaded 12 entries` 且不再刷「tag ingot 不支持」。
-  **未验**：真装 Thermal/Create 的路径（本机没有 jar）。
+- **验证（真装 Thermal Foundation 11.0.6.70 + Thermal Expansion + Create 6.0.8）**：
+  服务端日志 `tin/silver/lead/nickel smelts into thermal:*_ingot from thermal_foundation`、
+  `zinc smelts into create:zinc_ingot from create`；RCON 熔炉实测
+  `tin_ore_gravel → thermal:tin_ingot`、`silver_ore_sand → thermal:silver_ingot`、
+  `zinc_ore_dust → create:zinc_ingot`；自有 tin/silver/zinc 锭全部未注册（`summon` 得 Air）；
+  `Unknown item` 0 条（只装 Foundation 时它会为自己的压印模具报 64 条，装上 Expansion 后消失）。
+  dev 侧用 `fg.deobf` 把生产 jar 重映射进 `run`，Create 的 JiJ（flywheel/ponder/registrate）正常加载。
+- **未验**：Mek 与 Thermal 同时在场时的优先级（本机没有 1.20.1 的 Mekanism；主线已验证 Mek 单独在）。
 - **上一批**（datagen 第一批）仍是 tags/loot；配方/模型在这条线还是手写，移植计划见
   [datagen.md](datagen.md)。
 

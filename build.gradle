@@ -166,6 +166,26 @@ dependencies {
         }
     }
 
+    // Supported tech mods for the ingot-candidate integration test (libs/ is
+    // gitignored). Deliberately not gated by -PdevMods: these are common mods and
+    // `runServer` is the quickest way to check which ingot a material resolves to.
+    // Thermal Foundation needs CoFH Core; Thermal Expansion is not needed for us.
+    if (file("libs/cofh_core-1.20.1-11.0.2.56.jar").exists()) {
+        runtimeOnly fg.deobf("libs:cofh_core-1.20.1:11.0.2.56")
+    }
+    if (file("libs/thermal_foundation-1.20.1-11.0.6.70.jar").exists()) {
+        runtimeOnly fg.deobf("libs:thermal_foundation-1.20.1:11.0.6.70")
+    }
+    if (file("libs/create-1.20.1-6.0.8.jar").exists()) {
+        // Create bundles Flywheel / Ponder / Registrate / MixinExtras as jar-in-jar.
+        runtimeOnly fg.deobf("libs:create-1.20.1:6.0.8")
+    }
+    if (file("libs/thermal_expansion-1.20.1-11.0.1.29.jar").exists()) {
+        // Only for a realistic pack: Foundation's press recipes reference
+        // Expansion's press dies, so without it the log fills with Unknown item.
+        runtimeOnly fg.deobf("libs:thermal_expansion-1.20.1:11.0.1.29")
+    }
+
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
