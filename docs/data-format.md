@@ -3,8 +3,7 @@
 > 适用：M1 木桶 + 七种材质变体（Forge 1.20.1）。代码位置：
 > `common/compost/`、`common/blockentity/BarrelBlockEntity.java`。
 >
-> 七种桶（`barrel` = 橡木、`spruce_barrel`、`birch_barrel`、`jungle_barrel`、
-> `acacia_barrel`、`dark_oak_barrel`、`stone_barrel`）共用同一个 BE 类型和同一套
+> 十二种桶（11 种木材 + 石桶）共用同一个 BE 类型和同一套
 > NBT/行为；区别只有方块属性、模型贴图和配方。`barrel` 保持原名是为了兼容旧存档。
 
 ## 1. 堆肥 JSON
@@ -250,3 +249,25 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - **维度变体暂缺**：1.7.10 有 overworld / nether / end 三套矿砾（碎下界岩、末地砾）。
   当前 schema 只有一件事（筛砂砾/沙子/尘土），下界与末地变体留到 M2 实现时再扩字段，
   现在不要在表里硬塞。
+
+## 9. 桶转化 JSON（M1.5/M6）
+
+**路径**：`data/<namespace>/barrel/*.json`，一个转化一个文件。
+
+```json
+{ "base": "minecraft:water", "added": { "fluid": "minecraft:lava" },
+  "result": "minecraft:cobblestone" }
+```
+
+- `base`：桶内必须装满 1000 mB；`added` 恰好一个 `fluid` 或 `item`。
+- 方块结果用 `result`；生成实体用 `entity` + `peaceful_drop`（人偶、牛奶）：
+  ```json
+  { "base": "minecraft:water", "added": { "item": "minecraft:milk_bucket" },
+    "entity": "minecraft:slime", "peaceful_drop": "minecraft:slime_ball" }
+  ```
+  非和平在桶上方生成实体，和平掉 `peaceful_drop`；`peaceful_drop` 可为数组。
+- **物品规则优先于流体容器路径**：牛奶桶同时是物品和流体容器，先匹配 `added.item`；
+  消耗后把 `getCraftingRemainingItem()`（牛奶桶 → 空桶）还给玩家。
+- 当前 12 条：基础 5（水+熔岩、熔岩+水、熔岩+红石、熔岩+荧石、水+尘土）、
+  牛奶 1、巫水 2、人偶 4。
+- 未知 base/added/result/entity 只跳过该条并打 `[barrel]` 警告；删掉 JSON 就不反应。
