@@ -532,7 +532,7 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 | 科技模组锭（主 1.21.1 + Mek） | ✅ | 熔炉烧 `tin_ore_gravel` → `mekanism:ingot_tin`；自有 `tin_ingot` 未注册；`[materials]` 日志 4 条 |
 | 科技模组锭（主，兜底） | ✅ | 无 Create：烧 `zinc_ore_gravel` → `exnihilosatellitium:zinc_ingot` |
 | 科技模组锭（1.20.1 分支） | ✅ | 无模组：0 条解析错误、27 条变体跳过、`tin_ore_gravel → tin_ingot`；`conditions` 键生效 |
-| 科技模组锭（Thermal/Create） | ⚠️ | 本机没有这两个 jar，只做了静态等价验证 |
+| 科技模组锭（Thermal/Create） | ✅ | 1.20.1 分支真装 Thermal Foundation 11.0.6.70 + Create 6.0.8：`tin/silver/lead/nickel → thermal:*_ingot`、`zinc → create:zinc_ingot`，RCON 熔炉实测通过，自有锭未注册 |
 | 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
 | P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
 | P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |
