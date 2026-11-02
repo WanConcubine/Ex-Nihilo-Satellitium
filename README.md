@@ -21,15 +21,17 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-0.1.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-0.2.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
 | 1.20.1 | Forge 47.4.x | 同一版本号，由 `1.20.1-forge` 分支构建 |
 
 1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
 2. 把 jar 放进 `mods/`。
 3. 可选：**JEI**（配方查询）、**Jade**（方块信息）、**Create / Mekanism / Thermal**
-   （金属锭与矿石块的互通）。
+   （金属锭与矿石块的互通）；1.20.1 还可选 **Immersive Engineering** 与
+   **Tinkers' Construct 3 + Mantle**（金属锭/匠魂熔炼）。
+   所有联动都是可选的，没装就回退自有物品。
 
-首个版本的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
+0.2.0 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术栈
 
@@ -56,9 +58,9 @@
 - [x] M5 矿粒 / 粉碎矿 / 冶炼（熔炼成锭已通；锤子降档已接，待验收）
 - [x] M6 瓷桶 / 巫水 / 蚕丝 / 娃娃（服务端已验证，画面待验收）
 - [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运插件（服务端已验证，GUI 待验收）
-- [ ] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 已接管标签 / 掉落表 / 133 条配方，模型与语言待定）
+- [x] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 接管标签 / 掉落表 / 143 条配方 + 74 blockstate + 201 模型；语言仍手写）
 - [ ] M8 与「月光魔法」联动
-- [ ] M9 发布（CurseForge / Modrinth）
+- [ ] M9 发布（0.2.0 准备中；CurseForge / Modrinth 待上传）
 
 ## 文档
 

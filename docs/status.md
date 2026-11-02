@@ -28,7 +28,18 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/aluminum/uranium）
 和 **Tinkers' Construct 钴**（`tconstruct:cobalt_ingot`），运行时取第一个已加载模组的锭，
 自有锭只作兜底。
-**M9 发布：0.1.0 已发（两条线都有 tag）；M8 月光魔法联动仍未开始。**
+**M9 发布：0.1.0 已发（两条线都有 tag）；0.2.0 内容与 jar 已备，tag / 商店上传待确认；
+M8 月光魔法联动仍未开始。**
+
+## 0.2.0 发布准备（2026-11-02）
+
+- 两条线 `mod_version=0.2.0`；`CHANGELOG.md` / `README.md` / [release-0.2.0.md](release-0.2.0.md)
+  已更新。
+- 产物：主线 `build/libs/exnihilosatellitium-0.2.0.jar`（657 KB，
+  sha256 `fff01fc6…2624cc7`）、1.20.1 分支同名 jar（663 KB，sha256 `e579e3a1…cc1ff`）。
+- 两个 jar 的 `mods.toml` 版本号、`LICENSE` / `THIRD-PARTY.md` / `icon.png` 均已核对。
+- **待所有者确认**：版本号 / 发布日期、tag（`v0.2.0` / `v0.2.0-1.20.1`）、
+  CurseForge / Modrinth 上传、README 下载链接。
 
 ## 0.1.0 已发布（2026-11-02）
 
