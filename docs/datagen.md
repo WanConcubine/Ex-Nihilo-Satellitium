@@ -46,8 +46,8 @@ python3 scripts/check-textures.py
 ```
 
 - `runData` 后 `git status` 应干净（`.cache` 被忽略，generated JSON 显式提交）。
-- 服务端冒烟看：`[barrel] 12 transforms`、`[sieve] 6 inputs, 81 drops`、`[hammer] 49 recipes`、
-  `[crucible] 39 meltables / 9 heat sources`、`[compost] 65 entries`，无 missing tag/loot/recipe。
+- 服务端冒烟看：`[barrel] 12 transforms`、`[sieve] 6 inputs, 87 drops`、`[hammer] 49 recipes`、
+  `[crucible] 39 meltables / 9 heat sources`、`[compost] 67 entries`，无 missing tag/loot/recipe。
 - 日志里的 `Loaded N recipes` 是**配方类型数**（1.20.1 的 `RecipeManager` 就这么打印），不是配方条数。
 
 ## 4. 新会话开场清单

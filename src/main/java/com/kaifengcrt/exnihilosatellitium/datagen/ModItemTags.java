@@ -6,6 +6,7 @@ import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
+import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -79,7 +80,8 @@ public final class ModItemTags extends ItemTagsProvider {
                 Items.BAMBOO, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD, Items.PORKCHOP,
                 Items.COOKED_PORKCHOP, Items.BEEF, Items.COOKED_BEEF, Items.CHICKEN,
                 Items.COOKED_CHICKEN, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT,
-                Items.COOKED_RABBIT);
+                Items.COOKED_RABBIT,
+                ModItems.CRIMSON_NYLIUM_SPORES.get(), ModItems.WARPED_NYLIUM_SPORES.get());
     }
 
     static TagKey<Item> forge(final String path) {
