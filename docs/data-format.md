@@ -321,25 +321,30 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
   | 材料 | 候选（按优先级） |
   |---|---|
-  | tin / lead | `mekanism` → `thermal_foundation` |
-  | silver / nickel | `thermal_foundation` |
+  | tin | `mekanism` → `thermal_foundation` |
+  | lead | `mekanism` → `thermal_foundation` → `immersiveengineering` |
+  | silver / nickel | `thermal_foundation` → `immersiveengineering` |
   | zinc | `create` |
-  | osmium / uranium | `mekanism` |
-  | platinum / aluminum | 无候选（永远自有锭） |
+  | osmium | `mekanism` |
+  | uranium | `mekanism` → `immersiveengineering` |
+  | aluminum | `immersiveengineering`（无 IE 时自有锭） |
+  | platinum | 无候选（永远自有锭） |
 
   - **mod id ≠ 物品命名空间**：Thermal 的模组 id 是 `thermal_foundation`，锭却注册在
-    `thermal:` 里。条件写 mod id，物品写命名空间，两边都要对。
+    `thermal:` 里；IE 的模组 id 是 `immersiveengineering`，锭 id 是 `ingot_aluminum`
+    （不是 `aluminum_ingot`）。条件写 mod id，物品写命名空间，两边都要对。
   - **两个版本的配方条件键不同**：1.21.1 用 `neoforge:conditions`，1.20.1 用**裸 `conditions`**
     （Forge 的 `RecipeManager` 只认这个；写 `forge:conditions` 会被静默忽略，然后按无条件解析，
     结果是「未知物品」报错或条件失效）。两者都是**解析前**判定，所以未安装模组的变体可以
     安全地指向不存在的物品。
-  - **Thermal 只在 1.20.1 存在**：主线的材料表同样带着它的候选（两条线共用一个
-    `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 15 条变体配方也永远不会加载。
+  - **Thermal / Create / IE 只在 1.20.1 有对应版本**：主线的材料表同样带着它们的候选（两条线
+    共用一个 `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 30 条变体配方也不会加载。
   - 加一个模组 = 在材料里加一行候选 + 手写 `<m>_ore_<kind>_smelting_<mod>.json` +
     重跑 `./gradlew runData`（base 配方会自动重算条件）；id 必须按对方 jar 核对。
   - **换模组会改变物品存在性**：已有存档里拿到的自有锭，装上受支持模组后会变成未知物品
     （日志报错并消失）。开世界前定好模组列表。
-- 铁/金/铜的 `ingot` 指向原版锭，所以 36 个熔炼配方里它们熔到 `minecraft:*_ingot`；
+- 铁/金/铜的 `ingot` 指向原版锭，所以 27 条 base 熔炼里它们熔到 `minecraft:*_ingot`；
+  其余熔到自有锭或候选锭（27 条 base + 42 条候选变体 = 69 条熔炼配方）。
   其余 9 种熔到自有锭。
 - 锭贴图由 `art/items/ingots/generate.py` 用同一套 5 阶色板生成，16×16、自有像素。
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
@@ -367,6 +372,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 |---|---|---|
 | 1.21.1 | `"results": [{"id": "create:crushed_raw_iron", "count": 1, "chance": 0.75}]` | `processing_time` |
 | 1.20.1 | `"results": [{"item": "create:crushed_raw_iron", "chance": 0.75}]` | `processingTime` |
+
+- **Immersive Engineering 1.20.1**：它的 crusher 输入是 `forge:ores/<m>` 标签，我们的 12 种矿块
+  已经在 1.20.1 的 `forge:ores/<m>` 里，所以不需要补 IE 配方；产物落到 IE 自己的
+  `forge:dusts/<m>`（我们的矿尘按既定设计不占这个标签）。IE 没有 1.21.1 版本，主线只保留
+  锭候选 / 变体，不会命中。
 
 ## 9. 筛子 JSON（M2）
 

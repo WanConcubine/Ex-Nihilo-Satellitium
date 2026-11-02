@@ -21,11 +21,12 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
 **M7 datagen（两条线各三批）**：`runData` 生成标签 41 + 方块掉落表 69 + **配方 137**
 （`ModRecipes`）+ **71 个 blockstate + 179 个模型**（`ModBlockStates` + `ModItemModels`），
-输出到 `src/generated/resources`；仍手写 39 条配方（27 条 `*_smelting_<mod>` 候选变体 +
+输出到 `src/generated/resources`；仍手写 54 条配方（42 条 `*_smelting_<mod>` 候选变体 +
 12 条 `create:crushing`，产物都是对方模组的物品）、15 个手绘模型、全部语言文件。
 1.20.1 分支在 2026-11-02 晚补齐同样三批，见 [datagen.md](datagen.md) §5。
 **科技模组锭接入（2026-11-02）**：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
-zinc → Create；运行时取第一个已加载模组的锭，自有锭只作兜底。
+zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/aluminum/uranium），
+运行时取第一个已加载模组的锭，自有锭只作兜底。
 **M9 发布：0.1.0 已发（两条线都有 tag）；M8 月光魔法联动仍未开始。**
 
 ## 0.1.0 已发布（2026-11-02）
@@ -41,51 +42,39 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 - **还差**：CurseForge / Modrinth 的商店页与文件上传需要所有者操作（本机没有 API key 与 `gh`），
   文案见 CHANGELOG；上传后再把下载链接补进 README。
 
-## 当前批次（2026-11-02 晚，树的起点：泥土筛树苗 + 下界菌岩孢子）
+## 当前批次（2026-11-02 晚，Immersive Engineering 接入）
 
-- **泥土过筛 9 种树苗**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3%，
-  再加 **樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%**（合计 31%/次）。经典 Ex Nihilo 的
-  泥土筛里本来就有树种子，这是那条「从泥土重新长树」的起点；我们之前只有钩树叶一条来源。
-  深色橡木仍走「巫水 + 橡树苗」。**1.21.4 的苍白橡木（pale oak）不在两条目标版本里**，
-  等目标升到 1.21.4 再加。
-- **下界树（绯红 / 诡异菌）**：走「碎下界岩过筛 → 菌岩孢子（各 5%）→ 右键下界岩变菌岩 →
-  骨粉催菌 → 骨粉催巨菌」。不新增桶配方；菌岩一出现，原版骨粉就把剩下的链路接上了，
-  绯红 / 诡异木桶、木坩埚也就有了来源。
-- **新物品**：`crimson_nylium_spores` / `warped_nylium_spores`（16×16 自有像素，
-  `art/items/sieve_extras/generate.py` 生成），堆肥值各 100；杜鹃 / 盛开的杜鹃本来就在
-  `#minecraft:saplings` 里，按标签的 125 堆肥，不重复加条目。
-- **竹子缺口**：泥土筛加 `minecraft:bamboo` 5%。原版没有独立「竹笋」物品——竹子物品
-  本身就是可种植的竹笋，放下即长，所以不新增自定义物品/贴图；竹桶、竹坩埚、脚手架
-  和竹子堆肥都已有，缺的只是第一个来源。**这次筛表变成 6 输入 / 88 掉落。**
-- **双线同步**：`sieve/*.json` 是手写玩法表（不经 datagen），主线和 1.20.1 分支各一份，内容一致；
-  新物品的模型 / 堆肥标签走 datagen。
-- **验证**：`build` / `check-textures` / `check-core-imports` / `check-data-paths` 通过；
-  主线 `[sieve] 6 inputs, 88 drops`、`[compost] 67 entries`；1.20.1 分支同样 88 / 67，
-  两边 RCON `summon` 两个孢子物品名字正常。右键菌岩、骨粉催菌与 JEI 页待作者目视。
+- **IE 锭候选（只针对 1.20.1，IE 没有 1.21.1 版）**：silver / nickel → Thermal → IE；
+  lead → Mekanism → Thermal → IE；aluminum → IE（原来是自有锭）；uranium → Mekanism → IE。
+  **只接基础锭，不接 steel / electrum / constantan 这些合金**。
+- **15 条手写熔炼变体**（5 材料 × 砾/砂/尘），条件是「IE 在场 **且** 它之前的候选都不在」；
+  base 配方由 `runData` 重算成 `not(or(所有候选))`。两条线共用 `materials.json`，主线保留
+  IE 候选和变体（在 1.21.1 上永远不会命中），避免两份表漂移。
+- **IE 粉碎机**：输入走 `forge:ores/<m>` 标签；1.20.1 的 12 种矿块本来就在这个标签里，
+  所以不需要补配方。产物是 IE 自己的 dust（我们的矿尘按既定设计不占 `forge:dusts`）。
+- **验证**：
+  - 1.20.1 分支只装 IE：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部解析到
+    `immersiveengineering:ingot_*`；RCON 熔炉实测 `aluminum_ore_gravel → ingot_aluminum`、
+    `silver_ore_sand → ingot_silver`。
+  - 1.20.1 分支同时装 Thermal + Create + IE：tin/silver/lead/nickel → Thermal、zinc → Create、
+    aluminum/uranium → IE；0 条 `Unknown item`。
+  - 主线 1.21.1 不装 IE：`Loaded 1427 recipes`，RCON 熔炉
+    `aluminum_ore_gravel → 自有 aluminum_ingot`；15 条 IE 变体不加载。
+  - **IE 粉碎机多方块本身还没跑**；只核对了「矿块在 `forge:ores` 标签里、IE 配方输入也是该标签」。
+- **配方计数**：137 条 generated + 54 条手写 = **191**；其中 42 条是 `*_smelting_<mod>` 候选变体。
 
-## 上一批次（2026-11-02，泥土筛石子 + 锌矿接入 Create 粉碎）
+## 上一批次（2026-11-02，树的起点：树苗 / 竹子 / 下界菌岩孢子）
 
-- **石子**：四种（圆石 / 安山岩 / 花岗岩 / 闪长岩），**筛泥土每次必出四种、每种 4-6 个**
-  （100%，一次泥土 ≈ 4-6 块石头），4 个合成 1 块对应石头。为此筛表新增可选的 `min` / `max`（默认 1，闭区间），
-  手动筛、机器筛、JEI 全部走同一份数据：`SieveDrop` 带数量，`SieveRolls` 按数量出栈，
-  JEI 在概率下面多一行「掉落 4-6 个」。
-- **贴图**：`art/items/pebbles/generate.py`，16×16 自有像素，四套调色板（圆石中灰、
-  安山岩浅灰、闪长岩近白、花岗岩粉褐），同一轮廓只换色。
-- **Create 粉碎（审计后补全）**：Thermal 磨粉机全走 `forge:ores/<m>` 标签，所以我们的 12 种
-  矿块都能进；Create 则分两种——**8 种材料走标签**（直接能吃），**铁/金/铜/锌是具体物品**
-  （`minecraft:iron_ore`、`create:zinc_ore` 之类），标签不管用。于是补了 **12 条**
-  `create:crushing`（4 材料 × 砾/砂/尘），条件 `create`，产物与 Create 自己的同名矿石配方一致。
-- **两版字段名不同**：1.21.1 是 `results[].id` + `processing_time`，1.20.1 是
-  `results[].item` + `processingTime`，不能共用一份 JSON（见 [data-format.md](data-format.md) §8）。
-- **验证（1.20.1 分支，装 Thermal + Create）**：机器筛喂 16 泥土 → 7 次成功出
-  圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100% 出）；`[sieve] 6 inputs, 76 drops`；
-  0 条解析错误（12 条 `create:crushing` 都被 Create 6.0.8 接受，粉碎轮 JEI 页待目视）。
-- **未验**：手动筛的右键手感、JEI 数量行、粉碎轮实际输出——都要作者进游戏。
+- 泥土筛 9 种树苗（合计 31%/次）+ 竹子 5% → **6 输入 / 88 掉落**；竹子物品本身就是竹笋，
+  没有新增自定义物品。
+- 碎下界岩筛**菌岩孢子**各 5% → 右键下界岩变菌岩 → 原版骨粉催菌 / 催巨菌；
+  绯红 / 诡异木桶、木坩埚因此有了来源。新物品有自有贴图 / 模型 / 堆肥 100。
+- 双线 `[sieve] 88 drops` / `[compost] 67 entries`；右键菌岩、骨粉链与 JEI 页仍待作者目视。
 
 ## 历史批次（详细见 [history.md](history.md)）
 
 - **2026-11-02**：M7 datagen 第二批（配方 133 条）、第三批（blockstate + 模型 244 个）、
-  科技模组锭接入（Mekanism / Thermal / Create）。
+  科技模组锭接入（Mekanism / Thermal / Create）、泥土筛石子 + Create 粉碎桥。
 - **2026-11-01**：1.20.1 分支 M2–M10（筛子/矿链、锤钩、坩埚、巫水/瓷桶/蚕/人偶、机器）、
   P1 薄门面、P2 数据管线、M6 六刀、M10 自动化与自动输出配置。
 
@@ -331,7 +320,7 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 | 1.20.1 M3 手感 | ⚠️ | 锤左键链路/耐久、骨钩 ×1.5 待玩家 |
 | 1.20.1 M4 坩埚 | ✅ | 表加载 39/9；RCON 篝火 0.25、熄灭停、火把 0.1；JEI 两页注册 |
 | 1.20.1 M4 交互 | ⚠️ | 右键投料/取流体、Jade 画面待玩家 |
-| P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (145 recipes, 69 loot tables, 41 tags)` |
+| P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (191 recipes, 69 loot tables, 41 tags)` |
 | P2 生成器幂等 | ✅ | 1.21.1 四个生成器写入仓库副本后 `diff -r` 与仓库逐字节一致（含 lang/筛表） |
 | P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |
 | P2 生成器 1.20.1 | ✅ | `--target 1.20.1 --out`：107 recipe / 60 loot / 39 tag 通过守卫；与 port 产物 240 文件逐字节一致 |
@@ -348,8 +337,13 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 | M7 datagen 第三批（画面） | ⚠️ | 桶/坩埚/筛子/机器/矿块的观感未目视（客户端已启动待看） |
 | 科技模组锭（主 1.21.1 + Mek） | ✅ | 熔炉烧 `tin_ore_gravel` → `mekanism:ingot_tin`；自有 `tin_ingot` 未注册；`[materials]` 日志 4 条 |
 | 科技模组锭（主，兜底） | ✅ | 无 Create：烧 `zinc_ore_gravel` → `exnihilosatellitium:zinc_ingot` |
-| 科技模组锭（1.20.1 分支） | ✅ | 无模组：0 条解析错误、27 条变体跳过、`tin_ore_gravel → tin_ingot`；`conditions` 键生效 |
+| 科技模组锭（1.20.1 分支） | ✅ | 无模组：0 条解析错误、42 条变体跳过、`tin_ore_gravel → tin_ingot`；`conditions` 键生效 |
 | 科技模组锭（Thermal/Create） | ✅ | 1.20.1 分支真装 Thermal Foundation 11.0.6.70 + Create 6.0.8：`tin/silver/lead/nickel → thermal:*_ingot`、`zinc → create:zinc_ingot`，RCON 熔炉实测通过，自有锭未注册 |
+| IE 锭候选（1.20.1，仅 IE） | ✅ | 1.20.1 分支装 IE 10.2.0-183：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 → `immersiveengineering:ingot_*` |
+| IE 熔炼 RCON | ✅ | IE-only 分支：熔炉烧 `aluminum_ore_gravel` → `ingot_aluminum`，烧 `silver_ore_sand` → `ingot_silver` |
+| IE 优先级（Thermal+Create+IE） | ✅ | `[materials]`：tin/silver/lead/nickel → Thermal、zinc → Create、aluminum/uranium → IE；0 条 `Unknown item` |
+| IE 粉碎机（标签） | ⚠️ | 12 种矿块在 `forge:ores/<m>` 里，IE 的 crusher 输入也用该标签；多方块本身未跑 |
+| IE 主 1.21.1 回退 | ✅ | 主线无 IE：`Loaded 1427 recipes`；熔炉烧 `aluminum_ore_gravel` → 自有 `aluminum_ingot`；IE 变体不加载 |
 | 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
 | 泥土筛石子（数量） | ✅ | 分支机器筛：7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%） |
 | 泥土筛树苗 | ✅ | 主线/分支 `[sieve] 6 inputs, 88 drops`；1.20.1 机器筛 8 次 → 橡木/金合欢树苗各 1（旧 5 种，≈22%） |
@@ -374,8 +368,8 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 ## 下一步（按价值排序）
 
 1. **1.20.1 一次性验收 M1.5–M10**：服务端逻辑都已 RCON 验过，剩下机器 GUI/自动输出抽屉/
-   BER 动画、M6 美术与右键手感。Thermal 的锭接入已在分支上做好（见当前批次），剩下的是
-   **真装 Thermal / Create 跑一遍**（本机没有这两个 jar）。
+   BER 动画、M6 美术与右键手感。Thermal / Create / IE 的锭与粉碎接入已真装验过（见当前批次），
+   剩下的是机器多方块与画面。
 2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
    清单见交接清单。
 3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
@@ -383,7 +377,8 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
    标签/掉落/配方/模型四批都已完成。config 与 JEI 已齐。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
-7. **更多 supported mods**：Immersive Engineering / 其它科技模组的锭，按
+7. **更多 supported mods**：IE 已接（1.20.1）；下一批可看 Tinkers' Construct（钴，先核对
+   1.20.1 金属表）/ IE 1.21.1（等它发布）/ 其它科技模组的锭，按
    [data-format.md](data-format.md) §8 的规则加候选 + 手写变体即可（只接基础资源，不接合金）。
 
 ## 已拍板的决策
@@ -478,6 +473,11 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 - **子模型不要直接当方块模型用**：`barrel_base.json` 没有 textures，只作 parent。
 - **JEI / 月光魔法生产 jar 不能直接丢 `run/mods`**：SRG 名会 `NoSuchFieldError`。
 - **JEI 的 Modrinth maven 会拿到 Fabric jar**：用 `maven.blamejared.com` 的 neoforge 坐标。
+- **IE 1.20.1 的锭 id 是 `ingot_aluminum`**（不是 `aluminum_ingot`），模组 id 是
+  `immersiveengineering`；它的 crusher 输入只认 `forge:ores/<m>`（1.20.1），不吃 `c:ores`。
+  IE 没有 1.21.1 版，主线只保留候选 / 变体。
+- **IE 在专用服会打 `DISTXFORM` 报错**：那是 IE 自己尝试加载 client 类，server 仍然 `Done`，
+  不要当成本项目的错误。
 - **数据表客户端只认 `assets/`**：`processResources` 把 `barrel/`、`compost/`、`sieve/`、`hammer/`、
   `crook/`、`crucible_melt/`、`crucible_heat/` 镜像到 `assets/`；data 仍是唯一源。
 - **RCON 测桶前先 `forceload add`**；测熔炉要自己写 `CookTimeTotal`。

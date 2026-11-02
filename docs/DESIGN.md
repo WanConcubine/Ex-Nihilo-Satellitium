@@ -1198,9 +1198,11 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
 定位先说清楚：**我们负责让基础资源的来源在空岛上说得通，合金由科技模组自己做**。
 所以这一轮只做「同一块矿砾熔成谁家的锭」，不加新金属、不加合金、不占 `c:dusts` 标签。
 
-- **一个材料一条有序候选表**（`materials.json` 的 `ingots`）：tin/lead → `mekanism` →
-  `thermal_foundation`；silver/nickel → `thermal_foundation`；zinc → `create`；
-  osmium/uranium → `mekanism`；platinum/aluminum 保持自有锭。顺序 = 优先级，运行时
+- **一个材料一条有序候选表**（`materials.json` 的 `ingots`）：tin → `mekanism` →
+  `thermal_foundation`；lead → `mekanism` → `thermal_foundation` → `immersiveengineering`；
+  silver/nickel → `thermal_foundation` → `immersiveengineering`；zinc → `create`；
+  osmium → `mekanism`；uranium → `mekanism` → `immersiveengineering`；aluminum →
+  `immersiveengineering`（无 IE 时自有锭）；platinum 保持自有锭。顺序 = 优先级，运行时
   `OreMaterials` 取第一个已加载的模组；都不在就注册并使用自有锭。
 - **数据侧必须和运行时同构**：base 配方带 `not(or(候选 mod...))`，第 i 条的变体带
   `mod_loaded(i)` **加上** 对它之前所有候选的 `not(mod_loaded(...))`。少了后半截，两个
@@ -1212,12 +1214,13 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
   现在改成 `conditions`，并给 `check-data-paths.py` 加了「键必须对」的检查。
 - **为什么变体仍是手写**：产物是别的模组的物品，datagen 里的 `ItemStack` 必须指向已注册的
   `Item`（同 §30 的 Mekanism 结论）。base 由 `ModRecipes` 生成，变体手写，两边用同一张表。
-- **两条线共用一份 `materials.json`**：Thermal 只在 1.20.1 存在，主线的表里也留着它的候选，
-  在 1.21.1 上永远不命中、对应的 15 条变体也永远不加载——换来的是「一份表、两条线不漂移」。
+- **两条线共用一份 `materials.json`**：Thermal / Create / IE 只在 1.20.1 有对应版本，主线的
+  表里也留着它们的候选，在 1.21.1 上永远不命中、对应的 30 条变体也永远不加载——换来的是
+  「一份表、两条线不漂移」。
 - 验证：主线装 Mekanism 时熔炉烧 `tin_ore_gravel` 得到 `mekanism:ingot_tin`、自有 `tin_ingot`
   不注册；不装 Create 时 `zinc_ore_gravel` 回退自有锭；1.20.1 分支无模组时 0 条解析错误、
-  27 条变体全部按条件跳过。Thermal/Create 的真机验证本机没有 jar，只做了静态等价。
-  细节见 [data-format.md](data-format.md) §8 与 [status.md](status.md) 验证表。
+  42 条变体全部按条件跳过。Thermal/Create/IE 的真机验证见 §35 与
+  [status.md](status.md) 验证表。
 
 ## 33. 泥土筛石子，以及「矿块被别人家机器当成矿」（2026-11-02）
 
@@ -1264,3 +1267,24 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
    不新增自定义物品/贴图，只在泥土筛加 5%（Sequentia 的泥土筛也用 `minecraft:bamboo`；
    概率按本项目自己的表定）。竹子已经在堆肥表里（100），竹桶 / 竹坩埚 / 脚手架也有配方，
    缺的只是第一个来源——加一个掉落就闭环。
+
+## 35. Immersive Engineering：第二个科技模组锭接入（2026-11-02）
+
+定位延续 §32：**只接基础锭，不接合金**；这一批用 IE 1.20.1 `10.2.0-183` 真装验证。
+
+- 候选：silver / nickel → Thermal → IE；lead → Mekanism → Thermal → IE；
+  aluminum → IE；uranium → Mekanism → IE。IE 的锭 id 是 `ingot_aluminum` 这类，
+  **不是** `aluminum_ingot`；模组 id 是 `immersiveengineering`。
+- 15 条变体（5 材料 × 3 筛料）按 §32 的「本模组 + 之前候选的否定」写；base 由 `runData`
+  重算成 `not(or(...))`。两条线共用一份 `materials.json`，IE 没有 1.21.1 版，主线保留
+  候选 / 变体，永不命中。
+- 验证：IE-only 时 `[materials]` 的 5 条全部解析到 `immersiveengineering:ingot_*`，RCON 熔炉
+  `aluminum_ore_gravel → ingot_aluminum`、`silver_ore_sand → ingot_silver`；Thermal + Create + IE
+  同时装时优先级正确（Thermal 拿 tin/silver/lead/nickel、Create 拿 zinc、IE 拿 aluminum/uranium）；
+  主线无 IE 时 `aluminum_ore_gravel` 回退自有 `aluminum_ingot`。
+- **IE 粉碎机**输入走 `forge:ores/<m>` 标签，1.20.1 的 12 种矿块本来就在标签里，所以不需要
+  补 IE 配方；产物是 IE 自己的 dust（我们的矿尘不占 `forge:dusts`，这是 §32 的既定边界）。
+  多方块本身没跑，只核对了标签与配方输入。
+- 坑：IE 在专用服会尝试加载 client 类并打 `DISTXFORM` 报错（IE 自己的事，server 仍然 Done），
+  别当成本项目错误；它的 crusher 只认 `forge:ores`（1.20.1），不吃 `c:ores`。
+- 合金（steel / electrum / constantan）不接，避免抢科技模组的中间产物。
