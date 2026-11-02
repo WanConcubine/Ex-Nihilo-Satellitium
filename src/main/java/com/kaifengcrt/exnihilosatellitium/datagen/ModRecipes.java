@@ -83,6 +83,7 @@ public final class ModRecipes extends RecipeProvider {
         barrels(out);
         woodenCrucibles(out);
         sieveAndMeshes(out);
+        pebbles(out);
         tools(out);
         machines(out);
         upgrades(out);
@@ -280,6 +281,27 @@ public final class ModRecipes extends RecipeProvider {
                 .define('y', WOODEN_RODS)
                 .unlockedBy("has_rods", has(WOODEN_RODS))
                 .save(out, id(name));
+    }
+
+    // --------------------------------------------------------------- pebbles
+
+    /** Four pebbles of one kind craft the matching stone block (2x2). */
+    private static void pebbles(final RecipeOutput out) {
+        pebble(out, ModItems.COBBLESTONE_PEBBLE.get(), Items.COBBLESTONE);
+        pebble(out, ModItems.ANDESITE_PEBBLE.get(), Items.ANDESITE);
+        pebble(out, ModItems.DIORITE_PEBBLE.get(), Items.DIORITE);
+        pebble(out, ModItems.GRANITE_PEBBLE.get(), Items.GRANITE);
+    }
+
+    private static void pebble(final RecipeOutput out, final ItemLike pebble, final ItemLike block) {
+        final String pebbleName = path(pebble);
+        final String blockName = path(block);
+        ShapedRecipeBuilder.shaped(MISC, block)
+                .pattern("xx")
+                .pattern("xx")
+                .define('x', pebble)
+                .unlockedBy("has_" + pebbleName, has(pebble))
+                .save(out, id(pebbleName + "_to_" + blockName));
     }
 
     // -------------------------------------------------------------- machines

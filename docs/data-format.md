@@ -345,6 +345,22 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
 - 粉碎/粉末现在有两条通路：4 块合成 + M3 锤子降档（矿砾→粉碎、矿砂→粉末）。
 
+### 第三方机器：机械动力（Create）粉碎
+
+Create 对**别人家的矿**用标签（`forge:ores/<m>` / 1.21.1 的 `c:ores/<m>`，配方里带
+`tag_empty` 判定），我们的矿砾/矿砂/矿尘本来就在这些标签里，所以 tin/lead/silver/nickel/
+platinum/aluminum/osmium/uranium 都能直接进粉碎轮。**锌是唯一的例外**：Create 把它自己的锌矿
+写成了具体物品（`create:zinc_ore`），标签不管用，所以我们在自己的数据里补了三条
+`create:crushing`（`<m>_ore_{gravel,sand,dust}_crushing.json`），产物与 Create 自己的锌矿配方一致
+（1 个粉碎锌 + 0.75 概率再来一个 + 0.75 经验粒 + 0.125 圆石），条件是 `create` 已加载。
+
+两个版本的 `create:crushing` 字段名不同，**不能共用一份 JSON**：
+
+| 版本 | 结果数组 | 时间字段 |
+|---|---|---|
+| 1.21.1 | `"results": [{"id": "create:crushed_raw_zinc", "chance": 0.75}]` | `processing_time` |
+| 1.20.1 | `"results": [{"item": "create:crushed_raw_zinc", "chance": 0.75}]` | `processingTime` |
+
 ## 9. 筛子 JSON（M2）
 
 **路径**：`data/<namespace>/sieve/*.json`，一个输入一个文件。
@@ -354,20 +370,24 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   "input": "minecraft:gravel",
   "outputs": [
     { "item": "exnihilosatellitium:iron_broken", "chance": 0.2 },
-    { "item": "minecraft:flint", "chance": 0.25 }
+    { "item": "minecraft:flint", "chance": 0.25 },
+    { "item": "exnihilosatellitium:cobblestone_pebble", "chance": 0.2, "min": 4, "max": 6 }
   ]
 }
 ```
 
 - `input` 是物品 id；筛子一次只装 1 个该物品。
 - `outputs` 每条独立掷 `chance`（0..1），不是权重；一次结算可能同时出多个产物。
+- `min` / `max` 可选，默认 `1`：一次**成功**掷出几件（闭区间，`min <= max`）。
+  目前只有泥土的四种石子用 `4..6`；机器筛和手动筛走同一个 `SieveRolls`，JEI 会在概率下面多一行掉落数量。
 - `chance <= 0` 或物品 id 解析不到：该条跳过并打 `[sieve]` 警告。
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 6 个输入、72 掉落：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
+- 当前有 6 个输入、76 掉落：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
-  `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
+  `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **四种石子 4-6 个**：
+  圆石/安山岩/花岗岩/闪长岩，四个石子合成一块对应石头），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
   管珊瑚、海晶砂粒与**古代孢子**（`ancient_spores`，1/128，M6 巫水链起点）；
   `crushed_netherrack` 出石英/荧石/下界疣/烈焰粉/岩浆膏/灵魂沙，`crushed_end_stone` 出紫颂果/末影珍珠（2026-11-01 删掉“筛回末地石”，避免原地循环）；
   `sand` 另有 5 种珊瑚（管/脑/气泡/火/角）各 1% 与海晶碎片 2%（海晶碎片只从沙出，砂砾不出）。

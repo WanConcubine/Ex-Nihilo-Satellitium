@@ -70,12 +70,19 @@ public final class SieveRegistry {
                     final ResourceLocation itemId = ResourceLocation.parse(drop.get("item").getAsString());
                     final Item item = BuiltInRegistries.ITEM.getOptional(itemId).orElse(null);
                     final float chance = drop.get("chance").getAsFloat();
+                    final int min = drop.has("min") ? drop.get("min").getAsInt() : 1;
+                    final int max = drop.has("max") ? drop.get("max").getAsInt() : min;
                     if (item == null || item == Items.AIR || !Float.isFinite(chance)
                             || chance <= 0.0F || chance > 1.0F) {
                         ExNihiloSatellitium.LOGGER.warn("[sieve] bad drop {} in {}", itemId, id);
                         continue;
                     }
-                    list.add(new SieveDrop(item, chance));
+                    if (min < 1 || max < min) {
+                        ExNihiloSatellitium.LOGGER.warn("[sieve] bad count {}..{} for {} in {}",
+                                min, max, itemId, id);
+                        continue;
+                    }
+                    list.add(new SieveDrop(item, chance, min, max));
                 }
                 if (built.containsKey(input)) {
                     ExNihiloSatellitium.LOGGER.warn("[sieve] duplicate input {} in {}, overwriting", inputId, id);

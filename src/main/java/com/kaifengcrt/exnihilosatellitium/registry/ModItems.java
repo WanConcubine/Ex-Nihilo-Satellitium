@@ -78,6 +78,19 @@ public final class ModItems {
             ITEMS.register("porcelain_bucket", () -> new PorcelainBucketItem(
                     new Item.Properties().stacksTo(1)));
 
+    /** Dirt sifting pebbles: four of a kind craft the matching stone block. */
+    public static final DeferredHolder<Item, Item> COBBLESTONE_PEBBLE =
+            ITEMS.register("cobblestone_pebble", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> ANDESITE_PEBBLE =
+            ITEMS.register("andesite_pebble", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> DIORITE_PEBBLE =
+            ITEMS.register("diorite_pebble", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> GRANITE_PEBBLE =
+            ITEMS.register("granite_pebble", () -> new Item(new Item.Properties()));
+
+    public static final List<DeferredHolder<Item, Item>> PEBBLES = List.of(
+            COBBLESTONE_PEBBLE, ANDESITE_PEBBLE, DIORITE_PEBBLE, GRANITE_PEBBLE);
+
     /** M6: grass seeds turn dirt into grass; hammered netherrack / end stone. */
     public static final DeferredHolder<Item, Item> GRASS_SEEDS =
             ITEMS.register("grass_seeds", () -> new GrassSeedsItem(new Item.Properties()));
