@@ -198,6 +198,24 @@
       "enabled": true
     },
     {
+      "id": "cobalt",
+      "color": "3F7BD9",
+      "name": {
+        "en_us": "Cobalt",
+        "zh_cn": "钴"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "ingots": [
+        {
+          "item": "tconstruct:cobalt_ingot",
+          "mod": "tconstruct"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
       "id": "uranium",
       "color": "6BA84F",
       "name": {

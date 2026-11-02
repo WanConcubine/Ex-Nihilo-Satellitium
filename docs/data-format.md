@@ -325,6 +325,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   | lead | `mekanism` → `thermal_foundation` → `immersiveengineering` |
   | silver / nickel | `thermal_foundation` → `immersiveengineering` |
   | zinc | `create` |
+  | cobalt | `tconstruct`（`tconstruct:cobalt_ingot`；无匠魂时自有锭） |
   | osmium | `mekanism` |
   | uranium | `mekanism` → `immersiveengineering` |
   | aluminum | `immersiveengineering`（无 IE 时自有锭） |
@@ -332,20 +333,21 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
   - **mod id ≠ 物品命名空间**：Thermal 的模组 id 是 `thermal_foundation`，锭却注册在
     `thermal:` 里；IE 的模组 id 是 `immersiveengineering`，锭 id 是 `ingot_aluminum`
-    （不是 `aluminum_ingot`）。条件写 mod id，物品写命名空间，两边都要对。
+    （不是 `aluminum_ingot`）；Tinkers 的模组 id 是 `tconstruct`，钴锭是
+    `tconstruct:cobalt_ingot`。条件写 mod id，物品写命名空间，两边都要对。
   - **两个版本的配方条件键不同**：1.21.1 用 `neoforge:conditions`，1.20.1 用**裸 `conditions`**
     （Forge 的 `RecipeManager` 只认这个；写 `forge:conditions` 会被静默忽略，然后按无条件解析，
     结果是「未知物品」报错或条件失效）。两者都是**解析前**判定，所以未安装模组的变体可以
     安全地指向不存在的物品。
-  - **Thermal / Create / IE 只在 1.20.1 有对应版本**：主线的材料表同样带着它们的候选（两条线
-    共用一个 `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 30 条变体配方也不会加载。
+  - **Thermal / Create / IE / Tinkers 只在 1.20.1 有对应版本**：主线的材料表同样带着它们的候选
+    （两条线共用一个 `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 33 条变体配方
+    也不会加载。
   - 加一个模组 = 在材料里加一行候选 + 手写 `<m>_ore_<kind>_smelting_<mod>.json` +
     重跑 `./gradlew runData`（base 配方会自动重算条件）；id 必须按对方 jar 核对。
   - **换模组会改变物品存在性**：已有存档里拿到的自有锭，装上受支持模组后会变成未知物品
     （日志报错并消失）。开世界前定好模组列表。
-- 铁/金/铜的 `ingot` 指向原版锭，所以 27 条 base 熔炼里它们熔到 `minecraft:*_ingot`；
-  其余熔到自有锭或候选锭（27 条 base + 42 条候选变体 = 69 条熔炼配方）。
-  其余 9 种熔到自有锭。
+- 铁/金/铜的 `ingot` 指向原版锭，所以 39 条 base 熔炼里它们熔到 `minecraft:*_ingot`；
+  其余熔到自有锭或候选锭（39 条 base + 45 条候选变体 = 84 条熔炼配方）。
 - 锭贴图由 `art/items/ingots/generate.py` 用同一套 5 阶色板生成，16×16、自有像素。
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
 - 粉碎/粉末现在有两条通路：4 块合成 + M3 锤子降档（矿砾→粉碎、矿砂→粉末）。
@@ -373,10 +375,35 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | 1.21.1 | `"results": [{"id": "create:crushed_raw_iron", "count": 1, "chance": 0.75}]` | `processing_time` |
 | 1.20.1 | `"results": [{"item": "create:crushed_raw_iron", "chance": 0.75}]` | `processingTime` |
 
-- **Immersive Engineering 1.20.1**：它的 crusher 输入是 `forge:ores/<m>` 标签，我们的 12 种矿块
+- **Immersive Engineering 1.20.1**：它的 crusher 输入是 `forge:ores/<m>` 标签，我们的 13 种矿块
   已经在 1.20.1 的 `forge:ores/<m>` 里，所以不需要补 IE 配方；产物落到 IE 自己的
   `forge:dusts/<m>`（我们的矿尘按既定设计不占这个标签）。IE 没有 1.21.1 版本，主线只保留
   锭候选 / 变体，不会命中。
+
+### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
+
+**路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
+13 材料 × 6 形态 = **78 条**。
+
+```json
+{
+  "type": "tconstruct:melting",
+  "conditions": [
+    { "type": "forge:mod_loaded", "modid": "tconstruct" }
+  ],
+  "ingredient": { "item": "exnihilosatellitium:cobalt_broken" },
+  "result": { "amount": 60, "tag": "forge:molten_cobalt" },
+  "temperature": 950,
+  "time": 43
+}
+```
+
+- 物品形态（`broken` / `crushed` / `powdered`）→ **60 mB**（1/2 粗金属）；
+  方块形态（`ore_gravel` / `ore_sand` / `ore_dust`）→ **240 mB**（2× 粗金属）。
+- `result` 是**流体**：`tag: forge:molten_<m>` + `amount`，没有 `item` / `id`；
+  `check-data-paths.py` 只对 item/id result 做版本键检查。
+- `temperature` 取 Tinkers 自己的锭配方（如钴 950、铁 800），`time` 按 90 mB 锭等比缩放。
+- 没有 `tconstruct` 时整批条件跳过；不要在 Tinkers 3 上找 `molten_ardite`，它已移除。
 
 ## 9. 筛子 JSON（M2）
 
@@ -397,18 +424,21 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - `outputs` 每条独立掷 `chance`（0..1），不是权重；一次结算可能同时出多个产物。
 - `min` / `max` 可选，默认 `1`：一次**成功**掷出几件（闭区间，`min <= max`）。
   目前只有泥土的四种石子用 `4..6`；机器筛和手动筛走同一个 `SieveRolls`，JEI 会在概率下面多一行掉落数量。
+- `mod` 可选：写模组 id（如 `"tconstruct"`）。模组不在时**在查物品之前**跳过该条，
+  所以条件物品（匠魂种子）不会刷 unknown item；没有这个字段的条目行为不变。
 - `chance <= 0` 或物品 id 解析不到：该条跳过并打 `[sieve]` 警告。
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 **6 个输入、88 掉落**：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
+- 当前有 **6 个输入、90 掉落**（装 Tinkers 时 92）：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
   `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **9 种树苗**（橡木 8% / 白桦 4% /
   云杉 4% / 丛林 3% / 金合欢 3% / 樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%，合计 31%/次）+
-  **竹子 5%** + **四种石子各 4-6 个、100% 出**
+  **竹子 5%** + **碧空 / 末影黏液草种子各 2% / 1%**（仅 Tinkers 在场）+ **四种石子各 4-6 个、100% 出**
   （圆石/安山岩/花岗岩/闪长岩，四个石子合成一块对应石头；一次泥土 ≈ 4-6 块石头）），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
   管珊瑚、海晶砂粒与**古代孢子**（`ancient_spores`，1/128，M6 巫水链起点）；
-  `crushed_netherrack` 出石英/荧石/下界疣/烈焰粉/岩浆膏/灵魂沙，以及**绯红 / 诡异菌岩孢子各 5%**；
+  `crushed_netherrack` 出石英/荧石/下界疣/烈焰粉/岩浆膏/灵魂沙、**绯红 / 诡异菌岩孢子各 5%**、
+  **钴碎块 1%** 与**下界合金碎片 0.4%**；
   `crushed_end_stone` 出紫颂果/末影珍珠（2026-11-01 删掉“筛回末地石”，避免原地循环）；
   `sand` 另有 5 种珊瑚（管/脑/气泡/火/角）各 1% 与海晶碎片 2%（海晶碎片只从沙出，砂砾不出）。
 - **菌岩孢子**：`crimson_nylium_spores` / `warped_nylium_spores` 右键**下界岩** → 对应菌岩
@@ -416,6 +446,9 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   菌岩上撒骨粉出菌 / 根，菌上再撒骨粉长成巨菌；绯红 / 诡异菌柄因此有了空岛来源。
 - **竹子**：没有独立的「竹笋」物品，`minecraft:bamboo` 本身就是可种植的竹笋，所以泥土筛
   直接掉它（5%），不新增自定义物品。竹子已在堆肥表里（100），竹桶 / 竹坩埚的配方也齐了。
+- **钴 / 下界合金碎片**：`cobalt_broken` 1% 从碎下界岩出，走普通 4→块→熔炼链；有匠魂时
+  锭解析到 `tconstruct:cobalt_ingot`，没有时自有钴锭。`netherite_scrap` 0.4% 从碎下界岩出，
+  双线都有。钴碎块的 broken 贴图用下界岩红棕基底（`STONE_PALETTES`），不是灰石底。
 - **1.21.4 的苍白橡木（pale oak）**不在 1.21.1 / 1.20.1 的物品表里，暂时没有对应掉落；
   升级目标版本时再加。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。
@@ -503,7 +536,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   **坩埚热源页**：92×26，热源物品槽 + 右侧速度文字；`fire`/`lava` 没有方块物品，
   用打火石/熔岩桶作为图标。
 - **锤子页**：76×26，方块输入 + 箭头 + 产物；tooltip 写单次数量或 4–6 区间。
-  玩法表 47 条，JEI 只展示 35 条（12 条“矿物粉尘→自身”是安全兜底，不作为配方展示）。
+  玩法表 50 条，JEI 只展示 37 条（13 条“矿物粉尘→自身”是安全兜底，不作为配方展示）。
   6 种锤都注册为 catalyst。
 - **钩子页**：104×26，树叶输入 + 箭头 + 最多 3 个追加掉落槽，每个 tooltip 写概率
   （骨钩 ×1.5 只写在 tooltip 里）；木/骨钩作 catalyst。
@@ -543,11 +576,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - `min` / `max`（可选，默认都是 1）是**包含端点**的掉落数量区间，均匀随机。
   上限 64；`min < 1` 或 `max < min` 的文件会警告并跳过。
 - **锤子只有左键（正常破坏）一条路径**，没有右键快捷方式（经典 Ex Nihilo 也没有）。
-- 当前 47 条：
+- 当前 50 条：
   - 圆石→砂砾、砂砾→沙子、沙子→`exnihilosatellitium:dust`（各 1 个）；
   - 8 种砂岩（含红砂岩）→沙子 / 红沙（各 1 个）；
-  - 12 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
-  - 12 种材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
+  - 13 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
+  - 13 种材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
 - 未知/重复输入、非法数量区间打 `[hammer]` 警告并跳过。
 
 ### 钩子表
@@ -574,7 +607,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 - 新方块 `exnihilosatellitium:dust`，自有 `block/dust.png` 贴图（Creatio 噪点 4 色量化）；
   沙子用锤子砸出，放进筛子就是 `sieve/dust.json` 的输入。
-- 尘土表 15 条：12 种 `<material>_powdered` + 红石 / 荧石粉 / 火药。
+- 尘土表 16 条：13 种 `<material>_powdered` + 红石 / 荧石粉 / 火药。
 - 尘土方块有独立 loot table、`mineable/shovel` 标签和创造标签条目。
 
 ## 13. 坩埚表与配置（M4，2026-10-30）
