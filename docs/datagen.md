@@ -205,7 +205,7 @@ python3 scripts/check-textures.py
   `src/main` 与 `src/generated` 同名资源直接失败，这也是删旧文件必须一次删干净的原因。
 - 服务端冒烟：`runServer`，日志看 `Loaded ... recipes`、`[barrel] 12 transforms`、
   `[sieve] 6 inputs, 72 drops`，无 missing tag/loot/recipe。
-- 两条线都**未 push**（2026-11-02：main ahead 8，分支 ahead 8）。
+- 两条线都**未 push**（2026-11-02：main ahead 10，分支 ahead 8）。
 
 ## 7. 新会话开场清单
 
