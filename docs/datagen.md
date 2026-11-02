@@ -1,7 +1,7 @@
 # 数据生成（DataGen）——1.20.1 分支现状
 
-> 2026-11-02。**本分支只做了第一批**：方块/物品标签 + 方块掉落表。
-> 配方、blockstate、模型在这条线**仍是手写 JSON**；主线已完成第二、三批，待移植。
+> 2026-11-02。**三批都已完成**：标签 + 掉落表、配方、blockstate/模型。
+> 现在这条线和主线一样，vanilla 类型的数据全部由 `runData` 生成。
 
 ## 1. 本分支现在有什么
 
@@ -15,28 +15,25 @@
 | `ModBlockTags` | 方块标签：`forge:ores/<m>`、`mineable/*`、`#exnihilosatellitium:wooden_crucibles` | 18 |
 | `ModItemTags` | 物品标签：`forge:ores|ingots/<m>`、`#exnihilosatellitium:compostable` | 23 |
 | `ModLootTables` | 方块自掉表 | 69 |
+| `ModRecipes` | 配方（矿石链、桶/坩埚、筛/网、锤/钩、机器/插件、人偶、瓷、石子） | 137 |
+| `ModBlockStates` | blockstate + 机械方块模型 | 71 + 29 |
+| `ModItemModels` | 物品模型（从注册表推导） | 148 |
 
-- 当前整个 `data/` 树：**160 recipe / 69 loot_tables / 41 tags**（160 条配方是手写）。
-- 旧的手写 `data/**/tags/**` 与 `data/**/loot_tables/**` 已删除（提交 `0b7df76`）。
+- 当前整个 `data/` 树：**176 recipe / 69 loot_tables / 41 tags**（137 条生成 + 39 条手写）。
+- 手写保留：27 条 `*_smelting_<mod>` 候选变体（产物是对方模组的物品）、12 条 `create:crushing`、
+  13 个手绘方块模型、2 个手绘物品模型（`electric_hammer` / `fuel_hammer`）。
 
-## 2. 主线已经做完、这里还没做的
+## 2. 1.20.1 侧的三个 API 坑（移植时踩过）
 
-| 批次 | 主线实现 | 本分支状态 |
-|---|---|---|
-| 第二批：配方（133 条 base 生成 + 27 条候选变体手写） | `datagen/ModRecipes`（+ `datagen/WoodTypes`） | ⬜ 160 条全是手写 JSON |
-| 第三批：blockstate + 模型（71 + 244） | `datagen/ModBlockStates`、`datagen/ModItemModels` | ⬜ 全部手写 JSON |
-| 语言 | 保持手写 JSON（已拍板） | 同 |
-
-移植时注意 1.20.1 的 API 差异：
-
-- 没有 `RecipeOutput`：`buildRecipes(Consumer<FinishedRecipe> out)`，`RecipeBuilder#save` 的第二参数是
-  `String` id；路径是 `recipes/`、结果字段是 `result.item`。
-- 配方条件键是**裸 `conditions`**（不是 `forge:conditions`，写错会被 Forge 静默忽略）；
-  条件类型是 `forge:mod_loaded` / `forge:not` / `forge:or`。
-- `BlockStateProvider` / `ItemModelProvider` 在 `net.minecraftforge.client.model.generators`，
-  构造器与 NeoForge 版略有差别；`ExistingFileHelper` 同样需要 `--existing`。
-- `materials.json` 的 `ingots` 候选与 `OreMaterial.ingotCandidates` 已与主线一致。
-- `runData` 的 `data()` 已在 `build.gradle` 里配好输出与 `--existing`。
+1. **`RecipeBuilder.save(out, String)` 的 id 必须带命名空间**：传 `"tin_broken_to_ore_gravel"` 会被
+   解析成 `minecraft:...`，文件落到 `data/minecraft/recipes/`。而且 id 若等于「产物默认 id」
+   （产物物品的注册名）会直接抛 `should remove its 'save' argument`。所以统一走
+   `ModRecipes.save(out, name, builder)` 助手：相等用 `save(out)`，否则传 `id(name).toString()`。
+2. **配方条件用裸 `conditions` 键**（不是 `forge:conditions`，写错会被静默忽略）；
+   `datagen/DatagenRecipe` 负责挂条件数组，同时把 advancement 丢掉。
+3. **`runData` 不能装科技模组**：Thermal/Create 挂在 `-PtechMods` 后面；否则 `OreMaterials`
+   会解析到对方锭（自有锭不注册 → 生成直接抛异常），而且对方自己的 datagen provider 会把文件
+   写进我们的输出树。
 
 ## 3. 命令与冒烟
 
@@ -57,6 +54,7 @@ python3 scripts/check-textures.py
 
 1. 读 `docs/status.md` 的「下一步」与本文。
 2. `git status --short` 干净；`./gradlew build` 先绿。
-3. 跑一次 `runData`，确认 `git status` 零 diff。
-4. 要移植配方/模型时，先在主线拿到 `ModRecipes` / `ModBlockStates` / `ModItemModels` 的最终版，
-   再按第 2 节的差异改写；语义对比脚本（`compare-recipes.py` / `compare-models.py`）在主线仓库。
+3. 跑一次 `runData`（**不带** `-PtechMods`），确认 `git status` 零 diff。
+4. 改配方/模型：优先改 provider，再 `runData`；语义对比脚本 `compare-recipes.py` /
+   `compare-models.py` 已在本仓库 `scripts/`。
+5. 联调科技模组：`./gradlew runServer -PtechMods` / `runClient -PdevMods -PtechMods`。

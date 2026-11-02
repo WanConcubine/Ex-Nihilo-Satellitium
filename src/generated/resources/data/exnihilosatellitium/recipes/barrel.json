@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "minecraft:oak_planks"
+    },
+    "y": {
+      "item": "minecraft:oak_slab"
+    }
+  },
+  "pattern": [
+    "x x",
+    "x x",
+    "xyx"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:barrel"
+  },
+  "show_notification": true
+}

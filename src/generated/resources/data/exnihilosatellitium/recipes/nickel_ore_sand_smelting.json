@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "forge:not",
+      "value": {
+        "type": "forge:mod_loaded",
+        "modid": "thermal_foundation"
+      }
+    }
+  ],
+  "cookingtime": 200,
+  "experience": 0.1,
+  "group": "",
+  "ingredient": {
+    "item": "exnihilosatellitium:nickel_ore_sand"
+  },
+  "result": {
+    "item": "exnihilosatellitium:nickel_ingot"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "S": {
+      "item": "minecraft:sugar"
+    },
+    "U": {
+      "item": "exnihilosatellitium:speed_upgrade_1"
+    }
+  },
+  "pattern": [
+    "GSG",
+    "SUS",
+    "GSG"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:speed_upgrade_2"
+  },
+  "show_notification": true
+}

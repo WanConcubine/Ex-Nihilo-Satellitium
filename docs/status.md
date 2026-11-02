@@ -17,7 +17,28 @@
 **科技模组锭接入**（2026-11-02）：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
 zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底。
 
-## 当前批次（2026-11-02，科技模组锭接入：Thermal / Mekanism / Create）
+## 当前批次（2026-11-02，datagen 第二、三批移植）
+
+- **配方（第二批）**：`datagen/ModRecipes` 生成 **137 条**（133 条 base + 4 条石子→石头），
+  手写只剩 39 条（27 条 `*_smelting_<mod>` 候选变体 + 12 条 `create:crushing`），
+  原来的 137 个手写文件已删除。
+- **blockstate / 模型（第三批）**：`ModBlockStates` 生成 71 个 blockstate + 29 个机械模型，
+  `ModItemModels` 生成 148 个物品模型；13 个手绘方块模型 + 2 个物品模型保留。
+- **1.20.1 的两个 API 坑**（都写进 `datagen.md`）：
+  - `RecipeBuilder.save(out, String)` 的 id **必须带命名空间**，否则落到 `data/minecraft/recipes/`；
+    而且 id 等于「产物默认 id」时会抛异常，所以统一走 `save(out, name, builder)` 助手
+    （相等时用 `save(out)`，否则传完整 id）。
+  - 配方条件用**裸 `conditions`**；新增 `datagen/DatagenRecipe` 负责挂条件 + 丢掉 advancement。
+- **datagen 期间不能装科技模组**：Thermal/Create 现在挂在 `-PtechMods` 后面，
+  `runData` 不带这个参数（否则 `OreMaterials` 解析到对方锭、且对方自己的 datagen provider
+  会往我们的输出树里写文件）。
+- **验证**：`compare-recipes.py` → `176 old, 137 generated, 39 old-only (0 unexpected), 0 different`；
+  `compare-models.py` → `263 old, 248 generated, 248 identical`（15 个 old-only 全是手绘）；
+  删旧文件后 `runData` `written: 0`；`build` + `check-textures`（已换成扫两个资源根的版本）通过；
+  服务端 0 条解析错误、`[sieve] 6 inputs, 76 drops`；客户端启动 0 条 missing model/texture。
+- **未验**：进游戏看模型/配方书（作者验收）；`-PtechMods` 下的联调还要再跑一次。
+
+## 上一批次（2026-11-02，科技模组锭接入：Thermal / Mekanism / Create）
 
 - **材料表换成候选制**：`materials.json` 里 9 个自有锭材料原本写的是 `#forge:ingots/<m>` 标签
   （读表时标签还没加载 → 全部打警告并按自有锭处理）。现在改成有序 `ingots` 候选：
@@ -65,6 +86,11 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
   泥土筛石子、0.1.0 发布。
 
 ## 验证状态
+| datagen 配方移植 | ✅ | `ModRecipes` 生成 137 条；`compare-recipes.py` → 176 old / 137 generated / 0 different |
+| datagen 模型移植 | ✅ | 71 blockstate + 29 方块模型 + 148 物品模型；`compare-models.py` → 248 identical |
+| datagen 幂等 | ✅ | 删旧文件后重跑 `runData`：`written: 0` |
+| datagen 服务端 | ✅ | 0 条 recipe 解析错误；`[sieve] 76 drops` / `[barrel] 12` / `[hammer] 49` |
+| datagen 客户端 | ✅ | 启动到菜单，0 条 missing model/texture |
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
