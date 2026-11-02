@@ -20,7 +20,7 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
 **M7 datagen（两条线各三批）**：`runData` 生成标签 41 + 方块掉落表 69 + **配方 137**
-（`ModRecipes`）+ **71 个 blockstate + 177 个模型**（`ModBlockStates` + `ModItemModels`），
+（`ModRecipes`）+ **71 个 blockstate + 179 个模型**（`ModBlockStates` + `ModItemModels`），
 输出到 `src/generated/resources`；仍手写 39 条配方（27 条 `*_smelting_<mod>` 候选变体 +
 12 条 `create:crushing`，产物都是对方模组的物品）、15 个手绘模型、全部语言文件。
 1.20.1 分支在 2026-11-02 晚补齐同样三批，见 [datagen.md](datagen.md) §5。
@@ -41,14 +41,24 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 - **还差**：CurseForge / Modrinth 的商店页与文件上传需要所有者操作（本机没有 API key 与 `gh`），
   文案见 CHANGELOG；上传后再把下载链接补进 README。
 
-## 当前批次（2026-11-02 晚，树的起点：泥土筛树苗）
+## 当前批次（2026-11-02 晚，树的起点：泥土筛树苗 + 下界菌岩孢子）
 
-- **泥土过筛新增 5 种树苗**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3%
-  （合计 22%/次）。经典 Ex Nihilo 的泥土筛里本来就有树种子，这是那条「从泥土重新长树」的起点；
-  我们之前只有钩树叶一条来源。深色橡木仍走「巫水 + 橡树苗」。
-- **双线同步**：`sieve/dirt.json` 是手写玩法表（不经 datagen），主线和 1.20.1 分支各一份，内容一致。
-- **验证**：两条线服务端都是 `[sieve] 6 inputs, 81 drops`；1.20.1 机器筛 8 次泥土 →
-  橡木/金合欢树苗各 1、四种石子照旧（≈22% 的期望值对得上）。手动筛右键与 JEI 页待作者目视。
+- **泥土过筛 9 种树苗**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3%，
+  再加 **樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%**（合计 31%/次）。经典 Ex Nihilo 的
+  泥土筛里本来就有树种子，这是那条「从泥土重新长树」的起点；我们之前只有钩树叶一条来源。
+  深色橡木仍走「巫水 + 橡树苗」。**1.21.4 的苍白橡木（pale oak）不在两条目标版本里**，
+  等目标升到 1.21.4 再加。
+- **下界树（绯红 / 诡异菌）**：走「碎下界岩过筛 → 菌岩孢子（各 5%）→ 右键下界岩变菌岩 →
+  骨粉催菌 → 骨粉催巨菌」。不新增桶配方；菌岩一出现，原版骨粉就把剩下的链路接上了，
+  绯红 / 诡异木桶、木坩埚也就有了来源。
+- **新物品**：`crimson_nylium_spores` / `warped_nylium_spores`（16×16 自有像素，
+  `art/items/sieve_extras/generate.py` 生成），堆肥值各 100；杜鹃 / 盛开的杜鹃本来就在
+  `#minecraft:saplings` 里，按标签的 125 堆肥，不重复加条目。
+- **双线同步**：`sieve/*.json` 是手写玩法表（不经 datagen），主线和 1.20.1 分支各一份，内容一致；
+  新物品的模型 / 堆肥标签走 datagen。
+- **验证**：`build` / `check-textures` / `check-core-imports` / `check-data-paths` 通过；
+  主线 `[sieve] 6 inputs, 87 drops`、`[compost] 67 entries`；1.20.1 分支同样 87 / 67，
+  两边 RCON `summon` 两个孢子物品名字正常。右键菌岩、骨粉催菌与 JEI 页待作者目视。
 
 ## 上一批次（2026-11-02，泥土筛石子 + 锌矿接入 Create 粉碎）
 
@@ -85,12 +95,15 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 - 桶转化 12 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、熔岩+荧石→末地石、
   水+尘土→粘土、水+牛奶→史莱姆；巫水+沙→灵魂沙、巫水+树苗→深色橡树苗；
   5 条人偶规则（熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者）。
-- 筛子 6 输入 / 81 掉落（砂砾 / 沙 / 泥土 / 尘土 / 粉碎下界岩 / 粉碎末地石）；
+- 筛子 6 输入 / 87 掉落（砂砾 / 沙 / 泥土 / 尘土 / 粉碎下界岩 / 粉碎末地石）；
   三档筛网只影响耐久。
 - 矿物链：4 碎块 → 矿方块 → 熔炼成锭；锤矿砾/矿砂掉 4–6、粉尘掉自身。
 - **泥土的石头来源**：四种石子（圆石/安山岩/花岗岩/闪长岩）每次 4-6 个、100% 出，
   四个合成一块对应石头。
-- **泥土的树苗来源**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3%（经典 Ex Nihilo 的树种子位）。
+- **泥土的树苗来源**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3% +
+  **樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%**（共 9 种、合计 31%；经典 Ex Nihilo 的树种子位）。
+- **下界树起点**：粉碎下界岩筛出**绯红 / 诡异菌岩孢子**各 5%，右键下界岩变成对应菌岩；
+  之后用原版骨粉催菌、再催巨菌，得到绯红 / 诡异菌柄（木桶、木坩埚的来源）。
 - **M6 补的筛出物**：泥土 → 草种子（右键泥土变草方块）/甜浆果；沙 → 可可豆/海带/5 种珊瑚/
   海晶砂粒/海晶碎片；锤下界岩 → **粉碎下界岩方块**（筛石英/荧石/下界疣/烈焰粉/岩浆膏/灵魂沙）、
   锤末地石 → **粉碎末地石方块**（筛紫颂果/末影珍珠）。两者都是方块类筛料，走原来的方块料层渲染；
@@ -187,7 +200,7 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
   - **M6 蚕**：右键树叶 → 侵染；变白进度；Jade 百分比；扩散；破坏掉线；创造模式不掉落。
   - **M6 瓷桶**：未烧制 → 烧制；舀水/熔岩/巫水；倒进木桶/坩埚。
   - **M3**：6 锤/2 钩、左键链、右键无反应、矿砾/矿砂 4–6、锤钩 JEI 35/10、蚕动画。
-  - **M2/M6 筛子**：6 个输入、72 掉落；JEI 筛子页；粉碎方块平铺料层。
+  - **M2/M6 筛子**：6 个输入、87 掉落；JEI 筛子页；粉碎方块平铺料层；粉碎下界岩两页（旧产物 + 菌岩孢子）。
   - **M10 机器**：四台机器右键开 GUI；能量条/火焰条/进度条动；插件槽只收插件、燃料槽只收燃料；
     筛网/锤在 GUI 里显示耐久；破坏机器掉出全部内容；贴图观感；上下漏斗在游戏里再走一遍。
   - **M10 自动输出 GUI（第二版）**：左侧标签页的观感/悬停/变绿；配置面板从左边伸出、与面板齐平、
@@ -216,10 +229,10 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| `./gradlew build` | ✅ | 2026-10-31：`BUILD SUCCESSFUL`；JEI 依赖走 `maven.blamejared.com` |
-| `python3 scripts/check-core-imports.py` | ✅ | core 层无 NeoForge import；4 个已知漏点（OreMaterials + 3 个机器平台文件）以警告列出 |
+| `./gradlew build` | ✅ | 2026-11-02：`BUILD SUCCESSFUL`（`--offline`）；JEI 依赖走 `maven.blamejared.com` |
+| `python3 scripts/check-core-imports.py` | ✅ | core 层无 NeoForge import；`0 known leak(s)` |
 | `python3 scripts/check-textures.py` | ✅ | 方块/物品 16×16、蚕动画 16×64 + mcmeta、坩埚贴图存在；无 `minecraft:item/*` 引用 |
-| 数据表 JSON | ✅ | 47 hammer / 10 crook / 19 melt / 9 heat / 5 barrel / 65 compost / 4 sieve；全部可解析 |
+| 数据表 JSON | ✅ | 47 hammer / 10 crook / 19 melt / 9 heat / 5 barrel / 67 compost / 6 sieve；全部可解析 |
 | 客户端启动（最后一次） | ✅ | 2026-10-31 00:16：`[hammer] 47`、`[crook] 10`、`[crucible] 6`、`[jei] 47/6/5/3/10`；无 missing model/texture |
 | 客户端启动（当前代码） | ✅ | 2026-10-31 09:26 客户端日志：`[jei] 35 hammer` / `19 meltables, 9 heat sources` / `5 barrel, 65 compost` / `4 sieve` / `10 crook`；`[sieve] 4 inputs, 52 drops`；无 missing model/texture |
 | 桶：堆肥→泥土 | ✅ | 2026-10-29：苹果 +100 / 仙人掌 +100 / 树叶 +125，满 1000 后 `dirt=true` |
@@ -334,7 +347,11 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 | 科技模组锭（Thermal/Create） | ✅ | 1.20.1 分支真装 Thermal Foundation 11.0.6.70 + Create 6.0.8：`tin/silver/lead/nickel → thermal:*_ingot`、`zinc → create:zinc_ingot`，RCON 熔炉实测通过，自有锭未注册 |
 | 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
 | 泥土筛石子（数量） | ✅ | 分支机器筛：7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%） |
-| 泥土筛树苗 | ✅ | 双线 `[sieve] 6 inputs, 81 drops`；1.20.1 机器筛 8 次 → 橡木/金合欢树苗各 1（≈22%） |
+| 泥土筛树苗 | ✅ | 主线/分支 `[sieve] 6 inputs, 87 drops`；1.20.1 机器筛 8 次 → 橡木/金合欢树苗各 1（旧 5 种，≈22%） |
+| 泥土筛新树苗（樱花/红树/杜鹃） | ✅ | 四条新表加载无警告；9 种合计 31%/次；数值待作者试玩 |
+| 下界菌岩孢子（数据/物品） | ✅ | 主线 `runServer`：`[sieve] 6 inputs, 87 drops`、`[compost] 67 entries`；1.20.1 分支同样 87 / 67；两边 RCON `summon` 两个孢子物品名字正常 |
+| 下界菌岩孢子（右键/骨粉） | ⚠️ | `NyliumSporesItem` 右键下界岩 → 菌岩；骨粉催菌/催巨菌沿用原版；未进游戏右键 |
+| 孢子贴图/模型 | ✅ | 2 张 16×16 自有像素（`art/items/sieve_extras/generate.py`）；datagen 生成 item model；`check-textures` 通过 |
 | 泥土筛石子（贴图/模型） | ✅ | 4 张 16×16 贴图 + 模型（主线 datagen 自动、分支手写）；`check-textures` 通过 |
 | 矿块接 Create 粉碎 | ✅ | 分支装 Create 6.0.8：12 条 `create:crushing`（铁/金/铜/锌 ×3）0 解析错误；粉碎轮实际输出待目视 |
 | 矿块接 Thermal 磨粉机 | ✅ | 全部走 `forge:ores/<m>` 标签（Thermal 自己的配方），无需我们补 |
@@ -398,6 +415,9 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 - **NeoForge 21.1 `FluidTank` NBT 是嵌套 `{Fluid:{id,amount}}`**，不是 1.20.1 的顶层 `FluidName`/`Amount`。
 - **1.21.1 没有 `#forge:*` 物品标签**：用 `#c:*`；`#minecraft:crops/seeds` 也不是物品标签。
 - **堆肥标签和 JSON 必须同步**：标签有、JSON 没有 = 按 1 点处理。
+- **`#minecraft:saplings` 包含杜鹃 / 盛开的杜鹃**（1.21.1 与 1.20.1 都是），它们会按
+  树苗标签的 125 堆肥；别把它们当成标签外物品再补 100。菌岩孢子不在任何原版标签里，
+  才需要 `ModItemTags` 与 `compost/default.json` 两处都加。
 - **内缩模型的外侧面不能加 `cullface`**：只保留在方块边界；坩埚模型已按此规则清洗。
 - **`Properties.ofFullCopy(Blocks.FURNACE)` 会带上 `lit` 光照函数**：新方块没有 `lit` 状态，
   注册期就崩（`Cannot get property BooleanProperty{name=lit}`）。机器方块用 `IRON_BLOCK` 复制 + 手调强度。
@@ -427,6 +447,8 @@ zinc → Create；运行时取第一个已加载模组的锭，自有锭只作�
 - **生成器不能无条件覆盖手写数据**：`lang` 只补缺失键、筛表按 item 合并；否则重跑
   `generate_sieve_assets.py` 会删掉 M2/M6 手加的 13 条沙筛掉落（P2 修）。
   新写生成器时，凡是作者可能手改的 JSON，都要走“合并”而不是整文件重写。
+- **`art/items/sieve_extras/generate.py` 曾缺 `CHARS` 和 `SPRITES` 的收尾**（`20de823` 删块时带走），
+  重跑会 `NameError`；本次补回并把菌岩孢子并进同一脚本（重跑能生成同样像素）。
 - **`port_data.py` 只改路径/字段/命名空间，不改数值**：数值漂移要回生成器或手写源改，
   别在移植产物上打补丁（改完下一次 port 就丢）。
 - **core 门面必须在注册之前安装**：`Platform.install()` / `ConfigValues.install()` /

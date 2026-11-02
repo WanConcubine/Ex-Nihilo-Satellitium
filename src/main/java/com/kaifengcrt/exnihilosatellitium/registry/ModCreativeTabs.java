@@ -55,6 +55,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.CRUSHED_NETHERRACK.get());
                         output.accept(ModItems.CRUSHED_END_STONE.get());
                         output.accept(ModItems.ANCIENT_SPORES.get());
+                        output.accept(ModItems.CRIMSON_NYLIUM_SPORES.get());
+                        output.accept(ModItems.WARPED_NYLIUM_SPORES.get());
                         output.accept(ModItems.DOLL.get());
                         output.accept(ModItems.ANGRY_DOLL.get());
                         output.accept(ModItems.CREEPY_DOLL.get());
