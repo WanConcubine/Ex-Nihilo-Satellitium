@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": {
+      "item": "exnihilosatellitium:iron_hammer"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "IRI",
+    "RHR",
+    "IRI"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:electric_hammer"
+  },
+  "show_notification": true
+}

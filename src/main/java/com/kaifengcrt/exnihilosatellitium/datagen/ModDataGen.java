@@ -32,5 +32,12 @@ public final class ModDataGen {
         generator.addProvider(event.includeServer(), new LootTableProvider(output, Set.of(),
                 List.of(new LootTableProvider.SubProviderEntry(ModLootTables::new,
                         LootContextParamSets.BLOCK))));
+        generator.addProvider(event.includeServer(), new ModRecipes(output));
+        // Blockstates first: the item provider validates block-item parents against
+        // the models generated here (ExistingFileHelper#trackGenerated).
+        generator.addProvider(event.includeClient(),
+                new ModBlockStates(output, event.getExistingFileHelper()));
+        generator.addProvider(event.includeClient(),
+                new ModItemModels(output, event.getExistingFileHelper()));
     }
 }

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "forge:not",
+      "value": {
+        "type": "forge:mod_loaded",
+        "modid": "create"
+      }
+    }
+  ],
+  "cookingtime": 200,
+  "experience": 0.1,
+  "group": "",
+  "ingredient": {
+    "item": "exnihilosatellitium:zinc_ore_dust"
+  },
+  "result": {
+    "item": "exnihilosatellitium:zinc_ingot"
+  }
+}

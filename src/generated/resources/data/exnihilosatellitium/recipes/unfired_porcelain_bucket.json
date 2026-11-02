@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:porcelain"
+    }
+  },
+  "pattern": [
+    "x x",
+    " x "
+  ],
+  "result": {
+    "item": "exnihilosatellitium:unfired_porcelain_bucket"
+  },
+  "show_notification": true
+}
