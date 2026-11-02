@@ -20,13 +20,14 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-0.1.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-0.2.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
 
 1. 装好 Forge 47.4.x（Java 17），把 jar 放进 `mods/`。
 2. 可选：**JEI**（配方查询，`runClient -PdevMods` 时从 `libs/` 加载）、**Jade**（方块信息）、
-   **Create / Thermal Foundation**（金属锭与矿石块的互通）。
+   **Create / Thermal Foundation / Immersive Engineering / Tinkers' Construct 3 + Mantle**
+   （金属锭、矿石块与匠魂熔炼；全部可选，没装回退自有物品）。
 
-完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
+0.2.0 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术栈
 
@@ -45,14 +46,16 @@
 - [x] 基础内容：`porcelain`（瓷土，自绘贴图）、`barrel`（橡木桶）
 - [x] M1 木桶：堆肥→泥土（1000 分制，数值以 Omnia 1.10.2 为主、原版 1.7.10 校验；桶保留，右键取出）、1000 mB 流体、比较器、14×16 内缩模型、vanilla-sampled 贴图
 - [x] M1 材质变体：云杉/白桦/丛林/金合欢/深色橡木木桶 + 石桶，共享 BE 与行为
-- [ ] M1.5 桶内方块转化（水 + 熔岩 → 石/黑曜石）
-- [ ] M2 筛子 + 筛网 + 数据驱动掉落
-- [ ] M3 锤子 + 钩子
-- [ ] M4 坩埚 + 热源
-- [ ] M5 矿粒 / 粉碎矿 / 冶炼
-- [ ] M6 瓷土 / 瓷桶 / 巫水 / 蚕
-- [ ] M7 JEI / 配置 / 数据生成
+- [x] M1.5 桶内方块转化（水 + 熔岩 → 石/黑曜石）
+- [x] M2 筛子 + 筛网 + 数据驱动掉落
+- [x] M3 锤子 + 钩子
+- [x] M4 坩埚 + 热源
+- [x] M5 矿粒 / 粉碎矿 / 冶炼
+- [x] M6 瓷土 / 瓷桶 / 巫水 / 蚕
+- [x] M7 JEI / 配置 / 数据生成
+- [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 插件 + 自动输出
 - [ ] M8 与「月光魔法」联动
+- [ ] M9 发布（0.2.0 准备中；CurseForge / Modrinth 待上传）
 
 ## 文档
 

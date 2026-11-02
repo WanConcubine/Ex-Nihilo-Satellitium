@@ -18,6 +18,14 @@
 zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/uranium）与
 Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已加载的模组，自有锭只作兜底。
 
+## 0.2.0 发布准备（2026-11-02）
+
+- `mod_version=0.2.0`；`CHANGELOG.md` / `README.md` 已更新；主线的
+  [release-0.2.0.md](../../Ex-Nihilo-Satellitium/docs/release-0.2.0.md) 含商店文案与上传清单。
+- 本分支 jar：`build/libs/exnihilosatellitium-0.2.0.jar`（663 KB，
+  sha256 `e579e3a1…cc1ff`）；`mods.toml` 版本号、LICENSE / THIRD-PARTY / icon 已核对。
+- **待所有者确认**：tag `v0.2.0-1.20.1`、CurseForge / Modrinth 上传。
+
 ## 当前批次（2026-11-02 晚，Tinkers' Construct 3 接入）
 
 - **碧空 / 末影黏液草种子**：只在 `tconstruct` 在场时注册；右键草方块或泥土 →
