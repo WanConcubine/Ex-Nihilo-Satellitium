@@ -359,8 +359,10 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
   Jade tooltip 完全一致。石桶复制 `Blocks.STONE` 属性（镐、石音效），木桶复制对应木板属性。
 - 配方从“任意木板 → 橡木桶”改为**每种木材一个具体配方**；否则 `#minecraft:planks`
   会和具体木种配方同时匹配，产物不可预测。石桶用 `stone`。
-- 数据文件由 `scripts/generate_barrel_variants.py` 生成：blockstate、block/item model、
+- 数据文件最初由 `scripts/generate_barrel_variants.py` 生成：blockstate、block/item model、
   shaped recipe、loot table、`mineable/{axe,pickaxe}` 标签都来自同一张材质表。
+  **2026-11-02 起改由 datagen 接管**（`datagen/WoodTypes` 一张表 + `ModBlockStates` /
+  `ModItemModels` / `ModRecipes` / `ModBlockTags` / `ModLootTables`），该脚本已删除。
 - `art/barrel/render_current.py` 改为解析 parent 链，一次渲染七种材质的物品图标和
   3/4 视图，输出 `showcase_variants*.png`；早期自绘脚本保留但不再代表游戏内模型。
 
@@ -1161,3 +1163,32 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
 - 验收：`scripts/compare-recipes.py`（shaped 去空行空列成格子、shapeless 多重集、烹饪六字段、
   条件规范化）对 145 旧 / 133 新给出 `0 different`；删旧文件后 `runData` `written: 0`；
   `runServer` `Loaded 1423 recipes` 与迁移前一致。细节见 [datagen.md](datagen.md)。
+
+## 31. M7 datagen 第三批：blockstate 与模型（2026-11-02）
+
+问题：244 个 blockstate/model JSON 是 Python 生成器写出来的，同一份信息在
+「Java 注册表」「Python 表」「JSON 文件」三处各有一份；改一个木种要动三处，重跑脚本还会
+把手工调整盖掉。配方批次之后，这批是最后一块「数据跟着表走」的资产。
+
+- `datagen/ModBlockStates`：71 个 blockstate + 29 个模型。blockstate 全部是「一个 state → 一个模型」，
+  只有筛子是 multipart（frame + 三档 mesh，`when: {mesh: n}`）。
+- `datagen/ModItemModels`：144 个物品模型**从注册表推导**——方块物品的 parent 指向方块模型
+  （`sieve` → `sieve_frame`，矿块 → 共享的 `ore_<kind>_block`），其余 `item/generated`，
+  锤/钩 `item/handheld`，瓷桶两层 + `filled` predicate。新增物品不再需要手写模型。
+- `datagen/WoodTypes`：11 个木种的唯一一张表，配方（`ModRecipes`）和模型（`ModBlockStates`）
+  都从它派生；桶/坩埚的 id 规则（oak 保留无前缀 id）也在这里。
+- **手绘几何不迁**：`barrel_base`/`crucible_base`/3 个矿块/筛框与三张网/四台机器，以及
+  `electric_hammer`/`fuel_hammer` 两个带 elements 的物品模型。datagen 只写「parent + textures」
+  这一层，几何仍是要人调的资产。
+- **provider 顺序是有语义的**：`ModBlockStates` 先于 `ModItemModels` 注册，因为物品模型用
+  `getExistingFile` 校验方块模型父级，而 `ExistingFileHelper` 要到前一个 provider 调
+  `trackGenerated` 之后才认识它们；顺序反了会在 datagen 期就抛「model does not exist」。
+- `check-textures.py` 同步升级：同时扫 `src/main` 与 `src/generated`（后者覆盖前者），并新增
+  blockstate→模型、模型 `parent` 两条引用检查。以前它只看 `models/` 下的贴图引用，模型改名/
+  blockstate 指错都查不出来。
+- **Python 生成器的收尾**比迁移本身更重要：桶/坩埚两个只写 JSON 的脚本删除；矿/筛/机器三个改成
+  只写 PNG + 手写玩法表（锤表、筛表、lang）。否则任何人重跑一次脚本，244 个旧 JSON 就会
+  复活并与 generated 同名冲突（`processResources` 会直接失败）。
+- 验收：`scripts/compare-models.py`（variant 键序、multipart 段序都按语义比较）对
+  259 旧 / 244 新给出 `244 identical`；删旧文件后 `runData` `written: 0`；客户端启动无
+  missing model/texture。细节见 [datagen.md](datagen.md) §4。

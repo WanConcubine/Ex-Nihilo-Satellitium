@@ -189,10 +189,10 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 
 ## 7. 材质变体数据
 
-`scripts/generate_barrel_variants.py` 从一张表生成 11 种木桶 + 石桶的
-`blockstates/`、`models/block/`、`models/item/`、`recipe/`、`loot_table/blocks/`
-和 `data/minecraft/tags/block/mineable/{axe,pickaxe}.json`。几何只在
-`models/block/barrel_base.json` 里维护，子模型只覆盖 `textures`。
+12 种桶（11 木 + 石）的 `blockstates/`、`models/block/`、`models/item/`、`recipe/`、掉落表和
+`mineable/{axe,pickaxe}` 标签现在**全部由 datagen 生成**（`datagen/WoodTypes` 一张表 +
+`ModBlockStates` / `ModItemModels` / `ModRecipes` / `ModBlockTags` / `ModLootTables`）。
+几何只在手写的 `models/block/barrel_base.json` 里维护，子模型只覆盖 `textures`。
 
 | block id | 桶身贴图 | 内壁/桶底 | 配方键 | 工具 |
 |---|---|---|---|---|
@@ -234,7 +234,8 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | 数据包 | `data/<ns>/...` | 覆盖概率/配方，**不能新增材料** |
 
 **当前没有 config 扩展表**：表外材料不会自动发现，也不会生成骨架行。新增材料要改 jar 内表、
-重跑 `scripts/generate_ore_variants.py`（以及需要的 `generate_sieve_assets.py`），然后重启。
+重跑 `scripts/generate_ore_variants.py`（贴图 + 锤表 + lang）和 `./gradlew runData`
+（模型 / 配方 / 掉落 / 标签），需要的话再跑 `generate_sieve_assets.py`（筛表），然后重启。
 config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)）。
 
 **改材料表需要重启游戏**：物品与方块在注册期冻结，无法在 `/reload` 时新增。
@@ -267,7 +268,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | `tier` | ✅ | `common` / `uncommon` / `rare` / `epic`，校验数值区间用（见下） |
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。**当前只支持整数**；对象写法未实现（读 `gravel` 并打警告） |
 | `ingot` | ❌ | 无条件复用：写**具体物品 id**（`minecraft:iron_ingot`），熔炼总是产出它，不注册自有锭。**暂不支持标签**（`#c:ingots/tin`），写标签会打警告并按自有锭处理 |
-| `ingots` | ❌ | **受支持模组的候选锭**（有序数组）：`[{"item": "mekanism:ingot_tin", "mod": "mekanism"}]`。启动时取第一个 `mod` 已加载（或没写 `mod`）的候选；都不匹配时注册自有 `exnihilosatellitium:<id>_ingot`。生成脚本会给每个候选写一条 `neoforge:mod_loaded` 条件的熔炼配方，base 配方用 `neoforge:not(...)` 兜底，见下 |
+| `ingots` | ❌ | **受支持模组的候选锭**（有序数组）：`[{"item": "mekanism:ingot_tin", "mod": "mekanism"}]`。启动时取第一个 `mod` 已加载（或没写 `mod`）的候选；都不匹配时注册自有 `exnihilosatellitium:<id>_ingot`。datagen 会给 base 配方加 `neoforge:not(...)` 兜底；每个候选的 `*_smelting_<mod>.json` 仍是手写（datagen 引用不了未注册的物品），见下 |
 | `owner_mod` | ❌ | 主要来源模组；当前不解析，仅保留字段 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；设为 `false` 时该条跳过（当前没有自动骨架行） |
@@ -296,7 +297,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 ### 生成的配方与标签
 
-`scripts/generate_ore_variants.py` 读材料表，除了方块/物品资源，还生成：
+以下文件都由 `./gradlew runData` 从材料表生成（`ModRecipes` / `ModItemTags` / `ModBlockTags` /
+`ModLootTables` / `ModBlockStates` / `ModItemModels`）；只有 `*_smelting_<mod>.json` 是手写：
 
 | 文件 | 内容 |
 |---|---|
@@ -314,8 +316,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   运行时 `OreMaterials` 用同一个顺序解析，命中的候选模组在场时**不注册自有锭**，
   `c:ingots/<id>` 里的自有锭条目写成 `required: false`（物品不存在时标签跳过）。
   - 现在接入的是 **Mekanism**：tin / lead / osmium / uranium 熔成 `mekanism:ingot_*`。
-  - 加一个模组 = 在材料里加一行候选 + 重跑 `scripts/generate_ore_variants.py`；
-    id 必须按对方 jar 核对。
+  - 加一个模组 = 在材料里加一行候选 + 手写 `<m>_ore_<kind>_smelting_<mod>.json` +
+    重跑 `./gradlew runData`（base 配方会自动带 `not(...)` 条件）；id 必须按对方 jar 核对。
   - **换模组会改变物品存在性**：已有存档里拿到的自有锭，装上受支持模组后会变成未知物品
     （日志报错并消失）。开世界前定好模组列表。
 - 铁/金/铜的 `ingot` 指向原版锭，所以 36 个熔炼配方里它们熔到 `minecraft:*_ingot`；

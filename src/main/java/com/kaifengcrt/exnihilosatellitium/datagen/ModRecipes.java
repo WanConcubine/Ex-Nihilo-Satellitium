@@ -71,14 +71,6 @@ public final class ModRecipes extends RecipeProvider {
 
     private static final RecipeCategory MISC = RecipeCategory.MISC;
 
-    /** Wooden barrels: oak keeps the plain {@code barrel} id. */
-    private record BarrelRecipe(String name, ItemLike planks, ItemLike slab) {
-    }
-
-    /** Wooden crucibles: logs (bamboo uses a block, the nether woods use stems). */
-    private record CrucibleRecipe(String name, ItemLike log) {
-    }
-
     public ModRecipes(final PackOutput output, final CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries);
     }
@@ -174,55 +166,39 @@ public final class ModRecipes extends RecipeProvider {
     // -------------------------------------------------------------- barrels
 
     private static void barrels(final RecipeOutput out) {
-        final List<BarrelRecipe> recipes = List.of(
-                new BarrelRecipe("barrel", Items.OAK_PLANKS, Items.OAK_SLAB),
-                new BarrelRecipe("spruce_barrel", Items.SPRUCE_PLANKS, Items.SPRUCE_SLAB),
-                new BarrelRecipe("birch_barrel", Items.BIRCH_PLANKS, Items.BIRCH_SLAB),
-                new BarrelRecipe("jungle_barrel", Items.JUNGLE_PLANKS, Items.JUNGLE_SLAB),
-                new BarrelRecipe("acacia_barrel", Items.ACACIA_PLANKS, Items.ACACIA_SLAB),
-                new BarrelRecipe("dark_oak_barrel", Items.DARK_OAK_PLANKS, Items.DARK_OAK_SLAB),
-                new BarrelRecipe("mangrove_barrel", Items.MANGROVE_PLANKS, Items.MANGROVE_SLAB),
-                new BarrelRecipe("cherry_barrel", Items.CHERRY_PLANKS, Items.CHERRY_SLAB),
-                new BarrelRecipe("bamboo_barrel", Items.BAMBOO_PLANKS, Items.BAMBOO_SLAB),
-                new BarrelRecipe("crimson_barrel", Items.CRIMSON_PLANKS, Items.CRIMSON_SLAB),
-                new BarrelRecipe("warped_barrel", Items.WARPED_PLANKS, Items.WARPED_SLAB),
-                new BarrelRecipe("stone_barrel", Items.STONE, Items.SMOOTH_STONE_SLAB));
-        for (final BarrelRecipe recipe : recipes) {
-            ShapedRecipeBuilder.shaped(MISC, blockItem(recipe.name()))
+        for (final WoodTypes.Wood wood : WoodTypes.ALL) {
+            ShapedRecipeBuilder.shaped(MISC, blockItem(wood.barrel()))
                     .pattern("x x")
                     .pattern("x x")
                     .pattern("xyx")
-                    .define('x', recipe.planks())
-                    .define('y', recipe.slab())
+                    .define('x', wood.planks())
+                    .define('y', wood.slab())
                     .unlockedBy("has_planks", has(ItemTags.PLANKS))
-                    .save(out, id(recipe.name()));
+                    .save(out, id(wood.barrel()));
         }
+
+        ShapedRecipeBuilder.shaped(MISC, blockItem("stone_barrel"))
+                .pattern("x x")
+                .pattern("x x")
+                .pattern("xyx")
+                .define('x', Items.STONE)
+                .define('y', Items.SMOOTH_STONE_SLAB)
+                .unlockedBy("has_stone", has(Items.STONE))
+                .save(out, id("stone_barrel"));
     }
 
     // ----------------------------------------------------- wooden crucibles
 
     private static void woodenCrucibles(final RecipeOutput out) {
-        final List<CrucibleRecipe> recipes = List.of(
-                new CrucibleRecipe("wooden_crucible", Items.OAK_LOG),
-                new CrucibleRecipe("spruce_wooden_crucible", Items.SPRUCE_LOG),
-                new CrucibleRecipe("birch_wooden_crucible", Items.BIRCH_LOG),
-                new CrucibleRecipe("jungle_wooden_crucible", Items.JUNGLE_LOG),
-                new CrucibleRecipe("acacia_wooden_crucible", Items.ACACIA_LOG),
-                new CrucibleRecipe("dark_oak_wooden_crucible", Items.DARK_OAK_LOG),
-                new CrucibleRecipe("mangrove_wooden_crucible", Items.MANGROVE_LOG),
-                new CrucibleRecipe("cherry_wooden_crucible", Items.CHERRY_LOG),
-                new CrucibleRecipe("bamboo_wooden_crucible", Items.BAMBOO_BLOCK),
-                new CrucibleRecipe("crimson_wooden_crucible", Items.CRIMSON_STEM),
-                new CrucibleRecipe("warped_wooden_crucible", Items.WARPED_STEM));
-        for (final CrucibleRecipe recipe : recipes) {
-            ShapedRecipeBuilder.shaped(MISC, blockItem(recipe.name()))
+        for (final WoodTypes.Wood wood : WoodTypes.ALL) {
+            ShapedRecipeBuilder.shaped(MISC, blockItem(wood.crucible()))
                     .pattern("x x")
                     .pattern("x x")
                     .pattern("xyx")
-                    .define('x', recipe.log())
+                    .define('x', wood.log())
                     .define('y', ItemTags.WOODEN_SLABS)
                     .unlockedBy("has_log", has(ItemTags.LOGS))
-                    .save(out, id(recipe.name()));
+                    .save(out, id(wood.crucible()));
         }
     }
 
