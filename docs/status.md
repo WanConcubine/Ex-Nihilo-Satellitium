@@ -42,6 +42,14 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
   `zinc_ore_dust → create:zinc_ingot`；自有 tin/silver/zinc 锭全部未注册（`summon` 得 Air）；
   `Unknown item` 0 条（只装 Foundation 时它会为自己的压印模具报 64 条，装上 Expansion 后消失）。
   dev 侧用 `fg.deobf` 把生产 jar 重映射进 `run`，Create 的 JiJ（flywheel/ponder/registrate）正常加载。
+- **泥土筛石子（2026-11-02 追加）**：四种石子（圆石/安山岩/花岗岩/闪长岩），筛泥土每次成功出
+  4-6 个，4 个合成一块对应石头；筛表新增 `min`/`max`（默认 1），手动筛/机器筛共用 `SieveRolls`，
+  JEI 多一行数量。贴图 `art/items/pebbles/generate.py`（16×16），模型与配方手写。
+- **锌矿接 Create 粉碎**：Create 只对锌用具体物品（`create:zinc_ore`），其余材料走
+  `forge:ores/<m>` 标签；补 3 条 `create:crushing`（矿砾/矿砂/矿尘 → `create:crushed_raw_zinc`），
+  条件 `create`，字段用 1.20.1 的 `results[].item` + `processingTime`。
+- **验证（追加）**：机器筛 16 泥土 → 26 个石子（每次 4-6），`[sieve] 6 inputs, 76 drops`；
+  装 Thermal + Create 时 0 条解析错误。**未验**：手动筛右键、JEI 数量行、粉碎轮实际输出。
 - **未验**：Mek 与 Thermal 同时在场时的优先级（本机没有 1.20.1 的 Mekanism；主线已验证 Mek 单独在）。
 - **上一批**（datagen 第一批）仍是 tags/loot；配方/模型在这条线还是手写，移植计划见
   [datagen.md](datagen.md)。

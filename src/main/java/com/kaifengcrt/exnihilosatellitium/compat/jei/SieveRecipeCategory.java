@@ -79,10 +79,12 @@ public final class SieveRecipeCategory extends AbstractRecipeCategory<SieveRecip
                     .setStandardSlotBackground();
 
             final Map<Item, Float> chances = new HashMap<>();
+            final Map<Item, SieveDrop> byItem = new HashMap<>();
             for (int dropIndex = slotIndex; dropIndex < drops.size(); dropIndex += slots) {
                 final SieveDrop drop = drops.get(dropIndex);
                 slot.addItemStack(new ItemStack(drop.item()));
                 chances.put(drop.item(), drop.chance());
+                byItem.put(drop.item(), drop);
             }
             slot.addRichTooltipCallback((view, tooltip) ->
                     view.getDisplayedItemStack().ifPresent(stack -> {
@@ -90,6 +92,11 @@ public final class SieveRecipeCategory extends AbstractRecipeCategory<SieveRecip
                         if (chance != null) {
                             tooltip.add(Component.translatable(
                                     "jei.exnihilosatellitium.sieve.chance", percent(chance)));
+                        }
+                        final SieveDrop drop = byItem.get(stack.getItem());
+                        if (drop != null && drop.max() > 1) {
+                            tooltip.add(Component.translatable(
+                                    "jei.exnihilosatellitium.sieve.count", drop.min(), drop.max()));
                         }
                     }));
         }
