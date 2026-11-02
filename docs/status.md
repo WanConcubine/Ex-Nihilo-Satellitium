@@ -15,30 +15,41 @@
 **M10 自动化也已铺完**（四台机器 + 6 个插件 + 自动输出 + GUI/JEI/BER）；
 `crucible.*` 与 `machine.*` config 全部就位。**桶配方已按原版改正**（4 板 + 台阶，见下）。
 **科技模组锭接入**（2026-11-02）：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
-zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底。
+zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/uranium）；运行时取第一个
+已加载的模组，自有锭只作兜底。
 
-## 当前批次（2026-11-02 晚，树的起点：泥土筛树苗/竹子 + 下界菌岩孢子）
+## 当前批次（2026-11-02 晚，Immersive Engineering 接入）
 
-- **泥土过筛 9 种树苗**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3% +
-  **樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%**（合计 31%/次），
-  补上经典 Ex Nihilo 的「从泥土重新长树」起点；表是手写 JSON（不经 datagen）。
-  1.21.4 的苍白橡木不在 1.20.1 物品表里，暂不添加。
-- **竹子缺口**：泥土筛加 `minecraft:bamboo` 5%。原版没有独立「竹笋」物品，竹子物品本身
-  就是可种植的竹笋；竹桶、竹坩埚、脚手架和竹子堆肥已有，只补第一个来源。筛表变成 88 掉落。
-- **下界树（绯红 / 诡异菌）**：碎下界岩筛出**菌岩孢子**（各 5%）→ 右键下界岩变菌岩 →
-  原版骨粉催菌 / 催巨菌；绯红 / 诡异木桶、木坩埚因此有了来源。
-- **新物品**：`crimson_nylium_spores` / `warped_nylium_spores`，16×16 自有像素，堆肥值各 100；
-  杜鹃 / 盛开的杜鹃本来就在 `#minecraft:saplings` 里，按标签的 125 堆肥，不重复加条目。
-- **验证**：`build` / `check-textures` / `check-data-paths` 通过；服务端
-  `[sieve] 6 inputs, 88 drops`、`[compost] 67 entries`。右键菌岩、骨粉链与 JEI 页待作者目视。
+- **IE 锭候选（1.20.1）**：silver / nickel → Thermal → IE；lead → Mekanism → Thermal → IE；
+  aluminum → IE（原来是自有锭）；uranium → Mekanism → IE。只接基础锭，不接合金。
+- **15 条手写熔炼变体**（5 材料 × 砾/砂/尘），条件「IE 在场且之前的候选都不在」；
+  base 由 `runData` 重算 `not(or(所有候选))`。两条线共用 `materials.json`，主线保留 IE 候选
+  和变体（1.21.1 上永不命中）。
+- **IE 粉碎机**：输入走 `forge:ores/<m>` 标签；12 种矿块本来就在标签里，不需要补 IE 配方。
+  产物是 IE 自己的 dust（我们的矿尘不占 `forge:dusts`）。
+- **验证**：
+  - 只装 IE：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 →
+    `immersiveengineering:ingot_*`；RCON 熔炉 `aluminum_ore_gravel → ingot_aluminum`、
+    `silver_ore_sand → ingot_silver`。
+  - Thermal + Create + IE：tin/silver/lead/nickel → Thermal、zinc → Create、
+    aluminum/uranium → IE；0 条 `Unknown item`。
+  - IE 粉碎机多方块未跑，只核对了标签与配方输入。
+- **配方计数**：137 条 generated + 54 条手写 = **191**；其中 42 条是候选变体。
 
-## 上一批次（2026-11-02，datagen 第二、三批移植）
+## 上一批次（2026-11-02，树的起点：树苗 / 竹子 / 下界菌岩孢子）
+
+- 泥土筛 9 种树苗（31%/次）+ 竹子 5% → 88 掉落；竹子物品本身就是竹笋，不新增自定义物品。
+- 碎下界岩筛菌岩孢子各 5% → 右键下界岩变菌岩 → 原版骨粉催菌 / 催巨菌；
+  绯红 / 诡异木桶、木坩埚因此有了来源；新物品有自有贴图 / 模型 / 堆肥 100。
+- 双线 `[sieve] 88 drops` / `[compost] 67 entries`；右键与 JEI 仍待目视。
+
+## 更早批次（2026-11-02，datagen 第二、三批移植）
 
 - **配方（第二批）**：`datagen/ModRecipes` 生成 **137 条**（133 条 base + 4 条石子→石头），
-  手写只剩 39 条（27 条 `*_smelting_<mod>` 候选变体 + 12 条 `create:crushing`），
+  手写只剩 54 条（42 条 `*_smelting_<mod>` 候选变体 + 12 条 `create:crushing`），
   原来的 137 个手写文件已删除。
 - **blockstate / 模型（第三批）**：`ModBlockStates` 生成 71 个 blockstate + 29 个机械模型，
-  `ModItemModels` 生成 148 个物品模型；13 个手绘方块模型 + 2 个物品模型保留。
+  `ModItemModels` 生成 150 个物品模型；13 个手绘方块模型 + 2 个物品模型保留。
 - **1.20.1 的两个 API 坑**（都写进 `datagen.md`）：
   - `RecipeBuilder.save(out, String)` 的 id **必须带命名空间**，否则落到 `data/minecraft/recipes/`；
     而且 id 等于「产物默认 id」时会抛异常，所以统一走 `save(out, name, builder)` 助手
@@ -53,7 +64,7 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
   服务端 0 条解析错误、`[sieve] 6 inputs, 76 drops`；客户端启动 0 条 missing model/texture。
 - **未验**：进游戏看模型/配方书（作者验收）；`-PtechMods` 下的联调还要再跑一次。
 
-## 上一批次（2026-11-02，科技模组锭接入：Thermal / Mekanism / Create）
+## 更早批次（2026-11-02，科技模组锭接入：Thermal / Mekanism / Create）
 
 - **材料表换成候选制**：`materials.json` 里 9 个自有锭材料原本写的是 `#forge:ingots/<m>` 标签
   （读表时标签还没加载 → 全部打警告并按自有锭处理）。现在改成有序 `ingots` 候选：
@@ -102,7 +113,7 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
 
 ## 验证状态
 | datagen 配方移植 | ✅ | `ModRecipes` 生成 137 条；`compare-recipes.py` → 176 old / 137 generated / 0 different |
-| datagen 模型移植 | ✅ | 71 blockstate + 29 方块模型 + 148 物品模型；`compare-models.py` → 248 identical |
+| datagen 模型移植 | ✅ | 71 blockstate + 29 方块模型 + 150 物品模型；`compare-models.py` → 248 identical（当批） |
 | datagen 幂等 | ✅ | 删旧文件后重跑 `runData`：`written: 0` |
 | datagen 服务端 | ✅ | 0 条 recipe 解析错误；`[sieve] 76 drops` / `[barrel] 12` / `[hammer] 49` |
 | datagen 客户端 | ✅ | 启动到菜单，0 条 missing model/texture |
@@ -110,6 +121,10 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
 | 泥土筛竹子 | ✅ | 泥土加 `minecraft:bamboo` 5%；88 drops 加载无警告；竹子堆肥/竹桶/竹坩埚已有，只补来源 |
 | 菌岩孢子右键 | ⚠️ | `NyliumSporesItem` 右键下界岩 → 菌岩；未进游戏右键；骨粉链沿用原版 |
 | 孢子贴图 / 模型 | ✅ | 2 张 16×16 自有像素（`art/items/sieve_extras/generate.py`）+ datagen 模型；`check-textures` 通过 |
+| IE 锭候选（仅 IE） | ✅ | 只装 IE 10.2.0-183：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 → `immersiveengineering:ingot_*` |
+| IE 熔炼 RCON | ✅ | 熔炉烧 `aluminum_ore_gravel` → `ingot_aluminum`，烧 `silver_ore_sand` → `ingot_silver` |
+| IE 优先级（Thermal+Create+IE） | ✅ | `[materials]`：tin/silver/lead/nickel → Thermal、zinc → Create、aluminum/uranium → IE；0 条 `Unknown item` |
+| IE 粉碎机（标签） | ⚠️ | 12 种矿块在 `forge:ores/<m>`，IE crusher 输入也是该标签；多方块本身未跑 |
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|

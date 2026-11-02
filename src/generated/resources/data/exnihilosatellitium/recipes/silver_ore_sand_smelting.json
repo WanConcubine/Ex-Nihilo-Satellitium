@@ -5,8 +5,17 @@
     {
       "type": "forge:not",
       "value": {
-        "type": "forge:mod_loaded",
-        "modid": "thermal_foundation"
+        "type": "forge:or",
+        "values": [
+          {
+            "type": "forge:mod_loaded",
+            "modid": "thermal_foundation"
+          },
+          {
+            "type": "forge:mod_loaded",
+            "modid": "immersiveengineering"
+          }
+        ]
       }
     }
   ],

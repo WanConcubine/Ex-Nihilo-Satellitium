@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:lead_ore_sand"
+  },
+  "result": {
+    "item": "immersiveengineering:ingot_lead"
+  },
+  "experience": 0.1,
+  "cookingtime": 200,
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "immersiveengineering"
+    },
+    {
+      "type": "forge:not",
+      "value": {
+        "type": "forge:mod_loaded",
+        "modid": "mekanism"
+      }
+    },
+    {
+      "type": "forge:not",
+      "value": {
+        "type": "forge:mod_loaded",
+        "modid": "thermal_foundation"
+      }
+    }
+  ]
+}

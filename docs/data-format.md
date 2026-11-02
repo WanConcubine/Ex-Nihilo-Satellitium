@@ -250,6 +250,10 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - **维度变体暂缺**：1.7.10 有 overworld / nether / end 三套矿砾（碎下界岩、末地砾）。
   当前 schema 只有一件事（筛砂砾/沙子/尘土），下界与末地变体留到 M2 实现时再扩字段，
   现在不要在表里硬塞。
+- **当前候选（2026-11-02）**：tin → Mekanism → Thermal；lead → Mekanism → Thermal → IE；
+  silver/nickel → Thermal → IE；zinc → Create；osmium → Mekanism；uranium → Mekanism → IE；
+  aluminum → IE；platinum 无候选。IE 只在 1.20.1 有版本，锭 id 是 `ingot_aluminum` 这类；
+  它的 crusher 输入走 `forge:ores/<m>`，我们的矿块已在标签里。
 
 ## 9. 桶转化 JSON（M1.5/M6）
 

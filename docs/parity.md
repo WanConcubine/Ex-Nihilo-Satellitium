@@ -89,6 +89,7 @@
 | 矿砾 / 矿砂 / 矿尘、破碎矿 / 粉碎矿 / 矿粉 | 匠魂 / 龙之进化 | 部分存在 | ❓ |
 | 锭联动（tin / lead / osmium / uranium） | Mekanism 1.21.1 | 已接入：装了 Mek 熔成 `mekanism:ingot_*`，没装用自有锭（`ingots` 候选 + 配方条件） | ✅ |
 | Thermal 系列锭联动 | Thermal 1.20.1 | 接在 **1.20.1 分支**（双版本目标）；1.21.1 侧等它有 1.21.1 版 | ⏳ 随 1.20.1 线 |
+| Immersive Engineering 锭联动 | IE 1.20.1 | 接在 **1.20.1 分支**：silver / lead / nickel / aluminum / uranium 候选；IE 粉碎机走 `forge:ores/<m>` 标签 | ✅ |
 | 黄铀（过筛获得） | 大型反应堆 | 有 1.20.1 移植，未核实 | ❓ |
 | 橡胶树苗（过筛 + 可堆肥） | MFR | 1.20.1 无 MFR | ⏸ 等模组 |
 | 自然（Natura）树苗 / 灌木 | 自然 | 无 1.20.1 | ⏸ 等模组 |

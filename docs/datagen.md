@@ -17,10 +17,10 @@
 | `ModLootTables` | 方块自掉表 | 69 |
 | `ModRecipes` | 配方（矿石链、桶/坩埚、筛/网、锤/钩、机器/插件、人偶、瓷、石子） | 137 |
 | `ModBlockStates` | blockstate + 机械方块模型 | 71 + 29 |
-| `ModItemModels` | 物品模型（从注册表推导） | 148 |
+| `ModItemModels` | 物品模型（从注册表推导） | 150 |
 
-- 当前整个 `data/` 树：**176 recipe / 69 loot_tables / 41 tags**（137 条生成 + 39 条手写）。
-- 手写保留：27 条 `*_smelting_<mod>` 候选变体（产物是对方模组的物品）、12 条 `create:crushing`、
+- 当前整个 `data/` 树：**191 recipe / 69 loot_tables / 41 tags**（137 条生成 + 54 条手写）。
+- 手写保留：42 条 `*_smelting_<mod>` 候选变体（产物是对方模组的物品）、12 条 `create:crushing`、
   13 个手绘方块模型、2 个手绘物品模型（`electric_hammer` / `fuel_hammer`）。
 
 ## 2. 1.20.1 侧的三个 API 坑（移植时踩过）
