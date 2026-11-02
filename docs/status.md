@@ -50,6 +50,9 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
   （铁/金/铜/锌 × 砾/砂/尘），条件 `create`，字段用 1.20.1 的 `results[].item` + `processingTime`。
 - **验证（追加）**：机器筛 7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%），
   `[sieve] 6 inputs, 76 drops`；装 Thermal + Create 时 0 条解析错误（12 条 crushing 全被接受）。**未验**：手动筛右键、JEI 数量行、粉碎轮实际输出。
+- **0.1.0 已发布（2026-11-02）**：tag `v0.1.0-1.20.1` → `35d98d4`，已推到 `origin`；主线同时发了
+  `v0.1.0`。产物 `build/libs/exnihilosatellitium-0.1.0.jar`（1.20.1 / Forge 47.4）。打包剔除
+  datagen 的 `.cache/`，带 `LICENSE` + `THIRD-PARTY.md` + `icon.png`；商店页上传仍需所有者操作。
 - **未验**：Mek 与 Thermal 同时在场时的优先级（本机没有 1.20.1 的 Mekanism；主线已验证 Mek 单独在）。
 - **上一批**（datagen 第一批）仍是 tags/loot；配方/模型在这条线还是手写，移植计划见
   [datagen.md](datagen.md)。
