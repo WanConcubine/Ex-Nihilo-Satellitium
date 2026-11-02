@@ -7,16 +7,19 @@ import com.kaifengcrt.exnihilosatellitium.common.item.GrassSeedsItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.NyliumSporesItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -220,6 +223,19 @@ public final class ModItems {
     /** M6: ancient spores turn dirt into mycelium (the witch water chain start). */
     public static final RegistryObject<Item> ANCIENT_SPORES =
             ITEMS.register("ancient_spores", () -> new AncientSporesItem(new Item.Properties()));
+
+    /**
+     * Nether-tree start: crushing netherrack drops these spores, and right-clicking
+     * netherrack with them grows the matching nylium. Vanilla bone meal does the rest.
+     */
+    public static final RegistryObject<Item> CRIMSON_NYLIUM_SPORES =
+            ITEMS.register("crimson_nylium_spores", () -> new NyliumSporesItem(
+                    new Item.Properties(), Blocks.NETHERRACK, Blocks.CRIMSON_NYLIUM,
+                    ParticleTypes.CRIMSON_SPORE));
+    public static final RegistryObject<Item> WARPED_NYLIUM_SPORES =
+            ITEMS.register("warped_nylium_spores", () -> new NyliumSporesItem(
+                    new Item.Properties(), Blocks.NETHERRACK, Blocks.WARPED_NYLIUM,
+                    ParticleTypes.WARPED_SPORE));
 
     /** M6: witch water bucket (fluid id lives in {@link ModFluids}). */
     public static final RegistryObject<Item> WITCH_WATER_BUCKET =

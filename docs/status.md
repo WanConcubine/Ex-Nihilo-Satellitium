@@ -17,12 +17,18 @@
 **科技模组锭接入**（2026-11-02）：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
 zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底。
 
-## 当前批次（2026-11-02 晚，树的起点：泥土筛树苗）
+## 当前批次（2026-11-02 晚，树的起点：泥土筛树苗 + 下界菌岩孢子）
 
-- **泥土过筛新增 5 种树苗**（橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3%，合计 22%/次），
+- **泥土过筛 9 种树苗**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3% +
+  **樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%**（合计 31%/次），
   补上经典 Ex Nihilo 的「从泥土重新长树」起点；表是手写 JSON（不经 datagen）。
-- **验证**：`[sieve] 6 inputs, 81 drops`；机器筛 8 次泥土 → 橡木/金合欢树苗各 1、四种石子照旧。
-  手动筛右键与 JEI 页待作者目视。
+  1.21.4 的苍白橡木不在 1.20.1 物品表里，暂不添加。
+- **下界树（绯红 / 诡异菌）**：碎下界岩筛出**菌岩孢子**（各 5%）→ 右键下界岩变菌岩 →
+  原版骨粉催菌 / 催巨菌；绯红 / 诡异木桶、木坩埚因此有了来源。
+- **新物品**：`crimson_nylium_spores` / `warped_nylium_spores`，16×16 自有像素，堆肥值各 100；
+  杜鹃 / 盛开的杜鹃本来就在 `#minecraft:saplings` 里，按标签的 125 堆肥，不重复加条目。
+- **验证**：`build` / `check-textures` / `check-data-paths` 通过；服务端
+  `[sieve] 6 inputs, 87 drops`、`[compost] 67 entries`。右键菌岩、骨粉链与 JEI 页待作者目视。
 
 ## 上一批次（2026-11-02，datagen 第二、三批移植）
 
@@ -98,10 +104,13 @@ zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底�
 | datagen 幂等 | ✅ | 删旧文件后重跑 `runData`：`written: 0` |
 | datagen 服务端 | ✅ | 0 条 recipe 解析错误；`[sieve] 76 drops` / `[barrel] 12` / `[hammer] 49` |
 | datagen 客户端 | ✅ | 启动到菜单，0 条 missing model/texture |
+| 泥土筛树苗 / 菌岩孢子 | ✅ | 2026-11-02 `runServer`：`[sieve] 6 inputs, 87 drops`、`[compost] 67 entries`；RCON `summon` 两个孢子物品名字正常 |
+| 菌岩孢子右键 | ⚠️ | `NyliumSporesItem` 右键下界岩 → 菌岩；未进游戏右键；骨粉链沿用原版 |
+| 孢子贴图 / 模型 | ✅ | 2 张 16×16 自有像素（`art/items/sieve_extras/generate.py`）+ datagen 模型；`check-textures` 通过 |
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| `./gradlew build` | ✅ | 2026-10-28：`--offline` 下 `BUILD SUCCESSFUL in 8s`；直连 TLS 失败时用缓存 |
+| `./gradlew build` | ✅ | 2026-11-02：`--offline` 下 `BUILD SUCCESSFUL`；直连 TLS 失败时用缓存 |
 | `python3 scripts/check-textures.py` | ✅ | 七个子模型只引用 vanilla **block** 贴图 |
 | 服务端启动 | ✅ | 无 Jade 也能启动；`Done (3.5s)` |
 | 七种桶 BE | ✅ | 改名后 RCON：`exnihilosatellitium:barrel` 堆肥→DIRT、`DirtReady=1b`；七种材质共享同一 BE 注册表 |
