@@ -18,20 +18,21 @@
 | `ModBlockTags` | 方块标签 | 一 |
 | `ModItemTags` | 物品标签（矿石/锭/堆肥） | 一 |
 | `ModLootTables` | 69 张自掉表 | 一 |
-| `ModRecipes` | 133 条配方 | 二 |
+| `ModRecipes` | 137 条配方 | 二 |
 | `ModBlockStates` | 71 个 blockstate + 29 个机械方块模型 | 三 |
-| `ModItemModels` | 144 个物品模型 | 三 |
+| `ModItemModels` | 150 个物品模型 | 三 |
 
 - 旧的手写 `data/**/tags/**`、`data/**/loot_table(s)/**`、133 条手写配方、244 个
   blockstate/model JSON 已删除。
 - `scripts/check-data-paths.py` 会同时扫 `src/main/resources` 和 `src/generated/resources`，
-  当前输出 `160 recipes, 69 loot tables, 41 tags`（160 = 133 条 base 生成 + 27 条候选变体手写，见 §3.3）。
+  当前输出 `191 recipes, 69 loot tables, 41 tags`（191 = 137 条 base 生成 + 54 条手写：
+  42 条候选变体 + 12 条 `create:crushing`，见 §3.3）。
 
 ## 2. 范围与状态
 
 | 类别 | 迁移前来源 | 数量 | 状态 |
 |---|---|---|---|
-| 配方 | 手写 JSON | 160 | ✅ 133 条 base 进 `RecipeProvider`；27 条 `*_smelting_<mod>` 仍手写 |
+| 配方 | 手写 JSON | 191 | ✅ 137 条 base 进 `RecipeProvider`；42 条 `*_smelting_<mod>` + 12 条 `create:crushing` 仍手写 |
 | 模型 / blockstate | Python 生成器 | 244 | ✅ 244 条进 provider；13 个手绘几何模型 + 2 个物品几何模型留手写 |
 | 语言 | 手写 `en_us` / `zh_cn` | 265 键 | ⬜ 建议**保持 JSON**（双语手维护），除非所有者要求迁 |
 | 自定义玩法表 | JSON + reload listener | sieve/hammer/crook/compost/barrel/crucible_* | 不属于原版 datagen，暂不迁 |
@@ -63,16 +64,16 @@
    `category` 字段（默认 `misc`）；用 `CookingBookCategory.MISC` 保持行为一致。同理所有合成
    配方用 `RecipeCategory.MISC`（对应 `crafting_book_category: misc`）。
 
-### 3.3 为什么 27 条 `*_smelting_<mod>` 还是手写
+### 3.3 为什么 42 条 `*_smelting_<mod>` 还是手写
 
-`mekanism` / `thermal_foundation` / `create` 的变体产物是对方模组的锭（`mekanism:ingot_tin`、
-`thermal:tin_ingot`、`create:zinc_ingot`）。datagen 里
-`ItemStack` 必须指向**已注册**的 `Item`，而 Mekanism 不在 `runData` 的 classpath 上（它是可选
-软依赖），无法构造。所以：
+`mekanism` / `thermal_foundation` / `create` / `immersiveengineering` 的变体产物是对方模组的锭
+（`mekanism:ingot_tin`、`thermal:tin_ingot`、`create:zinc_ingot`、`immersiveengineering:ingot_lead`）。
+datagen 里 `ItemStack` 必须指向**已注册**的 `Item`，而这些模组不在 `runData` 的 classpath 上
+（它们是可选软依赖），无法构造。所以：
 
 - 生成的是**兜底**配方：产物 `exnihilosatellitium:<id>_ingot`，带
-  `neoforge:conditions: [{type: neoforge:not, value: {type: neoforge:mod_loaded, modid: mekanism}}]`；
-- 27 条 `<id>_ore_{gravel,sand,dust}_smelting_<mod>.json` 留在
+  `neoforge:conditions: [{type: neoforge:not, value: {type: neoforge:or, values: [...]}}]`；
+- 42 条 `<id>_ore_{gravel,sand,dust}_smelting_<mod>.json` 留在
   `src/main/resources/data/exnihilosatellitium/recipe/`，条件是「本模组在场 **且** 它之前的候选
   都不在」（否则两个科技模组同时装会匹配两条熔炼配方）；base 由 datagen 生成，
   条件自动是 `not(or(...))`。
@@ -172,8 +173,8 @@
 
 ## 5. 1.20.1 分支（三批已完成，2026-11-02 晚）
 
-分支上 `runData` 现在生成：标签 41 + 掉落表 69 + **配方 137** + **71 个 blockstate + 177 个模型**。
-手写只剩 39 条配方（27 条 `*_smelting_<mod>` 候选变体 + 12 条 `create:crushing`，产物都是
+分支上 `runData` 现在生成：标签 41 + 掉落表 69 + **配方 137** + **71 个 blockstate + 179 个模型**。
+手写只剩 54 条配方（42 条 `*_smelting_<mod>` 候选变体 + 12 条 `create:crushing`，产物都是
 对方模组的物品）和 15 个手绘模型（13 方块 + 2 物品）。
 
 移植时踩到并记进分支 `docs/datagen.md` 的三个坑：

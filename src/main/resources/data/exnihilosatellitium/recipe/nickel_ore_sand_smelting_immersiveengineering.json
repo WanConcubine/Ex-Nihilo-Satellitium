@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:nickel_ore_sand"
+  },
+  "result": {
+    "id": "immersiveengineering:ingot_nickel"
+  },
+  "experience": 0.1,
+  "cookingtime": 200,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "immersiveengineering"
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:mod_loaded",
+        "modid": "thermal_foundation"
+      }
+    }
+  ]
+}

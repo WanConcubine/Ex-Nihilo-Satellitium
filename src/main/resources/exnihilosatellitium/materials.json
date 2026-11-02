@@ -74,6 +74,10 @@
         {
           "item": "thermal:silver_ingot",
           "mod": "thermal_foundation"
+        },
+        {
+          "item": "immersiveengineering:ingot_silver",
+          "mod": "immersiveengineering"
         }
       ],
       "source": "classic",
@@ -96,6 +100,10 @@
         {
           "item": "thermal:lead_ingot",
           "mod": "thermal_foundation"
+        },
+        {
+          "item": "immersiveengineering:ingot_lead",
+          "mod": "immersiveengineering"
         }
       ],
       "source": "classic",
@@ -114,6 +122,10 @@
         {
           "item": "thermal:nickel_ingot",
           "mod": "thermal_foundation"
+        },
+        {
+          "item": "immersiveengineering:ingot_nickel",
+          "mod": "immersiveengineering"
         }
       ],
       "source": "classic",
@@ -140,6 +152,12 @@
       },
       "tier": "common",
       "rarity": 8,
+      "ingots": [
+        {
+          "item": "immersiveengineering:ingot_aluminum",
+          "mod": "immersiveengineering"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -192,6 +210,10 @@
         {
           "item": "mekanism:ingot_uranium",
           "mod": "mekanism"
+        },
+        {
+          "item": "immersiveengineering:ingot_uranium",
+          "mod": "immersiveengineering"
         }
       ],
       "source": "estimate",
