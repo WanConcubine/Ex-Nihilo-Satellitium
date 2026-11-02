@@ -14,8 +14,32 @@
 木坩埚 11 种、木桶补齐 12 种、粉碎下界岩/末地石 + 草种子、蚕/侵染树叶、5 种人偶）；
 **M10 自动化也已铺完**（四台机器 + 6 个插件 + 自动输出 + GUI/JEI/BER）；
 `crucible.*` 与 `machine.*` config 全部就位。**桶配方已按原版改正**（4 板 + 台阶，见下）。
+**科技模组锭接入**（2026-11-02）：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
+zinc → Create;运行时取第一个已加载的模组，自有锭只作兜底。
 
-## 当前批次（2026-11-01，M6 + M10 + config + 桶配方修正）
+## 当前批次（2026-11-02，科技模组锭接入：Thermal / Mekanism / Create）
+
+- **材料表换成候选制**：`materials.json` 里 9 个自有锭材料原本写的是 `#forge:ingots/<m>` 标签
+  （读表时标签还没加载 → 全部打警告并按自有锭处理）。现在改成有序 `ingots` 候选：
+  tin/lead → `mekanism` → `thermal_foundation`；silver/nickel → `thermal_foundation`；
+  zinc → `create`；osmium/uranium → `mekanism`；platinum/aluminum 保持自有锭。
+  与主线**共用同一份表**（Thermal 只在 1.20.1 存在，主线上的候选永远不命中）。
+- **`OreMaterial` / `OreMaterials`**：加了 `ingotCandidates`（原始有序候选），解析拆成
+  `readIngotCandidates` + `resolveIngot`；模组探测走分支自己的 `ModList`（这里还没有
+  `Platform` 门面）。
+- **配方**：21 条 base 重新生成（带 `not(or(...))` / `not(...)` 条件）+ 27 条候选变体
+  （tin/lead 各 2 个候选、silver/nickel/zinc/osmium/uranium 各 1 个）。
+- **踩到的真坑**：Forge 1.20.1 的配方条件键是**裸 `conditions`**，不是 `forge:conditions`。
+  写错不报错——`RecipeManager` 直接忽略，然后按无条件解析，未安装模组的 `thermal:`/`create:`
+  物品炸出 27 条 `Unknown item`（而且 `Loaded 7 recipes` 里的 7 其实是**配方类型数**，
+  不是配方数，别被骗）。改成 `conditions` 后 0 条解析错误。
+- **验证**：无科技模组时 27 条变体全部按条件跳过、`tin_ore_gravel` 熔成自有 `tin_ingot`、
+  `[materials] loaded 12 entries` 且不再刷「tag ingot 不支持」。
+  **未验**：真装 Thermal/Create 的路径（本机没有 jar）。
+- **上一批**（datagen 第一批）仍是 tags/loot；配方/模型在这条线还是手写，移植计划见
+  [datagen.md](datagen.md)。
+
+## 上一批次（2026-11-01，M6 + M10 + config + 桶配方修正）
 
 - **桶配方修正**：七种木桶/石桶的合成回到原版式样 `x x / x x / xyx`
   （x=对应木板或 `stone`，y=对应台阶 / `smooth_stone_slab`）；之前是 8 块板的

@@ -48,7 +48,16 @@
       },
       "tier": "common",
       "rarity": 18,
-      "ingot": "#forge:ingots/tin",
+      "ingots": [
+        {
+          "item": "mekanism:ingot_tin",
+          "mod": "mekanism"
+        },
+        {
+          "item": "thermal:tin_ingot",
+          "mod": "thermal_foundation"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -61,7 +70,12 @@
       },
       "tier": "uncommon",
       "rarity": 45,
-      "ingot": "#forge:ingots/silver",
+      "ingots": [
+        {
+          "item": "thermal:silver_ingot",
+          "mod": "thermal_foundation"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -74,7 +88,16 @@
       },
       "tier": "uncommon",
       "rarity": 32,
-      "ingot": "#forge:ingots/lead",
+      "ingots": [
+        {
+          "item": "mekanism:ingot_lead",
+          "mod": "mekanism"
+        },
+        {
+          "item": "thermal:lead_ingot",
+          "mod": "thermal_foundation"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -87,7 +110,12 @@
       },
       "tier": "uncommon",
       "rarity": 32,
-      "ingot": "#forge:ingots/nickel",
+      "ingots": [
+        {
+          "item": "thermal:nickel_ingot",
+          "mod": "thermal_foundation"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -100,7 +128,6 @@
       },
       "tier": "epic",
       "rarity": 128,
-      "ingot": "#forge:ingots/platinum",
       "source": "classic",
       "enabled": true
     },
@@ -113,7 +140,6 @@
       },
       "tier": "common",
       "rarity": 8,
-      "ingot": "#forge:ingots/aluminum",
       "source": "classic",
       "enabled": true
     },
@@ -126,7 +152,12 @@
       },
       "tier": "common",
       "rarity": 10,
-      "ingot": "#forge:ingots/osmium",
+      "ingots": [
+        {
+          "item": "mekanism:ingot_osmium",
+          "mod": "mekanism"
+        }
+      ],
       "source": "classic",
       "enabled": true
     },
@@ -139,7 +170,12 @@
       },
       "tier": "common",
       "rarity": 24,
-      "ingot": "#forge:ingots/zinc",
+      "ingots": [
+        {
+          "item": "create:zinc_ingot",
+          "mod": "create"
+        }
+      ],
       "source": "estimate",
       "enabled": true
     },
@@ -152,7 +188,12 @@
       },
       "tier": "rare",
       "rarity": 90,
-      "ingot": "#forge:ingots/uranium",
+      "ingots": [
+        {
+          "item": "mekanism:ingot_uranium",
+          "mod": "mekanism"
+        }
+      ],
       "source": "estimate",
       "enabled": true
     }
