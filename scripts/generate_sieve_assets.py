@@ -34,6 +34,13 @@ MATS = [m for m in json.load(open(SOURCE / f"{MOD_ID}/materials.json", encoding=
 # unknown item.
 METALS = [m for m in MATS if "gems" not in m]
 GEMS = [m for m in MATS if "gems" in m]
+# Single-source materials: each arrives from one hand-written table only
+# (ardite from crushed netherrack, chlorophyll from grass blocks).  They must not
+# leak into the overworld gravel / sand / dust tables, where the player would
+# read "ardite from gravel" — the generators below skip them on both paths.
+SINGLE_SOURCE = frozenset({"ardite", "chlorophyll"})
+SOIL_METALS = [m for m in METALS if m["id"] not in SINGLE_SOURCE]
+SOIL_GEMS = [m for m in GEMS if m["id"] not in SINGLE_SOURCE]
 
 MESH_COLORS = {"wood": (122, 88, 52), "silk": (232, 232, 228), "iron": (188, 190, 196)}
 # 档位不是换色：编织密度不同。pitch=网格间距，strand=线宽
@@ -124,8 +131,10 @@ def main(argv=None):
 
     for name in MESH_COLORS:
         mesh_texture(name)
+        item_dir = ASSETS / "textures/item"
+        item_dir.mkdir(parents=True, exist_ok=True)
         Image.open(ASSETS / f"textures/block/sieve_mesh_{name}.png").save(
-            ASSETS / f"textures/item/{name}_mesh.png")
+            item_dir / f"{name}_mesh.png")
 
     # sift tables
     vanilla = {
@@ -141,15 +150,30 @@ def main(argv=None):
     count = 0
     for kind, suffix_name in suffix.items():
         outputs = [{"item": f"exnihilosatellitium:{m['id']}_{suffix_name}",
-                    "chance": round(1.0 / rarity_of(m), 5)} for m in METALS]
+                    "chance": round(1.0 / rarity_of(m), 5)} for m in SOIL_METALS]
         outputs += [{"item": item, "chance": round(1.0 / n, 5)} for item, n in vanilla[kind]]
         merge_table(RES / f"data/{MOD_ID}/sieve/{kind}.json", inputs[kind], outputs,
                     suffix_name, {m["id"] for m in METALS})
         count += len(outputs)
 
+    # Grass block: the hand-written soil table plus the grass-only ore pieces
+    # (chlorophyll, from Tinkers' Thinking).  Built from dirt.json (the read-only
+    # source, so --out previews work) instead of being copied by hand, so the two
+    # soils cannot drift apart; the pieces stay mod-gated like every gem entry.
+    soil = json.loads((SOURCE / f"data/{MOD_ID}/sieve/dirt.json").read_text(encoding="utf-8"))
+    grass = [entry for entry in soil["outputs"]
+             if not entry.get("item", "").startswith(f"{MOD_ID}:chlorophyll_")]
+    for material in GEMS:
+        if material["id"] != "chlorophyll":
+            continue
+        mod = next((c.get("mod") for c in material.get("gems", []) if c.get("mod")), None)
+        grass.append({"item": f"{MOD_ID}:chlorophyll_broken", "chance": 0.01, "mod": mod})
+    write_json(RES / f"data/{MOD_ID}/sieve/grass_block.json",
+               {"input": "minecraft:grass_block", "outputs": grass})
+
     # Mod-gated gem tables: the whole file is skipped while `mod` is absent.
     by_mod = {}
-    for material in GEMS:
+    for material in SOIL_GEMS:
         mod = next((c.get("mod") for c in material.get("gems", []) if c.get("mod")), None)
         if mod:
             by_mod.setdefault(mod, []).append(material)

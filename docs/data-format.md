@@ -413,7 +413,9 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - `result` 是**流体**：`tag: forge:molten_<m>` + `amount`，没有 `item` / `id`；
   `check-data-paths.py` 只对 item/id result 做版本键检查。
 - `temperature` 取 Tinkers 自己的锭配方（如钴 950、铁 800），`time` 按 90 mB 锭等比缩放。
-- 没有 `tconstruct` 时整批条件跳过；不要在 Tinkers 3 上找 `molten_ardite`，它已移除。
+- 没有 `tconstruct` 时整批条件跳过；Tinkers 3 本体没有 `molten_ardite`（阿迪特被移除），
+  工匠巧思补回了 `forge:molten_ardite`，所以 **14 种金属 × 6 形态 = 84 条**里包含阿迪特
+  （碎矿 45 mB / 矿块 180 mB，950°C）。叶绿素是 `gems`，没有对应的熔融液体，不写熔炼。
 
 ## 9. 筛子 JSON（M2）
 
@@ -440,7 +442,9 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 **6 个输入、114 掉落**（全装 Mek+Thermal；无科技模组时 93，只装 Mek 时 96；1.20.1 全装 113）：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
+- 当前有 **7 个输入、139 掉落**（1.20.1 全装 Mek+Thermal+Create+IE+Tinkers+工匠巧思；1.21.1 装
+  Mek+Thermal 时约 137，两版无科技模组分别 116 / 113；**装 AE2 时两版各 +2**）：`gravel` / `sand` / `dirt` / `dust` /
+  `grass_block`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
   `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **9 种树苗**（橡木 8% / 白桦 4% /
   云杉 4% / 丛林 3% / 金合欢 3% / 樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%，合计 31%/次）+
@@ -459,6 +463,23 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **钴 / 下界合金碎片**：`cobalt_broken` 1% 从碎下界岩出，走普通 4→块→熔炼链；有匠魂时
   锭解析到 `tconstruct:cobalt_ingot`，没有时自有钴锭。`netherite_scrap` 0.4% 从碎下界岩出，
   双线都有。钴碎块的 broken 贴图用下界岩红棕基底（`STONE_PALETTES`），不是灰石底。
+- **工匠巧思（Tinkers' Thinking，`tinkers_thinking`，仅 1.20.1）**：两种材料，走**我们自己的三档矿链**
+  （筛 → 碎矿 → 4 合 1 矿块 → 熔成对方物品），不直接掉对方的矿石方块、不复制 TiT 资源。
+  - **阿迪特（`ardite`，金属）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装 TiT 时回退自有
+    `ardite_ingot`（和钴同一套）。碎下界岩 **1%** 出 `ardite_broken`——**只此一处**，砂砾/沙子/尘土不出；
+    颜色 `8E3B2E`，碎块基底用下界岩。
+  - **叶绿素（`chlorophyll`，`gems`）**：没有锭，按 `gems` 规则**只在 TiT 在场时注册**
+    （没装时物品/方块/碎矿/锤表/配方/标签都不出现），熔成 `tinkers_thinking:chlorophyte_compound`
+    （原矿正好掉 1 个 A + 1 个 B、合成 1 个混合物，所以我们一块矿 = 一份等价物）。
+    筛源：**草方块 1%**（新输入 `minecraft:grass_block`，表 = 泥土 24 条 + 叶绿素碎矿，由
+    `scripts/generate_sieve_assets.py` 从 `dirt.json` 生成）（**只此一处**，不扩散到砂砾/沙子/尘土）。
+  - 叶绿素的每条掉落都带 `"mod": "tinkers_thinking"`，没装时**在查物品之前**跳过，不刷 unknown item；
+    1.21.1 上整条永不注册（TiT 没有 1.21.1 版），阿迪特则照常存在并熔成自有锭。
+- **应用能源 2（`ae2`，两版）**：独立补丁文件 `sieve/sand_ae2.json`，根级 `"mod": "ae2"` +
+  `"patch": true`，对沙追加两条：`ae2:certus_quartz_crystal` **1/6**、
+  `ae2:certus_quartz_dust` **1/12**。不注册自有物品、不复制对方资源；没装 AE2 时整文件跳过
+  （基表仍是 119 / 116），装了两版各 +2（本轮实测 121 / 147）。充能赛特斯与天石粉不做：前者用
+  AE2 自己的 `ae2:charger` 充能（配方只要铁 / 铜 / 赛特斯），后者来自陨石天石，不属于空岛缺口。
 - **1.21.4 的苍白橡木（pale oak）**不在 1.21.1 / 1.20.1 的物品表里，暂时没有对应掉落；
   升级目标版本时再加。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。

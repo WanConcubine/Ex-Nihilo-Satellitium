@@ -17,19 +17,29 @@
 - **Immersive Engineering（1.20.1）**：silver / lead / nickel / aluminum / uranium 的锭候选
   （Thermal / Mekanism 之后），15 条熔炼变体；IE 粉碎机通过 `forge:ores/<m>` 标签直接接受矿块。
 - **Tinkers' Construct 3（1.20.1）**：条件注册的碧空 / 末影黏液草种子（右键草方块或泥土），
-  78 条 `tconstruct:melting`（碎块/粉碎/粉末 60 mB、矿砾/矿砂/矿尘方块 240 mB）。
+  84 条 `tconstruct:melting`（碎块/粉碎/粉末 45 mB、矿砾/矿砂/矿尘方块 180 mB）。
+- **工匠巧思（Tinkers' Thinking，1.20.1）**：新增 `ardite`（粉碎下界岩 1%，没装 TiT 熔成自有
+  阿迪特锭，装了熔成 `tinkers_thinking:ardite_ingot`）和 `chlorophyll`（草方块 1%，走 `gems`：
+  只装 TiT 时注册，矿块熔成 `tinkers_thinking:chlorophyte_compound`）两种材料，都走本模组的
+  三档碎矿链；1.20.1 另有 6 条匠魂熔炼（`forge:molten_ardite`）。
+- **应用能源 2（两版）**：筛沙 1/6 出 `ae2:certus_quartz_crystal`、1/12 出
+  `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json` 带根级 `"mod": "ae2"` + patch，
+  没装 AE2 时整文件静默跳过。充能赛特斯与天石粉不做（充能走 AE2 自己的充电器）。
 - **1.20.1 datagen 补齐**：0.1.0 时分支尚缺的配方、blockstate/模型已全部补上；
   木桶合成按原版修正为 4 板 + 台阶。
 
 ### 数据与兼容
 
-- **筛子**：6 个输入 / 90 掉落（1.20.1 装 Tinkers 时 92）；**堆肥** 67 条；
+- **筛子**：7 个输入 / 139 掉落（1.20.1 无 techMods 113，全装 + 工匠巧思 139、主线无科技模组 116；
+  装 **AE2** 时两版各 +2）；**堆肥** 67 条；
   **锤表** 50 条 / 钩表 10 条。
 - **配方**：主线 143 条生成 + 57 条手写 = 200；1.20.1 分支 143 + 135 = 278
   （其中 78 条匠魂熔炼）。
-- **材料**：13 种；铁/金/铜熔到原版锭，其余按已加载模组的候选锭或自有锭。
+- **材料**：22 种（14 金属 + 8 矿物；其中 8 种 `gems` 只在对应模组在场时注册）；
+  铁/金/铜熔到原版锭，其余按已加载模组的候选锭或自有锭。
 - **支持模组**：Mekanism（1.21.1 / 1.20.1）、Thermal Foundation + Expansion（1.20.1）、
-  Create（两版）、Immersive Engineering（1.20.1）、Tinkers' Construct 3（1.20.1）。
+  Create（两版）、Immersive Engineering（1.20.1）、Tinkers' Construct 3（1.20.1）、
+  Tinkers' Thinking（1.20.1）、Applied Energistics 2（两版）。
   所有联动都是**可选**的：没装就回退自有物品，不硬依赖。
 - **JEI / Jade**：仍是可选客户端依赖；JEI 提供筛子/桶/堆肥/锤/钩/坩埚/机器页面，
   Jade 提供桶/坩埚/机器/侵染树叶提示。
@@ -38,16 +48,18 @@
 
 - 部分画面与手感仍待作者逐一验收（机器 GUI/动画、自动输出抽屉、筛料层、木桶竖棱、
   手动筛右键、匠魂种子右键、匠魂炉实际熔化等）；玩法逻辑本身大多已用服务端 RCON 验过。
-- **阿迪特暂未加入**：Tinkers 3.12.1 已移除阿迪特，等「工匠巧思」拓展重现后再接。
+- **阿迪特 / 叶绿素**：Tinkers 3.12.1 已移除阿迪特，1.20.1 由工匠巧思补回；我们筛的是**自己的**
+  阿迪特 / 叶绿素碎矿，走本模组三档链。阿迪特有自有锭兜底；叶绿素是 `gems`，只在 TiT 在场时注册。
 - IE 与 Tinkers 都只有 1.20.1 版本；1.21.1 主线只保留它们的候选/变体（不会命中）。
+- AE2 的筛出物只验过服务端表与 RCON 查询，手筛 / 机器筛实际出货与 JEI 页面未目视。
 - 没有 advancement 进度树、没有自动化测试与 CI；与「月光魔法」仍只有软依赖占位。
 
 ### 安装
 
 1. 安装 **NeoForge 21.1.x**（1.20.1 版用 **Forge 47.4.x**）。
 2. 把 `exnihilosatellitium-0.2.0.jar` 放进 `mods/`。
-3. 可选：JEI（配方查询）、Jade（方块信息）、Create / Mekanism / Thermal / IE / Tinkers
-   （资源与机器互通；后两者仅 1.20.1）。
+3. 可选：JEI（配方查询）、Jade（方块信息）、Create / Mekanism / Thermal / IE / Tinkers /
+   TiT / AE2（资源与机器互通；IE / Tinkers / TiT 仅 1.20.1）。
 
 ## 0.1.0 — 2026-11-02（首个公开版本）
 

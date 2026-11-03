@@ -1590,3 +1590,60 @@ Create 只有锌，已有完整链，本轮只做回归。
    `mekanism:fluorite_gem` 与 `thermal:apatite|cinnabar|niter|sulfur|ruby|sapphire`。
    `dump` 的筛表 / 锤表条数与两版一致。Thermal 机器吃矿块只核对了 `forge:ores/<m>` 标签，
    多方块本身未跑。
+
+## 45. 工匠巧思：阿迪特 / 叶绿素（2026-11-03，两版，1.20.1 真装）
+
+§36 留下的「阿迪特等工匠巧思」这一批结掉。TiT（`tinkers_thinking`，0.2.4，MIT）只有
+1.18.2 / 1.19.2 / 1.20.1，没有 1.21.1，所以它是第二个只有 1.20.1 能真装的联动（第一个是 IE）。
+数据两版一致：条目在，模组不在就跳过。
+
+1. **按我们自己的三档矿链做，不直接掉对方的矿石方块**。所有者明确要求筛出来的是本模组的碎矿：
+   筛 → `broken` / `crushed` / `powdered` → 4 合 1 矿块 → 熔成对方物品。这和 §32/§44 的
+   「对方产物」是同一个原则，只是入口换成了两种 TiT 矿。
+2. **阿迪特是金属**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装 TiT 时回退自有
+   `ardite_ingot`——和钴完全同一套（§36）。碎下界岩 1%（和钴碎块同档）出 `ardite_broken`，
+   砂砾/沙子/尘土**不出**（单源材料不扩散）；1.20.1 补 6 条匠魂熔炼（45 mB 碎矿 / 180 mB 矿块，
+   950°C = TiT 的锭配方，时间 65 t / 90 mB）→ `forge:molten_ardite`。
+3. **叶绿素不是金属**，走 §44 的 `gems`：没有锭、没有自有兜底，**只在 `tinkers_thinking` 在场时
+   注册**（物品、方块、碎矿、锤表、配方、标签一起消失）。熔成 `tinkers_thinking:chlorophyte_compound`：
+   TiT 的原矿正好掉 1 个叶绿素 A + 1 个 B，合成 1 个混合物，所以一块矿 = 一份等价物，
+   比只给 A 或只给 B 都合理（只给一半会让化合物永远凑不齐）。
+4. **入口**：阿迪特走碎下界岩（1%），叶绿素走**草方块**（1%，新输入 `minecraft:grass_block`）。
+   草方块表 = 泥土 24 条原样 + 叶绿素碎矿，由 `scripts/generate_sieve_assets.py` 从 `dirt.json`
+   生成（草方块 = 泥土 + 草种子，空岛上用途一致；手抄会漂移，重跑幂等）。
+5. **单源，不扩散**：两种材料都只从各自那一张表出——阿迪特只从碎下界岩、叶绿素只从草方块；
+   生成器里的 `SINGLE_SOURCE` 会把它们从砂砾/沙子/尘土（以及 gems 的 patch 文件）里排除，
+   免得玩家在砂砾里筛出阿迪特。
+   叶绿素的每条掉落都带 `mod`；没装 TiT 时在查物品之前跳过，
+   不刷 unknown item。1.21.1 上叶绿素永不注册，阿迪特照常存在并熔成自有锭——这是有意的降级。
+6. **验证**：1.20.1 全装 `[materials] 22 entries`、`ardite → tinkers_thinking:ardite_ingot`、
+   `chlorophyll → tinkers_thinking:chlorophyte_compound`、`7 inputs / 139 drops`、`hammer 79`；
+   RCON 熔炉把两种矿砾分别烧成 `tinkers_thinking:ardite_ingot` / `tinkers_thinking:chlorophyte_compound`；
+   不装 TiT 时 14 entries / 116 / 113 条、无 unknown item，阿迪特矿砾烧成自有锭。
+   手筛出货手感、匠魂炉熔化、JEI 页面还没进游戏看。
+
+## 46. 应用能源 2：赛特斯石英（2026-11-03，两版数据与真装）
+
+AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：赛特斯石英只从陨石 / 晶簇来，
+空岛没有陨石。经典 Ex Nihilo 的做法也是筛沙出赛特斯。这里**不走 TiT 那种自有三档材料链**：
+赛特斯石英本身就是 AE2 的基础资源，AE2 自带种子 / 充能 / 氟石 / ME 网络整条链，直接掉对方
+成品既够用，又不会多出和 AE2 数值对不上的中间物。
+
+1. **只做两条**：沙 → `ae2:certus_quartz_crystal`（1/6）与 `ae2:certus_quartz_dust`（1/12）。
+   水晶是 AE2 的基础建材，粉用于种子 / 加工；两条都直接掉对方物品，不注册自有物品、
+   不复制贴图 / JSON / 代码。
+2. **不做充能赛特斯 / 天石粉**：充能赛特斯由 AE2 自己的 `ae2:charger` 充能得到（充电器配方只要
+   铁 / 铜 / 赛特斯，空岛能凑齐），不需要筛表；天石粉来自陨石天石，和「空岛拿不到」无关，
+   留给数据包或以后。这样 AE2 的完整启动链（赛特斯 → 充能 → 种子 / 氟石 → ME 网络）都有来源。
+3. **门控与形态**：`sieve/sand_ae2.json` 是独立 patch 文件，根级 `"mod": "ae2"` +
+   `"patch": true`。没装 AE2 时在物品查找之前整文件跳过，基表不变、不刷 unknown item；
+   装了以后按补丁语义追加两条，不覆盖 `sand.json`，所以数据包改沙表不会和它冲突。
+   两个版本的 JSON 逐字相同（mod id 与物品 id 在 1.20.1 / 1.21.1 一致）。
+4. **数值依据**：水晶 1/6 对齐经典 Ex Nihilo（Omnia 是 5%）；粉取水晶的一半，因为粉还能用
+   水晶在 AE2 里加工，1/12 只是给前期「赛特斯种子」一个更快的起点。
+5. **验证**：1.21.1 + AE2 19.2.18（GuideME 21.1.22）：`[sieve] 7 inputs, 121 drops`
+   （基表 119 + 2），`/exnihilo sieve minecraft:sand` 两条都在；不装 AE2 时 119、无 unknown item。
+   1.20.1 + AE2 15.4.12（GuideME 20.1.15，`-PtechMods` 全装）：`147 drops`（基表 145 + 2），
+   不装时 145。手筛的实际手感与 JEI 页面还没进游戏看。
+6. **1.20.1 dev 坑**：AE2 生产 jar 走 FG dev 时 SRG mixin 找不到 `f_129762_`，必须放 `libs/`
+   由 `-PtechMods` 做 `fg.deobf`；1.21.1 的 NeoForge dev 用官方名，生产 jar 可直接进 `run/mods`。
