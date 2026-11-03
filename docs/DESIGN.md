@@ -1307,8 +1307,8 @@ P2 把“版本差异”收进一个模块，让数据只维护一份。
    不再用其他矿碎块的煤灰底。
 3. **下界合金碎片**。碎下界岩 0.4%，**双线都加**（用户明确要求）；不参与匠魂熔炼。
 4. **匠魂熔炼**。13 材料 × 6 形态 = **78 条** `tconstruct:melting`：
-   - 物品（broken / crushed / powdered）→ **60 mB**（1/2 粗金属）；
-   - 方块（ore_gravel / ore_sand / ore_dust）→ **240 mB**（2× 粗金属）；
+   - 物品（broken / crushed / powdered）→ **45 mB**（1/2 锭）；
+   - 方块（ore_gravel / ore_sand / ore_dust）→ **180 mB**（2 锭）；
    - 流体用 `forge:molten_<m>` 标签，温度复制 Tinkers 自己的锭配方，时间按 90 mB 换算；
    - 全部带 `conditions: mod_loaded(tconstruct)`；没匠魂时整批跳过。
 5. **阿迪特不做**。Tinkers 3.12.1 已移除阿迪特（没有 `molten_ardite` / `ardite_ingot`，
@@ -1555,3 +1555,38 @@ vanilla `RecipeManager`。
 验证：两版各七个入口生效；改脚本 `/reload` 清旧贡献、应用新条目；同一 fixture 用
 datapack 跑，七张表 dump 与 CT 逐字节一致；移除 CT 后正常启动。
 未做：CT recipe type / JEI 分类；P4 客户端 JEI 同步。
+
+## 44. 科技模组矿物链：氟石 + Thermal 六种（2026-11-03，两版）
+
+§32/§35 只接了「同一块矿砾熔成谁家的锭」。这一批补的是**没有锭的矿物**：Mekanism 氟石，
+Thermal 磷灰石 / 朱砂 / 硝石 / 硫磺 / 红宝石 / 蓝宝石。它们在世界里有自己的矿石方块，空岛上却拿不到；
+Create 只有锌，已有完整链，本轮只做回归。
+
+1. **不直接掉成品**。所有者在方案里明确要求「我们的筛制也要出矿物，而不是直接出产物」。
+   所以 7 种矿物各占一条材料，走现有三档矿链：
+   筛砂砾/沙子/尘土 → `broken` / `crushed` / `powdered` → 4 合 1 成矿块 → 熔炼成对方的矿物。
+   不新增「筛子直接掉 `thermal:apatite`」的捷径，JEI、锤表、创造栏仍然只有一张材料表。
+2. **`gems` schema**。`materials.json` 的 `ingot` / `ingots` 语义是「金属锭」；宝石/矿物
+   用同构的 `gems` 数组。按所有者要求，**`gems` 是纯模组产物**：
+   - **不注册自有磷灰石/氟石之类的兜底物品**，也不生成 `c:gems` / `forge:gems` 标签；
+   - **整条材料只在候选 mod 之一已加载时注册**：没装时物品、方块、三档碎料、筛出物、
+     锤表、配方和标签都不出现；
+   - 装对应模组时，矿砾/矿砂/矿尘熔成对方物品；
+   - 矿块仍然进 `c:ores/<id>` / `forge:ores/<id>`（标签条目 `required: false`），所以
+     Thermal 磨粉机 / Mek 富集机走标签就能吃；
+   - `gems` 与 `ingot`/`ingots` **不能混用**，混用整条跳过并打 `[materials]` 错误。
+   这避免在无模组包里凭空多出“磷灰石/氟石”这种不属于本模组的物品，也避免加载
+   引用缺失物品的配方/掉落表。矿块没有 loot table，由 `SelfDropBlock` 代码掉自身。
+3. **数据侧沿用 §32 的条件顺序，但 `gems` 没有 base**。金属仍是 base + 候选变体；
+   7 种矿物只有手写的 `*_smelting_<mod>` 变体（mod 条件），没有无条件的兜底配方。两条线的条件键仍不同
+   （1.21.1 `neoforge:conditions`，1.20.1 裸 `conditions`）。
+4. **数值**。fluorite 1/8、apatite 1/18、cinnabar 1/32、niter 1/24、sulfur 1/24、ruby/sapphire 1/64；三种筛料
+   共用同一 `rarity`，和 §32 的金属保持一致。7 种矿物不写匠魂熔炼：Tinkers 没有对应熔融
+   液体，硬写会得到不存在的流体。
+5. **验证**。main 无科技模组：13 种金属、筛 93 / 锤 52，`exnihilosatellitium:ruby_broken` 为
+   unknown；只装 Mek：14 种、筛 96 / 锤 55，Thermal 六种仍不存在；全装（1.20.1）：20 种、
+   筛 113 / 锤 73。所有情况下都没有缺失物品/掉落表报错。
+   1.20.1 同时装 Mek + Thermal + Create + IE + Tinkers：7 种矿砾分别熔成
+   `mekanism:fluorite_gem` 与 `thermal:apatite|cinnabar|niter|sulfur|ruby|sapphire`。
+   `dump` 的筛表 / 锤表条数与两版一致。Thermal 机器吃矿块只核对了 `forge:ores/<m>` 标签，
+   多方块本身未跑。

@@ -38,6 +38,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -58,10 +59,10 @@ import java.util.concurrent.CompletableFuture;
  *       categories.</li>
  * </ul>
  *
- * <p>The twelve {@code *_smelting_mekanism} recipes are <em>not</em> generated:
- * their result is an item from a mod that is not on the datagen classpath, and an
- * {@link ItemStack} cannot reference an unregistered item. They stay hand-written
- * under {@code src/main/resources}.</p>
+ * <p>The per-mod smelting variants (the {@code *_smelting_<mod>} files) are
+ * <em>not</em> generated: their result is an item from a mod that is not on the
+ * datagen classpath, and an {@link ItemStack} cannot reference an unregistered
+ * item. They stay hand-written under {@code src/main/resources}.</p>
  */
 public final class ModRecipes extends RecipeProvider {
 
@@ -77,7 +78,7 @@ public final class ModRecipes extends RecipeProvider {
 
     @Override
     protected void buildRecipes(final RecipeOutput output) {
-        final RecipeOutput out = withoutAdvancements(output);
+        final RecipeOutput out = withoutAdvancements(output, gemPackConditions());
 
         oreChain(out);
         barrels(out);
@@ -92,12 +93,42 @@ public final class ModRecipes extends RecipeProvider {
         silkwormCooking(out);
     }
 
+    /**
+     * Conditions for the 2x2 pack recipes of mod-gated {@code gems} materials: they
+     * only exist while one of their candidate mods is loaded. Metals keep their
+     * unconditional pack recipes because they always have an own ingot fallback.
+     */
+    private static Map<String, ICondition> gemPackConditions() {
+        final Map<String, ICondition> out = new LinkedHashMap<>();
+        for (final OreMaterial material : OreMaterials.all()) {
+            if (!material.gem()) {
+                continue;
+            }
+            final List<ICondition> mods = new ArrayList<>();
+            for (final OreMaterial.ProductCandidate candidate : material.candidates()) {
+                if (candidate.mod() != null) {
+                    mods.add(new ModLoadedCondition(candidate.mod()));
+                }
+            }
+            if (mods.isEmpty()) {
+                continue;
+            }
+            final ICondition condition = mods.size() == 1 ? mods.get(0) : new OrCondition(mods);
+            for (final String suffix : List.of("_broken_to_ore_gravel", "_crushed_to_ore_sand",
+                    "_powdered_to_ore_dust")) {
+                out.put(material.id() + suffix, condition);
+            }
+        }
+        return out;
+    }
+
     // ------------------------------------------------------------ ore chain
 
     /**
-     * Nine materials → 3 pack recipes + 3 smelting recipes each. Materials with an
-     * {@code ingots} candidate list get a conditional base recipe (our own ingot
-     * only while none of those mods is loaded); the per-mod variants stay hand-written.
+     * Every material → 3 pack recipes + 3 smelting recipes each. Materials with an
+     * {@code ingots} / {@code gems} candidate list get a conditional base recipe
+     * (our own fallback only while none of those mods is loaded); the per-mod
+     * variants stay hand-written.
      */
     private static void oreChain(final RecipeOutput out) {
         for (final OreMaterial material : OreMaterials.all()) {
@@ -114,18 +145,25 @@ public final class ModRecipes extends RecipeProvider {
             pack(out, material.id() + "_crushed_to_ore_sand", crushed, sand);
             pack(out, material.id() + "_powdered_to_ore_dust", powdered, dust);
 
+            // Gem/mineral entries have no own fallback: without the supported mod
+            // the ore chain simply has no smelting endpoint. The per-mod variants
+            // are hand-written, so datagen emits nothing for these.
+            if (material.gem()) {
+                continue;
+            }
+
             final List<ICondition> loaded = new ArrayList<>();
-            for (final OreMaterial.IngotCandidate candidate : material.ingotCandidates()) {
+            for (final OreMaterial.ProductCandidate candidate : material.candidates()) {
                 if (candidate.mod() != null) {
                     loaded.add(new ModLoadedCondition(candidate.mod()));
                 }
             }
             final ICondition[] conditions;
-            if (material.ingotCandidates().isEmpty()) {
+            if (material.candidates().isEmpty()) {
                 conditions = new ICondition[0];
             } else if (loaded.isEmpty()) {
                 // An unconditional candidate always wins, so there is no base recipe.
-                ExNihiloSatellitium.LOGGER.warn("[datagen] {}: unconditional ingot candidate, "
+                ExNihiloSatellitium.LOGGER.warn("[datagen] {}: unconditional product candidate, "
                         + "no base smelting recipe generated", material.id());
                 continue;
             } else {
@@ -133,24 +171,24 @@ public final class ModRecipes extends RecipeProvider {
                         loaded.size() == 1 ? loaded.get(0) : new OrCondition(loaded))};
             }
 
-            final Item ingot = smeltingTarget(material);
-            smelt(out, material.id() + "_ore_gravel_smelting", gravel, ingot, 0.1F, 200, conditions);
-            smelt(out, material.id() + "_ore_sand_smelting", sand, ingot, 0.1F, 200, conditions);
-            smelt(out, material.id() + "_ore_dust_smelting", dust, ingot, 0.1F, 200, conditions);
+            final Item product = smeltingTarget(material);
+            smelt(out, material.id() + "_ore_gravel_smelting", gravel, product, 0.1F, 200, conditions);
+            smelt(out, material.id() + "_ore_sand_smelting", sand, product, 0.1F, 200, conditions);
+            smelt(out, material.id() + "_ore_dust_smelting", dust, product, 0.1F, 200, conditions);
         }
     }
 
-    /** The ingot our own recipes point at; for candidates that is always our fallback. */
+    /** The product our own recipes point at; for candidates that is always our fallback. */
     private static Item smeltingTarget(final OreMaterial material) {
-        if (!material.ingotCandidates().isEmpty() || material.ingot() == null) {
-            final var holder = ModOreItems.byMaterial().get(material.id()).get("ingot");
+        if (!material.candidates().isEmpty() || material.product() == null) {
+            final var holder = ModOreItems.byMaterial().get(material.id()).get("product");
             if (holder == null) {
-                throw new IllegalStateException("material " + material.id() + " has no own ingot item: "
+                throw new IllegalStateException("material " + material.id() + " has no own product item: "
                         + "run datagen without its supported mods on the classpath");
             }
             return holder.get();
         }
-        return requireItem(material.ingot());
+        return requireItem(material.product());
     }
 
     /** 2×2 of one refinement stage back into the ore block. */
@@ -540,12 +578,21 @@ public final class ModRecipes extends RecipeProvider {
      * Drops the generated {@code advancement/recipes/**}: the mod has never shipped
      * recipe advancements, and adding them would silently change recipe-book unlocks.
      */
-    private static RecipeOutput withoutAdvancements(final RecipeOutput delegate) {
+    private static RecipeOutput withoutAdvancements(final RecipeOutput delegate,
+                                                    final Map<String, ICondition> packConditions) {
         return new RecipeOutput() {
             @Override
             public void accept(final ResourceLocation id, final Recipe<?> recipe,
                                @Nullable final AdvancementHolder advancement, final ICondition... conditions) {
-                delegate.accept(id, recipe, null, conditions);
+                final ICondition condition = packConditions.get(id.getPath());
+                if (condition == null) {
+                    delegate.accept(id, recipe, null, conditions);
+                    return;
+                }
+                final ICondition[] all = new ICondition[conditions.length + 1];
+                System.arraycopy(conditions, 0, all, 0, conditions.length);
+                all[conditions.length] = condition;
+                delegate.accept(id, recipe, null, all);
             }
 
             @Override

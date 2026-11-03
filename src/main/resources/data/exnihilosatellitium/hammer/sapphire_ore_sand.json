@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:sapphire_ore_sand",
+  "result": "exnihilosatellitium:sapphire_powdered",
+  "min": 4,
+  "max": 6,
+  "mod": "thermal_foundation"
+}

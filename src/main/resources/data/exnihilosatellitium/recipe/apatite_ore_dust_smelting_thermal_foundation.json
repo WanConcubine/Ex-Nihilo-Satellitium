@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:apatite_ore_dust"
+  },
+  "result": {
+    "id": "thermal:apatite"
+  },
+  "experience": 0.1,
+  "cookingtime": 200,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "thermal_foundation"
+    }
+  ]
+}

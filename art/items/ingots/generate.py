@@ -114,7 +114,7 @@ def main() -> None:
     materials = json.loads(MATERIALS.read_text(encoding="utf-8"))["materials"]
     rendered = {}
     for material in materials:
-        if material.get("enabled") is False or "ingot" in material:
+        if material.get("enabled") is False or "ingot" in material or "gems" in material:
             continue
         mid = material["id"]
         palette = [tools.hex_rgb(c) for c in tools.PALETTES[mid]]

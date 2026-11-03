@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "exnihilosatellitium:cinnabar_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:cinnabar_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:cinnabar_ore_dust",
+      "required": false
+    }
+  ]
+}

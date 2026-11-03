@@ -236,6 +236,132 @@
       ],
       "source": "estimate",
       "enabled": true
+    },
+    {
+      "id": "fluorite",
+      "color": "6FE3C0",
+      "name": {
+        "en_us": "Fluorite",
+        "zh_cn": "氟石"
+      },
+      "tier": "common",
+      "rarity": 8,
+      "gems": [
+        {
+          "item": "mekanism:fluorite_gem",
+          "mod": "mekanism"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "apatite",
+      "color": "7FC8E8",
+      "name": {
+        "en_us": "Apatite",
+        "zh_cn": "磷灰石"
+      },
+      "tier": "common",
+      "rarity": 18,
+      "gems": [
+        {
+          "item": "thermal:apatite",
+          "mod": "thermal_foundation"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "cinnabar",
+      "color": "C93A2E",
+      "name": {
+        "en_us": "Cinnabar",
+        "zh_cn": "朱砂"
+      },
+      "tier": "uncommon",
+      "rarity": 32,
+      "gems": [
+        {
+          "item": "thermal:cinnabar",
+          "mod": "thermal_foundation"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "niter",
+      "color": "E8E4D6",
+      "name": {
+        "en_us": "Niter",
+        "zh_cn": "硝石"
+      },
+      "tier": "common",
+      "rarity": 24,
+      "gems": [
+        {
+          "item": "thermal:niter",
+          "mod": "thermal_foundation"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "sulfur",
+      "color": "E0CE4A",
+      "name": {
+        "en_us": "Sulfur",
+        "zh_cn": "硫磺"
+      },
+      "tier": "common",
+      "rarity": 24,
+      "gems": [
+        {
+          "item": "thermal:sulfur",
+          "mod": "thermal_foundation"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "ruby",
+      "color": "D93A4A",
+      "name": {
+        "en_us": "Ruby",
+        "zh_cn": "红宝石"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "gems": [
+        {
+          "item": "thermal:ruby",
+          "mod": "thermal_foundation"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "sapphire",
+      "color": "3A6FD9",
+      "name": {
+        "en_us": "Sapphire",
+        "zh_cn": "蓝宝石"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "gems": [
+        {
+          "item": "thermal:sapphire",
+          "mod": "thermal_foundation"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
     }
   ]
 }

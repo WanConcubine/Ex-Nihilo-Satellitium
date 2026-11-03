@@ -1,0 +1,11 @@
+{
+  "mod": "mekanism",
+  "patch": true,
+  "input": "minecraft:sand",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:fluorite_crushed",
+      "chance": 0.125
+    }
+  ]
+}

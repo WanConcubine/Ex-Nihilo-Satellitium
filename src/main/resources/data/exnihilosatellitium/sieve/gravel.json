@@ -68,6 +68,10 @@
     {
       "item": "minecraft:emerald",
       "chance": 0.00667
+    },
+    {
+      "item": "exnihilosatellitium:cobalt_broken",
+      "chance": 0.01562
     }
   ]
 }

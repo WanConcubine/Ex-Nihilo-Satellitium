@@ -70,6 +70,9 @@ neoForge {
         }
         data {
             data()
+            // Datagen must still see mod-gated `gems` materials so their assets
+            // exist for packs that do install Mekanism/Thermal.
+            systemProperty 'exnihilosatellitium.datagen', 'true'
             programArguments.addAll '--mod', 'exnihilosatellitium', '--all',
                     '--output', file('src/generated/resources').absolutePath,
                     '--existing', file('src/main/resources').absolutePath

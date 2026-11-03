@@ -1,7 +1,16 @@
 {
   "values": [
-    "exnihilosatellitium:lead_ore_gravel",
-    "exnihilosatellitium:lead_ore_sand",
-    "exnihilosatellitium:lead_ore_dust"
+    {
+      "id": "exnihilosatellitium:lead_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:lead_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:lead_ore_dust",
+      "required": false
+    }
   ]
 }

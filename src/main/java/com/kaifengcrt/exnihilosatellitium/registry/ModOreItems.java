@@ -17,9 +17,10 @@ import java.util.Map;
 
 /**
  * Block items for the three ore-block states plus the three item stages
- * (broken / crushed / powdered) of every material. Materials without an
- * {@code ingot} entry in {@code materials.json} also get their own ingot item,
- * so the chain ends somewhere even when no other mod supplies that metal.
+ * (broken / crushed / powdered) of every material. Materials without a
+ * resolvable product in {@code materials.json} also get their own fallback item
+ * ({@code <id>_ingot}, or {@code <id>} for gem materials), so the chain ends
+ * somewhere even when no other mod supplies that mineral.
  */
 public final class ModOreItems {
 
@@ -42,8 +43,8 @@ public final class ModOreItems {
                 entries.put(stage, ITEMS.register(material.id() + "_" + stage,
                         () -> new Item(new Item.Properties())));
             }
-            if (material.hasOwnIngot()) {
-                entries.put("ingot", ITEMS.register(material.id() + "_ingot",
+            if (material.hasOwnProduct()) {
+                entries.put("product", ITEMS.register(material.ownItemId(),
                         () -> new Item(new Item.Properties())));
             }
             BY_MATERIAL.put(material.id(), entries);

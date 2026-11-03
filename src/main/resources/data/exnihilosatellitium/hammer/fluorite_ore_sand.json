@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:fluorite_ore_sand",
+  "result": "exnihilosatellitium:fluorite_powdered",
+  "min": 4,
+  "max": 6,
+  "mod": "mekanism"
+}

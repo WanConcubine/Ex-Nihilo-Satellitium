@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterial;
+import com.kaifengcrt.exnihilosatellitium.common.block.SelfDropBlock;
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
@@ -36,7 +37,9 @@ public final class ModOreBlocks {
             final Map<String, DeferredHolder<Block, Block>> kinds = new LinkedHashMap<>();
             for (final String kind : KINDS) {
                 kinds.put(kind, BLOCKS.register(material.id() + "_ore_" + kind,
-                        () -> new Block(properties(kind))));
+                        () -> material.gem()
+                                ? new SelfDropBlock(properties(kind))
+                                : new Block(properties(kind))));
             }
             BY_MATERIAL.put(material.id(), kinds);
         }

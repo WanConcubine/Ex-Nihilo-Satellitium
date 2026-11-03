@@ -1,7 +1,16 @@
 {
   "values": [
-    "exnihilosatellitium:nickel_ore_gravel",
-    "exnihilosatellitium:nickel_ore_sand",
-    "exnihilosatellitium:nickel_ore_dust"
+    {
+      "id": "exnihilosatellitium:nickel_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:nickel_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:nickel_ore_dust",
+      "required": false
+    }
   ]
 }

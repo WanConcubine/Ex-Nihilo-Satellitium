@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "exnihilosatellitium:niter_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:niter_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:niter_ore_dust",
+      "required": false
+    }
+  ]
+}
