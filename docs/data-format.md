@@ -384,7 +384,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | 1.21.1 | `"results": [{"id": "create:crushed_raw_iron", "count": 1, "chance": 0.75}]` | `processing_time` |
 | 1.20.1 | `"results": [{"item": "create:crushed_raw_iron", "chance": 0.75}]` | `processingTime` |
 
-- **Immersive Engineering 1.20.1**：它的 crusher 输入是 `forge:ores/<m>` 标签，我们的 20 种矿块
+- **Immersive Engineering 1.20.1**：它的 crusher 输入是 `forge:ores/<m>` 标签，我们的全部矿块
   已经在 1.20.1 的 `forge:ores/<m>` 里，所以不需要补 IE 配方；产物落到 IE 自己的
   `forge:dusts/<m>`（我们的矿尘按既定设计不占这个标签）。IE 没有 1.21.1 版本，主线只保留
   锭候选 / 变体，不会命中。
@@ -392,7 +392,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 ### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
 
 **路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
-13 种金属材料 × 6 形态 = **78 条**。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）**不写匠魂熔炼**，
+14 种金属材料 × 6 形态 = **84 条**（含阿迪特）。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）**不写匠魂熔炼**，
 因为 Tinkers 没有它们对应的熔融液体；这是有意的边界，不是漏生成。
 
 ```json
@@ -478,7 +478,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **应用能源 2（`ae2`，两版）**：独立补丁文件 `sieve/sand_ae2.json`，根级 `"mod": "ae2"` +
   `"patch": true`，对沙追加两条：`ae2:certus_quartz_crystal` **1/6**、
   `ae2:certus_quartz_dust` **1/12**。不注册自有物品、不复制对方资源；没装 AE2 时整文件跳过
-  （基表仍是 119 / 116），装了两版各 +2（本轮实测 121 / 147）。充能赛特斯与天石粉不做：前者用
+  （基表仍是 116 / 113），装了两版各 +2（本轮实测 118 / 115）。充能赛特斯与天石粉不做：前者用
   AE2 自己的 `ae2:charger` 充能（配方只要铁 / 铜 / 赛特斯），后者来自陨石天石，不属于空岛缺口。
 - **1.21.4 的苍白橡木（pale oak）**不在 1.21.1 / 1.20.1 的物品表里，暂时没有对应掉落；
   升级目标版本时再加。
@@ -610,8 +610,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 当前 73 条：
   - 圆石→砂砾、砂砾→沙子、沙子→`exnihilosatellitium:dust`（各 1 个）；
   - 8 种砂岩（含红砂岩）→沙子 / 红沙（各 1 个）；
-  - 20 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
-  - 20 种材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
+  - 各材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
+  - 各材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
 - 未知/重复输入、非法数量区间打 `[hammer]` 警告并跳过。
 
 ### 钩子表
@@ -638,7 +638,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 - 新方块 `exnihilosatellitium:dust`，自有 `block/dust.png` 贴图（Creatio 噪点 4 色量化）；
   沙子用锤子砸出，放进筛子就是 `sieve/dust.json` 的输入。
-- 尘土表 23 条：20 种 `<material>_powdered` + 红石 / 荧石粉 / 火药。
+- 尘土表：各材料的 `<material>_powdered` + 红石 / 荧石粉 / 火药。
 - 尘土方块有独立 loot table、`mineable/shovel` 标签和创造标签条目。
 
 ## 13. 坩埚表与配置（M4，2026-10-30）
