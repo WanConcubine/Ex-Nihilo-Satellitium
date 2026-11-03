@@ -365,6 +365,7 @@ saves/<世界名>/datapacks/my_pack/
 /reload
 /exnihilo tables
 /exnihilo dump sieve
+/exnihilo dump all
 /exnihilo sieve minecraft:sand
 /exnihilo hammer minecraft:cobblestone
 /exnihilo compost minecraft:bread

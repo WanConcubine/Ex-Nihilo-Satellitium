@@ -185,6 +185,7 @@ public final class CrucibleHeat {
             clientSources = snapshot;
         } else {
             sources = snapshot;
+            builder.logConflicts();
         }
         ExNihiloSatellitium.LOGGER.info(
                 "[crucible] loaded {} heat sources ({} tag files, {} patches, {} overlay{}){}",
@@ -228,7 +229,7 @@ public final class CrucibleHeat {
             return;
         }
         final Map<String, String> properties = properties(source.root());
-        removeMatching(builder, inputs, properties);
+        removeMatching(builder, inputs, properties, null);
         if (DataPackJson.removeAll(source.root())) {
             return;
         }
@@ -255,7 +256,8 @@ public final class CrucibleHeat {
                 }
                 final Map<String, String> properties = properties(root);
                 switch (customization.action()) {
-                    case REMOVE -> removeMatching(builder, inputs, properties);
+                    case REMOVE -> removeMatching(builder, inputs, properties,
+                            overlaySource(customization));
                     case ADD -> {
                         final float speed = speed(root, label);
                         if (speed <= 0.0F) {
@@ -272,7 +274,7 @@ public final class CrucibleHeat {
                         if (speed <= 0.0F) {
                             continue;
                         }
-                        removeMatching(builder, inputs, properties);
+                        removeMatching(builder, inputs, properties, overlaySource(customization));
                         for (final Block input : inputs) {
                             builder.put(key(input, properties),
                                     new HeatSource(input, properties, speed),
@@ -288,10 +290,11 @@ public final class CrucibleHeat {
     }
 
     private static void removeMatching(final TableBuilder<String, HeatSource> builder,
-                                       final List<Block> inputs, final Map<String, String> properties) {
+                                       final List<Block> inputs, final Map<String, String> properties,
+                                       final String source) {
         if (!properties.isEmpty()) {
             for (final Block input : inputs) {
-                builder.remove(key(input, properties));
+                builder.remove(key(input, properties), source);
             }
             return;
         }
@@ -307,7 +310,7 @@ public final class CrucibleHeat {
             }
         }
         for (final String key : doomed) {
-            builder.remove(key);
+            builder.remove(key, source);
         }
     }
 

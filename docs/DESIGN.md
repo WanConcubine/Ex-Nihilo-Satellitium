@@ -1456,3 +1456,30 @@ KJS 只能走 `kubejs/data`，CT 只能改原版配方；这与“尽可能支�
   给内置条目“打地基”，只能覆盖它。
 - **不持久化。** 脚本贡献由脚本在每次启动/重载时重新提交；P1 的命令入口只是测试，
   重启丢失是预期行为，避免把调试状态悄悄写进存档。
+
+## 41. P1.5：overlay 的优先级、冲突与生命周期（2026-11-03）
+
+P1 的 overlay 只有“提交顺序”，没有优先级，也不清楚最终是谁赢了。P1.5 补四件事：
+
+1. **priority**。`Customization` 增加 `priority`（默认 0），`forTable` 按
+   `(priority, sequence)` 排序：低 priority 先应用，高 priority 后应用所以覆盖它；
+   同 priority 仍是后提交者赢。命令语法是
+   `/exnihilo customize <table> add|remove|replace [priority] <json>`。
+   这是给 P2/P3 的 KJS/CT 用的：各自绑定固定 tier，而不是依赖模组加载顺序。
+2. **冲突可见**。`TableBuilder` 在 overlay 写已有 key / 删已有 key / `add` 被已有规则挡住时，
+   记录 `Conflict(key, kind, previousSource, newSource)`；rebuild 后 `logConflicts()`
+   打印 `replaced` / `removed` / `add ignored` 与旧 source。`sourceOf` 从“只存不用”
+   变成了日志依据；数据包文件之间的重复仍走原来的 duplicate 警告。
+3. **生命周期**。`CustomizationOverlay` 对同一 source 的完全相同 payload 去重；
+   总操作数上限 4096；空 payload 直接拒绝（命令返回 failure）。
+   `ServerStoppedEvent` 清空队列，避免单人“退出世界 → 进另一个世界”把上一个世界的
+   命令操作带过去；脚本本来就应该在每次加载时重新提交。
+4. **诊断**。`/exnihilo dump all` 一次输出七张表；`customize list` 显示 priority 和 payload。
+
+取舍：冲突日志在每次 rebuild 都会重放，所以 `/reload` 会重复打印同样的冲突行。
+这是刻意保留的——它证明「这次 rebuild 的赢家仍然是同一个」；如果将来日志太吵，
+再加“只在冲突集合变化时打印”的去重。
+
+验证：main dev server 上 p10 先提交、p5 后提交，最终 p10 赢；`add ignored`、`replaced`、
+`removed` 三种日志都能看到；同一 add 提交两次 overlay 仍为 1；空 payload 被拒；
+`dump all` 298 行 / 7 个表头；停止服务器清理 3 条并打日志；两次 `/reload` dump 一致。

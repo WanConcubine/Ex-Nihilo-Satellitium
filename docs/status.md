@@ -32,6 +32,29 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 M8 月光魔法联动仍未开始。三路径 P1 基座已完成**（TableBuilder + CustomizationOverlay +
 `/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
 
+## 当前批次（2026-11-03，P1.5：overlay 边角）
+
+- **显式 priority**：`CustomizationOverlay` 的操作带 `priority`（默认 0）；应用顺序是
+  **priority 升序，再按提交顺序**，高 priority 后应用所以覆盖低 priority。
+  命令形态：`/exnihilo customize <table> add|remove|replace [priority] <json>`。
+- **冲突可见**：`TableBuilder` 记录 overlay 的 `replaced` / `removed` / `add ignored`，
+  rebuild 后打印一行一条，带旧 source：
+  - `[customize] hammer replaced minecraft:cobblestone (was exnihilosatellitium:hammer/cobblestone.json)`
+  - `[customize] hammer add ignored for minecraft:cobblestone (kept ...)`
+  - `[customize] barrel removed ...` / `sieve removed ...`
+- **生命周期**：服务器停止时清空 overlay（单人切世界不会泄漏到下一个世界）；同一 source
+  重复提交完全相同的操作会去重；总操作数上限 4096；空 payload 直接拒绝。
+- **诊断**：`/exnihilo dump all` 一次输出七张表（298 行，7 个表头）。
+- **验证**（2026-11-03，dev server + RCON）：
+  - priority：先提交 `p10 cobblestone→flint`、再提交 `p5 cobblestone→gravel`，
+    最终 dump 是 flint（p10 后应用）；冲突日志显示 p5 覆盖文件、p10 覆盖 p5。
+  - `add ignored`：对已有文件规则的锤子 add 被拒绝并记录保留的 source。
+  - 去重：同一 sieve add 提交两次，overlay 仍是 1 条。
+  - 空 payload：`/exnihilo customize sieve add {}` 返回 rejected，overlay 不变。
+  - 连续两次 `/reload`：dump 一致，conflict 日志重复但最终表不变。
+  - 停止服务器：日志 `cleared 3 overlay op(s) on server stop`，重启后 `overlay 0 ops`。
+- **1.20.1**：代码已同步，build + 纹理守卫通过；P1.5 的 RCON 复验见分支 `docs/status.md`。
+
 ## 当前批次（2026-11-03，三路径 P1：TableBuilder + overlay 基座）
 
 - **新包 `common/table/`**：
@@ -340,6 +363,8 @@ M8 月光魔法联动仍未开始。三路径 P1 基座已完成**（TableBuilde
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
+| P1.5 priority / conflicts | ✅ | p10 先提交仍赢 p5；`add ignored` / `replaced` / `removed` 带旧 source；两版 RCON |
+| P1.5 生命周期 | ✅ | 重复提交去重、空 payload 拒绝、`dump all` 298 行、server stop 清理 3/4 条 |
 | P1 TableBuilder / overlay | ✅ | 2026-11-03：七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致；clear 21 条后回基线 |
 | P1 `/exnihilo dump` | ✅ | 七张表排序行输出（RCON 可读）；头行只有表名 + 行数，便于跨路径 diff |
 | P1 失败隔离 | ✅ | 坏 overlay 只 `[customize]` warning；坏数据包 `[sieve] rebuild failed` 且旧表不变 |

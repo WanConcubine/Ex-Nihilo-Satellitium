@@ -817,20 +817,25 @@ overlay 队列（`CustomizationOverlay`）。P1 只通过 OP 命令暴露，用�
 将来共用的语义：
 
 ```
-/exnihilo customize <table> add|remove|replace <json>
+/exnihilo customize <table> add|remove|replace [priority] <json>
 /exnihilo customize list
 /exnihilo customize clear [source]
-/exnihilo dump <table>
+/exnihilo dump <table|all>
 ```
 
 - payload 与 datapack 文件字段完全相同，因此解析、校验、`#tag` 展开只写一份；
 - `add` = 普通文件语义；`replace` = 先删目标再写入；`remove` = 删整条，或按 `remove` 列表删；
   锤子/熔点/热源不需要 `remove` 字段，给 `input`/`block` 即删整条（热源带 `properties`
   时只删同状态）；
-- 每个操作带 source（命令是 `command`，将来的脚本用自己的 id），按提交顺序重放；
-  后提交者覆盖，`[customize]` 日志打印 payload 与 source；
+- 每个操作带 source（命令是 `command`，将来的脚本用自己的 id）和 `priority`（默认 0）。
+  应用顺序是 **priority 升序 → 提交顺序**，所以高 priority 后应用、覆盖低 priority；
+  同 priority 后提交者覆盖。KJS/CT 应给各自 source 固定 tier，不要赌模组加载顺序。
+- 冲突可见：overlay 覆盖/删除/被已有规则挡住时，`[customize]` 日志分别打印
+  `replaced` / `removed` / `add ignored`，并带旧 source：
+  `[customize] hammer replaced minecraft:cobblestone (was .../hammer/cobblestone.json)`。
 - overlay 在**每次 rebuild**（`/reload`、tags 更新、命令改表）时重放，不在 JSON 文件里，
-  所以不会被 `/reload` 丢掉；**不持久化**，重启服务器清空；
+  所以不会被 `/reload` 丢掉；**不持久化**，服务器停止时清空（单人切世界不会泄漏）。
+- 同一 source 重复提交完全相同的操作会去重；总操作数上限 4096；空 payload 直接拒绝。
 - 失败隔离：单条操作解析异常只跳过该条；整表 rebuild 异常保留上一份快照；
   `replace` 会先解析并校验新值，再删旧规则（坏 payload 不会把原条目删掉）。
 

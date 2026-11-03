@@ -90,7 +90,8 @@ public final class CrookDrops {
     private static void rebuild(final boolean clientView, final boolean expandTags) {
         final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
         final boolean tagsReady = expandTags && DataPackJson.tagsReady();
-        final TableBuilder<Block, List<Drop>> builder = new TableBuilder<>(TableId.CROOK.id());
+        final TableBuilder<Block, List<Drop>> builder = new TableBuilder<>(TableId.CROOK.id(),
+                block -> BuiltInRegistries.BLOCK.getKey(block).toString());
         final List<DataPackJson.Source> tagFiles = new ArrayList<>();
         final List<DataPackJson.Source> patchFiles = new ArrayList<>();
 
@@ -137,6 +138,7 @@ public final class CrookDrops {
             clientTable = snapshot;
         } else {
             table = snapshot;
+            builder.logConflicts();
         }
         final int drops = snapshot.values().stream().mapToInt(List::size).sum();
         ExNihiloSatellitium.LOGGER.info(
@@ -265,7 +267,7 @@ public final class CrookDrops {
         }
         for (final Block input : inputs) {
             if (drops.isEmpty()) {
-                builder.remove(input);
+                builder.remove(input, overlaySource(customization));
             } else {
                 builder.put(input, drops, overlaySource(customization));
             }
@@ -283,7 +285,7 @@ public final class CrookDrops {
         final List<String> remove = DataPackJson.removeList(root);
         if (remove.isEmpty()) {
             for (final Block input : inputs) {
-                builder.remove(input);
+                builder.remove(input, overlaySource(customization));
             }
             return;
         }
@@ -299,17 +301,18 @@ public final class CrookDrops {
             final List<Drop> list = new ArrayList<>(current);
             list.removeIf(drop -> removed.contains(drop.item()));
             if (list.isEmpty()) {
-                builder.remove(input);
+                builder.remove(input, overlaySource(customization));
             } else {
-                builder.put(input, List.copyOf(list), overlaySource(customization));
+                builder.recordRemoval(input, overlaySource(customization));
+                builder.set(input, List.copyOf(list), overlaySource(customization));
             }
         }
     }
 
     private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
         final ResourceLocation label = ResourceLocation.tryParse(
-                "exnihilosatellitium:overlay/" + customization.sequence());
-        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+                "customize:crook/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("customize:crook/0") : label;
     }
 
     private static String overlaySource(final CustomizationOverlay.Customization customization) {

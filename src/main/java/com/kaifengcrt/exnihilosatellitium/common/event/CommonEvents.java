@@ -8,6 +8,7 @@ import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
 import com.kaifengcrt.exnihilosatellitium.common.table.Tables;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
@@ -15,6 +16,7 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
@@ -61,6 +63,20 @@ public final class CommonEvents {
 
     private static void rebuildAll(final boolean clientView) {
         Tables.rebuildAll(clientView);
+    }
+
+    /**
+     * Overlay operations are not persisted on purpose, but they live in a static
+     * queue: without this, leaving a single-player world would carry command/script
+     * operations into the next world in the same JVM. Scripts re-submit on load.
+     */
+    @SubscribeEvent
+    public static void onServerStopped(final ServerStoppedEvent event) {
+        final int dropped = CustomizationOverlay.clearAll();
+        if (dropped > 0) {
+            ExNihiloSatellitium.LOGGER.info(
+                    "[customize] cleared {} overlay op(s) on server stop", dropped);
+        }
     }
 
     @SubscribeEvent
