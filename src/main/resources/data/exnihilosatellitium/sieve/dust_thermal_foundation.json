@@ -1,0 +1,31 @@
+{
+  "mod": "thermal_foundation",
+  "patch": true,
+  "input": "exnihilosatellitium:dust",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:apatite_powdered",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:cinnabar_powdered",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:niter_powdered",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:sulfur_powdered",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:ruby_powdered",
+      "chance": 0.01562
+    },
+    {
+      "item": "exnihilosatellitium:sapphire_powdered",
+      "chance": 0.01562
+    }
+  ]
+}

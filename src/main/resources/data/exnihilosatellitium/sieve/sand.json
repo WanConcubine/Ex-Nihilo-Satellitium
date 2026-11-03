@@ -96,6 +96,10 @@
     {
       "item": "minecraft:prismarine_shard",
       "chance": 0.02
+    },
+    {
+      "item": "exnihilosatellitium:cobalt_crushed",
+      "chance": 0.01562
     }
   ]
 }

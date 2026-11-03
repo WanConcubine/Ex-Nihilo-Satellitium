@@ -269,6 +269,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。**当前只支持整数**；对象写法未实现（读 `gravel` 并打警告） |
 | `ingot` | ❌ | 无条件复用：写**具体物品 id**（`minecraft:iron_ingot`），熔炼总是产出它，不注册自有锭。**暂不支持标签**（`#c:ingots/tin`），写标签会打警告并按自有锭处理 |
 | `ingots` | ❌ | **受支持模组的候选锭**（有序数组）：`[{"item": "mekanism:ingot_tin", "mod": "mekanism"}]`。启动时取第一个 `mod` 已加载（或没写 `mod`）的候选；都不匹配时注册自有 `exnihilosatellitium:<id>_ingot`。datagen 会给 base 配方加 `neoforge:not(...)` 兜底；每个候选的 `*_smelting_<mod>.json` 仍是手写（datagen 引用不了未注册的物品），见下 |
+| `gems` | ❌ | **受支持模组的候选矿物**（与 `ingots` 同构，有序数组）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石这类没有“锭”的矿物用它。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `c:gems` / `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 之一已加载时注册**：没装时物品、方块、筛出物、锤表、配方和标签都不出现。装模组时矿砾/矿砂/矿尘熔成对方物品。**不能与 `ingot`/`ingots` 同时出现**，混用会整条跳过 |
 | `owner_mod` | ❌ | 主要来源模组；当前不解析，仅保留字段 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；设为 `false` 时该条跳过（当前没有自动骨架行） |
@@ -289,8 +290,13 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **校验失败只跳过该条**（不拖垮启动）：`id` 非法、颜色格式错、`tier` 非法、`rarity` 越界、重复 `id`。
   日志用 `[materials] ...` 前缀，和 `[compost]` 保持一致的风格。
 - **注册名不可变**：`id` 改了就等于换了材料，旧存档里的物品会变成缺失——发布后不要改已用的 `id`。
-- **宝石不走材料链**：钻石、绿宝石、青金石、石英、红石、下界石英这类没有“锭”的东西，
+- **原版宝石不走材料链**：钻石、绿宝石、青金石、石英、红石、下界石英这类没有“锭”的东西，
   直接写进筛子掉落表（`1/N`），不占 `materials` 的条目——它们的链条在 1.7.10 里也不存在。
+- **模组矿物可以走材料链**：Mekanism 氟石、Thermal 磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石这类“对方世界里
+  有矿石方块、但空岛拿不到”的矿物，用 `gems` 进材料链（三档碎料 → 矿块 → 熔炼），
+  而不是直接掉对方成品。这类材料**没有自有兜底物品**：无模组时链条没有熔炼终点，
+  这是有意的，避免注册一个假的“磷灰石/氟石”物品；`gems` 条目**只在候选 mod 已加载时注册**，
+  所以无模组包里连矿砾/矿砂/矿尘和三档碎料都不会出现。
 - **维度变体暂缺**：1.7.10 有 overworld / nether / end 三套矿砾（碎下界岩、末地砾）。
   当前 schema 只有一件事（筛砂砾/沙子/尘土），下界与末地变体留到 M2 实现时再扩字段，
   现在不要在表里硬塞。
@@ -303,21 +309,21 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | 文件 | 内容 |
 |---|---|
 | `data/exnihilosatellitium/recipe/<id>_<stage>_to_ore_<kind>.json` | 2×2：4 个破碎/粉碎/粉末 → 对应矿砾/矿砂/矿尘方块 |
-| `data/exnihilosatellitium/recipe/<id>_ore_<kind>_smelting.json` | 熔炼：矿砾/矿砂/矿尘 → 锭（0.1 xp，200 tick） |
+| `data/exnihilosatellitium/recipe/<id>_ore_<kind>_smelting.json` | 熔炼：矿砾/矿砂/矿尘 → 锭/矿物（0.1 xp，200 tick） |
 | `data/c/tags/item/ingots/<id>.json` | 自有锭加入 `c:ingots/<id>`，方便别的模组用标签接受它 |
-| `data/c/tags/block/ores/<id>.json` | 矿砾/矿砂/矿尘方块 → `c:ores/<id>`（方块标签） |
-| `data/c/tags/item/ores/<id>.json` | 同名方块物品 → `c:ores/<id>`（物品标签） |
+| `data/c/tags/block/ores/<id>.json` | 矿砾/矿砂/矿尘方块 → `c:ores/<id>`（方块标签；`gems` 条目写成 `required: false`，无模组时自动跳过） |
+| `data/c/tags/item/ores/<id>.json` | 同名方块物品 → `c:ores/<id>`（物品标签；同上） |
 | ~~`data/c/tags/item/raw_materials/<id>.json`~~ | **已删除（2026-10-31）**：破碎/粉碎/粉末不是原矿，不能进 `c:raw_materials`，否则别的模组会把它们当原矿处理，绕过「4 块 → 方块 → 熔炼」链条 |
 | `data/c/tags/{block,item}/ores.json` | 把本项目材料的 `#c:ores/<id>` 子标签挂到根标签（只含矿砾/矿砂/矿尘方块，对应 1.7.10 把矿方块注册给 TE/TC 的做法） |
 
-- **受支持模组（`ingots` 候选）**：有序数组，**第一个已加载模组的锭胜出**。数据侧是
-  「一条 base + 每条候选一个变体」：
-  - base `<m>_ore_<kind>_smelting.json` → 自有锭，条件 `not(or(候选 mod...))`；
-  - 变体 `<m>_ore_<kind>_smelting_<mod>.json` → 候选的锭，条件
+- **受支持模组（`ingots` / `gems` 候选）**：有序数组，**第一个已加载模组的产物胜出**。数据侧是
+  「金属一条 base + 每条候选一个变体；`gems` 只有变体、没有 base」：
+  - 金属的 base `<m>_ore_<kind>_smelting.json` → 自有锭，条件 `not(or(候选 mod...))`；
+  - 变体 `<m>_ore_<kind>_smelting_<mod>.json` → 候选的产物，条件
     `mod_loaded(本模组)` **加上** 对该候选之前所有 mod 的 `not(mod_loaded(...))`。
     没有这串否定，两个模组同时在场时同一输入会匹配两条熔炼配方。
-  - 运行时 `OreMaterials` 用同一个顺序解析，命中的候选模组在场时**不注册自有锭**，
-    `c:ingots/<id>` 里的自有锭条目写成 `required: false`（物品不存在时标签跳过）。
+  - 运行时 `OreMaterials` 用同一个顺序解析；金属在命中的候选模组在场时**不注册自有锭**，
+    `c:ingots/<id>` 里的自有条目写成 `required: false`（物品不存在时标签跳过）；`gems` 不生成标签。
 
   | 材料 | 候选（按优先级） |
   |---|---|
@@ -330,6 +336,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   | uranium | `mekanism` → `immersiveengineering` |
   | aluminum | `immersiveengineering`（无 IE 时自有锭） |
   | platinum | 无候选（永远自有锭） |
+  | fluorite | `mekanism`（`mekanism:fluorite_gem`；`gems` 材料，无自有兜底） |
+  | apatite / cinnabar / niter / sulfur / ruby / sapphire | `thermal_foundation`（`thermal:apatite` / `thermal:ruby` 等；`gems` 材料，无自有兜底） |
 
   - **mod id ≠ 物品命名空间**：Thermal 的模组 id 是 `thermal_foundation`，锭却注册在
     `thermal:` 里；IE 的模组 id 是 `immersiveengineering`，锭 id 是 `ingot_aluminum`
@@ -340,15 +348,16 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
     结果是「未知物品」报错或条件失效）。两者都是**解析前**判定，所以未安装模组的变体可以
     安全地指向不存在的物品。
   - **Thermal / Create / IE / Tinkers 只在 1.20.1 有对应版本**：主线的材料表同样带着它们的候选
-    （两条线共用一个 `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 33 条变体配方
+    （两条线共用一个 `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 51 条变体配方
     也不会加载。
   - 加一个模组 = 在材料里加一行候选 + 手写 `<m>_ore_<kind>_smelting_<mod>.json` +
     重跑 `./gradlew runData`（base 配方会自动重算条件）；id 必须按对方 jar 核对。
-  - **换模组会改变物品存在性**：已有存档里拿到的自有锭，装上受支持模组后会变成未知物品
+  - **换模组会改变物品存在性**：已有存档里拿到的自有锭/矿物，装上受支持模组后会变成未知物品
     （日志报错并消失）。开世界前定好模组列表。
 - 铁/金/铜的 `ingot` 指向原版锭，所以 39 条 base 熔炼里它们熔到 `minecraft:*_ingot`；
-  其余熔到自有锭或候选锭（39 条 base + 45 条候选变体 = 84 条熔炼配方）。
-- 锭贴图由 `art/items/ingots/generate.py` 用同一套 5 阶色板生成，16×16、自有像素。
+  其余金属熔到自有或候选产物，7 种 `gems` 矿物**没有 base**，只有 21 条手写变体
+  （39 条 base + 66 条候选变体 = 105 条熔炼配方）。
+- 锭贴图由 `art/items/ingots/generate.py` 生成；`gems` 材料没有自有图标（产物是对方模组的物品）。
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
 - 粉碎/粉末现在有两条通路：4 块合成 + M3 锤子降档（矿砾→粉碎、矿砂→粉末）。
 
@@ -375,7 +384,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | 1.21.1 | `"results": [{"id": "create:crushed_raw_iron", "count": 1, "chance": 0.75}]` | `processing_time` |
 | 1.20.1 | `"results": [{"item": "create:crushed_raw_iron", "chance": 0.75}]` | `processingTime` |
 
-- **Immersive Engineering 1.20.1**：它的 crusher 输入是 `forge:ores/<m>` 标签，我们的 13 种矿块
+- **Immersive Engineering 1.20.1**：它的 crusher 输入是 `forge:ores/<m>` 标签，我们的 20 种矿块
   已经在 1.20.1 的 `forge:ores/<m>` 里，所以不需要补 IE 配方；产物落到 IE 自己的
   `forge:dusts/<m>`（我们的矿尘按既定设计不占这个标签）。IE 没有 1.21.1 版本，主线只保留
   锭候选 / 变体，不会命中。
@@ -383,7 +392,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 ### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
 
 **路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
-13 材料 × 6 形态 = **78 条**。
+13 种金属材料 × 6 形态 = **78 条**。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）**不写匠魂熔炼**，
+因为 Tinkers 没有它们对应的熔融液体；这是有意的边界，不是漏生成。
 
 ```json
 {
@@ -398,8 +408,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 }
 ```
 
-- 物品形态（`broken` / `crushed` / `powdered`）→ **60 mB**（1/2 粗金属）；
-  方块形态（`ore_gravel` / `ore_sand` / `ore_dust`）→ **240 mB**（2× 粗金属）。
+- 物品形态（`broken` / `crushed` / `powdered`）→ **45 mB**（1/2 锭）；
+  方块形态（`ore_gravel` / `ore_sand` / `ore_dust`）→ **180 mB**（2 锭）。
 - `result` 是**流体**：`tag: forge:molten_<m>` + `amount`，没有 `item` / `id`；
   `check-data-paths.py` 只对 item/id result 做版本键检查。
 - `temperature` 取 Tinkers 自己的锭配方（如钴 950、铁 800），`time` 按 90 mB 锭等比缩放。
@@ -430,7 +440,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 **6 个输入、90 掉落**（装 Tinkers 时 92）：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
+- 当前有 **6 个输入、114 掉落**（全装 Mek+Thermal；无科技模组时 93，只装 Mek 时 96；1.20.1 全装 113）：`gravel` / `sand` / `dirt` / `dust`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
   `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **9 种树苗**（橡木 8% / 白桦 4% /
   云杉 4% / 丛林 3% / 金合欢 3% / 樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%，合计 31%/次）+
@@ -576,11 +586,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - `min` / `max`（可选，默认都是 1）是**包含端点**的掉落数量区间，均匀随机。
   上限 64；`min < 1` 或 `max < min` 的文件会警告并跳过。
 - **锤子只有左键（正常破坏）一条路径**，没有右键快捷方式（经典 Ex Nihilo 也没有）。
-- 当前 50 条：
+- 当前 73 条：
   - 圆石→砂砾、砂砾→沙子、沙子→`exnihilosatellitium:dust`（各 1 个）；
   - 8 种砂岩（含红砂岩）→沙子 / 红沙（各 1 个）；
-  - 13 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
-  - 13 种材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
+  - 20 种材料的矿砾→粉碎、矿砂→粉末（各 **4–6 个**）；
+  - 20 种材料的矿物粉尘→**它自己**（不再降档，1 个；防止锤子把粉尘方块敲没）。
 - 未知/重复输入、非法数量区间打 `[hammer]` 警告并跳过。
 
 ### 钩子表
@@ -607,7 +617,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 - 新方块 `exnihilosatellitium:dust`，自有 `block/dust.png` 贴图（Creatio 噪点 4 色量化）；
   沙子用锤子砸出，放进筛子就是 `sieve/dust.json` 的输入。
-- 尘土表 16 条：13 种 `<material>_powdered` + 红石 / 荧石粉 / 火药。
+- 尘土表 23 条：20 种 `<material>_powdered` + 红石 / 荧石粉 / 火药。
 - 尘土方块有独立 loot table、`mineable/shovel` 标签和创造标签条目。
 
 ## 13. 坩埚表与配置（M4，2026-10-30）

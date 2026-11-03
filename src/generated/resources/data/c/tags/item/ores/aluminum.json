@@ -1,7 +1,16 @@
 {
   "values": [
-    "exnihilosatellitium:aluminum_ore_gravel",
-    "exnihilosatellitium:aluminum_ore_sand",
-    "exnihilosatellitium:aluminum_ore_dust"
+    {
+      "id": "exnihilosatellitium:aluminum_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:aluminum_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:aluminum_ore_dust",
+      "required": false
+    }
   ]
 }

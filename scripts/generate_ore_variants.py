@@ -44,6 +44,7 @@ _spec.loader.exec_module(_pieces)
 _pieces.PALETTES.setdefault("osmium", ("#26313D", "#3F5B78", "#608FC4", "#8FB4DC", "#C4DCF4"))
 
 
+
 def write_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -73,12 +74,20 @@ def clear_own_ingot_assets(mid):
     (ASSETS / f"textures/item/{mid}_ingot.png").unlink(missing_ok=True)
 
 
-def own_ingot_reachable(material):
-    """Whether our own ``<id>_ingot`` item can ever be the smelting result.
+def clear_own_gem_assets(mid):
+    """A material is no longer a gem: drop the now-unused mineral icon."""
+    (ASSETS / f"textures/item/{mid}.png").unlink(missing_ok=True)
 
-    An explicit ``ingot`` means we never register one; an unconditional ``ingots``
-    candidate always wins, so the fallback is unreachable there too.
+
+def own_product_reachable(material):
+    """Whether our own ``<id>_ingot`` can ever be the smelting result.
+
+    Gem/mineral entries (``gems``) never own a fallback item, so they are not
+    reachable here.  An explicit ``ingot`` means we never register one; an
+    unconditional ``ingots`` candidate always wins too.
     """
+    if "gems" in material:
+        return False
     explicit = material.get("ingot")
     if explicit and not explicit.startswith("#"):
         return False
@@ -88,17 +97,32 @@ def own_ingot_reachable(material):
     return True
 
 
-def hammer_table(mid, kind):
-    """The hand-written hammer crush rule: gravel/sand drop 4-6 pieces, dust itself."""
+def gem_mod(material):
+    """The supporting mod for a `gems` material, or None for metals."""
+    if "gems" not in material:
+        return None
+    return next((c.get("mod") for c in material.get("gems", []) if c.get("mod")), None)
+
+
+def hammer_table(mid, kind, mod=None):
+    """The hand-written hammer crush rule: gravel/sand drop 4-6 pieces, dust itself.
+
+    Mod-gated `gems` entries carry a root `mod`: the block does not exist without
+    that mod, so the hammer table must be skipped instead of logging an unknown item.
+    """
     if kind == "gravel":
-        return {"input": f"{MOD_ID}:{mid}_ore_gravel",
-                "result": f"{MOD_ID}:{mid}_crushed", "min": 4, "max": 6}
-    if kind == "sand":
-        return {"input": f"{MOD_ID}:{mid}_ore_sand",
-                "result": f"{MOD_ID}:{mid}_powdered", "min": 4, "max": 6}
-    # Hammering ore dust does not refine it further: the block simply drops
-    # itself instead of being lost to a wrong tool.
-    return {"input": f"{MOD_ID}:{mid}_ore_dust", "result": f"{MOD_ID}:{mid}_ore_dust"}
+        table = {"input": f"{MOD_ID}:{mid}_ore_gravel",
+                 "result": f"{MOD_ID}:{mid}_crushed", "min": 4, "max": 6}
+    elif kind == "sand":
+        table = {"input": f"{MOD_ID}:{mid}_ore_sand",
+                 "result": f"{MOD_ID}:{mid}_powdered", "min": 4, "max": 6}
+    else:
+        # Hammering ore dust does not refine it further: the block simply drops
+        # itself instead of being lost to a wrong tool.
+        table = {"input": f"{MOD_ID}:{mid}_ore_dust", "result": f"{MOD_ID}:{mid}_ore_dust"}
+    if mod:
+        table["mod"] = mod
+    return table
 
 
 def main(argv=None):
@@ -125,17 +149,34 @@ def main(argv=None):
             lang_en.setdefault(f"item.exnihilosatellitium.{mid}_{stage}", f"{en} {stage.capitalize()} Ore")
             lang_zh.setdefault(f"item.exnihilosatellitium.{mid}_{stage}", f"{STAGE_ZH[stage]}{zh}矿")
 
-        if own_ingot_reachable(material):
+        if "gems" in material:
+            # Gem/mineral entries are mod-only: no own item, no own icon, no
+            # "<id>" lang key.  This also cleans up a previous fallback.
+            clear_own_ingot_assets(mid)
+            clear_own_gem_assets(mid)
+            lang_en.pop(f"item.exnihilosatellitium.{mid}", None)
+            lang_zh.pop(f"item.exnihilosatellitium.{mid}", None)
+            lang_en.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
+            lang_zh.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
+        elif own_product_reachable(material):
             ensure_ingot_texture(mid)
             lang_en.setdefault(f"item.exnihilosatellitium.{mid}_ingot", f"{en} Ingot")
             lang_zh.setdefault(f"item.exnihilosatellitium.{mid}_ingot", f"{zh}锭")
+            clear_own_gem_assets(mid)
+            lang_en.pop(f"item.exnihilosatellitium.{mid}", None)
+            lang_zh.pop(f"item.exnihilosatellitium.{mid}", None)
         else:
             clear_own_ingot_assets(mid)
+            clear_own_gem_assets(mid)
             lang_en.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
             lang_zh.pop(f"item.exnihilosatellitium.{mid}_ingot", None)
+            lang_en.pop(f"item.exnihilosatellitium.{mid}", None)
+            lang_zh.pop(f"item.exnihilosatellitium.{mid}", None)
 
+        mod = gem_mod(material)
         for kind in KINDS:
-            write_json(RES / f"data/{MOD_ID}/hammer/{mid}_ore_{kind}.json", hammer_table(mid, kind))
+            write_json(RES / f"data/{MOD_ID}/hammer/{mid}_ore_{kind}.json",
+                       hammer_table(mid, kind, mod))
             lang_en.setdefault(f"block.exnihilosatellitium.{mid}_ore_{kind}",
                                f"{en} Ore {kind.capitalize()}")
             lang_zh.setdefault(f"block.exnihilosatellitium.{mid}_ore_{kind}",

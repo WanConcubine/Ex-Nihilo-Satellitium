@@ -111,6 +111,13 @@ PALETTES = {
     "uranium": ("#1E3A10", "#3E7A20", "#6FBF3A", "#A6E36A", "#D8F8A0"),
     "zinc": ("#34414A", "#6C7C86", "#9EACB4", "#C2D0D8", "#E2F0F6"),
     "cobalt": ("#0E2238", "#1F4C7A", "#3F7BD9", "#6FA8E8", "#B8D8FA"),
+    "fluorite": ("#1E4A3C", "#3E8A70", "#6FE3C0", "#9FF0D8", "#D8FFF4"),
+    "apatite": ("#234A5A", "#4E8AA0", "#7FC8E8", "#B0E2F4", "#E0F8FF"),
+    "cinnabar": ("#3A0E0A", "#7A1E16", "#C93A2E", "#E86A5A", "#FFA898"),
+    "niter": ("#4A463C", "#8A8474", "#C8C2B0", "#E8E4D6", "#FFFEF4"),
+    "sulfur": ("#4A420E", "#8A7C1E", "#D8C43A", "#E8DC6A", "#FFF4A8"),
+    "ruby": ("#3A0A10", "#8A1A26", "#C93A4A", "#E86A7A", "#FFB0BC"),
+    "sapphire": ("#0A1A3A", "#1A3A8A", "#3A6FD9", "#6FA0E8", "#B0D0FF"),
 }
 
 

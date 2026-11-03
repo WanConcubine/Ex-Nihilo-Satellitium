@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:sulfur_ore_gravel",
+  "result": "exnihilosatellitium:sulfur_crushed",
+  "min": 4,
+  "max": 6,
+  "mod": "thermal_foundation"
+}

@@ -75,9 +75,9 @@ public final class ModCreativeTabs {
                             for (final String stage : ModOreItems.STAGES) {
                                 output.accept(entries.get(stage).get());
                             }
-                            final var ingot = entries.get("ingot");
-                            if (ingot != null) {
-                                output.accept(ingot.get());
+                            final var product = entries.get("product");
+                            if (product != null) {
+                                output.accept(product.get());
                             }
                         }
                     })

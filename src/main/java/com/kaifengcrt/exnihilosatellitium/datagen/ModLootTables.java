@@ -48,6 +48,11 @@ public final class ModLootTables extends BlockLootSubProvider {
             blocks.add(crucible.get());
         }
         for (final OreMaterial material : OreMaterials.all()) {
+            if (material.gem()) {
+                // Gem ore blocks are mod-gated and drop themselves in code; a
+                // loot-table JSON for an absent item would fail to parse.
+                continue;
+            }
             for (final String kind : ModOreBlocks.KINDS) {
                 blocks.add(ModOreBlocks.byMaterial().get(material.id()).get(kind).get());
             }

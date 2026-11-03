@@ -1,7 +1,16 @@
 {
   "values": [
-    "exnihilosatellitium:platinum_ore_gravel",
-    "exnihilosatellitium:platinum_ore_sand",
-    "exnihilosatellitium:platinum_ore_dust"
+    {
+      "id": "exnihilosatellitium:platinum_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:platinum_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:platinum_ore_dust",
+      "required": false
+    }
   ]
 }

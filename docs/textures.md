@@ -152,7 +152,7 @@ assets/exnihilosatellitium/textures/
 - 已经进 `assets/textures/item/<m>_<stage>.png`（由 `scripts/generate_ore_variants.py`
   从 `art/` 复制/生成），并保证 16×16。
 - **自有锭**：`art/items/ingots/generate.py` 用同一套 5 阶色板生成
-  `<m>_ingot.png`，16×16；只给 `materials.json` 里没有 `ingot` 的 9 种材料生成
+  `<m>_ingot.png`，16×16；只给 `materials.json` 里没有 `ingot` 的 10 种金属生成
   （铁/金/铜用原版锭贴图，不重复画）。锭的形状是斜置金属条：顶面受光、正面中间调、
   左端面暗部，1px 内切边，不复制原版锭 PNG。
 - 如果以后要省文件，可以只保留三张灰度 base + `tintindex`，用 1.20 的 `ItemColor`

@@ -1,0 +1,11 @@
+{
+  "mod": "mekanism",
+  "patch": true,
+  "input": "exnihilosatellitium:dust",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:fluorite_powdered",
+      "chance": 0.125
+    }
+  ]
+}

@@ -19,18 +19,71 @@ M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件
 `crucible.*`/`machine.*` config；分支提交 `6a733e8`）。
 顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
 缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
-**M7 datagen（两条线各三批）**：`runData` 生成标签 41 + 方块掉落表 69 + **配方 143**
-（`ModRecipes`）+ **74 个 blockstate + 201 个模型**（`ModBlockStates` + `ModItemModels`），
-输出到 `src/generated/resources`；仍手写 57 条配方（45 条 `*_smelting_<mod>` 候选变体 +
-12 条 `create:crushing`，产物都是对方模组的物品）、15 个手绘模型、全部语言文件。
+**M7 datagen（两条线各三批）**：`runData` 生成标签 58 + 方块掉落表 72 + **配方 164**
+（`ModRecipes`）+ **96 个 blockstate + 251 个模型**（`ModBlockStates` + `ModItemModels`），
+输出到 `src/generated/resources`；仍手写 79 条配方（66 条 `*_smelting_<mod>` 候选变体 +
+12 条 `create:crushing` + 1 条末影蛋糕，产物都是对方模组的物品）、15 个手绘模型、全部语言文件。
 1.20.1 分支在 2026-11-02 晚补齐同样三批，并再加 78 条匠魂熔炼，见 [datagen.md](datagen.md) §5。
 **科技模组锭接入（2026-11-02）**：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
 zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/aluminum/uranium）
 和 **Tinkers' Construct 钴**（`tconstruct:cobalt_ingot`），运行时取第一个已加载模组的锭，
 自有锭只作兜底。
+**科技模组矿物（2026-11-03）**：Mekanism 氟石 + Thermal 磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石接进 `gems`
+三档矿链（筛碎料 → 矿块 → 熔成对方矿物），**只在对应模组加载时注册**；两版都已验证；Create 只有锌，已有链。
 **M9 发布：0.1.0 已发（两条线都有 tag）；0.2.0 内容与 jar 已备，tag / 商店上传待确认；
 M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完成**（TableBuilder + CustomizationOverlay +
 `/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
+
+## 当前批次（2026-11-03，科技模组矿物链：Mek 氟石 + Thermal 六种）
+
+- **目标**：把三家科技模组里「空岛拿不到、又不是金属锭」的矿物接进本模组的矿链。范围：
+  **Mekanism 氟石** + **Thermal 磷灰石 / 朱砂 / 硝石 / 硫磺 / 红宝石 / 蓝宝石**；Create 只有
+  锌，已有完整链，本轮只做回归验证。
+- **形态**：不直接掉对方成品，而是新增 7 种材料，走现有三档矿链——
+  筛 砂砾/沙子/尘土 → `*_broken` / `*_crushed` / `*_powdered` → 4 合 1 成
+  `*_ore_gravel/sand/dust` → 熔炼成 `mekanism:fluorite_gem` / `thermal:apatite` 等。
+  锤表、筛表、JEI、创造栏都从同一张材料表派生。
+- **schema（按所有者修正）**：`materials.json` 新增可选 `gems` 数组（与 `ingots` 同构，
+  **不能混用**）。`gems` 是**纯模组产物**：**不注册自有磷灰石/氟石之类的物品，也不生成
+  `c:gems` / `forge:gems` 标签**。**整条材料只在候选 mod 已加载时注册**：没装时物品、方块、
+  三档碎料、筛出物、锤表、配方和标签都不出现；装对应模组时，我们的矿砾/矿砂/矿尘熔成对方
+  物品。矿块仍进 `c:ores/<id>` / `forge:ores/<id>`（标签条目 `required: false`），所以对方
+  机器可以按标签处理；矿块没有 loot table，由 `SelfDropBlock` 代码掉自身。
+- **数据**：`gems` 材料**不生成 base 熔炼配方**，只有手写的 `*_smelting_<mod>` 变体
+  （共 21 条：7 种 × 3 档）。金属仍保留原来的 base + 候选变体。
+- **数值**：fluorite 1/8、apatite 1/18、cinnabar 1/32、niter 1/24、sulfur 1/24、
+  ruby/sapphire 1/64；三种筛料同一 `rarity`。
+- **末影蛋糕图标修正**：物品模型改为 `item/generated` + 16×16 透明
+  `exnihilosatellitium:item/end_cake`（由 `art/blocks/end_cake/inventory.png` 提供）；
+  `ModItemModels` 跳过 `end_cake`，不再用方块模型当物品图标，也不会再生成重复的
+  `models/item/end_cake.json`。
+- **验证（main 1.21.1 / NeoForge 21.1.265）**：
+  - `./gradlew build`、`check-textures.py`、`check-data-paths.py`、`check-core-imports.py`
+    全绿（`check-wiki.py` 当时通过；之后双语 `MAINTAINING` 的未闭合代码块让它失败，不是本批改动）；
+    全装 Mek+Thermal 时 20 种材料、筛表 **114** drops、锤表 **73** 条；无科技模组时
+    13 种、筛 **93** / 锤 **52**；只装 Mek 时 14 种、筛 **96** / 锤 **55**。生成配方 **164** 条
+    （39 条 base 熔炼 + 桶/坩埚/机器等），手写 **79** 条（66 条候选变体 + 12 条
+    `create:crushing` + 1 条末影蛋糕）。
+  - 无科技模组：13 entries、筛 93 / 锤 52；`exnihilosatellitium:ruby_broken` 为 unknown；
+    无缺失物品/掉落表报错。
+  - 只装 Mekanism 10.7.19.85：14 entries、筛 96 / 锤 55；日志 `fluorite smelts into
+    mekanism:fluorite_gem`，RCON 熔炉通过；Thermal 六种仍不注册（`ruby_broken` unknown）。
+  - `gems` 的 2×2 打包配方带 `neoforge:conditions`；矿块无 loot table，使用 `SelfDropBlock`。
+  - **未验**：Thermal 在 1.21.1 不存在，主线只验了 Mek 路径；JEI/客户端未目视。
+- **验证（1.20.1-forge / Forge 47.4.28 / Java 17）**：
+  - 同时装 Mekanism 10.4.16 + Thermal Foundation 11.0.6 + CoFH Core + Create 6.0.8 + IE +
+    Tinkers：`[materials] loaded 20 entries`，7 条 `smelts into` 全部命中；RCON 熔炉把
+    `fluorite/apatite/cinnabar/niter/sulfur/ruby/sapphire` 的矿砾分别熔成
+    `mekanism:fluorite_gem` / `thermal:*`，**7/7 通过**。
+  - 无科技模组：13 entries、筛 90 / 锤 52，`ruby_broken` unknown，无缺失物品/掉落表报错。
+  - `/exnihilo dump sieve` 113 行、`dump hammer` 73 行；新条目概率与 main 一致。
+  - `./gradlew build`（Java 17）、`check-textures.py` 通过；generated 树不再有 7 种矿物的
+    fallback 物品模型/标签/base 熔炼配方/掉落表。
+  - **未验**：Thermal 磨粉机 / Mek 富集机实际吃我们新矿块（只核对了 `forge:ores/<m>` 标签）；
+    JEI/客户端未目视（本轮会再开 1.20.1 客户端）。
+- **1.20.1 匠魂熔炼产量修正**：78 条 `tconstruct:melting` 的碎块类改为 45 mB（1/2 锭）、
+  矿块类 180 mB（2 锭），时间按 0.75 缩放；7 种 `gems` 矿物无对应熔融液体，仍不写。
+- **边界**：7 种矿物**不写匠魂熔炼**（Tinkers 没有对应熔融液体）；合金仍由科技模组自己做。
 
 ## 当前批次（2026-11-03，P3：CraftTweaker，两版）
 
@@ -255,8 +308,8 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   **broken 贴图改用下界岩红棕基底**（`STONE_PALETTES`），不再用其他矿碎块的煤炭灰底。
 - **下界合金碎片**：碎下界岩 0.4%，**双线都加**。
 - **匠魂熔炼**：13 材料 × 6 形态 = **78 条** `tconstruct:melting`（1.20.1 分支）：
-  - 碎块 / 粉碎 / 粉末物品 → **60 mB**（1/2 粗金属）；
-  - 对应矿砾 / 矿砂 / 矿尘方块 → **240 mB**（2× 粗金属）；
+  - 碎块 / 粉碎 / 粉末物品 → **45 mB**（1/2 锭）；
+  - 对应矿砾 / 矿砂 / 矿尘方块 → **180 mB**（2 锭）；
   - 流体用 `forge:molten_<m>`，温度取 Tinkers 自己的锭配方，时间按 90 mB 锭等比缩放；
   - 全部带 `conditions: mod_loaded(tconstruct)`，没匠魂时整批跳过。
 - **阿迪特暂不做**：Tinkers 3.12.1 已移除阿迪特（无 `molten_ardite` / `ardite_ingot`），
@@ -523,6 +576,11 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 | supported mods（Mek 在场） | ✅ | 服务端加 Mekanism 10.7.19.85：日志 `tin/lead/osmium/uranium smelts into mekanism:ingot_*`；`summon` 自有 `tin_ingot` 得到 Air（未注册），`mekanism:ingot_tin` 正常；1423 → 3001 条配方（Mek 自带 + 我们的 12 条变体） |
 | supported mods（Mek 不在） | ✅ | 无 Mek：1423 条配方照旧；熔炉烧 `tin_ore_gravel` 产出 `exnihilosatellitium:tin_ingot`（fallback 条件生效） |
 | supported mods（Mek 在场熔炼） | ✅ | 有 Mek：熔炉烧同一块 `tin_ore_gravel` 产出 `mekanism:ingot_tin` |
+| 矿物链（Mek 氟石，1.21.1） | ✅ | 有 Mek：日志 `fluorite smelts into mekanism:fluorite_gem`；RCON 熔炉 `fluorite_ore_gravel → mekanism:fluorite_gem`；自有 `exnihilosatellitium:fluorite` 未注册（按设计不造） |
+| 矿物链（无科技模组，1.21.1） | ✅ | 无 Mek/Thermal：13 entries、筛 93 / 锤 52；`ruby_broken` unknown；无缺失物品/掉落表报错 |
+| 矿物链（只装 Mek，1.21.1） | ✅ | 14 entries、筛 96 / 锤 55；氟石注册，Thermal 六种仍不注册；无缺失物品/掉落表报错 |
+| 矿物链（Thermal 六种，1.20.1） | ✅ | Thermal Foundation 11.0.6 + CoFH Core：RCON 把 apatite/cinnabar/niter/sulfur/ruby/sapphire 的矿砾分别熔成 `thermal:*`，6/6 通过 |
+| 矿物链（三档数据，两版） | ✅ | 全装：main 筛 114 / 锤 73；1.20.1 筛 113 / 锤 73。无科技模组：main 93/52、1.20.1 90/52；只装 Mek：main 96/55 |
 | supported mods（JEI/客户端） | ⚠️ | 服务端已验；JEI 里的熔炼页与创造栏未在客户端目视 |
 | M10 自动输出（下推） | ✅ | RCON 2026-11-01：`AutoOutput=1/OutputMask=1` + 下方箱子，一件后箱子拿到 `iron_crushed`、输出格清空 |
 | M10 自动输出（关闭） | ✅ | RCON：`AutoOutput=0` 后产物留在槽 6..10，下方箱子不再增长 |
@@ -565,7 +623,7 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 | IE 锭候选（1.20.1，仅 IE） | ✅ | 1.20.1 分支装 IE 10.2.0-183：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 → `immersiveengineering:ingot_*` |
 | IE 熔炼 RCON | ✅ | IE-only 分支：熔炉烧 `aluminum_ore_gravel` → `ingot_aluminum`，烧 `silver_ore_sand` → `ingot_silver` |
 | IE 优先级（Thermal+Create+IE） | ✅ | `[materials]`：tin/silver/lead/nickel → Thermal、zinc → Create、aluminum/uranium → IE；0 条 `Unknown item` |
-| IE 粉碎机（标签） | ⚠️ | 13 种矿块在 `forge:ores/<m>` 里，IE 的 crusher 输入也用该标签；多方块本身未跑 |
+| IE 粉碎机（标签） | ⚠️ | 20 种矿块在 `forge:ores/<m>` 里，IE 的 crusher 输入也用该标签；多方块本身未跑 |
 | IE 主 1.21.1 回退 | ✅ | 主线无 IE：`Loaded 1427 recipes`；熔炉烧 `aluminum_ore_gravel` → 自有 `aluminum_ingot`；IE 变体不加载 |
 | 匠魂种子（条件物品） | ✅ | 只装 Tinkers：`summon` 两个种子物品成功；不装：`[sieve] 90` vs 92，无 unknown item |
 | 匠魂钴 | ✅ | 只装 Tinkers：`[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |

@@ -111,17 +111,21 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 
 ### 支持的模组（supported mods）
 
-材料表的 `ingots` 是**有序候选列表**：装了对应模组就用它的锭熔炼，没装就注册我们自己的锭
-（经典 Ex Nihilo 行为）。配方用 `neoforge:mod_loaded` 条件生成，缺模组时自动回退。
+材料表的 `ingots` / `gems` 是**有序候选列表**：装了对应模组就用它的锭/矿物熔炼。金属
+`ingots` 没装时回退自有锭；`gems` 是**纯模组产物**，只有装了对应模组才注册——没装时
+没有自有磷灰石/氟石，也没有矿砾/矿砂/矿尘、碎料、筛出物或熔炼配方。
 
 | 模组 | 覆盖材料 | 说明 |
 |---|---|---|
-| [Mekanism](https://modrinth.com/mod/mekanism) 1.21.1 | 锡 / 铅 / 锇 / 铀 | 矿砾/矿砂/矿尘熔成 `mekanism:ingot_*`；这四种不再注册自有锭 |
-| Thermal 系列 | 锡 / 银 / 铅 / 镍 / 铂 / 铝 | **接在 1.20.1 线**（Thermal 只有 1.20.1）；1.21.1 侧等它有 1.21.1 版后加一行 id |
+| [Mekanism](https://modrinth.com/mod/mekanism) 1.21.1 | 锡 / 铅 / 锇 / 铀 / 氟石 | 矿砾/矿砂/矿尘熔成 `mekanism:ingot_*` / `mekanism:fluorite_gem`；这些材料不再注册自有兜底 |
+| Thermal 系列 | 锡 / 银 / 铅 / 镍 / 磷灰石 / 朱砂 / 硝石 / 硫磺 / 红宝石 / 蓝宝石 | **接在 1.20.1 线**（Thermal 只有 1.20.1）；六种矿物走三档矿链，熔成 `thermal:apatite` / `thermal:ruby` 等 |
+| Create | 锌 | 矿砾/矿砂/矿尘熔成 `create:zinc_ingot`；1.20.1 另有 `create:crushing` 桥 |
+| Immersive Engineering（1.20.1） | 银 / 铅 / 镍 / 铝 / 铀 | 排在 Mek/Thermal 之后；IE 粉碎机走 `forge:ores/<m>` 标签 |
+| Tinkers' Construct（1.20.1） | 钴 | `tconstruct:cobalt_ingot`；只有金属有匠魂熔炼，氟石等矿物不写 |
 
 加模组支持 = 在 `materials.json` 对应材料里加一条 `{"item": "...", "mod": "..."}`，
-再跑 `python3 scripts/generate_ore_variants.py`。**开世界前定好模组列表**：加/减受支持模组会
-改变哪些锭存在，旧存档里的自有锭会变成未知物品。
+再跑 `python3 scripts/generate_ore_variants.py` 和 `./gradlew runData`。**开世界前定好模组
+列表**：加/减受支持模组会改变哪些兜底物品存在，旧存档里的自有锭/矿物会变成未知物品。
 
 ## Jade（玉）
 

@@ -29,6 +29,11 @@ MOD_ID = "exnihilosatellitium"
 
 MATS = [m for m in json.load(open(SOURCE / f"{MOD_ID}/materials.json", encoding="utf-8"))["materials"]
         if m.get("enabled", True)]
+# Mod-gated `gems` materials are written to <kind>_<mod>.json, not the shared
+# table: without their mod the items do not exist, so a shared entry would be an
+# unknown item.
+METALS = [m for m in MATS if "gems" not in m]
+GEMS = [m for m in MATS if "gems" in m]
 
 MESH_COLORS = {"wood": (122, 88, 52), "silk": (232, 232, 228), "iron": (188, 190, 196)}
 # 档位不是换色：编织密度不同。pitch=网格间距，strand=线宽
@@ -136,11 +141,24 @@ def main(argv=None):
     count = 0
     for kind, suffix_name in suffix.items():
         outputs = [{"item": f"exnihilosatellitium:{m['id']}_{suffix_name}",
-                    "chance": round(1.0 / rarity_of(m), 5)} for m in MATS]
+                    "chance": round(1.0 / rarity_of(m), 5)} for m in METALS]
         outputs += [{"item": item, "chance": round(1.0 / n, 5)} for item, n in vanilla[kind]]
         merge_table(RES / f"data/{MOD_ID}/sieve/{kind}.json", inputs[kind], outputs,
-                    suffix_name, {m["id"] for m in MATS})
+                    suffix_name, {m["id"] for m in METALS})
         count += len(outputs)
+
+    # Mod-gated gem tables: the whole file is skipped while `mod` is absent.
+    by_mod = {}
+    for material in GEMS:
+        mod = next((c.get("mod") for c in material.get("gems", []) if c.get("mod")), None)
+        if mod:
+            by_mod.setdefault(mod, []).append(material)
+    for mod, materials in by_mod.items():
+        for kind, suffix_name in suffix.items():
+            outputs = [{"item": f"exnihilosatellitium:{m['id']}_{suffix_name}",
+                        "chance": round(1.0 / rarity_of(m), 5)} for m in materials]
+            write_json(RES / f"data/{MOD_ID}/sieve/{kind}_{mod}.json",
+                       {"mod": mod, "patch": True, "input": inputs[kind], "outputs": outputs})
 
     # lang
     for lang, entries in {
