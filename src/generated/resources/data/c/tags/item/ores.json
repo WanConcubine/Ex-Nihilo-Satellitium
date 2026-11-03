@@ -12,6 +12,7 @@
     "#c:ores/osmium",
     "#c:ores/zinc",
     "#c:ores/cobalt",
+    "#c:ores/ardite",
     "#c:ores/uranium",
     "#c:ores/fluorite",
     "#c:ores/apatite",
@@ -19,6 +20,7 @@
     "#c:ores/niter",
     "#c:ores/sulfur",
     "#c:ores/ruby",
-    "#c:ores/sapphire"
+    "#c:ores/sapphire",
+    "#c:ores/chlorophyll"
   ]
 }

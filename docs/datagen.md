@@ -169,6 +169,8 @@ datagen 里 `ItemStack` 必须指向**已注册**的 `Item`，而这些模组不
 - `generate_ore_variants.py`：只留**纹理拷贝/生成 + 锤表 + lang**；方块/物品模型、blockstate、
   配方、掉落、标签全部删掉。
 - `generate_sieve_assets.py`：只留**筛网纹理 + 物品图标 + 筛表合并 + lang**；blockstate/模型删掉。
+  另外从 `dirt.json` 生成 `sieve/grass_block.json`（泥土同款掉落 + 工匠巧思的叶绿素碎矿），
+  改泥土表后重跑即可，不要手改草方块表。
 - `generate_machine_assets.py`：只留 **PNG**（32×32 方块贴图、GUI、图标）；模型/blockstate 删掉。
 - 三个脚本都不再需要 `--target`（它们不再写版本相关的 `data/` 路径）。
 

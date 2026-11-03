@@ -216,6 +216,24 @@
       "enabled": true
     },
     {
+      "id": "ardite",
+      "color": "8E3B2E",
+      "name": {
+        "en_us": "Ardite",
+        "zh_cn": "阿迪特"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "ingots": [
+        {
+          "item": "tinkers_thinking:ardite_ingot",
+          "mod": "tinkers_thinking"
+        }
+      ],
+      "source": "classic",
+      "enabled": true
+    },
+    {
       "id": "uranium",
       "color": "6BA84F",
       "name": {
@@ -361,6 +379,24 @@
         }
       ],
       "source": "classic",
+      "enabled": true
+    },
+    {
+      "id": "chlorophyll",
+      "color": "5FC24A",
+      "name": {
+        "en_us": "Chlorophyll",
+        "zh_cn": "叶绿素"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "gems": [
+        {
+          "item": "tinkers_thinking:chlorophyte_compound",
+          "mod": "tinkers_thinking"
+        }
+      ],
+      "source": "estimate",
       "enabled": true
     }
   ]

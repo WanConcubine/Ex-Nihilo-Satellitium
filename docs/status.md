@@ -33,6 +33,80 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 **M9 发布：0.1.0 已发（两条线都有 tag）；0.2.0 内容与 jar 已备，tag / 商店上传待确认；
 M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完成**（TableBuilder + CustomizationOverlay +
 `/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
+**工匠巧思（TiT）两种矿已接**（2026-11-03 晚）：碎下界岩 1% → 阿迪特碎矿、草方块 1% → 叶绿素碎矿，
+从 4 合 1 矿块到熔炼走本模组自己的三档链；阿迪特有自有锭兜底，叶绿素只在 TiT 在场时注册。
+**应用能源 2（AE2）已接**（2026-11-03 晚）：筛沙 **1/6** 出 `ae2:certus_quartz_crystal`、
+**1/12** 出 `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json` 带根级 `"mod": "ae2"`，
+没装时整文件跳过，双线数据一致。
+
+## 当前批次（2026-11-03 晚，应用能源 2：赛特斯石英粉 / 水晶）
+
+- **对象**：[AE2]应用能源 2（mod id `ae2`，两版都有）。1.21.1 用 **19.2.18**（NeoForge，前置
+  GuideME 21.1.22），1.20.1 用 **15.4.12**（Forge，前置 GuideME 20.1.15）。
+- **范围（按所有者）**：只做筛沙——**赛特斯石英水晶**与**赛特斯石英水晶粉**。不注册自有物品，
+  不复制对方的贴图 / JSON / 代码；充能赛特斯、天石粉、陨石 / 天石方块不做。
+- **数值**：水晶 **1/6**（经典 Ex Nihilo 的沙 → 赛特斯档；Omnia 是 5%），粉 **1/12**。
+  充能赛特斯由 AE2 自己的 `ae2:charger` 充能得到（充电器只要铁 / 铜 / 赛特斯），所以不塞筛表；
+  粉还能由水晶在 AE2 里加工，1/12 只是给前期种子链一个更快的起点。
+- **形态**：新文件 `data/exnihilosatellitium/sieve/sand_ae2.json`，根级 `"mod": "ae2"` +
+  `"patch": true`，对 `minecraft:sand` 追加两条掉落。没装 AE2 时**在查物品之前**整文件跳过，
+  不刷 unknown item；装了以后按补丁语义追加，不覆盖 `sand.json`，因此数据包改沙表不会冲突。
+- **为什么直接掉对方成品**：赛特斯石英是 AE2 的基础资源（不是锭），AE2 自带完整的
+  种子 / 充能 / 氟石链；再复制一套三档矿链只会多出和 AE2 数值对不上的中间物。这点和 TiT 的
+  阿迪特 / 叶绿素（走本模组材料链）不同，是按对方链的形态分别选的接入方式。
+- **验证**：
+  - `./gradlew build`、`check-textures.py`、`check-data-paths.py`、`check-core-imports.py`、
+    `check-wiki.py` 全绿。
+  - 1.21.1 dev server（AE2 19.2.18 + GuideME 21.1.22）：`[sieve] loaded 7 inputs, 118 drops`
+    （该轮基表 116 + AE2 2 条）；`/exnihilo sieve minecraft:sand` 列出
+    `ae2:certus_quartz_dust 0.08333` / `ae2:certus_quartz_crystal 0.16667`；无 unknown item。
+  - 1.20.1 dev server（AE2 15.4.12 + GuideME 20.1.15，`-PtechMods` 全装）：`[sieve] 7 inputs,
+    144 drops`（基表 142 + 2）；`/exnihilo sieve minecraft:sand` 含同样两条 AE2 条目。
+  - 不装 AE2：1.21.1 `118 → 116` drops、1.20.1 `144 → 142`，`sand_ae2.json` 被 `mod` 门
+    整文件跳过，无 unknown item / 缺失掉落表。基表条数随 TiT 批次还在变化，AE2 恒为 +2。
+  - **未验**：真实手筛 / 机器筛筛出这两个物品、JEI 筛子页目视。
+- **坑（1.20.1 dev）**：AE2 的生产 jar 在 ForgeGradle dev 里会因 SRG mixin 报
+  `@Shadow field f_129762_ was not located`；必须放进 `libs/` 并由 `-PtechMods` 走 `fg.deobf`
+  （`build.gradle` 已加入口），不能直接丢 `run/mods`。1.21.1 NeoForge dev 用官方名，生产 jar
+  可直接丢 `run/mods`。
+- **坑**：AE2 是可选依赖，不写进 `mods.toml`；`run/mods`（主线）与 `libs/`（分支）里的 AE2 /
+  GuideME 已放进本轮 dev 环境，方便直接试玩；删掉它们即回到无 AE2 的基表，发布 jar 不打包。
+
+## 当前批次（2026-11-03 晚，工匠巧思：阿迪特 / 叶绿素）
+
+- **对象**：[TiT]工匠巧思（mod id `tinkers_thinking`，0.2.4，MIT，Forge + NeoForge **只有 1.20.1**
+  （以及 1.18.2 / 1.19.2），**没有 1.21.1**）。前置 Tinkers 3.12.1+；本轮实测用 Tinkers 3.12.1.231 +
+  Mantle 1.11.117 + TiT 0.2.4。不复制 TiT 的贴图 / JSON / 代码。
+- **范围（按所有者）**：只做两种矿——**阿迪特**（碎下界岩筛）和**叶绿素**（草方块筛）。走本模组现有的
+  三档矿链：筛 → `broken` / `crushed` / `powdered` 碎矿 → 4 合 1 矿块 → 熔成对方物品；不直接掉对方的
+  矿石方块。
+- **阿迪特（`ardite`，金属）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装 TiT 时回退自有
+  `ardite_ingot`（和钴同一套）。**只从碎下界岩出** `ardite_broken` 1%（不扩散到砂砾/沙子/尘土）；
+  颜色 `8E3B2E`，碎块基底用下界岩（`STONE_PALETTES`）。1.20.1 补了 **6 条匠魂熔炼**：
+  碎矿 45 mB / 矿块 180 mB、温度 950（TiT 的锭配方）、时间按 65 t / 90 mB 折算 → `forge:molten_ardite`。
+- **叶绿素（`chlorophyll`，`gems`）**：没有锭的矿物，按 `gems` 规则**只在 `tinkers_thinking` 在场时注册**
+  （没装时物品、方块、碎矿、筛出物、锤表、配方、标签都不出现），熔成
+  `tinkers_thinking:chlorophyte_compound`（叶绿混合物）。选它当产物是因为 TiT 的原矿正好掉
+  1 个叶绿素 A + 1 个 B，合成 1 个混合物——我们一块矿 = 一份等价物。
+  筛源：**只有草方块 1%**（新输入，表 = 泥土 24 条 + 叶绿素碎矿，由 `scripts/generate_sieve_assets.py`
+  从 `dirt.json` 生成；不扩散到砂砾/沙子/尘土）。
+- **门控**：叶绿素的全部条目走 `mod` 门（文件级 patch 或单条 `mod`），没装 TiT 时在查物品之前跳过；
+  1.21.1 上叶绿素永远不注册（TiT 没有 1.21.1），阿迪特则照常存在、熔成自有锭。
+- **验证**：
+  - 1.20.1 同服全装 Mek + Thermal + Create + IE + Tinkers + TiT：`[materials] loaded 22 entries`、
+    `ardite smelts into tinkers_thinking:ardite_ingot`、`chlorophyll smelts into
+    tinkers_thinking:chlorophyte_compound`；`[sieve] 7 inputs, 139 drops`（另装 AE2 时 141）、`[hammer] 79 recipes`；
+    `/exnihilo sieve` 里草方块 25 条（末条 `chlorophyll_broken 0.01`）、碎下界岩 11 条（`ardite_broken 0.01`）；
+    RCON 熔炉：`ardite_ore_gravel → tinkers_thinking:ardite_ingot`、`chlorophyll_ore_gravel →
+    tinkers_thinking:chlorophyte_compound`，两个都真的烧出来了。
+  - 不装 TiT（主线 1.21.1 无科技模组）：`[materials] loaded 14 entries`、`[sieve] 7 inputs, 116 drops`（另装 AE2 时 118）、
+    `[hammer] 55`，叶绿素条目静默跳过、无 unknown item；RCON 熔炉 `ardite_ore_gravel → 自有
+    exnihilosatellitium:ardite_ingot`（兜底生效）。
+  - `./gradlew build`（主线 toolchain 21 / 分支 Java 17）、`check-textures.py`、`check-data-paths.py`、
+    `check-core-imports.py` 全绿；`runData` 生成新材料的 blockstate/模型/配方/标签，无 warning。
+  - **未验**：手筛 / 机器筛的实际出货手感、匠魂炉真实熔化、JEI 两页目视。
+- **坑**：阿迪特矿和叶绿素矿在 TiT 里**都要钻石镐**，阿迪特没有熔炉配方（只有高炉 / 冶炼炉）；
+  我们自己的矿块只负责“给空岛一个来源”，碎矿→矿块→熔炼仍是我们自己的链路。
 
 ## 当前批次（2026-11-03，科技模组矿物链：Mek 氟石 + Thermal 六种）
 
@@ -312,8 +386,7 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   - 对应矿砾 / 矿砂 / 矿尘方块 → **180 mB**（2 锭）；
   - 流体用 `forge:molten_<m>`，温度取 Tinkers 自己的锭配方，时间按 90 mB 锭等比缩放；
   - 全部带 `conditions: mod_loaded(tconstruct)`，没匠魂时整批跳过。
-- **阿迪特暂不做**：Tinkers 3.12.1 已移除阿迪特（无 `molten_ardite` / `ardite_ingot`），
-  等「工匠巧思」拓展（重现 1/2 代阿迪特）再按同一套加。
+- **阿迪特/叶绿素**：本批已接（见顶部当前批次；碎下界岩 / 草方块出我们自己的碎矿）。
 - **验证**：
   - 1.20.1 只装 Tinkers 3.12.1 + Mantle 1.11.117：`[materials] cobalt → tconstruct:cobalt_ingot`；
     `[sieve] 6 inputs, 92 drops`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；
@@ -581,6 +654,10 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 | 矿物链（只装 Mek，1.21.1） | ✅ | 14 entries、筛 96 / 锤 55；氟石注册，Thermal 六种仍不注册；无缺失物品/掉落表报错 |
 | 矿物链（Thermal 六种，1.20.1） | ✅ | Thermal Foundation 11.0.6 + CoFH Core：RCON 把 apatite/cinnabar/niter/sulfur/ruby/sapphire 的矿砾分别熔成 `thermal:*`，6/6 通过 |
 | 矿物链（三档数据，两版） | ✅ | 全装：main 筛 114 / 锤 73；1.20.1 筛 113 / 锤 73。无科技模组：main 93/52、1.20.1 90/52；只装 Mek：main 96/55 |
+| AE2 赛特斯石英（1.21.1） | ✅ | AE2 19.2.18 + GuideME 21.1.22：筛 **118** drops（基表 116 + 2）；RCON `/exnihilo sieve minecraft:sand` 两条都在（dust 0.08333 / crystal 0.16667），无 unknown item |
+| AE2 缺省降级（1.21.1） | ✅ | 不装 AE2：筛 116 drops；`sand_ae2.json` 被 `mod` 门整文件跳过，无 unknown item |
+| AE2 赛特斯石英（1.20.1） | ✅ | AE2 15.4.12 + GuideME 20.1.15（`-PtechMods` 全装）：筛 **144** drops（基表 142 + 2），RCON sand 含两条 AE2；不装 AE2 时 142、无 unknown |
+| AE2 画面/手感 | ⚠️ | 手筛 / 机器筛实际出货、JEI 筛子页未目视 |
 | supported mods（JEI/客户端） | ⚠️ | 服务端已验；JEI 里的熔炼页与创造栏未在客户端目视 |
 | M10 自动输出（下推） | ✅ | RCON 2026-11-01：`AutoOutput=1/OutputMask=1` + 下方箱子，一件后箱子拿到 `iron_crushed`、输出格清空 |
 | M10 自动输出（关闭） | ✅ | RCON：`AutoOutput=0` 后产物留在槽 6..10，下方箱子不再增长 |
@@ -627,7 +704,9 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 | IE 主 1.21.1 回退 | ✅ | 主线无 IE：`Loaded 1427 recipes`；熔炉烧 `aluminum_ore_gravel` → 自有 `aluminum_ingot`；IE 变体不加载 |
 | 匠魂种子（条件物品） | ✅ | 只装 Tinkers：`summon` 两个种子物品成功；不装：`[sieve] 90` vs 92，无 unknown item |
 | 匠魂钴 | ✅ | 只装 Tinkers：`[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |
-| 匠魂熔炼配方 | ⚠️ | 78 条 `tconstruct:melting` 按 Tinkers 自己的格式生成，加载无报错；匠魂炉实际熔化未跑 |
+| 匠魂熔炼配方 | ⚠️ | 84 条 `tconstruct:melting` 按 Tinkers 自己的格式生成，加载无报错；匠魂炉实际熔化未跑 |
+| 工匠巧思：阿迪特矿链 | ✅ | 碎下界岩 1% → `ardite_broken`（砂砾/沙子/尘土不出）；1.20.1 全装 `[materials] 22 entries`、`ardite → tinkers_thinking:ardite_ingot`、`7 inputs / 139 drops`（+AE2 141）、`hammer 79`；RCON 熔炉 `ardite_ore_gravel → tinkers_thinking:ardite_ingot`；无 TiT 时烧成自有 `ardite_ingot`；手筛未测 |
+| 工匠巧思：叶绿素矿链 | ✅ | `gems` 材料（仅 TiT 在场注册）；草方块 1% → `chlorophyll_broken`（只此一处）；RCON 熔炉 `chlorophyll_ore_gravel → tinkers_thinking:chlorophyte_compound`；无 TiT 时整条（含草方块表那一条）静默跳过、`7 inputs / 116 drops`（+AE2 118） |
 | 下界合金碎片 | ✅ | 碎下界岩 0.4%，双线都加；`[sieve] 90`（无匠魂）/ 92（有匠魂） |
 | 匠魂草种子右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块或泥土 → `*_vanilla_slime_grass`；需要玩家右键实测 |
 | 钴碎块贴图 | ✅ | broken 用下界岩红棕基底，其余钴形态蓝色；`check-textures` 通过 |
@@ -667,8 +746,9 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
    标签/掉落/配方/模型四批都已完成。config 与 JEI 已齐。
 5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
 6. **M8 月光魔法联动** / **M9 发布**。
-7. **更多 supported mods**：IE + Tinkers 钴已接（1.20.1）；下一批等「工匠巧思」拓展补阿迪特
-   （Tinkers 3 本体已移除），再看 IE 1.21.1 / 其它科技模组，按
+7. **更多 supported mods**：IE + Tinkers 钴已接（1.20.1）；**TiT 的阿迪特 / 叶绿素矿**
+   与 **AE2 的赛特斯石英**已接（数据双线；AE2 两版真装验过）。下一步可以看 AE2 的充能赛特斯 /
+   天石粉（若所有者要）、TiT 的其它矿（锆 / 锆石之类）、IE 1.21.1 / 其它科技模组，按
    [data-format.md](data-format.md) §8 的规则加候选 + 手写变体即可（只接基础资源，不接合金）。
 
 ## 已拍板的决策
@@ -768,8 +848,9 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   IE 没有 1.21.1 版，主线只保留候选 / 变体。
 - **IE 在专用服会打 `DISTXFORM` 报错**：那是 IE 自己尝试加载 client 类，server 仍然 `Done`，
   不要当成本项目的错误。
-- **Tinkers 3 已经移除阿迪特**：3.12.1 没有 `molten_ardite` / `ardite_ingot`，只有残留的
-  贴图文件；不要在 Tinkers 3 上硬加，等「工匠巧思」这类重现 1/2 代金属的拓展。
+- **Tinkers 3 已经移除阿迪特**：3.12.1 本体没有 `molten_ardite` / `ardite_ingot`（只有残留贴图），
+  阿迪特由 **工匠巧思（`tinkers_thinking`，只有 1.20.1）** 提供；我们筛**自己**的 `ardite_broken`
+  走三档链，再熔成 TiT 的锭（或没装时熔成自有锭）。不要在 Tinkers 3 上自己造阿迪特。
 - **条件物品不能交给 datagen**：`sky/ender_slime_grass_seeds` 只在 `tconstruct` 在场时注册，
   `runData` 没有匠魂 → 不会生成模型；这两个模型/贴图必须手写。条件物品的创造栏也要 null 检查。
 - **匠魂熔炼的 `result` 是流体**（`{tag, amount}`，没有 `item`/`id`）：`check-data-paths.py`

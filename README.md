@@ -27,8 +27,9 @@
 1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
 2. 把 jar 放进 `mods/`。
 3. 可选：**JEI**（配方查询）、**Jade**（方块信息）、**Create / Mekanism / Thermal**
-   （金属锭与矿石块的互通）；1.20.1 还可选 **Immersive Engineering** 与
-   **Tinkers' Construct 3 + Mantle**（金属锭/匠魂熔炼）。
+   （金属锭与矿石块的互通）、**Applied Energistics 2 + GuideME**（筛沙出赛特斯石英）；
+   1.20.1 还可选 **Immersive Engineering**、**Tinkers' Construct 3 + Mantle** 与
+   **工匠巧思（Tinkers' Thinking）**（金属锭/匠魂熔炼/两种矿石）。
    所有联动都是可选的，没装就回退自有物品。
 
 0.2.0 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
@@ -122,9 +123,13 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 | Create | 锌 | 矿砾/矿砂/矿尘熔成 `create:zinc_ingot`；1.20.1 另有 `create:crushing` 桥 |
 | Immersive Engineering（1.20.1） | 银 / 铅 / 镍 / 铝 / 铀 | 排在 Mek/Thermal 之后；IE 粉碎机走 `forge:ores/<m>` 标签 |
 | Tinkers' Construct（1.20.1） | 钴 | `tconstruct:cobalt_ingot`；只有金属有匠魂熔炼，氟石等矿物不写 |
+| [Tinkers' Thinking](https://modrinth.com/mod/tinkers-thinking)（工匠巧思，1.20.1） | 阿迪特 / 叶绿素 | 碎下界岩 1% → `ardite_broken`（没装 TiT 熔成自有阿迪特锭），草方块 1% → `chlorophyll_broken`（熔成 `tinkers_thinking:chlorophyte_compound`）；走本模组三档矿链 |
+| [Applied Energistics 2](https://modrinth.com/mod/ae2)（两版） | 赛特斯石英 | 筛沙 1/6 → `ae2:certus_quartz_crystal`、1/12 → `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json` 带 `mod` 门补丁，没装时整文件跳过，不注册自有物品 |
 
 加模组支持 = 在 `materials.json` 对应材料里加一条 `{"item": "...", "mod": "..."}`，
-再跑 `python3 scripts/generate_ore_variants.py` 和 `./gradlew runData`。**开世界前定好模组
+再跑 `python3 scripts/generate_ore_variants.py` 和 `./gradlew runData`。**对方物品本身就是基础资源时**
+（如 AE2 的赛特斯石英），用独立 patch 文件（根级 `"mod"` + `"patch": true`）给筛表追加掉落即可，
+见 `sieve/sand_ae2.json`。**开世界前定好模组
 列表**：加/减受支持模组会改变哪些兜底物品存在，旧存档里的自有锭/矿物会变成未知物品。
 
 ## Jade（玉）
