@@ -299,3 +299,87 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - 当前 12 条：基础 5（水+熔岩、熔岩+水、熔岩+红石、熔岩+荧石、水+尘土）、
   牛奶 1、巫水 2、人偶 4。
 - 未知 base/added/result/entity 只跳过该条并打 `[barrel]` 警告；删掉 JSON 就不反应。
+
+## 10. 数据包魔改指南（七张玩法表，2026-11-03）
+
+七张表都是数据包资源，加载器扫描**所有命名空间**：
+
+| 表 | 路径 | 一条 JSON | 输入可用 `#tag` |
+|---|---|---|---|
+| 筛子 | `data/<ns>/sieve/*.json` | 一个输入物品 + 掉落列表 | ✅ 物品标签 |
+| 锤子 | `data/<ns>/hammer/*.json` | 一个方块 + 产物 + 数量区间 | ✅ 方块标签 |
+| 钩子 | `data/<ns>/crook/*.json` | 一种树叶方块 + 追加掉落 | ✅ 方块标签 |
+| 桶转化 | `data/<ns>/barrel/*.json` | base 流体 + added → 方块/实体 | ✅ 流体/物品标签 |
+| 堆肥 | `data/<ns>/compost/*.json` | 物品/标签 → 分值 | ✅ 原生 |
+| 坩埚熔点 | `data/<ns>/crucible_melt/*.json` | 方块 → 流体 + 量 | ✅ 方块标签 |
+| 坩埚热源 | `data/<ns>/crucible_heat/*.json` | 方块（可带状态）→ 速度 | ✅ 方块标签 |
+
+### 10.1 三种写法
+
+1. **覆盖内置**：同命名空间同路径（例如 `data/exnihilosatellitium/sieve/sand.json`）
+   会整文件替换 jar 内那份；要抄全原有条目。
+2. **新增**：用自己的命名空间；同一输入重复时后加载的覆盖并打 `[sieve] duplicate input ...`。
+3. **补丁**：`"patch": true` 或出现 `"remove"`，在所有普通文件之后按资源 id 排序应用，
+   不用抄全，还能删条目。
+
+### 10.2 标签输入
+
+`input` / `block` / `base` / `added` 可以写 `#tag`，加载时展开：
+
+```json
+{ "input": "#forge:gravel", "outputs": [ { "item": "minecraft:diamond", "chance": 0.01 } ] }
+```
+
+- 1.20.1 的通用标签是 `forge:` 命名空间（`#forge:gravel`、`#forge:ingots/...`）；
+  vanilla 标签仍是 `#minecraft:logs` / `#minecraft:leaves` / `#minecraft:campfires`。
+- 筛子 / 钩子：标签**合并**到每个匹配物品，完全相同的掉落只留一份。
+- 锤子 / 熔点 / 热源：具体条目优先，标签不覆盖已有规则。
+- 桶：`base` / `added.fluid` 只展开 **still（source）流体**；`#minecraft:water` 在 1.20.1
+  的标签里同时含 still/flowing，flowing 规则永远匹配不到桶里的流体，所以加载时丢掉。
+- 掉落产物（`item` / `result`）仍必须是具体 id；要随机掉一种锭请写多条。
+
+### 10.3 `mod` 条件
+
+文件根写 `"mod": "tconstruct"`，模组不在时整文件静默跳过（不解析物品、不刷 unknown id）。
+筛子 / 钩子的单条掉落也可以各自带 `mod`。
+
+### 10.4 补丁与删除
+
+| 表 | `"patch": true` | `"remove": true` | `"remove": ["id", "#tag"]` |
+|---|---|---|---|
+| 筛子 | 追加 `outputs` | 删除该 `input` 整条 | 删除匹配的掉落 |
+| 钩子 | 追加 `drops` | 删除该 `input` 整条 | 删除匹配的掉落 |
+| 锤子 / 熔点 / 热源 | 替换该输入的规则 | 删除该输入 | — |
+| 桶 | 替换该 `base + added` 规则 | 删除该规则 | — |
+| 堆肥 | 追加 `values` | — | 删除匹配的条目（可再用 `values` 加回新值） |
+
+```json
+{ "input": "minecraft:sand", "patch": true,
+  "remove": ["minecraft:cactus"],
+  "outputs": [ { "item": "minecraft:diamond", "chance": 0.5 } ] }
+```
+
+```json
+{ "base": "minecraft:water", "added": { "item": "minecraft:milk_bucket" }, "remove": true }
+```
+
+### 10.5 加载顺序与自检
+
+```
+普通具体条目（按资源 id 排序） → 普通标签条目 → 补丁（按资源 id 排序）
+```
+
+标签在所有 reload listener 之后才 bind，所以日志会先出现一次
+`waiting for tags`（只有具体条目），紧接着 `TagsUpdatedEvent` 再打印完整条数；**以第二次为准**。
+`/exnihilo tables`、`/exnihilo sieve <item>`、`/exnihilo hammer <block>`、
+`/exnihilo compost <item>`（OP）可直接查当前生效规则。
+
+### 10.6 示例包
+
+`examples/datapack/`（`pack_format 15`）覆盖标签、补丁、`mod` 门、堆肥改值；
+1.21.1 主线的同一示例在主线仓库的 `examples/datapack/`。
+
+### 10.7 客户端
+
+1.20.1 分支目前没有客户端表镜像 / 网络同步：单人 / 局域网 JEI 读服务端表；
+专用服客户端看不到服务端数据包，JEI 只能显示内置内容（和主线同一边界）。

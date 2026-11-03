@@ -116,6 +116,18 @@ python3 scripts/generate_barrel_variants.py   # 从材质表重生成七种桶�
 Jade 是**可选依赖**；没装时插件类不会被加载。API 只用于编译（`compileOnly`），
 不会打进我们的 jar。
 
+## 数据包
+
+筛子 / 锤子 / 钩子 / 桶转化 / 堆肥 / 坩埚熔点和热源都可以用数据包改：
+
+- 输入支持 `#tag`（1.20.1 通用标签用 `forge:`，例如 `"input": "#forge:gravel"`）；
+- 根级 `"mod": "tconstruct"` 让整张表只在装了某模组时生效；
+- `"patch": true` + `"remove"` 可以只改一两条，不用抄全内置文件；
+- 改完 `/reload`；`/exnihilo tables`（OP）看当前条数，`/exnihilo sieve <item>` 查单条。
+
+示例在 [`examples/datapack/`](examples/datapack/README.md)，完整语法见
+[`docs/data-format.md`](docs/data-format.md) §10。
+
 ## 许可证
 
 - **本项目的代码与美术资源：MIT**，详见 [LICENSE](LICENSE)。
