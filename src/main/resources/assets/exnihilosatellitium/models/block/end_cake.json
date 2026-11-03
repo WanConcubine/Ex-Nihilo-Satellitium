@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cake",
+  "textures": {
+    "particle": "exnihilosatellitium:block/end_cake_side",
+    "bottom": "exnihilosatellitium:block/end_cake_bottom",
+    "top": "exnihilosatellitium:block/end_cake_top",
+    "side": "exnihilosatellitium:block/end_cake_side"
+  }
+}

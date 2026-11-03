@@ -75,6 +75,10 @@ SirLyle 2017 / Wolforce 2019 textures）。
 | `textures/block/crucible.png` | `textures/blocks/blockcrucible.png` |
 | `textures/block/unfired_crucible.png` | `textures/blocks/blockcrucibleunfired.png` |
 | `models/block/crucible_base.json` | `models/block/block_crucible_big.json`（几何；cullface 已修正） |
+| `textures/block/end_cake_top.png` | `textures/blocks/end_cake_top.png`（经 `restyle.py` 裁边/放大/描边） |
+| `textures/block/end_cake_side.png` | `textures/blocks/end_cake_side.png`（同上） |
+| `textures/block/end_cake_bottom.png` | `textures/blocks/end_cake_bottom.png`（同上） |
+| `textures/block/end_cake_inner.png` | `textures/blocks/end_cake_inner.png`（同上） |
 
 派生（不是直接复制）：
 
@@ -86,8 +90,8 @@ SirLyle 2017 / Wolforce 2019 textures）。
 后续如再采用 Creatio 的资源，必须同步扩充本表和许可证文件。
 以上 PNG 在 `src/main/.../textures/` 里经过了**颜色微调**（1.21 风格的方向光、描边、
 暖金/下界合金色板与色阶收敛）；原始采用图只读保存在 `art/items/tools/creatio/`
-与 `art/blocks/crucible/creatio/`，微调规则见两个 `restyle.py`。MIT 允许修改与再分发，微调版仍按 MIT 授权，
-版权仍归原作者。
+与 `art/blocks/crucible/creatio/`，以及末影蛋糕的 `art/blocks/end_cake/creatio/`；
+微调规则见对应的 `restyle.py`。MIT 允许修改与再分发，微调版仍按 MIT 授权，版权仍归原作者。
 **Ex Nihilo: Sequentia（传承）1.21 的许可证是 CC BY-NC-SA 4.0**（非 MIT，
 带非商业与相同方式共享条款），因此本项目**不采用**其任何贴图，只作玩法/数值对照。
 

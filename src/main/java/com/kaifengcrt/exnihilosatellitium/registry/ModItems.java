@@ -104,6 +104,11 @@ public final class ModItems {
             ITEMS.register("crushed_end_stone", () -> new BlockItem(ModBlocks.CRUSHED_END_STONE.get(),
                     new Item.Properties()));
 
+    /** The End route: a cake that teleports the eater; ender eyes add slices. */
+    public static final DeferredHolder<Item, Item> END_CAKE =
+            ITEMS.register("end_cake", () -> new BlockItem(ModBlocks.END_CAKE.get(),
+                    new Item.Properties().stacksTo(64)));
+
     /** M6: dolls, the nether/end mob recipe (angry -> blaze, creepy -> enderman). */
     public static final DeferredHolder<Item, Item> DOLL =
             ITEMS.register("doll", () -> new Item(new Item.Properties().stacksTo(16)));

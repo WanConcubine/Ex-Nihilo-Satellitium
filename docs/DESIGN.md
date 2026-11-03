@@ -1,6 +1,6 @@
 # 设计文档：无中生有：众星捧月
 
-> 状态：M1–M4 已实现（M3 收尾 + M4 待验收）/ 最后更新：2026-10-31
+> 状态：M1–M4 已实现（M3 收尾 + M4 待验收）/ 最后更新：2026-11-03
 
 ## 1. 独立实现原则
 
@@ -1321,3 +1321,98 @@ RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；两个种子 `summ
 
 坑：Tinkers 的熔炼 `result` 是流体（`tag` + `amount`），没有 `item`/`id`；`check-data-paths.py`
 已改成只对 item/id result 检查版本键，否则 78 条熔炼会全部误报。
+
+## 37. 数据包 v2：标签输入 / `mod` 门 / 补丁（2026-11-03）
+
+目标：把「数据包能改」从“能覆盖 JSON”推进到“能当扩展 API 用”，先不引入 KubeJS /
+CraftTweaker 的 Java 依赖。
+
+1. **标签输入**。七张表的 id 字段都接受 `#tag`，在加载时展开成当前注册表对象，玩法代码
+   仍是具体 id 查表。筛子 / 钩子对同一物品**合并**掉落（去重）；锤子 / 熔点 / 热源是
+   一条规则一个方块，**具体条目优先**；桶做 base × added 叉积。
+2. **`mod` 门**。文件根 `"mod": "x"` 在解析任何 id 之前判断，避免未装模组时刷 unknown id；
+   筛子 / 钩子的单条掉落也可以各自带 `mod`。
+3. **补丁**。`"patch": true` 或出现 `"remove"` 的文件进入第三遍：`remove: true` 删整条，
+   `remove: ["id", "#tag"]` 删列表条目；补丁按资源 id 排序，所以多包改同一条目时顺序确定。
+   `remove` 也接受标签，用来“删掉所有树叶的某条掉落”这类操作。
+4. **时序坑**。`TagManager` 只在 reload 中存 `LoadResult`，真正的 `bindTags` 在
+   `ReloadableServerResources.updateRegistryTags()`，也就是所有 listener 之后。第一版在
+   `apply()` 里展开标签全是空集，日志 `[sieve] 5 inputs, 75 drops`。改成：
+   - `load()` 只建具体条目，并缓存原始 `JsonObject`；
+   - `TagsUpdatedEvent`（server / client 都会发）里再 `rebuild()`，展开标签并应用补丁；
+   - 客户端打开 F3+T 时标签仍在，`load()` 允许直接展开，不会丢 JEI 的标签条目。
+5. **诊断**。`/exnihilo tables` 看条数；`/exnihilo sieve|hammer|compost <id>` 直接查一条
+   规则，用来确认补丁删/加是否生效。示例包 `examples/datapack/` 覆盖全部语法。
+
+验证：见 `docs/status.md` 的「当前批次（2026-11-03）」；测试包下 tag 展开后
+`[sieve] 45 inputs, 115 drops`、`[hammer] 91`、`[crook] 32 drops`、`[crucible] 49 heat`，
+删补丁文件后 `/reload` 恢复 `hammer 91` / `barrel 11`；`sieve sand` 已无 cactus、
+`hammer end_stone` 无规则、`compost bread` = 100。
+
+没做：专用服客户端 JEI 同步（需要网络包）；1.20.1 分支移植；KubeJS / CT 的一等集成。
+
+## 38. 决策：自定义三路径等价（2026-11-03）
+
+**背景。** 玩家已经在问“能不能用 KJS/CT 改筛子/桶/堆肥”。当前数据包路径完整，
+KJS 只能走 `kubejs/data`，CT 只能改原版配方；这与“尽可能支持高度自定义”的产品理念不符。
+
+**决策。**
+
+1. **数据包 / KubeJS / CraftTweaker 是三条目标等价路径**，不是“数据包 + 两个脚本补丁”。
+   最终验收：同一份 fixture 用三种写法表达，`/reload` 后 `/exnihilo dump` 快照一致。
+2. **数据包仍是规范来源。** 任何新表/新字段先有 JSON 形态、loader、校验和文档，再谈
+   KJS/CT 入口；脚本入口不允许绕过校验。
+3. **统一 TableBuilder + overlay。** JSON loader 和脚本贡献都写同一个 builder；
+   脚本贡献在每次 reload 后重新应用，不能直接改全局 map，也不能在 `/reload` 后丢条目。
+4. **KJS 用 plugin + 事件，CT 优先用 ZenScript API。** CT 不强行把七张表塞进
+   `RecipeManager`；先保证“能改表”，recipe type/JEI 显示后置。
+5. **文档是 Definition of Done。** 维护契约见 `wiki/MAINTAINING.md`；
+   能力矩阵见 `wiki/README.md`；差距和阶段见 `docs/customization-roadmap.md`。
+   任何页面不得把未支持的能力写成“支持”。
+6. **注册期内容不参与等价化。** 新物品/方块/材料仍由注册期决定；KJS 可以拥有自己的物品，
+   但不进 `materials.json` 链。数据包/CT/KJS 都不能在运行期新增材料。
+
+**后果。**
+
+- 七张表的 loader 要重构出 `TableBuilder` / `CustomizationOverlay`（roadmap P1），
+  之后才接 KJS（P2）和 CT（P3）。
+- 每次改表结构要同时改 wiki 和 roadmap 的能力矩阵，并跑 `scripts/check-wiki.py`。
+- 专用服客户端 JEI 的同步（P4）是“看起来等价”的必要条件，但不阻塞 P1–P3。
+
+**当前状态。** P0（数据包 v2）已完成并在两版验证；P1 尚未开始。
+
+## 39. 末影蛋糕（2026-11-03）
+
+补 `parity.md` 的 End Cake 缺口。原版参考是 Omnia 1.10.2 的 `BlockEndCake`：可放置蛋糕，
+放置时只有 1 片，末影之眼右键把 `bites` 减 1（补一片），空手右键吃一片并
+`changeDimension(1)`（仅主世界）；吃一片 +2 饥饿 / 0.1 饱和度；原版末地/下界不传送。
+本实现额外补了“末地 → 主世界”的回程（用户要求）。
+
+实现：
+
+1. **`EndCakeBlock extends CakeBlock`**，复用 vanilla 的 `BITES`、形状、`canSurvive`、比较器。
+   - `getStateForPlacement` 返回 `bites=6`（1 片），所以物品放置和 `/setblock` 的默认状态不同；
+   - `useItemOn`：末影之眼且 `bites>0` → `bites-1`、消耗 1 个眼、播放 `ENDER_EYE_LAUNCH`；
+   - `useWithoutItem`：空手且（可进食或创造）→ 吃、`bites+1` 或移除方块、按维度传送
+     （主世界 → 末地，末地 → 主世界）。
+2. **传送**：主世界吃 → `ServerPlayer.teleportTo(ServerLevel.END, 0.5, height+1, 0.5, ...)`，
+   用 `Heightmap.MOTION_BLOCKING_NO_LEAVES` 找中央岛表面；末地吃 → 传回玩家在
+   **主世界**的床/重生锚点，没有则世界出生点；下界不传送。不走 `changeDimension(1)` 的
+   1.10 写法，也不创建 1.10 的末地平台。
+3. **配方/资源**：8 末影珍珠 + 蛋糕；4 张 16×16 贴图（Creatio 原图经 `art/blocks/end_cake/restyle.py` 裁边/放大/描边），
+   模型只写 `parent: minecraft:block/cake*` + `textures` 覆盖，不复制 vanilla 模型文件；
+   无掉落表（和 vanilla 蛋糕一致）。
+4. **1.20.1**：同一套资源/配方；`EndCakeBlock` 单独实现 `use(...)`（1.20.1 没有
+   `useItemOn`/`useWithoutItem`），`stack.shrink(1)` 代替 `ItemStack.consume`，
+   `InteractionResult.sidedSuccess`。
+
+差异/坑：
+
+- 原版 Omnia 有 `end_cake_hunger` 配置（满饥饿时能否吃）；我们没加配置，**始终可吃**，
+  避免“在末地满饥饿导致回不了主世界”。
+- 原版 `changeDimension(1)` 会把玩家丢到末地默认入口；我们直接落到中央岛表面，
+  不需要先有末地平台。回程按玩家要求补成“末地吃 → 主世界床/出生点”，这是对
+  Omnia 原版“不能回传”的有意偏离。
+- `/setblock` 放出来是 `bites=0`（vanilla 默认状态），不是物品放置的 `bites=6`；
+  这是命令调试的正常差异，不要当 bug。
+

@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.block.BarrelBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.CrucibleBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.EndCakeBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.InfestedLeavesBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.UnfiredCrucibleBlock;
@@ -99,6 +100,11 @@ public final class ModBlocks {
     /** Generic dust block: hammered from sand, then sifted for powdered resources. */
     public static final DeferredHolder<Block, Block> DUST =
             BLOCKS.register("dust", () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.SAND)));
+
+    /** The End route: a cake that teleports the eater to the End. */
+    public static final DeferredHolder<Block, Block> END_CAKE =
+            BLOCKS.register("end_cake", () -> new EndCakeBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.CAKE)));
 
     /** M4: unfired porcelain crucible (smelted into the working crucible). */
     public static final DeferredHolder<Block, Block> UNFIRED_CRUCIBLE =

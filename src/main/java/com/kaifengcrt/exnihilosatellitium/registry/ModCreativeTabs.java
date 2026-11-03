@@ -54,6 +54,7 @@ public final class ModCreativeTabs {
                         ModItems.PEBBLES.forEach(pebble -> output.accept(pebble.get()));
                         output.accept(ModItems.CRUSHED_NETHERRACK.get());
                         output.accept(ModItems.CRUSHED_END_STONE.get());
+                        output.accept(ModItems.END_CAKE.get());
                         output.accept(ModItems.ANCIENT_SPORES.get());
                         output.accept(ModItems.CRIMSON_NYLIUM_SPORES.get());
                         output.accept(ModItems.WARPED_NYLIUM_SPORES.get());

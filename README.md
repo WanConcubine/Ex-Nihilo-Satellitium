@@ -68,6 +68,8 @@
 - [docs/tech-debt.md](docs/tech-debt.md) —— 技术债/潜在风险审计（P0–P3）
 - [docs/DESIGN.md](docs/DESIGN.md) —— 原则、架构、里程碑、M1–M10 实现记录
 - [docs/data-format.md](docs/data-format.md) —— 堆肥/筛子 JSON、材料表、NBT、命令、JEI
+- [wiki/](wiki/README.md) —— 玩家向：数据包 / KubeJS / CraftTweaker 自定义配方
+- [docs/customization-roadmap.md](docs/customization-roadmap.md) —— 三路径等价路线图（P1–P4、验收标准）
 - [docs/textures.md](docs/textures.md) —— 纹理路线、引用规则、检查脚本
 - [THIRD-PARTY.md](THIRD-PARTY.md) —— 第三方/参考来源
 - [AGENTS.md](AGENTS.md) —— 仓库规则（给协作者/AI）
@@ -148,6 +150,20 @@ Jade 是**可选依赖**；没装时插件类不会被加载。API 只用于编�
 JEI 同样是**可选依赖**，只用于编译（`compileOnly`），不会打包；
 没装 JEI 时模组独立运行。数据与结算共用 `data/<ns>/sieve/*.json`、
 `data/<ns>/barrel/*.json` 和 `data/<ns>/compost/*.json`，改表即改 JEI。
+
+## 数据包
+
+筛子 / 锤子 / 钩子 / 桶转化 / 堆肥 / 坩埚熔点和热源都可以用数据包改：
+
+- 输入支持 `#tag`（如 `"input": "#c:gravels"`），加载时展开成当前注册表里的物品/方块；
+- 根级 `"mod": "tconstruct"` 让整张表只在装了某模组时生效；
+- `"patch": true` + `"remove"` 可以只改一两条，不用抄全内置文件；
+- 改完 `/reload`；`/exnihilo tables`（OP）看当前条数，`/exnihilo sieve <item>` 查单条。
+
+可直接用的示例在 [`examples/datapack/`](examples/datapack/README.md)，
+完整语法和优先级见 [`docs/data-format.md`](docs/data-format.md) §14。
+
+面向玩家的完整 wiki（数据包 / KubeJS / CraftTweaker 三条路线）：[`wiki/`](wiki/README.md)。
 
 ## 许可证
 

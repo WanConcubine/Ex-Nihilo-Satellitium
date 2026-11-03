@@ -1,6 +1,6 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-02
+> 最后更新：2026-11-03
 > 先看这 20 行；细节再翻 [DESIGN.md](DESIGN.md)、[data-format.md](data-format.md)、[textures.md](textures.md)。
 
 ## 一句话
@@ -30,6 +30,61 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 自有锭只作兜底。
 **M9 发布：0.1.0 已发（两条线都有 tag）；0.2.0 内容与 jar 已备，tag / 商店上传待确认；
 M8 月光魔法联动仍未开始。**
+
+## 当前批次（2026-11-03，末影蛋糕）
+
+- **新方块/物品 `exnihilosatellitium:end_cake`**：可放置蛋糕，吃一片**主世界 ↔ 末地**双向传送
+  （主世界 → 末地中央岛；末地 → 玩家床/世界出生点）；下界不传送。放置时只有 **1 片**
+  （`bites=6`），末影之眼右键补 1 片，最多 7 片；每次吃 +2 饥饿 / 0.1 饱和度，
+  **始终可吃**（不要求饥饿值，保证末地回程）。顶面是末影之眼标志（绿色 end-stone 底 +
+  teal 虹膜 + 黑瞳）。
+- **配方**：8 末影珍珠 + 1 蛋糕（3×3 环，蛋糕居中），1.20.1 同配方。
+- **资源**：几何复用 vanilla `minecraft:block/cake` / `cake_slice1..6` 父模型，只覆盖 4 张
+  16×16 贴图（Creatio 原图经 `art/blocks/end_cake/restyle.py` 裁边/放大/描边）；
+  无掉落表（和 vanilla 蛋糕一样，打掉不返还）。
+- **验证**（2026-11-03，main）：
+  - `./gradlew build`、`check-textures.py`、`check-data-paths.py`、`check-wiki.py` 全绿。
+  - dev server：`Loaded 1434 recipes` / `our recipes=144`（+1 条 End Cake）；
+    `/setblock ... end_cake[bites=0/1/5/6]` 均可放置并通过 `execute if block` 检查。
+  - **未验**：进游戏右键吃/传送、末影之眼补片、模型画面；`getStateForPlacement` 的
+    `bites=6` 需要物品放置才能看到（命令 `/setblock` 走默认 `bites=0`）。
+- **1.20.1**：已同步同一套方块/物品/贴图/模型/配方，`compileJava` + `check-textures.py` 通过；
+  服务端 `/setblock ... [bites=6]` 验过。
+
+## 当前批次（2026-11-03，数据包 v2：标签 / mod 门 / 补丁）
+
+- **标签输入**：`sieve` / `hammer` / `crook` / `barrel` / `crucible_melt` / `crucible_heat` 的
+  id 字段接受 `#tag`（物品 / 方块 / 流体标签），加载时展开；堆肥原本就支持 `#tag`。
+- **时序坑（重要）**：`TagManager` 只在 reload 里存结果，标签在所有 listener 之后才绑定，
+  所以 `load()` 只建具体条目，`TagsUpdatedEvent` 里再 `rebuild()` 展开标签。日志会先出现
+  `waiting for tags`，随后出现完整条数，这是正常的，不是漏加载。
+- **mod 门**：所有表支持根级 `"mod": "x"`；筛子 / 钩子的单条掉落也支持 `mod`。
+- **补丁**：`"patch": true`（或出现 `"remove"`）在所有普通文件之后按资源 id 排序应用；
+  `remove: true` 删整条规则，`remove: ["id", "#tag"]` 删列表条目（筛子 / 钩子 / 堆肥）。
+  具体条目优先于标签；筛子 / 钩子的标签是合并，锤子 / 熔点 / 热源是具体优先。
+- **诊断命令**（OP）：`/exnihilo tables`、`/exnihilo sieve <item>`、
+  `/exnihilo hammer <block>`、`/exnihilo compost <item>`。
+- **示例包**：`examples/datapack/`（`pack_format 48`），可直接丢进 `world/datapacks/`。
+- **玩家 wiki**：`wiki/` 按「数据包 / KubeJS / CraftTweaker」三条路线写，覆盖 1.21.1 与
+  1.20.1 的路径/标签差异；CT 明确写清只改原版配方、碰不到七张表。
+- **维护契约**：`wiki/MAINTAINING.md` 定义 Owner / Definition of Done / 发布前检查；
+  `scripts/check-wiki.py` 守卫页面、链接、JSON、版本矩阵和“最后核对”头。
+- **三路径路线图**：`docs/customization-roadmap.md` 列出当前能力矩阵、P1（规范表 + overlay 基座）、
+  P2（KJS 插件）、P3（CT API）、P4（客户端同步）的验收标准；**当前只有数据包是完整路径**。
+- **验证**（2026-11-03，main）：
+  - `./gradlew build`、`check-textures.py`、`check-core-imports.py`、`check-data-paths.py`、
+    `check-wiki.py` 全绿。
+  - dev server + 测试包（`#minecraft:logs` / `#minecraft:leaves` / `#minecraft:saplings` 标签、
+    sand 补丁、end_stone 删除、水 + 牛奶删除、tconstruct mod 门、面包 125→100、tag 删树苗）：
+    - 启动：先 `waiting for tags`，随后 **测试包下** `[sieve] 45 inputs, 115 drops`、
+      `[hammer] 91`、`[crook] 32 drops`、`[crucible] 49 heat`、`[barrel] 11`；
+      无 unknown item / empty tag 警告。
+    - RCON：`sieve minecraft:sand` 已无 cactus、有 0.5 钻石；`sieve minecraft:oak_log` 有 1%
+      钻石（tag）；`hammer minecraft:oak_log` → 木棍 1–2；`hammer minecraft:end_stone` → no rule；
+      `compost minecraft:bread` → 100；删掉补丁文件后 `/reload` 恢复 `hammer 91`、`barrel 11`。
+- **1.20.1**：已移植并单独验证，见分支的 `docs/status.md`「数据包 v2 移植」。
+- **未做**：专用服客户端 JEI 仍只读本地镜像 / 本地数据包；KubeJS / CraftTweaker 仍无集成；
+  下一步是 roadmap 的 **P1（TableBuilder / overlay 基座）**，之后才谈 KJS/CT 等价。
 
 ## 0.2.0 发布准备（2026-11-02）
 
@@ -394,6 +449,9 @@ M8 月光魔法联动仍未开始。**
 | 旧内容目视 | ⚠️ | 桶/筛比例、Jade tooltip 等仍待作者确认；桶的两道外凸箍已按反馈删除（2026-10-31） |
 
 ## 下一步（按价值排序）
+
+> 自定义三路径：先做 [roadmap](customization-roadmap.md) 的 **P1（TableBuilder + overlay）**，
+> 再做 P2 KJS 插件、P3 CT API；在 P2/P3 完成前，wiki 仍写“只有数据包是完整路径”。
 
 1. **1.20.1 一次性验收 M1.5–M10**：服务端逻辑都已 RCON 验过，剩下机器 GUI/自动输出抽屉/
    BER 动画、M6 美术与右键手感。Thermal / Create / IE 的锭与粉碎接入已真装验过（见当前批次），
