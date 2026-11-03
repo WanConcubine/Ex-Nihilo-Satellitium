@@ -493,6 +493,6 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 4. **数值依据**：水晶 1/6 对齐经典 Ex Nihilo（Omnia 是 5%）；粉取水晶的一半。
 5. **1.20.1 dev 坑**：AE2 生产 jar 直接丢 `run/mods` 会因 SRG mixin `@Shadow f_129762_`
    找不到而崩服；必须放 `libs/`，由 `-PtechMods` 做 `fg.deobf`（`build.gradle` 已加入口）。
-6. **验证**：`-PtechMods` 全装 + AE2 15.4.12 + GuideME 20.1.15：`[sieve] 7 inputs, 144 drops`
-   （基表 142 + 2），RCON sand 含 `certus_quartz_crystal 0.16667` / `dust 0.08333`；
-   去掉 AE2 时 142、无 unknown item。手筛与 JEI 页面未目视。
+6. **验证**：`-PtechMods` 全装 + AE2 15.4.12 + GuideME 20.1.15：`[sieve] 7 inputs, 141 drops`
+   （基表 139 + 2），RCON sand 含 `certus_quartz_crystal 0.16667` / `dust 0.08333`；
+   去掉 AE2 时 139、无 unknown item。手筛与 JEI 页面未目视。

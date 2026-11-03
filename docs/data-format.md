@@ -263,7 +263,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 ### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
 
 **路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
-13 种金属材料 × 6 形态 = 78 条。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）不写匠魂熔炼，
+14 种金属材料 × 6 形态 = 84 条（含阿迪特）。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）不写匠魂熔炼，
 因为 Tinkers 没有对应熔融液体。
 
 ```json

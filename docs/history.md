@@ -1,7 +1,51 @@
-# 1.20.1 分支历史批次（2026-11-01 ～ 2026-11-02）
+# 1.20.1 分支历史批次（2026-11-01 ～ 2026-11-03）
 
 > 从 [status.md](status.md) 搬出来的批次叙事与日期流水：只记「当时做了什么、怎么验的」。
 > **当前状态、验证表、下一步只看 status.md**；这里不再维护，只作追溯用。
+
+## 2026-11-03（数据包 v2 / 末影蛋糕 / 三路径 / 科技矿物链移植）
+
+### 数据包 v2 移植
+
+- 六张玩法表的 `#tag` 输入、根级 `"mod"` 门、`"patch"` / `"remove"` 补丁语义全部移植。
+- 1.20.1 的配方条件键是**裸 `conditions`**（不是 `forge:conditions`）；写错会被 Forge 忽略，
+  然后按无条件解析，炸出 missing item。`check-data-paths.py` 已加负向测试。
+- 诊断命令 `/exnihilo tables|sieve|hammer|compost`、`/exnihilo customize` 与主线同一份代码。
+- 验证：测试包 `[sieve] 45 inputs / 115 drops` 等；`/reload` 回基线；删补丁后恢复。
+
+### 末影蛋糕移植
+
+- 可放置蛋糕，主世界 ↔ 末地双向传送；1 片起（`bites=6`），末影之眼补片；8 珍珠 + 蛋糕。
+- 复用 vanilla cake 父模型 + 4 张 16×16 贴图；无掉落表；`/setblock ... [bites=6]` 验过。
+
+### 三路径 P1 → P3（分支）
+
+- P1 `common/table/` 整体移植：七张表 add/remove/replace、`/exnihilo dump`、overlay 基座。
+- P1.5：priority、冲突日志、去重、server stop 清理。
+- P2 KubeJS 2001：`KubeJSPlugin` 类 + `BindingsEvent`，七张表绑定 + JSON 逃生口。
+- P3 CraftTweaker 14.0.60：七个 `@ZenRegister` 类，source priority 200，reload 清旧贡献。
+- 验证：七张表 dump 与 datapack fixture 逐字节一致；无 KJS/CT 正常启动。
+
+### Mek 氟石 + Thermal 六种矿物链
+
+- 与主线共用 `materials.json` 的 `gems` schema：纯模组产物、无自有兜底、整条只在候选 mod
+  在场时注册；21 条 `*_smelting_<mod>` 变体，条件键裸 `conditions`。
+- 验证：Thermal Foundation 11.0.6 + CoFH Core：7 种矿砾 RCON 熔炼 7/7 通过；
+  无科技模组时 13 entries、无 unknown item。
+
+## 2026-11-02（发布 / datagen 移植 / Tinkers / IE / 树起点）
+
+- **0.1.0 发布**：tag `v0.1.0-1.20.1`（`35d98d4`），jar 587 KB；已推 origin，商店上传待所有者。
+- **0.2.0 准备**：`mod_version=0.2.0`，jar 663 KB；tag / 商店待确认。
+- **datagen 第二/三批移植**：配方 143 条（133 base + 4 石子→石头 + 6 钴）、71 blockstate +
+  29 方块模型 + 157 物品模型；`compare-models.py` 248 identical；`written: 0` 幂等。
+- **Tinkers 3**：两个黏液草种子条件注册；钴 → `tconstruct:cobalt_ingot`；78 条匠魂熔炼；
+  下界合金碎片 0.4%。
+- **Immersive Engineering**：silver/lead/nickel/aluminum/uranium 候选（排在 Thermal/Mek 后）；
+  IE 粉碎机走 `forge:ores/<m>`。
+- **树的起点**：泥土筛 9 种树苗 + 竹子 5%；碎下界岩筛菌岩孢子各 5%。
+- **科技模组锭**：Thermal / Mek / Create 候选；无模组回退自有锭。
+- **1.20.1 datagen 差异**：`runData` 生成到 `recipes/`、`loot_tables/`、`tags/blocks|items/`。
 
 ## 上一批次（2026-11-01，M6 + M10 + config + 桶配方修正）
 

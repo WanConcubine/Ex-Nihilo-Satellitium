@@ -17,7 +17,7 @@
 - **Immersive Engineering（1.20.1）**：silver / lead / nickel / aluminum / uranium 的锭候选
   （Thermal / Mekanism 之后），15 条熔炼变体；IE 粉碎机通过 `forge:ores/<m>` 标签直接接受矿块。
 - **Tinkers' Construct 3（1.20.1）**：条件注册的碧空 / 末影黏液草种子（右键草方块或泥土），
-  78 条 `tconstruct:melting`（碎块/粉碎/粉末 45 mB、矿砾/矿砂/矿尘方块 180 mB）。
+  84 条 `tconstruct:melting`（碎块/粉碎/粉末 45 mB、矿砾/矿砂/矿尘方块 180 mB）。
 - **工匠巧思（Tinkers' Thinking，1.20.1）**：新增 `ardite`（粉碎下界岩 1%，没装 TiT 熔自有
   阿迪特锭、装了熔 `tinkers_thinking:ardite_ingot`）和 `chlorophyll`（草方块 1%，`gems`：仅 TiT
   在场时注册，矿块熔成 `tinkers_thinking:chlorophyte_compound`）两种材料，走本模组三档碎矿链；
@@ -32,7 +32,7 @@
 
 - **筛子**：7 个输入 / 139 掉落（全装 + 工匠巧思；无 techMods 113；装 **AE2** 时 +2，全装 141、
   无科技模组 115）；**堆肥** 67 条；
-  **锤表** 50 条 / 钩表 10 条。
+  **锤表** 55 条（全装 79）/ 钩表 10 条。
 - **配方**：主线 143 条生成 + 57 条手写 = 200；1.20.1 分支 143 + 135 = 278
   （其中 84 条匠魂熔炼）。
 - **材料**：22 种（14 金属 + 8 矿物；其中 8 种 `gems` 只在对应模组在场时注册）；
