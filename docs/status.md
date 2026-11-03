@@ -59,7 +59,7 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   `models/item/end_cake.json`。
 - **验证（main 1.21.1 / NeoForge 21.1.265）**：
   - `./gradlew build`、`check-textures.py`、`check-data-paths.py`、`check-core-imports.py`
-    全绿（`check-wiki.py` 当时通过；之后双语 `MAINTAINING` 的未闭合代码块让它失败，不是本批改动）；
+    全绿；
     全装 Mek+Thermal 时 20 种材料、筛表 **114** drops、锤表 **73** 条；无科技模组时
     13 种、筛 **93** / 锤 **52**；只装 Mek 时 14 种、筛 **96** / 锤 **55**。生成配方 **164** 条
     （39 条 base 熔炼 + 桶/坩埚/机器等），手写 **79** 条（66 条候选变体 + 12 条
