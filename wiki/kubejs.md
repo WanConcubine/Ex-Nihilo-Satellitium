@@ -1,165 +1,145 @@
-# KubeJS：用数据包通道 + 脚本
+# KubeJS：数据包通道 + 七张表脚本 API
 
-> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> 最后核对：2026-11-03 · 适用：1.21.1（主线）；1.20.1 分支暂未移植脚本 API
+> KubeJS 版本：`2101.x`（KubeJS 7 / 1.21.1）；1.20.1 线对应 `2001.x`
 
-KubeJS 不是一个“七张表的脚本 API”。它在本模组里能做的事分两类：
+KubeJS 现在有两条通道：
 
-| 你想做的 | KubeJS 怎么做 | 说明 |
-|---|---|---|
-| 改筛子 / 锤子 / 钩子 / 桶 / 堆肥 / 坩埚 | **把同样的 JSON 放进 `kubejs/data/`** | KubeJS 会把它当数据包加载；不需要写脚本 |
-| 加 / 删 / 改原版合成、熔炼 | `ServerEvents.recipes` | 操作 vanilla `RecipeManager` |
-| 改物品标签 | `ServerEvents.tags` | 例如给堆肥补 `compostable` |
-| 注册自己的物品 / 方块 | `StartupEvents.registry` | 只属于 KJS 内容，不进本模组材料表 |
-| 给七张表写脚本循环 / 条件 | ❌ 没有 API | 用数据包 JSON；需要动态逻辑就生成 JSON |
+| 你想做的 | 怎么做 |
+|---|---|
+| 改筛子 / 锤子 / 钩子 / 桶 / 堆肥 / 坩埚 | **脚本 API**（`SieveEvents` 等，见 §1）或 `kubejs/data` JSON |
+| 加 / 删 / 改原版合成、熔炼 | `ServerEvents.recipes` |
+| 改物品标签 | `ServerEvents.tags` |
+| 注册自己的物品 / 方块 | `StartupEvents.registry`（只属于 KJS 内容） |
+| 新增本模组材料（`materials.json`） | ❌ 做不到 |
 
-> 版本：KubeJS 7（1.21.1 线，`2101.x`）；1.20.1 线用 `2001.x`。
-> 本模组不依赖 KubeJS，装不装都能跑；下面的写法以 KubeJS 7 为例。
+> **1.20.1 现状**：分支尚未移植 KubeJS 插件；在分支上请继续用 §2 的 `kubejs/data` JSON。
+> 本页 §1 的脚本写法只适用于 1.21.1 主线。
 
-## 1. 七张表：走 `kubejs/data`
+## 1. 七张表的脚本 API（1.21.1）
 
-KubeJS 会把 `kubejs/data` 当数据包加载。目录结构和普通数据包一样：
+把脚本放到 `kubejs/server_scripts/`，例如 `exnihilo_tables.js`：
+
+```js
+// 筛子：沙子里加 0.02 的钻石；一次成功掉 1 个
+SieveEvents.add('minecraft:sand', 'minecraft:diamond', 0.02)
+
+// 第 4 个参数是 min，第 5 个是 max（省略时都是 1）
+SieveEvents.add('minecraft:dirt', 'minecraft:oak_sapling', 0.08, 1, 2)
+
+// 删掉落 / 删整个输入 / 整条替换
+SieveEvents.remove('minecraft:sand', 'minecraft:cactus')
+SieveEvents.removeInput('minecraft:gravel')
+SieveEvents.replace('minecraft:sand', 'minecraft:emerald', 1.0)
+
+// 锤子 / 钩子
+HammerEvents.add('minecraft:cobblestone', 'minecraft:gravel')
+HammerEvents.add('minecraft:oak_log', 'minecraft:stick', 1, 2)
+HammerEvents.remove('minecraft:cobblestone')
+
+CrookEvents.add('minecraft:oak_leaves', 'minecraft:stick', 0.1)
+
+// 桶：物品 / 流体两种 added
+BarrelEvents.addItem('minecraft:water', 'minecraft:sugar', 'minecraft:dirt')
+BarrelEvents.addFluid('minecraft:water', 'minecraft:milk_bucket', 'minecraft:slime_block')
+
+// 堆肥 / 坩埚
+CompostEvents.add('minecraft:bread', 100)
+CompostEvents.add('#minecraft:flowers', 100)       // 标签也可以
+CrucibleMeltEvents.add('minecraft:cobblestone', 'minecraft:lava', 250)
+CrucibleHeatEvents.add('minecraft:torch', 0.1)
+```
+
+### 语义
+
+- 所有 id 都可以写 `#tag`（例如 `#minecraft:logs`、`#forge:gravel`）。
+- `add` = 数据包普通文件语义：筛子/钩子**合并掉落**；锤子/熔点/热源/桶是“一条规则一个 key”，
+  先到者赢，脚本 `add` **覆盖不了**已有规则；要改已有规则用 `replace`。
+- `remove` = 删整条；筛子/钩子也可以用 `remove(input, output)` 只删一条掉落。
+- 脚本操作在数据包和补丁**之后**应用（脚本是最后一层覆盖），优先级固定为 `100`。
+- 脚本重载时旧贡献会先被清掉，再按新脚本重新提交；`/reload` 不会重复叠加。
+- 改完 `/reload`；`/exnihilo tables` 看条数，`/exnihilo dump <table>` 看整表，
+  `[customize]` 日志看谁覆盖了谁。
+
+### JSON 逃生口
+
+复杂结构（例如带实体/和平掉落的桶规则）可以直接写完整 JSON：
+
+```js
+SieveEvents.addJson('{"input":"minecraft:sand","outputs":[{"item":"minecraft:diamond","chance":0.02}]}')
+SieveEvents.removeJson('{"input":"minecraft:sand","remove":["minecraft:cactus"]}')
+SieveEvents.replaceJson('{"input":"minecraft:sand","outputs":[]}')
+
+BarrelEvents.addJson('{"base":"minecraft:witch_water","added":{"item":"exnihilosatellitium:creepy_doll"},"entity":"minecraft:enderman","peaceful_drop":"minecraft:ender_pearl","cook_ticks":600}')
+```
+
+七张表都有 `addJson` / `removeJson` / `replaceJson`。JSON 字段与[数据包页面](datapack.md)完全一致；
+`dump` 输出也可以直接拿来当 fixture。
+
+### 容易踩的坑
+
+- **筛子同物品不同概率 = 两条独立掉落**：`add(sand, diamond, 0.02)` 和
+  `add(sand, diamond, 0.5)` 都会留下，实际是两次独立判定。
+- **锤子 `add` 不会覆盖已有规则**：内置 `cobblestone → gravel` 还在时，`add(cobblestone, flint)`
+  会被忽略并打 `add ignored`；要改请用 `replace`。
+- **不要同时用脚本和 `kubejs/data` 写同一条**：脚本在文件之后应用，通常脚本赢；
+  但两边都写会让排查变复杂。选一个来源。
+- **材料表不参与**：脚本不能新增 `materials.json` 里的材料，也不能让 KJS 物品进入
+  4→块→熔炼链。
+
+## 2. `kubejs/data` 通道（两版都能用）
+
+KubeJS 会把 `kubejs/data` 当数据包加载，目录结构和普通数据包一样：
 
 ```
-kubejs/
-├── data/
-│   └── mypack/
-│       ├── sieve/
-│       │   └── sand_patch.json
-│       ├── barrel/
-│       │   └── water_sugar.json
-│       └── compost/
-│           └── patch.json
-└── server_scripts/
-    └── vanilla_recipes.js
-```
-
-**推荐用自己的命名空间 + `patch: true`**，不要依赖覆盖顺序：
-
-`kubejs/data/mypack/sieve/sand_patch.json`
-
-```json
+kubejs/data/mypack/sieve/sand_patch.json
 {
   "input": "minecraft:sand",
   "patch": true,
   "remove": ["minecraft:cactus"],
-  "outputs": [
-    { "item": "minecraft:diamond", "chance": 0.5 }
-  ]
+  "outputs": [{ "item": "minecraft:diamond", "chance": 0.5 }]
 }
 ```
 
-`kubejs/data/mypack/barrel/water_sugar.json`
+- 推荐自己的命名空间 + `"patch": true`，不要依赖覆盖顺序。
+- 七张表的字段、`#tag`、`mod` 门、`remove` 规则与[数据包页面](datapack.md)一致。
+- 1.20.1 分支目前只能走这条通道。
 
-```json
-{
-  "base": "minecraft:water",
-  "added": { "item": "minecraft:sugar" },
-  "result": "minecraft:dirt"
-}
-```
-
-> 为什么不用 `data/exnihilosatellitium/sieve/sand.json`？
-> 那会整文件替换内置 `sand.json`，需要把原条目抄全；而且不同 KJS 版本的包优先级
-> 可能不同。用 `mypack` + `patch` 最稳。
-
-七张表的字段、`#tag`、`mod` 门、`remove` 规则与[数据包页面](datapack.md)完全一致。
-
-## 2. 原版配方：用脚本
+## 3. 原版配方：用脚本
 
 ```js
-// kubejs/server_scripts/vanilla_recipes.js
-
 ServerEvents.recipes(event => {
-  // 删掉本模组的橡木桶配方（按 recipe id）
   event.remove({ id: 'exnihilosatellitium:barrel' })
-
-  // 换成 3x3 原木
-  event.shaped('exnihilosatellitium:barrel', [
-    'LLL',
-    'L L',
-    'LLL'
-  ], {
-    L: 'minecraft:oak_log'
-  })
-
-  // 加一个熔炼
+  event.shaped('exnihilosatellitium:barrel', ['LLL', 'L L', 'LLL'], { L: 'minecraft:oak_log' })
   event.smelting('minecraft:iron_ingot', 'minecraft:iron_ore')
 })
 ```
 
-- `event.remove({ id: '...' })` 也可以按输出删：`event.remove({ output: 'exnihilosatellitium:barrel' })`。
-- 配方 id 在 `data/<ns>/recipe/`（1.20.1 是 `recipes/`）下，文件名就是 id 的 path。
-- 想删某个模组的全部配方：`event.remove({ mod: 'exnihilosatellitium' })`。
+## 4. 标签：`ServerEvents.tags`
 
-## 3. 标签：`ServerEvents.tags`
-
-堆肥需要 **JSON 分值 + `compostable` 标签** 两处。KJS 可以补标签这半：
+堆肥需要 **JSON 分值 + `compostable` 标签** 两处；脚本 API 的 `CompostEvents.add` 只写分值，
+标签仍要补：
 
 ```js
 ServerEvents.tags('item', event => {
   event.add('exnihilosatellitium:compostable', 'minecraft:rotten_flesh')
-  event.add('exnihilosatellitium:compostable', '#minecraft:flowers')
 })
 ```
-
-分值那半仍然要写 `kubejs/data/mypack/compost/*.json`：
-
-```json
-{
-  "values": {
-    "minecraft:rotten_flesh": 85,
-    "#minecraft:flowers": 100
-  }
-}
-```
-
-## 4. 注册自己的物品（可选）
-
-如果只是想加“本模组之外”的新物品，KJS 可以注册：
-
-```js
-// kubejs/startup_scripts/items.js
-StartupEvents.registry('item', event => {
-  event.create('mypack:tin_broken')
-    .texture('mypack:item/tin_broken')
-})
-```
-
-贴图放 `kubejs/assets/mypack/textures/item/tin_broken.png`；模型 KJS 会自动生成基础 item model。
-
-但要清楚：
-
-- 它不会出现在本模组的材料表、创造栏分组或 4→块→熔炼链里；
-- 想让它参与筛子，仍然要在 `kubejs/data/mypack/sieve/*.json` 里写条目；
-- **新增第 14 种材料不能靠 KJS**，见[首页](README.md#不能通过这三条路线做到的事)。
 
 ## 5. 重载与日志
 
-- 服务器脚本 / `kubejs/data`：先 `/reload`；如果 `kubejs/data` 的文件没被重新读取
-  （取决于 KJS 版本），退出重进世界或重启服务器。
-- 脚本报错看 `logs/kubejs/server.log`；启动期注册看 `logs/kubejs/startup.log`。
-- 本模组的表是否生效，仍然看 `/exnihilo tables` 和服务端日志里的
-  `[sieve]` / `[hammer]` / … 行。
+- 脚本 / `kubejs/data` 改完先 `/reload`；脚本在服务端重载时重新执行。
+- 本模组的脚本贡献在每次脚本重载前清空，所以改脚本不会留下旧条目。
+- 看 `logs/kubejs/server.log`；本模组侧看 `/exnihilo tables`、`/exnihilo dump` 和
+  `[customize]` 日志。
 
-## 6. KubeJS 做不到的
+## 6. KJS 做不到的
 
-- 没有 `SieveEvents.add(...)`、`BarrelEvents.add(...)` 之类的 API；
-  七张表只能读 JSON。
-- 不能用脚本直接调用 `SieveRegistry` / `CompostRegistry`。
-- 不能改 `materials.json`。
-- 不能把新物品“接进”本模组的材料链（自动 4→块、候选锭解析、JEI 分组都不会认）。
-- 专用服客户端 JEI 仍然读不到服务端数据包（与数据包限制相同）。
-
-## 未来
-
-本页描述的是**当前版本**：KJS 没有七张表的脚本 API。三路径等价（KJS 直接
-`SieveEvents.add(...)`）是路线图 P2 的目标，进度见
-[`docs/customization-roadmap.md`](../docs/customization-roadmap.md)。
-
-P1（2026-11-03）已经在 Java 侧落了 `TableBuilder` + `CustomizationOverlay`，并加了
-`/exnihilo dump` 供对比；但 **P2 之前，KJS 仍然只能写 `kubejs/data` JSON**。
+- 不能改 `materials.json`，也不能让 KJS 物品进入本模组材料链。
+- 不能注册本模组的方块/物品（KJS 自己的内容可以）。
+- 专用服客户端 JEI 仍读不到服务端表（P4 客户端同步）。
 
 ## 参考
 
 - KubeJS 文档：<https://kubejs.com/>
-- KubeJS 的 `data` 目录与普通数据包结构相同；本模组七张表的字段见[数据包页面](datapack.md)。
+- 七张表字段：[数据包页面](datapack.md)；三路径进度：[roadmap](../docs/customization-roadmap.md)。

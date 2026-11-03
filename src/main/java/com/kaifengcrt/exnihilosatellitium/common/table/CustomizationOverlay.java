@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.common.table;
 
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -149,7 +150,8 @@ public final class CustomizationOverlay {
     public static List<Customization> forTable(final TableId table) {
         final List<Customization> list = new ArrayList<>();
         for (final Customization customization : OPERATIONS) {
-            if (customization.table() == table) {
+            if (customization.table() == table
+                    && DataPackJson.modLoaded(customization.payload())) {
                 list.add(customization);
             }
         }

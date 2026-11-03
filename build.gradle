@@ -27,6 +27,10 @@ dependencies {
     // JEI recipe display: compile-time only, never shipped. Modrinth's maven
     // serves the Fabric jar for this version, so use BlameJared's JEI maven.
     compileOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+    // KubeJS plugin API + Rhino: compile-time only. KubeJS reads
+    // kubejs.plugins.txt from this jar at runtime, so neither is shipped.
+    compileOnly "maven.modrinth:kubejs:${kubejs_version}"
+    compileOnly "maven.modrinth:rhino:${rhino_version}"
 }
 
 neoForge {

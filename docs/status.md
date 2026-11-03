@@ -29,8 +29,34 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 和 **Tinkers' Construct 钴**（`tconstruct:cobalt_ingot`），运行时取第一个已加载模组的锭，
 自有锭只作兜底。
 **M9 发布：0.1.0 已发（两条线都有 tag）；0.2.0 内容与 jar 已备，tag / 商店上传待确认；
-M8 月光魔法联动仍未开始。三路径 P1 基座已完成**（TableBuilder + CustomizationOverlay +
+M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完成**（TableBuilder + CustomizationOverlay +
 `/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
+
+## 当前批次（2026-11-03，P2：KubeJS 插件，仅 1.21.1）
+
+- **依赖**：`compileOnly maven.modrinth:kubejs:2101.7.2-build.348` +
+  `maven.modrinth:rhino:2101.2.7-build.81+Rhino-1.21`；不随 jar 分发。
+- **插件发现**：`src/main/resources/kubejs.plugins.txt` 指向
+  `com.kaifengcrt.exnihilosatellitium.compat.kubejs.ExNihiloKubeJSPlugin`；
+  KJS 不在时该文件不被读取，插件类也不会被加载（已实测无 KJS 启动）。
+- **七个绑定**（只注册到 server 脚本）：
+  `SieveEvents` / `HammerEvents` / `CrookEvents` / `BarrelEvents` / `CompostEvents` /
+  `CrucibleMeltEvents` / `CrucibleHeatEvents`。每个都有常用的
+  `add` / `remove` / `replace` 签名，以及 `addJson` / `removeJson` / `replaceJson`
+  直接喂 datapack JSON（复杂桶实体规则、未来新字段走这条）。
+- **语义**：绑定只构造 payload 并提交 overlay（source `kubejs`，priority 100），
+  解析/校验/`#tag`/根级 `mod` 与数据包完全共用；脚本贡献在数据包和补丁之后应用。
+- **生命周期**：`beforeScriptsLoaded` 在每次 server 脚本批次前清空旧 `kubejs` 贡献；
+  应用由 tags rebuild 和 `ServerStartedEvent` 触发；脚本改完 `/reload` 不会残留旧条目。
+- **验证**（2026-11-03，KubeJS 2101.7.2 + Rhino，dev server）：
+  - 七个绑定各一条：`[sieve] 90→91 drops`、hammer 52→53、crook 22→23、barrel 12→13、
+    compost 67→68、melt 39→40、heat 9→10；`/exnihilo dump` 分别出现预期条目。
+  - 脚本删除 sieve 条目、compost 300→150 后 `/reload`：`dropped 6 old op(s)`，
+    sieve emerald 消失、compost=150，overlay 6 条。
+  - 同一 fixture 用命令 overlay（priority 100）重放，七张表 `dump` 与 KJS 结果逐字节一致。
+  - 移除 KJS/Rhino 后服务端正常启动，无 `NoClassDefFoundError`。
+- **未做**：1.20.1 分支的 KJS `2001.x` 插件（分支仍用 `kubejs/data`）；
+  专用服客户端 JEI 同步（P4）。
 
 ## 当前批次（2026-11-03，P1.5：overlay 边角）
 
@@ -363,6 +389,8 @@ M8 月光魔法联动仍未开始。三路径 P1 基座已完成**（TableBuilde
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
+| P2 KubeJS 插件 | ✅ | 七张表绑定 + JSON 逃生口；KJS 脚本、命令 overlay、datapack fixture 三者 dump 逐字节一致 |
+| P2 KJS 生命周期 | ✅ | `beforeScriptsLoaded` 清旧贡献、`/reload` 改脚本生效；无 KJS 正常启动 |
 | P1.5 priority / conflicts | ✅ | p10 先提交仍赢 p5；`add ignored` / `replaced` / `removed` 带旧 source；两版 RCON |
 | P1.5 生命周期 | ✅ | 重复提交去重、空 payload 拒绝、`dump all` 298 行、server stop 清理 3/4 条 |
 | P1 TableBuilder / overlay | ✅ | 2026-11-03：七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致；clear 21 条后回基线 |
@@ -520,9 +548,9 @@ M8 月光魔法联动仍未开始。三路径 P1 基座已完成**（TableBuilde
 
 ## 下一步（按价值排序）
 
-> 自定义三路径：**P1（TableBuilder + overlay）已完成**，见本页当前批次；下一步是
-> [roadmap](customization-roadmap.md) 的 **P2 KJS 插件**、P3 CT API。在 P2/P3 完成前，
-> wiki 仍写“只有数据包是完整路径”。
+> 自定义三路径：**P1 + P1.5（TableBuilder / overlay / priority）+ P2 KubeJS 插件（1.21.1）
+> 已完成**；下一步是 [roadmap](customization-roadmap.md) 的 **P3 CraftTweaker API**，
+> 以及把 P2 移植到 1.20.1 分支。在 P3 完成前，wiki 不把 CT 写成“支持七张表”。
 
 1. **1.20.1 一次性验收 M1.5–M10**：服务端逻辑都已 RCON 验过，剩下机器 GUI/自动输出抽屉/
    BER 动画、M6 美术与右键手感。Thermal / Create / IE 的锭与粉碎接入已真装验过（见当前批次），

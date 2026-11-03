@@ -44,6 +44,8 @@ public final class CommonEvents {
             }
         }
         ExNihiloSatellitium.LOGGER.info("[debug] our recipes={} compostable items={}", ours, compostable);
+        // KubeJS scripts run before this event; apply their queued overlay ops now.
+        Tables.rebuildAll(false);
     }
 
     /**

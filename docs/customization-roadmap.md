@@ -16,26 +16,29 @@
 
 | 能力 | 数据包 | KubeJS | CraftTweaker |
 |---|---|---|---|
-| 筛子 add / remove / replace | ✅ | 只能写 `kubejs/data` JSON | ❌ |
-| 锤子 / 钩子 | ✅ | 只能写 JSON | ❌ |
-| 桶转化 | ✅ | 只能写 JSON | ❌ |
-| 堆肥 | ✅ | JSON + `ServerEvents.tags` | ❌ |
-| 坩埚熔点 / 热源 | ✅ | 只能写 JSON | ❌ |
-| `#tag` 输入 | ✅ | 只能写 JSON | ❌ |
-| `mod` 条件 | ✅ | 只能写 JSON | ❌ |
+| 筛子 add / remove / replace | ✅ | ✅ 脚本 API（1.21.1；1.20.1 仅 JSON） | ❌ |
+| 锤子 / 钩子 | ✅ | ✅ 脚本 API（1.21.1） | ❌ |
+| 桶转化 | ✅ | ✅ 脚本 API（1.21.1） | ❌ |
+| 堆肥 | ✅ | ✅ 脚本 API + `ServerEvents.tags`（1.21.1） | ❌ |
+| 坩埚熔点 / 热源 | ✅ | ✅ 脚本 API（1.21.1） | ❌ |
+| `#tag` 输入 | ✅ | ✅ 脚本与 JSON 都接受 | ❌ |
+| `mod` 条件 | ✅ | ✅ overlay 根级 `mod` 生效 | ❌ |
 | 原版合成 / 熔炼 | 只能加，不能删 | ✅ add / remove | ✅ add / remove |
 | 注册新物品 / 方块 | ❌ | ✅（KJS 自己的内容） | ❌ |
 | 新增材料（`materials.json`） | ❌ | ❌ | ❌ |
 | 专用服客户端 JEI 同步 | ❌ | ❌ | ❌ |
 
-**结论：** 目前只有数据包是完整路径；KJS 是“数据包通道 + 原版配方脚本”，
-CT 只覆盖原版配方。这是当前事实，wiki 不得写成“三条都支持”。
+**结论：** 数据包是完整路径；1.21.1 的 KubeJS 已有七张表脚本 API
+（`SieveEvents` / `HammerEvents` / …），1.20.1 分支暂时仍只能走 `kubejs/data`；
+CT 只覆盖原版配方。wiki 不得把 CT 写成“已支持七张表”。
 
-**P1 更新（2026-11-03）：** 玩家可见的能力没有变化，但内部基座已落地：
-七张表共用 `common/table/TableBuilder`，脚本贡献进 `CustomizationOverlay`，
-每次 reload 在 JSON 与补丁之后重放；OP 可以用 `/exnihilo customize` 验证
-add / remove / replace，用 `/exnihilo dump <table>` 对比快照。KJS/CT 仍没有暴露
-这些入口（P2 / P3）。
+**P1 更新（2026-11-03）：** 七张表共用 `common/table/TableBuilder`，脚本贡献进
+`CustomizationOverlay`，每次 reload 在 JSON 与补丁之后重放；OP 可以用
+`/exnihilo customize` 验证 add / remove / replace，用 `/exnihilo dump <table>` 对比快照。
+
+**P2 更新（2026-11-03）：** KubeJS 7 插件已接（1.21.1）：`kubejs.plugins.txt` 注册
+`ExNihiloKubeJSPlugin`，server 脚本里直接调用 `SieveEvents.add(...)` 等绑定；
+贡献走同一个 overlay（source `kubejs`，priority 100）；脚本重载前清空旧贡献。
 
 ## 3. 目标矩阵
 
@@ -85,20 +88,22 @@ overlay    ─┘         （KJS/CT 绑定在 P2/P3，payload 仍是同表 JSON�
 
 ### 4.3 KubeJS
 
-- 一个 `@KubeJSPlugin`：
-  - `registerEvents` 注册 server 事件；
-  - `registerBindings` 暴露 `SieveEvents` / `BarrelEvents` / `CrucibleEvents` 等。
-- 脚本 API 示例（目标形态）：
+- 已实现（1.21.1）：`kubejs.plugins.txt` 注册 `ExNihiloKubeJSPlugin`，在
+  `registerBindings` 里只给 server 脚本加七个绑定对象。
+- 脚本直接调用绑定方法（不是 KJS 的“事件回调”形态）：
 
   ```js
   SieveEvents.add('minecraft:sand', 'minecraft:diamond', 0.02)
   SieveEvents.remove('minecraft:sand', 'minecraft:cactus')
-  BarrelEvents.add('minecraft:water', { item: 'minecraft:sugar' }, 'minecraft:dirt')
+  BarrelEvents.addItem('minecraft:water', 'minecraft:sugar', 'minecraft:dirt')
   ```
 
-- 同时保留 `kubejs/data` JSON 通道；两条通道共用 `TableBuilder`。
-- KJS 版本分线（1.21.1 的 `2101.x` / 1.20.1 的 `2001.x`）要在构建里做 compileOnly
-  或反射隔离，不能把 KJS 变成硬依赖。
+- 绑定方法把参数变成该表 datapack JSON，提交到 `CustomizationOverlay`（source `kubejs`，
+  priority 100）；复杂结构用 `addJson(...)`。两条通道共用同一份解析/校验。
+- `beforeScriptsLoaded` 在每个 server 脚本批次前清空旧 `kubejs` 贡献；应用由
+  tags rebuild / server start 触发。
+- KJS 是 compileOnly：没装时插件类不被加载，jar 里只有 `kubejs.plugins.txt` 这个空钩子。
+- 1.20.1 的 `2001.x` 需要单独适配（KJS 7 API 接近，但 Forge 事件/版本不同），当前分支未移植。
 
 ### 4.4 CraftTweaker
 
@@ -173,15 +178,30 @@ build + 纹理守卫通过（分支没有 core/data 守卫脚本）。
 - 生命周期：server stop 清空 overlay（防单人切世界泄漏）；同一 source 的完全相同操作去重；
   上限 4096 条；空 payload 拒绝；`/exnihilo dump all` 一次看七张表。
 
-### P2 — KubeJS 插件
+### P2 — KubeJS 插件（已完成，2026-11-03，仅 1.21.1）
 
-- `compileOnly` KJS 依赖 + `@KubeJSPlugin`；
-- 暴露七张表的 add/remove/replace；
-- `kubejs/data` JSON 通道继续可用；
-- 文档 `wiki/kubejs.md` 增加脚本示例与能力矩阵更新。
+- `compileOnly` KubeJS `2101.7.2-build.348` + Rhino `2101.2.7-build.81`（不随 jar 分发）；
+- `kubejs.plugins.txt` + `ExNihiloKubeJSPlugin`，server 脚本注册
+  `SieveEvents` / `HammerEvents` / `CrookEvents` / `BarrelEvents` / `CompostEvents` /
+  `CrucibleMeltEvents` / `CrucibleHeatEvents` 七个绑定对象；
+- 每个绑定提供 `add` / `remove` / `replace`（常用签名）以及 `addJson` / `removeJson` /
+  `replaceJson` 逃生口，内部复用 `CustomizationOverlay` 的同一套解析与校验；
+- KJS source 固定 priority 100（数据包之后）；`beforeScriptsLoaded` 在脚本重载前清空旧贡献，
+  避免改脚本留下旧条目；`ServerStartedEvent` 与 tags rebuild 负责应用；
+- `kubejs/data` JSON 通道保留；KJS 不在时模组正常启动（插件类不会被加载）；
+- 文档 `wiki/kubejs.md` 重写，能力矩阵更新。
 
-**验收：** 同一 fixture 用 KJS 脚本和 JSON 各跑一遍，`/exnihilo dump` 逐条一致；
-KJS 不在时模组正常启动。
+**验收（2026-11-03，KubeJS 2101.7.2 + Rhino，dev server）：**
+
+- 七个绑定各写一条，startup 后 `[sieve] 90 → 91 drops`、hammer 52 → 53、barrel 12 → 13、
+  compost 67 → 68、melt 39 → 40、heat 9 → 10、crook 22 → 23；
+- 改脚本（删掉 sieve 一条、compost 300 → 150）后 `/reload`：旧 6 条被清、新 6 条应用，
+  sieve emerald 消失、compost 变 150；
+- 同一份 fixture 用命令 overlay（priority 100）重放，七张表 `dump` 与 KJS 结果逐字节一致；
+- 把 KJS/Rhino 从 `run/mods` 移除后服务端正常启动，无 `NoClassDefFoundError`。
+
+**未做：** 1.20.1 分支的 KJS `2001.x` 插件移植（分支仍用 `kubejs/data`）；
+专用服客户端 JEI 同步（P4）。
 
 ### P3 — CraftTweaker API
 
@@ -237,7 +257,8 @@ CT 不在时模组正常启动。
    就是 RCON 日志，文本最方便粘贴/对比；需要机器可读时再在 P4 加 JSON 模式。
 4. CT 是否需要 recipe type 才能在 JEI 里显示，还是接受“脚本 API + 无 JEI 分类”？
 5. 客户端同步是否也覆盖 `compost` 的标签交互预测？
-6. P2/P3 暴露脚本 API 时，payload 继续用 JSON 形状，还是给每张表加类型化 wrapper？
-   P1 的 overlay 已经固定 JSON 形状（复用校验），类型化 wrapper 只做转换、不另开解析。
+6. ~~P2/P3 暴露脚本 API 时，payload 继续用 JSON 形状，还是给每张表加类型化 wrapper？~~
+   **P2 已定：两者都要。** 常用签名（`SieveEvents.add(input, output, chance)`）做类型化薄 wrapper，
+   底层仍是 datapack JSON；复杂/新字段用 `addJson(...)` 直接喂 JSON，保证不用改 API 就能跟上表结构。
 
 这些问题在 P1/P2 开始前由 Owner 定；先记在这里，避免实现时临时拍脑袋。

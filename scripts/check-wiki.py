@@ -129,7 +129,7 @@ def check_content(errors: list[str]) -> None:
             errors.append(f"wiki/README.md: version matrix is missing {needle!r}")
 
     kubejs = (WIKI / "kubejs.md").read_text(encoding="utf-8")
-    for needle in ("kubejs/data", "没有"):
+    for needle in ("kubejs/data", "SieveEvents", "materials.json"):
         if needle not in kubejs:
             errors.append(f"wiki/kubejs.md: KJS boundary note is missing {needle!r}")
 
