@@ -78,8 +78,9 @@
 python3 scripts/check-wiki.py
 ```
 
-- [ ] 脚本通过（链接、围栏、JSON、必需页面/章节、版本矩阵、nav 覆盖）
-- [ ] `mkdocs build --strict` 通过（新增页面已同时加进 `mkdocs.yml` 的 `nav` 和 `_sidebar.md`）
+- [ ] 脚本通过（链接、围栏、JSON、必需页面/章节、版本矩阵、nav 覆盖、译文覆盖与 JSON 一致性）
+- [ ] `mkdocs build --strict` 通过（新增页面已同时加进 `mkdocs.yml` 的 `nav` 和 `_sidebar.md`，
+      并且有对应的 `.en.md` 译文）
 - [ ] 每个页面顶部日期已更新
 - [ ] `README.md` 能力矩阵与实际代码一致
 - [ ] 1.20.1 / 1.21.1 的 `pack_format`、标签命名空间、配方路径没有写反
@@ -124,3 +125,22 @@ python3 scripts/check-wiki.py
 - 发布：push 到 `main` 触发 `.github/workflows/wiki.yml`（先跑守卫，再 `mkdocs build --strict`，
   最后部署 Pages）；PR 只校验、不发布。首次启用要在仓库 Settings → Pages 里把 Source 选成
   “GitHub Actions”。
+
+## 10. 多语言
+
+站点是中英双语的：`/` 是中文，`/en/` 是英文，用 `mkdocs-static-i18n` 的后缀结构。
+
+- **每个内容页必须有英文孪生文件**：`datapack.md` ↔ `datapack.en.md`。新增页面时两个一起建，
+  否则 `scripts/check-wiki.py` 直接失败。
+- **JSON 示例必须逐字一致**：只翻代码块以外的散文；守卫会把两边的 JSON 代码块解析后比较，
+  只改了一边就报错。
+- **英文页头部行**固定为 `> Last checked: YYYY-MM-DD · Applies to: 1.21.1 / 1.20.1`；改内容时
+  和中文页一起改日期。
+- **英文页不允许残留中文**（代码块与行内代码除外）；守卫会扫 `\u4e00-\u9fff`，并报出行号。
+- **侧栏标题来自 `mkdocs.yml` 的 `nav_translations`**：新增导航项时中英标题都要加，否则英文侧栏
+  会漏出中文。
+- **站内相对链接照原样写** `datapack.md` 即可：构建时插件会把它指到当前语言的页面，不需要手写
+  `/en/`；反过来，手写 `/en/` 会让中文页跳到英文页。
+- **不能开 `theme.features: navigation.instant`**：语言切换需要整页跳转，模型下开启会让
+  `mkdocs build --strict` 直接失败。
+

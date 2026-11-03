@@ -196,10 +196,13 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   1.20.1 的路径/标签差异；CT 明确写清只改原版配方、碰不到七张表。
 - **维护契约**：`wiki/MAINTAINING.md` 定义 Owner / Definition of Done / 发布前检查；
   `scripts/check-wiki.py` 守卫页面、链接、JSON、版本矩阵和“最后核对”头。
-- **静态站**（2026-11-03）：`mkdocs.yml` + `requirements-wiki.txt`，源目录仍是 `wiki/`，
-  `_sidebar.md` 保留但不再发布；`mkdocs build --strict` 本地通过，`check-wiki.py` 增加
-  “nav 必须覆盖所有页面”检查。`.github/workflows/wiki.yml` 在 push main 后部署 GitHub Pages
-  （**仓库 Pages 还没启用、workflow 还没真跑过**；本地预览用 `mkdocs serve`）。
+- **静态站**（2026-11-03 上线）：<https://wanconcubine.github.io/Ex-Nihilo-Satellitium/>；
+  `mkdocs.yml` + `requirements-wiki.txt`，源目录仍是 `wiki/`，`_sidebar.md` 保留但不发布；
+  `check-wiki.py` 守卫 nav 覆盖与译文，`mkdocs build --strict` 本地与 CI 都通过；
+  `.github/workflows/wiki.yml` 在 push main（或手动 dispatch）后部署 Pages。
+- **中英双语**（2026-11-03）：`mkdocs-static-i18n` 后缀结构，`wiki/*.en.md` 为英文，`/` 中文、`/en/` 英文，
+  语言切换器与 `hreflang` 自动生成；JSON 示例两边逐字一致，缺译文或英文页残留中文会让
+  `check-wiki.py` 失败。`navigation.instant` 因与切换器不兼容已关闭。
 - **三路径路线图**：`docs/customization-roadmap.md` 列出当前能力矩阵、P1（规范表 + overlay 基座）、
   P2（KJS 插件）、P3（CT API）、P4（客户端同步）的验收标准；**当前只有数据包是完整路径**。
 - **验证**（2026-11-03，main）：

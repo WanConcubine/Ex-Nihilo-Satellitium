@@ -5,8 +5,11 @@ Checks the cheap, objective failures so the human maintainer can spend time on
 the semantic ones:
 
 * required pages exist and every page has a "最后核对" header;
+* every page has an English counterpart (X.en.md) with its own header, no
+  leftover Chinese prose, and JSON examples identical to the Chinese page;
 * README / sidebar link to every page;
-* mkdocs.yml nav covers every page (local page with no entry is unreachable);
+* mkdocs.yml nav covers every page (local page with no entry is unreachable)
+  and nav_translations covers every nav title (English sidebar stays English);
 * local Markdown links resolve;
 * fenced code blocks are balanced and every ```json block parses;
 * the datapack page mentions all seven table directories;
@@ -53,9 +56,12 @@ TABLE_DIRS = [
 ]
 
 HEADER = re.compile(r"^> 最后核对：\d{4}-\d{2}-\d{2} · 适用：", re.MULTILINE)
+EN_HEADER = re.compile(r"^> Last checked: \d{4}-\d{2}-\d{2} · Applies to:", re.MULTILINE)
 LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
-NAV_ITEM = re.compile(r"^\s+-\s+[^:]+:\s*(\S+\.md)\s*$")
+NAV_ENTRY = re.compile(r"^\s+-\s+([^:]+):\s*(\S+\.md)\s*$")
 FENCE = re.compile(r"```")
+CJK = re.compile(r"[\u4e00-\u9fff]")
+INLINE_CODE = re.compile(r"`[^`\n]*`")
 
 
 def strip_fences(text: str) -> str:
@@ -120,34 +126,40 @@ def check_index(errors: list[str]) -> None:
             errors.append(f"wiki/_sidebar.md: sidebar does not link to {name}")
 
 
-def check_site_nav(errors: list[str]) -> int:
+def yaml_block(lines: list[str], key: str) -> list[str]:
+    """Return the indented lines that follow a `key:` line at any depth."""
+    try:
+        start = next(i for i, line in enumerate(lines) if line.strip() == f"{key}:")
+    except StopIteration:
+        return []
+    block: list[str] = []
+    for line in lines[start + 1 :]:
+        if line.strip() and not line[0].isspace():
+            break
+        block.append(line)
+    return block
+
+
+def check_site_nav(errors: list[str]) -> tuple[int, int]:
     """Every content page must be reachable from mkdocs.yml nav.
 
     MkDocs happily builds a page that no nav entry points at; the page then
     exists but nobody can reach it. Keep the site nav and the guard together.
+    The English sidebar reuses those titles, so nav_translations must cover
+    every one of them or the English site leaks Chinese labels.
     """
     if not MKDOCS.is_file():
         errors.append("missing mkdocs.yml (static site config)")
-        return 0
+        return 0, 0
 
     lines = MKDOCS.read_text(encoding="utf-8").splitlines()
-    try:
-        start = next(i for i, line in enumerate(lines) if line.rstrip() == "nav:")
-    except StopIteration:
-        errors.append("mkdocs.yml: no `nav:` block")
-        return 0
-
-    targets: list[str] = []
-    for line in lines[start + 1 :]:
-        if line.strip() and not line[0].isspace():
-            break  # back to a top-level key
-        match = NAV_ITEM.match(line)
-        if match:
-            targets.append(match.group(1))
+    entries = [m for m in (NAV_ENTRY.match(line) for line in yaml_block(lines, "nav")) if m]
+    titles = [m.group(1).strip() for m in entries]
+    targets = [m.group(2) for m in entries]
 
     if not targets:
         errors.append("mkdocs.yml: `nav:` has no page entries")
-        return 0
+        return 0, 0
 
     for target in targets:
         if not (WIKI / target).is_file():
@@ -155,7 +167,59 @@ def check_site_nav(errors: list[str]) -> int:
     for name in CONTENT_PAGES:
         if name not in targets:
             errors.append(f"mkdocs.yml: nav does not list wiki/{name} (page would be unreachable)")
-    return len(targets)
+
+    translations = yaml_block(lines, "nav_translations")
+    if not translations:
+        errors.append("mkdocs.yml: no `nav_translations:` block (English sidebar would stay Chinese)")
+        return len(targets), 0
+
+    translated = 0
+    for title in titles:
+        if any(re.match(rf"^\s+{re.escape(title)}:\s*\S", line) for line in translations):
+            translated += 1
+        else:
+            errors.append(f"mkdocs.yml: nav_translations is missing {title!r}")
+    return len(targets), translated
+
+
+def json_blocks(text: str) -> list:
+    blocks = []
+    for raw in re.findall(r"```json\n(.*?)```", text, re.S):
+        try:
+            blocks.append(json.loads(raw))
+        except json.JSONDecodeError:
+            blocks.append(raw)
+    return blocks
+
+
+def check_translations(errors: list[str]) -> int:
+    """Every page needs an English twin that is actually translated.
+
+    Three things rot quietly on a bilingual site: a page with no translation,
+    a translation that still contains Chinese paragraphs, and JSON examples
+    that were edited on one side only. Check all three.
+    """
+    pairs = 0
+    for name in CONTENT_PAGES:
+        target = WIKI / f"{Path(name).stem}.en.md"
+        if not target.is_file():
+            errors.append(f"missing translation: wiki/{target.name}")
+            continue
+        pairs += 1
+        text = target.read_text(encoding="utf-8")
+        if not EN_HEADER.search(text):
+            errors.append(
+                f"wiki/{target.name}: missing '> Last checked: YYYY-MM-DD · Applies to: ...' header"
+            )
+        prose = INLINE_CODE.sub("", strip_fences(text))
+        leftover = CJK.search(prose)
+        if leftover:
+            line = prose.count("\n", 0, leftover.start()) + 1
+            errors.append(f"wiki/{target.name}: untranslated Chinese near line {line}")
+        if json_blocks(text) != json_blocks((WIKI / name).read_text(encoding="utf-8")):
+            errors.append(f"wiki/{target.name}: JSON examples drifted from wiki/{name}")
+    return pairs
+
 
 
 def check_content(errors: list[str]) -> None:
@@ -202,10 +266,11 @@ def main() -> int:
 
     check_required(errors)
     check_headers(errors)
-    json_blocks = check_fences(errors)
+    json_examples = check_fences(errors)
     links = check_links(errors)
     check_index(errors)
-    nav_pages = check_site_nav(errors)
+    nav_pages, nav_translated = check_site_nav(errors)
+    pairs = check_translations(errors)
     check_content(errors)
 
     if errors:
@@ -215,8 +280,9 @@ def main() -> int:
         return 1
 
     print(
-        f"wiki check passed ({len(CONTENT_PAGES)} pages, {links} links, "
-        f"{json_blocks} JSON blocks, {nav_pages} nav entries)"
+        f"wiki check passed ({len(CONTENT_PAGES)} pages, {pairs} translations, "
+        f"{links} links, {json_examples} JSON blocks, "
+        f"{nav_pages} nav entries ({nav_translated} translated))"
     )
     return 0
 

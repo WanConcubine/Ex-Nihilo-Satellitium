@@ -1,5 +1,7 @@
 # Ex Nihilo: Satellitium 自定义配方 Wiki
 
+> English: [English version](https://wanconcubine.github.io/Ex-Nihilo-Satellitium/en/)
+
 > 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
 
 面向玩家和整合包作者的「改配方」说明。这里不讲 Java 开发，只讲**装好模组之后怎么改数据**。

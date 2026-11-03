@@ -153,7 +153,7 @@ StartupEvents.registry('item', event => {
 然后要在 `kubejs/data/mypack/sieve/*.json` 里把它写进掉落，或写合成配方。
 它**不会**进入本模组的材料链/创造栏分组。
 
-## 13. 加第 14 种材料
+## 13. 加第 21 种材料
 
 三条路线都做不到。材料表在 jar 内 `materials.json`，注册期读取；
 新增材料还要贴图、模型、配方、标签、JEI 分组。需要改模组源码或等后续 schema 支持。
