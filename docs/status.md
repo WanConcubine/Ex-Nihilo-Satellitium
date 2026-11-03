@@ -196,6 +196,10 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   1.20.1 的路径/标签差异；CT 明确写清只改原版配方、碰不到七张表。
 - **维护契约**：`wiki/MAINTAINING.md` 定义 Owner / Definition of Done / 发布前检查；
   `scripts/check-wiki.py` 守卫页面、链接、JSON、版本矩阵和“最后核对”头。
+- **静态站**（2026-11-03）：`mkdocs.yml` + `requirements-wiki.txt`，源目录仍是 `wiki/`，
+  `_sidebar.md` 保留但不再发布；`mkdocs build --strict` 本地通过，`check-wiki.py` 增加
+  “nav 必须覆盖所有页面”检查。`.github/workflows/wiki.yml` 在 push main 后部署 GitHub Pages
+  （**仓库 Pages 还没启用、workflow 还没真跑过**；本地预览用 `mkdocs serve`）。
 - **三路径路线图**：`docs/customization-roadmap.md` 列出当前能力矩阵、P1（规范表 + overlay 基座）、
   P2（KJS 插件）、P3（CT API）、P4（客户端同步）的验收标准；**当前只有数据包是完整路径**。
 - **验证**（2026-11-03，main）：

@@ -7,8 +7,8 @@
 > 维护约定：本目录是玩家 wiki 的唯一出处；改代码里的表结构、字段名或加载顺序时，
 > 同一提交里更新对应页面，并跑 `python3 scripts/check-wiki.py`。维护者职责和发布检查见
 > [`MAINTAINING.md`](MAINTAINING.md)；三条路径的差距与阶段见
-> [`docs/customization-roadmap.md`](../docs/customization-roadmap.md)。开发向的完整 schema 仍在
-> [`docs/data-format.md`](../docs/data-format.md)。
+> [`docs/customization-roadmap.md`](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/docs/customization-roadmap.md)。开发向的完整 schema 仍在
+> [`docs/data-format.md`](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/docs/data-format.md)。
 
 ## 三条路线怎么选
 
@@ -80,7 +80,7 @@
 - [常见任务 Cookbook](cookbook.md)
 - [排错与日志](troubleshooting.md)
 - [维护契约](MAINTAINING.md)
-- [三路径等价路线图](../docs/customization-roadmap.md)
+- [三路径等价路线图](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/docs/customization-roadmap.md)
 
 ## 先记住这三条
 
@@ -92,7 +92,7 @@
 
 ## 不能通过这三条路线做到的事
 
-- **新增材料**（第 14 种矿）：材料表在 jar 内的 `materials.json`，注册期读取；
+- **新增材料**（第 21 种矿）：材料表在 jar 内的 `materials.json`，注册期读取；
   数据包/KJS/CT 都改不了。KJS 可以自己注册一套物品做“平行矿链”，但它不属于本模组的材料链。
 - **新增本模组的物品/方块**：同上，注册期决定。
 - **直接删除原版配方**：数据包没有“删除配方”的 JSON；用 KubeJS 或 CraftTweaker。

@@ -5,4 +5,4 @@
 - [常见任务](cookbook.md)
 - [排错](troubleshooting.md)
 - [维护契约](MAINTAINING.md)
-- [三路径路线图](../docs/customization-roadmap.md)
+- [三路径路线图](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/docs/customization-roadmap.md)

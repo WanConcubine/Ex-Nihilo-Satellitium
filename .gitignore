@@ -48,3 +48,9 @@ __pycache__/
 
 # DataGen incremental cache
 src/generated/resources/.cache/
+
+# 玩家 wiki 静态站：mkdocs build 的产物
+site/
+
+# 本地 Python 环境（装 mkdocs-material 用）
+.venv/
