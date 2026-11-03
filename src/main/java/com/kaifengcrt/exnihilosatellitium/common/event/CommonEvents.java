@@ -2,14 +2,23 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipes;
+import com.kaifengcrt.exnihilosatellitium.common.command.ExNihiloTablesCommand;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
 import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
+import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
+import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveRegistry;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -38,6 +47,35 @@ public final class CommonEvents {
             }
         }
         ExNihiloSatellitium.LOGGER.info("[debug] our recipes={} compostable items={}", ours, compostable);
+    }
+
+    /**
+     * Tags are bound after every reload listener has run, so the tables that
+     * accept {@code #tag} inputs rebuild here. On an integrated server the
+     * client-packet event is skipped: the static registries are already the
+     * server's.
+     */
+    @SubscribeEvent
+    public static void onTagsUpdated(final TagsUpdatedEvent event) {
+        if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
+            rebuildAll(false);
+        } else if (event.shouldUpdateStaticData()) {
+            rebuildAll(true);
+        }
+    }
+
+    private static void rebuildAll(final boolean clientView) {
+        SieveRegistry.rebuild(clientView);
+        BarrelRecipes.rebuild(clientView);
+        HammerRecipes.rebuild(clientView);
+        CrookDrops.rebuild(clientView);
+        CrucibleRecipes.rebuild(clientView);
+        CrucibleHeat.rebuild(clientView);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterCommands(final RegisterCommandsEvent event) {
+        ExNihiloTablesCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent

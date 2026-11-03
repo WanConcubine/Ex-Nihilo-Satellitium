@@ -1,0 +1,6 @@
+{
+  "remove": ["minecraft:bread"],
+  "values": {
+    "minecraft:bread": 100
+  }
+}

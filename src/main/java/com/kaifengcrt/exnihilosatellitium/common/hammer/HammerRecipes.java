@@ -1,11 +1,10 @@
 package com.kaifengcrt.exnihilosatellitium.common.hammer;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
@@ -14,14 +13,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Hammer crush table, loaded from {@code data/<namespace>/hammer/*.json}.
@@ -37,8 +33,15 @@ import java.util.Optional;
  * ore dust      → the ore dust block itself (no further crushing)
  * </pre>
  *
- * <p>Gameplay always reads the server table; the client keeps a copy loaded
+ * <p>One rule per block, so a {@code #tag} input expands to every matching
+ * block but never overwrites a block that already has a concrete rule. Use
+ * {@code "patch": true} to replace a rule and {@code "remove": true} to delete
+ * one. Gameplay always reads the server table; the client keeps a copy loaded
  * from the mirrored assets so JEI works when connected to a dedicated server.</p>
+ *
+ * <p>Tags are bound after the reload listeners run, so {@link #load} builds the
+ * concrete part and {@link #rebuild(boolean)} runs again on
+ * {@code TagsUpdatedEvent} to expand tags and apply patches.</p>
  */
 public final class HammerRecipes {
 
@@ -47,6 +50,8 @@ public final class HammerRecipes {
 
     private static volatile Map<Block, Rule> recipes = Map.of();
     private static volatile Map<Block, Rule> clientRecipes = Map.of();
+    private static volatile List<DataPackJson.Source> sources = List.of();
+    private static volatile List<DataPackJson.Source> clientSources = List.of();
 
     /** One hammer rule: the dropped item and the inclusive drop-count range. */
     public record Rule(Item item, int min, int max) {
@@ -78,50 +83,126 @@ public final class HammerRecipes {
     }
 
     public static void load(final ResourceManager manager, final boolean clientView) {
+        final List<DataPackJson.Source> read = DataPackJson.readAll(manager, DIR, "hammer");
+        if (clientView) {
+            clientSources = read;
+        } else {
+            sources = read;
+        }
+        rebuild(clientView);
+    }
+
+    /** Rebuilds from the last read sources; called again after tags are bound. */
+    public static void rebuild(final boolean clientView) {
+        final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
+        final boolean tagsReady = DataPackJson.tagsReady();
         final Map<Block, Rule> built = new HashMap<>();
-        int files = 0;
-        for (final Map.Entry<ResourceLocation, Resource> entry
-                : manager.listResources(DIR, path -> path.getPath().endsWith(".json")).entrySet()) {
-            final ResourceLocation id = entry.getKey();
-            try (InputStreamReader reader = new InputStreamReader(
-                    entry.getValue().open(), StandardCharsets.UTF_8)) {
-                final JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-                final ResourceLocation inputId = ResourceLocation.parse(root.get("input").getAsString());
-                final Optional<Block> input = BuiltInRegistries.BLOCK.getOptional(inputId);
-                if (input.isEmpty()) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] unknown input block {} in {}", inputId, id);
-                    continue;
+        final List<DataPackJson.Source> tagFiles = new ArrayList<>();
+        final List<DataPackJson.Source> patchFiles = new ArrayList<>();
+
+        for (final DataPackJson.Source source : sourceList) {
+            if (!DataPackJson.modLoaded(source.root())) {
+                continue;
+            }
+            if (DataPackJson.isPatch(source.root())) {
+                patchFiles.add(source);
+                continue;
+            }
+            final String rawInput = DataPackJson.string(source.root(), "input");
+            if (rawInput == null) {
+                ExNihiloSatellitium.LOGGER.warn("[hammer] missing input in {}", source.id());
+                continue;
+            }
+            if (DataPackJson.isTag(rawInput)) {
+                if (tagsReady) {
+                    tagFiles.add(source);
                 }
-                final ResourceLocation resultId = ResourceLocation.parse(root.get("result").getAsString());
-                final Optional<Item> result = BuiltInRegistries.ITEM.getOptional(resultId);
-                if (result.isEmpty() || result.get() == Items.AIR) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] unknown result {} in {}", resultId, id);
-                    continue;
+                continue;
+            }
+            final List<Block> inputs = blocks(rawInput, source.id());
+            final Rule rule = parseRule(source.root(), source.id());
+            if (rule == null) {
+                continue;
+            }
+            for (final Block input : inputs) {
+                if (built.putIfAbsent(input, rule) != null) {
+                    ExNihiloSatellitium.LOGGER.warn(
+                            "[hammer] duplicate input {} in {}, later entry skipped",
+                            BuiltInRegistries.BLOCK.getKey(input), source.id());
                 }
-                final int min = root.has("min") ? root.get("min").getAsInt() : 1;
-                final int max = root.has("max") ? root.get("max").getAsInt() : min;
-                if (min < 1 || max < min || max > MAX_COUNT) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] invalid count range {}..{} in {}, skipped",
-                            min, max, id);
-                    continue;
-                }
-                if (built.putIfAbsent(input.get(), new Rule(result.get(), min, max)) != null) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] duplicate input {} in {}, later entry skipped",
-                            inputId, id);
-                    continue;
-                }
-                files++;
-            } catch (final Exception exception) {
-                ExNihiloSatellitium.LOGGER.error("[hammer] failed to read {}: {}", id, exception.toString());
             }
         }
+
+        if (tagsReady) {
+            for (final DataPackJson.Source source : tagFiles) {
+                final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+                final Rule rule = parseRule(source.root(), source.id());
+                if (rule == null) {
+                    continue;
+                }
+                for (final Block input : inputs) {
+                    built.putIfAbsent(input, rule);
+                }
+            }
+
+            for (final DataPackJson.Source source : patchFiles) {
+                final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+                if (DataPackJson.removeAll(source.root())) {
+                    for (final Block input : inputs) {
+                        built.remove(input);
+                    }
+                    continue;
+                }
+                final Rule rule = parseRule(source.root(), source.id());
+                if (rule == null) {
+                    continue;
+                }
+                for (final Block input : inputs) {
+                    built.put(input, rule);
+                }
+            }
+        }
+
         final Map<Block, Rule> snapshot = Map.copyOf(built);
         if (clientView) {
             clientRecipes = snapshot;
         } else {
             recipes = snapshot;
         }
-        ExNihiloSatellitium.LOGGER.info("[hammer] loaded {} recipes{}", files,
-                clientView ? " (client)" : "");
+        ExNihiloSatellitium.LOGGER.info("[hammer] loaded {} recipes ({} tag files, {} patches{}){}",
+                built.size(), tagFiles.size(), patchFiles.size(),
+                tagsReady ? "" : ", tags not ready", clientView ? " (client)" : "");
+    }
+
+    private static List<Block> blocks(final String raw, final ResourceLocation file) {
+        if (raw == null) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] missing input in {}", file);
+            return List.of();
+        }
+        return DataPackJson.resolve(BuiltInRegistries.BLOCK, raw, "hammer", file).values();
+    }
+
+    private static Rule parseRule(final JsonObject root, final ResourceLocation file) {
+        final String rawResult = DataPackJson.string(root, "result");
+        if (rawResult == null) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] {} has no result", file);
+            return null;
+        }
+        final ResourceLocation resultId = DataPackJson.id(rawResult, "hammer", file);
+        final Item result = resultId == null
+                ? null
+                : BuiltInRegistries.ITEM.getOptional(resultId).orElse(null);
+        if (result == null || result == Items.AIR) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] unknown result {} in {}", rawResult, file);
+            return null;
+        }
+        final int min = root.has("min") ? root.get("min").getAsInt() : 1;
+        final int max = root.has("max") ? root.get("max").getAsInt() : min;
+        if (min < 1 || max < min || max > MAX_COUNT) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] invalid count range {}..{} in {}, skipped",
+                    min, max, file);
+            return null;
+        }
+        return new Rule(result, min, max);
     }
 }

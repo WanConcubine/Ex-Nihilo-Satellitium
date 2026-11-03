@@ -15,12 +15,12 @@ public final class CrookDropsReloadListener extends SimplePreparableReloadListen
 
     @Override
     protected Void prepare(final ResourceManager manager, final ProfilerFiller profiler) {
-        CrookDrops.load(manager, this.clientView);
+        // Tag expansion needs the tag bindings, which are only ready in apply().
         return null;
     }
 
     @Override
     protected void apply(final Void unused, final ResourceManager manager, final ProfilerFiller profiler) {
-        // Table already rebuilt in prepare().
+        CrookDrops.load(manager, this.clientView);
     }
 }

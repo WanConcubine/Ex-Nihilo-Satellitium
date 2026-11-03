@@ -15,13 +15,13 @@ public final class CrucibleReloadListener extends SimplePreparableReloadListener
 
     @Override
     protected Void prepare(final ResourceManager manager, final ProfilerFiller profiler) {
-        CrucibleRecipes.load(manager, this.clientView);
-        CrucibleHeat.load(manager, this.clientView);
+        // Tag expansion needs the tag bindings, which are only ready in apply().
         return null;
     }
 
     @Override
     protected void apply(final Void unused, final ResourceManager manager, final ProfilerFiller profiler) {
-        // Tables are rebuilt in prepare().
+        CrucibleRecipes.load(manager, this.clientView);
+        CrucibleHeat.load(manager, this.clientView);
     }
 }
