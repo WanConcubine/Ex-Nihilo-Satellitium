@@ -134,7 +134,29 @@ repositories {
     // deobfuscates them, otherwise SRG names break at runtime in the dev client.
     flatDir {
         dirs 'libs'
+        dirs 'libs/crafttweaker'
     }
+}
+
+// CraftTweaker's BlameJared maven has an intermittent TLS handshake failure with
+// Gradle; fetch the compile-time Forge jar with the build JVM and keep it under
+// libs/ (gitignored, never shipped).
+def crafttweakerJar = file("libs/crafttweaker/CraftTweaker-forge-1.20.1-${crafttweaker_version}.jar")
+
+tasks.register('downloadCraftTweaker') {
+    outputs.file(crafttweakerJar)
+    doLast {
+        if (crafttweakerJar.exists()) {
+            return
+        }
+        crafttweakerJar.parentFile.mkdirs()
+        def url = new URL("https://maven.blamejared.com/com/blamejared/crafttweaker/CraftTweaker-forge-1.20.1/${crafttweaker_version}/CraftTweaker-forge-1.20.1-${crafttweaker_version}.jar")
+        url.withInputStream { input -> crafttweakerJar.withOutputStream { output -> output << input } }
+    }
+}
+
+tasks.named('compileJava').configure {
+    dependsOn 'downloadCraftTweaker'
 }
 
 dependencies {
@@ -152,6 +174,7 @@ dependencies {
     // deobfuscates the mod jars so the plugin can reference Minecraft symbols.
     compileOnly fg.deobf("maven.modrinth:kubejs:${kubejs_version}")
     compileOnly fg.deobf("maven.modrinth:rhino:${rhino_version}")
+    compileOnly fg.deobf("ct:CraftTweaker-forge-1.20.1:${crafttweaker_version}")
 
     // Dev-test mods: production jars from libs/ (gitignored), deobfuscated into
     // the dev runtime. Only with -PdevMods, because they are client-side mods and
@@ -165,6 +188,10 @@ dependencies {
     // are SRG-named, so they must be deobfuscated for the dev server; gated
     // behind -PkjsMods so a normal runServer stays dependency-free.
     //   ./gradlew runServer -PkjsMods
+    if (project.hasProperty("ctMods")) {
+        runtimeOnly fg.deobf("ct:CraftTweaker-forge-1.20.1:${crafttweaker_version}")
+    }
+
     if (project.hasProperty("kjsMods")) {
         runtimeOnly fg.deobf("maven.modrinth:kubejs:${kubejs_version}")
         runtimeOnly fg.deobf("maven.modrinth:rhino:${rhino_version}")

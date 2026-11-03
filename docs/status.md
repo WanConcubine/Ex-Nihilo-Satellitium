@@ -33,6 +33,24 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
   - **未验**：进游戏右键吃/传送、末影之眼补片、模型画面；`/setblock` 默认是 `bites=0`，
     物品放置才是 `bites=6`。
 
+## 当前批次（2026-11-03，P3：CraftTweaker）
+
+- **入口**：`@ZenRegister` 的七个类
+  `mods.exnihilosatellitium.Sieve` / `.Hammer` / `.Crook` / `.Barrel` / `.Compost` /
+  `.CrucibleMelt` / `.CrucibleHeat`；常用 `add` / `remove` / `replace` +
+  `addJson` / `removeJson` / `replaceJson`。
+- **依赖**：`compileOnly` CraftTweaker 14.0.60（不随 jar 分发）。BlameJared maven 的
+  Gradle TLS 问题用 `downloadCraftTweaker` 下载到 `libs/crafttweaker/`；Forge 开发服
+  用 `./gradlew runServer -PctMods` 把 `fg.deobf` 后的 CT 放进运行时。
+- **语义**：source `crafttweaker`、priority 200（在数据包和 KJS 之后）；`#tag` / `mod` /
+  校验共用；`onAddReloadListenerEvent` 在 CT 脚本前清旧贡献。
+- **验证**（2026-11-03，CT 14.0.60 / Forge 47.4.28 / Java 17）：
+  - 七个入口全部生效，七张表条数正确；
+  - 改脚本 `/reload`：`cleared 7 stale crafttweaker op(s)`，旧条目消失、compost 300→150；
+  - CT 与 datapack fixture 的七张表 dump 逐字节一致；
+  - 不带 `-PctMods`（无 CT）正常启动；旧世界提示 `Missing data pack mod:crafttweaker` 属正常。
+- **未做**：CT recipe type / JEI 分类（后置）；P4 客户端 JEI 同步。
+
 ## 当前批次（2026-11-03，P2：KubeJS 插件）
 
 - **KubeJS 2001 插件**：`compileOnly` KubeJS `2001.6.5-build.26` + Rhino
