@@ -88,6 +88,14 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onAddReloadListeners(final AddReloadListenerEvent event) {
+        // CraftTweaker scripts execute inside this reload, after the listener
+        // event; drop their previous overlay contributions here so /reload
+        // replaces instead of stacking. KJS loads earlier and clears itself.
+        final int staleCt = CustomizationOverlay.clear("crafttweaker");
+        if (staleCt > 0) {
+            ExNihiloSatellitium.LOGGER.info(
+                    "[customize] cleared {} stale crafttweaker op(s)", staleCt);
+        }
         event.addListener(new CompostReloadListener(false));
         event.addListener(new SieveReloadListener(false));
         event.addListener(new BarrelRecipeReloadListener(false));

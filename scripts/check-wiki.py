@@ -134,7 +134,7 @@ def check_content(errors: list[str]) -> None:
             errors.append(f"wiki/kubejs.md: KJS boundary note is missing {needle!r}")
 
     crafttweaker = (WIKI / "crafttweaker.md").read_text(encoding="utf-8")
-    for needle in ("craftingTable", "改不了", "addJsonRecipe"):
+    for needle in ("craftingTable", "mods.exnihilosatellitium", "addJson"):
         if needle not in crafttweaker:
             errors.append(f"wiki/crafttweaker.md: CT boundary note is missing {needle!r}")
 

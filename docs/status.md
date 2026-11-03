@@ -32,6 +32,35 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完成**（TableBuilder + CustomizationOverlay +
 `/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
 
+## 当前批次（2026-11-03，P3：CraftTweaker，两版）
+
+- **依赖**：`compileOnly` CraftTweaker，不随 jar 分发。1.21.1 用 21.0.39，1.20.1 用
+  14.0.60。BlameJared maven 在本机 Gradle 上有 TLS handshake 问题，构建脚本用
+  `downloadCraftTweaker` 任务经构建 JVM 下载到 `libs/crafttweaker/`（gitignored），
+  再作为本地依赖编译；1.20.1 开发服用 `-PctMods` 把 deobf 的 CT 放进运行时。
+- **入口**：`@ZenRegister` + `@ZenCodeType.Name` 的七个类：
+  `mods.exnihilosatellitium.Sieve` / `.Hammer` / `.Crook` / `.Barrel` / `.Compost` /
+  `.CrucibleMelt` / `.CrucibleHeat`。每个类有常用 `add` / `remove` / `replace` 与
+  `addJson` / `removeJson` / `replaceJson`，内部构造 datapack JSON 后提交 overlay。
+- **语义**：CT source `crafttweaker`，priority 200（数据包 0、KJS 100 之后）；
+  `#tag`、`mod` 门、校验、replace 先校验后删旧规则全部复用。没有注册 CT recipe type，
+  JEI 不会出现七张表的 CT 配方页（P4/可选）。
+- **生命周期**：`onAddReloadListenerEvent` 在每次 reload 的清点阶段清空旧
+  `crafttweaker` 贡献；CT 的脚本执行在该事件之后，所以 `/reload` 是替换而不是叠加。
+- **验证（1.21.1，CT 21.0.39）**：
+  - 七个入口各写一条，七张表条数/条目正确（sieve 91 drops、hammer 53、crook 23、
+    barrel 13、compost 68、melt 40、heat 10）。
+  - 改脚本（删 sieve、compost 300→150）后 `/reload`：`cleared 6 stale crafttweaker op(s)`，
+    旧条目消失、新条目生效，overlay 6。
+  - 同一 fixture 用 datapack 跑，七张表 `dump` 与 CT 逐字节一致。
+  - 移除 CT jar 后服务端正常启动，无 `NoClassDefFoundError`。
+- **验证（1.20.1，CT 14.0.60）**：
+  - 七个入口全部生效；改脚本 `/reload` 清 7 条旧贡献、应用 6 条新贡献；
+  - CT 与 datapack fixture 的七张表 `dump` 逐字节一致；
+  - 不带 `-PctMods`（无 CT）正常启动；旧世界会提示 `Missing data pack mod:crafttweaker`，
+    这是移除模组后的正常警告。
+- **未做**：CT recipe type / JEI 分类（可选，后置）；P4 客户端 JEI 同步。
+
 ## 当前批次（2026-11-03，P2：KubeJS 插件，两版）
 
 - **依赖**：`compileOnly` KubeJS + Rhino，不随 jar 分发。1.21.1 用
@@ -346,8 +375,9 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 
 ## 交接清单（下次会话先做）
 
-- **1.20.1 分支**：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`
-  （`1.20.1-forge` @ `6a733e8`，含一次性验收清单），已到 **M10**（含 `crucible.*` + `machine.*` config），
+- **1.20.1 分支**：同级 git worktree `../Ex-Nihilo-Satellitium-1.20.1`
+  （`git worktree add ../Ex-Nihilo-Satellitium-1.20.1 1.20.1-forge` 可复现；
+  `1.20.1-forge` @ `a564ab1`，含一次性验收清单），已到 **M10**（含 `crucible.*` + `machine.*` config），
   下一步只剩一次性画面/手感验收。
   分支的 `docs/status.md` 里有当前批次、验证表、构建/客户端命令（`runClient -PdevMods`）
   和固定套路。新会话在分支工作区开工即可。
@@ -398,6 +428,8 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
+| P3 CraftTweaker | ✅ | 两版七张表 ZenScript 入口 + JSON 逃生口；CT、datapack fixture dump 逐字节一致 |
+| P3 CT 生命周期 | ✅ | reload 清旧贡献；无 CT 正常启动（1.20.1 有旧世界 missing pack 警告） |
 | P2 KubeJS 插件 | ✅ | 两版七张表绑定 + JSON 逃生口；KJS、命令 overlay、datapack fixture 三者 dump 逐字节一致 |
 | P2 KJS 生命周期 | ✅ | 2101 用 `beforeScriptsLoaded`、2001 用 `registerBindings` 清旧贡献；无 KJS 正常启动 |
 | P1.5 priority / conflicts | ✅ | p10 先提交仍赢 p5；`add ignored` / `replaced` / `removed` 带旧 source；两版 RCON |
@@ -557,9 +589,8 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 
 ## 下一步（按价值排序）
 
-> 自定义三路径：**P1 + P1.5（TableBuilder / overlay / priority）+ P2 KubeJS 插件（1.21.1）
-> 已完成**；下一步是 [roadmap](customization-roadmap.md) 的 **P3 CraftTweaker API**，
-> 以及把 P2 移植到 1.20.1 分支。在 P3 完成前，wiki 不把 CT 写成“支持七张表”。
+> 自定义三路径：**P1 + P1.5 + P2（KJS）+ P3（CraftTweaker）两版都已完成**；
+> 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 
 1. **1.20.1 一次性验收 M1.5–M10**：服务端逻辑都已 RCON 验过，剩下机器 GUI/自动输出抽屉/
    BER 动画、M6 美术与右键手感。Thermal / Create / IE 的锭与粉碎接入已真装验过（见当前批次），
