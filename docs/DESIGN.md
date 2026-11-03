@@ -1379,7 +1379,7 @@ KJS 只能走 `kubejs/data`，CT 只能改原版配方；这与“尽可能支�
 - 每次改表结构要同时改 wiki 和 roadmap 的能力矩阵，并跑 `scripts/check-wiki.py`。
 - 专用服客户端 JEI 的同步（P4）是“看起来等价”的必要条件，但不阻塞 P1–P3。
 
-**当前状态。** P0（数据包 v2）已完成并在两版验证；P1（TableBuilder + overlay）已完成（2026-11-03，主线），见 §40。
+**当前状态。** P0（数据包 v2）已完成并在两版验证；P1 + P1.5（TableBuilder / overlay / priority）已完成；P2（KubeJS 插件，1.21.1）已完成。见 §40–§42。
 
 ## 39. 末影蛋糕（2026-11-03）
 
@@ -1483,3 +1483,38 @@ P1 的 overlay 只有“提交顺序”，没有优先级，也不清楚最终�
 验证：main dev server 上 p10 先提交、p5 后提交，最终 p10 赢；`add ignored`、`replaced`、
 `removed` 三种日志都能看到；同一 add 提交两次 overlay 仍为 1；空 payload 被拒；
 `dump all` 298 行 / 7 个表头；停止服务器清理 3 条并打日志；两次 `/reload` dump 一致。
+
+## 42. P2：KubeJS 插件（2026-11-03，1.21.1）
+
+目标：让 KJS 脚本直接改七张表，而不是只能写 `kubejs/data` JSON，同时不把 KJS 变成硬依赖。
+
+1. **发现方式**：KJS 7 按 `IModFile.findResource("kubejs.plugins.txt")` 读取每个 mod 的插件清单。
+   我们在 jar 根放一行 `com.kaifengcrt...compat.kubejs.ExNihiloKubeJSPlugin`，实现
+   `dev.latvian.mods.kubejs.plugin.KubeJSPlugin` 接口。没有 KJS 时该文件没人读、插件类不被加载，
+   服务端正常启动（已实测）。
+2. **绑定而不是事件组**：KJS 7 的 `EventHandler.call` 是“注册回调”语义
+   （`SieveEvents.add(event => {...})`），而目标 API 是直接传参
+   （`SieveEvents.add('minecraft:sand', 'minecraft:diamond', 0.02)`）。所以插件在
+   `registerBindings` 里只给 server 脚本加七个普通 Java 绑定对象，方法签名直接接收
+   `String` / `double` / `int`；Rhino 负责 JS→Java 转换。
+3. **复用 overlay**：每个绑定方法把参数拼成该表的 datapack JSON（字段与文件一致），
+   调 `CustomizationOverlay.submit(..., source="kubejs", priority=100)`；复杂结构用
+   `addJson` / `replaceJson` 直接传 JSON。这样解析、`#tag`、根级 `mod`、数值校验、
+   `replace` 先校验再删旧规则全部复用，KJS 层没有第二套校验。
+4. **生命周期**：`beforeScriptsLoaded(ScriptManager)` 只对 server 脚本生效，在脚本批次前
+   清空旧 `kubejs` 贡献；脚本重新提交后由 tags rebuild / `ServerStartedEvent` 应用。
+   `clearCaches` 不能用——实测它在服务端脚本之后才调用，会把刚提交的贡献清掉。
+   client 脚本的 `beforeScriptsLoaded` 必须跳过，否则单人客户端脚本重载会清掉服务端队列。
+5. **验收**：七个绑定各写一条，startup 后七张表条数/条目正确；改脚本 `/reload` 后旧条目
+   被清、新条目生效；同一 fixture 用命令 overlay（priority 100）重放，七张表 dump 逐字节一致；
+   移除 KJS/Rhino 后正常启动。
+6. **未做**：1.20.1 的 `2001.x` 插件（分支仍走 `kubejs/data`）；P4 客户端 JEI 同步。
+
+取舍：
+
+- **不做 KJS 事件组**。事件组适合“事件发生时给脚本一个对象去改”，而表定制是“脚本加载时声明
+  条目”；绑定对象直接调用更贴近 `SieveEvents.add(...)` 的目标形态，也少一层事件生命周期。
+- **priority 固定 100**。数据包/补丁是 0，KJS 是覆盖层；将来 CT 用 200，冲突时 CT 赢。
+  如果 KJS 内部需要分先后，脚本可以用命令入口的显式 priority，或等 P3 再加 per-source 配置。
+- **编译期依赖**。`compileOnly` 拉 KJS/Rhino（不打包），代价是开发构建需要能访问 Modrinth
+  Maven；`--offline` 在缓存齐全时可继续用。
