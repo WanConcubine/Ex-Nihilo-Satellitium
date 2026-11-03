@@ -69,7 +69,8 @@
    ```
 
 4. 进游戏执行 `/reload`（或 `/datapack list` 确认启用）。
-5. 用 `/exnihilo tables` 看条数；`/exnihilo sieve minecraft:sand` 查单条。
+5. 用 `/exnihilo tables` 看条数；`/exnihilo sieve minecraft:sand` 查单条；
+   `/exnihilo dump <table>` 看整张表（按行排序，方便对比）。
 
 ## 目录
 

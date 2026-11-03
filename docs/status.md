@@ -29,7 +29,47 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 和 **Tinkers' Construct 钴**（`tconstruct:cobalt_ingot`），运行时取第一个已加载模组的锭，
 自有锭只作兜底。
 **M9 发布：0.1.0 已发（两条线都有 tag）；0.2.0 内容与 jar 已备，tag / 商店上传待确认；
-M8 月光魔法联动仍未开始。**
+M8 月光魔法联动仍未开始。三路径 P1 基座已完成**（TableBuilder + CustomizationOverlay +
+`/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
+
+## 当前批次（2026-11-03，三路径 P1：TableBuilder + overlay 基座）
+
+- **新包 `common/table/`**：
+  - `TableId` —— 七张表的唯一 id（`sieve` / `hammer` / `crook` / `barrel` / `compost` /
+    `crucible_melt` / `crucible_heat`），命令、dump、未来的脚本绑定共用；
+  - `TableBuilder` —— JSON loader 与 overlay 共用的有序工作集，记录每个 key 的 last source；
+  - `CustomizationOverlay` —— 脚本/命令贡献按 source 排队，每次 rebuild 在**文件 + 补丁之后**
+    重放，可按 source 清空；不持久化，重启即空；
+  - `Tables` / `TableDump` —— 统一 rebuild 入口与稳定行输出。
+- **七张表**的 rebuild 全部改为“建 builder → 喂 JSON/补丁 → 喂 overlay → 发布不可变快照”；
+  原有语义保持：筛子/钩子合并掉落、锤子/熔点/热源具体优先、桶按 base+added 覆盖、
+  堆肥同 key 取 max。启动日志：`[sieve] 6 inputs/90 drops`、`[hammer] 52`、
+  `[crook] 10/22`、`[barrel] 12`、`[compost] 67`、`[crucible] 39 melt / 9 heat`。
+- **命令（OP 2）**：
+  - `/exnihilo customize <table> add|remove|replace <json>`：payload 与 datapack 文件同字段，
+    复用同一套解析/校验；`/exnihilo customize list`、`clear [source]`；
+  - `/exnihilo dump <table>`：按行排序、可直接 diff；头行 `# <table> N lines`
+    （overlay 数量看 `/exnihilo tables`）。
+- **失败语义**：单条 overlay 解析异常只跳过该条并打 `[customize]` 警告；整表 rebuild 抛异常时
+  保留上一份快照（`rebuild failed, keeping previous snapshot`）。
+- **验证**（2026-11-03，dev server + RCON）：
+  - `./gradlew build`、`check-core-imports.py`（`common/table` 已纳入扫描）、
+    `check-textures.py`、`check-data-paths.py`、`check-wiki.py` 全绿。
+  - 七张表各跑 add：dump 只多一行；remove 掉刚加的条目后回到基线；筛子额外删了 sand 的
+    cactus 验证“删现有掉落”；replace 后目标只剩新规则（sand 只剩 diamond 1.0、
+    cobblestone → flint x1-3、oak_leaves 只剩 stick、water+sugar → glass、
+    emerald=50、end_stone → water 100、furnace[lit=true]=0.9）。
+  - 连续两次 `/reload` 后七张表 dump 与 reload 前**逐字节一致**（overlay 只重放一次，不叠加）。
+  - `/exnihilo customize clear` 清掉 21 条后，七张表 dump 与启动基线**逐字节一致**。
+  - 坏 overlay（`chance` 写成字符串）只打 warning，表不变；坏数据包（同一错误）触发
+    `[sieve] rebuild failed, keeping previous snapshot`，dump 仍是旧表。
+  - `replace` 先校验再删旧规则：`chance` 越界 / `speed: 0` / 未知 `result` 的 replace
+    都保留原条目（筛子/热源/桶各验一次）。
+  - tag payload：hammer 的 `#minecraft:logs` 展开 52 → 92 条，`clear command` 回到 52。
+- **1.20.1**：已移植并单独验证（`common/table/` + 七张表 + 命令整体带过去；
+  build + 纹理守卫、七张表 add/replace、`/reload` 一致、clear 回基线），
+  见分支 `docs/status.md`「三路径 P1 移植」。
+- **未做**：KJS / CT 的脚本绑定（P2 / P3）；overlay 持久化；专用服客户端 JEI 同步（P4）。
 
 ## 当前批次（2026-11-03，末影蛋糕）
 
@@ -300,6 +340,11 @@ M8 月光魔法联动仍未开始。**
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
+| P1 TableBuilder / overlay | ✅ | 2026-11-03：七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致；clear 21 条后回基线 |
+| P1 `/exnihilo dump` | ✅ | 七张表排序行输出（RCON 可读）；头行只有表名 + 行数，便于跨路径 diff |
+| P1 失败隔离 | ✅ | 坏 overlay 只 `[customize]` warning；坏数据包 `[sieve] rebuild failed` 且旧表不变 |
+| P1 core 守卫 | ✅ | `check-core-imports.py` 已纳入 `common/table`，`0 known leak(s)` |
+| P1 1.20.1 移植 | ✅ | 2026-11-03：分支 build + 纹理守卫；七张表 add/replace、`/reload` 一致、clear 回基线 |
 | `./gradlew build` | ✅ | 2026-11-02：`BUILD SUCCESSFUL`（`--offline`）；JEI 依赖走 `maven.blamejared.com` |
 | `python3 scripts/check-core-imports.py` | ✅ | core 层无 NeoForge import；`0 known leak(s)` |
 | `python3 scripts/check-textures.py` | ✅ | 方块/物品 16×16、蚕动画 16×64 + mcmeta、坩埚贴图存在；无 `minecraft:item/*` 引用 |
@@ -450,8 +495,9 @@ M8 月光魔法联动仍未开始。**
 
 ## 下一步（按价值排序）
 
-> 自定义三路径：先做 [roadmap](customization-roadmap.md) 的 **P1（TableBuilder + overlay）**，
-> 再做 P2 KJS 插件、P3 CT API；在 P2/P3 完成前，wiki 仍写“只有数据包是完整路径”。
+> 自定义三路径：**P1（TableBuilder + overlay）已完成**，见本页当前批次；下一步是
+> [roadmap](customization-roadmap.md) 的 **P2 KJS 插件**、P3 CT API。在 P2/P3 完成前，
+> wiki 仍写“只有数据包是完整路径”。
 
 1. **1.20.1 一次性验收 M1.5–M10**：服务端逻辑都已 RCON 验过，剩下机器 GUI/自动输出抽屉/
    BER 动画、M6 美术与右键手感。Thermal / Create / IE 的锭与粉碎接入已真装验过（见当前批次），

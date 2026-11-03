@@ -36,6 +36,7 @@ CORE_DIRS = (
     "common/config",    # ConfigValues / ConfigSource facades
     "common/platform",  # Platform / ModProbe facades
     "common/machine",   # top-level roll math / enums / energy buffer
+    "common/table",     # TableBuilder / CustomizationOverlay / dump
 )
 
 CORE_FILES = (

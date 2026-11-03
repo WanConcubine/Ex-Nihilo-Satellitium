@@ -156,6 +156,9 @@ StartupEvents.registry('item', event => {
 `SieveEvents.add(...)`）是路线图 P2 的目标，进度见
 [`docs/customization-roadmap.md`](../docs/customization-roadmap.md)。
 
+P1（2026-11-03）已经在 Java 侧落了 `TableBuilder` + `CustomizationOverlay`，并加了
+`/exnihilo dump` 供对比；但 **P2 之前，KJS 仍然只能写 `kubejs/data` JSON**。
+
 ## 参考
 
 - KubeJS 文档：<https://kubejs.com/>

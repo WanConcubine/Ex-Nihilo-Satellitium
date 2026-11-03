@@ -4,6 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -14,10 +17,8 @@ import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Data-driven compost values.
@@ -31,6 +32,11 @@ import java.util.Set;
  * mirrored {@code assets/.../compost/} copy so JEI can show the table even
  * when connected to a dedicated server; interaction prediction still uses the
  * {@code #exnihilosatellitium:compostable} item tag.</p>
+ *
+ * <p>Entries are keyed by the literal JSON key (item id or {@code #tag}), so a
+ * patch or overlay operation can delete exactly one value. Lookups keep the
+ * "highest matching value wins" rule, which is why the loader merges duplicate
+ * keys with {@code max} instead of last-write-wins.</p>
  */
 public final class CompostRegistry {
 
@@ -45,6 +51,9 @@ public final class CompostRegistry {
     private static volatile List<Entry> entries = List.of();
     /** Client-side copy for JEI; never used for server-side composting. */
     private static volatile List<Entry> clientEntries = List.of();
+    /** Last parsed files, kept so an overlay change can rebuild without a resource reload. */
+    private static volatile Map<ResourceLocation, JsonElement> sources = Map.of();
+    private static volatile Map<ResourceLocation, JsonElement> clientSources = Map.of();
 
     private CompostRegistry() {
     }
@@ -55,100 +64,177 @@ public final class CompostRegistry {
     }
 
     public static void reload(final Map<ResourceLocation, JsonElement> jsons, final boolean clientView) {
-        final List<Entry> next = new ArrayList<>();
+        if (clientView) {
+            clientSources = Map.copyOf(jsons);
+        } else {
+            sources = Map.copyOf(jsons);
+        }
+        rebuild(clientView);
+    }
+
+    /** Rebuilds from the last read files; also called after an overlay change. */
+    public static void rebuild(final boolean clientView) {
+        final Map<ResourceLocation, JsonElement> jsons = clientView ? clientSources : sources;
+        if (jsons.isEmpty()) {
+            return;
+        }
+        final TableBuilder<String, Entry> builder = new TableBuilder<>(TableId.COMPOST.id());
         final List<Map.Entry<ResourceLocation, JsonElement>> sorted = new ArrayList<>(jsons.entrySet());
         sorted.sort(Comparator.comparing(file -> file.getKey().toString()));
 
-        // Normal files first, so a patch always sees the full built-in table.
-        for (final Map.Entry<ResourceLocation, JsonElement> file : sorted) {
-            try {
-                final JsonObject root = file.getValue().getAsJsonObject();
-                if (!DataPackJson.modLoaded(root) || DataPackJson.isPatch(root)) {
-                    continue;
-                }
-                addValues(root, file.getKey(), next);
-            } catch (final Exception exception) {
-                ExNihiloSatellitium.LOGGER.warn("[compost] failed to parse {}", file.getKey(), exception);
-            }
-        }
-
-        for (final Map.Entry<ResourceLocation, JsonElement> file : sorted) {
-            try {
-                final JsonObject root = file.getValue().getAsJsonObject();
-                if (!DataPackJson.modLoaded(root) || !DataPackJson.isPatch(root)) {
-                    continue;
-                }
-                final Set<Item> removeItems = new LinkedHashSet<>();
-                final Set<TagKey<Item>> removeTags = new LinkedHashSet<>();
-                for (final String raw : DataPackJson.removeList(root)) {
-                    if (DataPackJson.isTag(raw)) {
-                        final ResourceLocation id = DataPackJson.id(raw, "compost", file.getKey());
-                        if (id != null) {
-                            removeTags.add(TagKey.create(Registries.ITEM, id));
-                        }
-                    } else {
-                        final ResourceLocation id = DataPackJson.id(raw, "compost", file.getKey());
-                        final Item item = id == null
-                                ? null
-                                : BuiltInRegistries.ITEM.getOptional(id).orElse(null);
-                        if (item != null && item != Items.AIR) {
-                            removeItems.add(item);
-                        }
+        try {
+            // Normal files first, so a patch always sees the full built-in table.
+            for (final Map.Entry<ResourceLocation, JsonElement> file : sorted) {
+                try {
+                    final JsonObject root = file.getValue().getAsJsonObject();
+                    if (!DataPackJson.modLoaded(root) || DataPackJson.isPatch(root)) {
+                        continue;
                     }
+                    addValues(builder, root, file.getKey(), false);
+                } catch (final Exception exception) {
+                    ExNihiloSatellitium.LOGGER.warn("[compost] failed to parse {}",
+                            file.getKey(), exception);
                 }
-                if (!removeItems.isEmpty() || !removeTags.isEmpty()) {
-                    next.removeIf(entry -> (entry.item() != null && removeItems.contains(entry.item()))
-                            || (entry.tag() != null && removeTags.contains(entry.tag())));
-                }
-                addValues(root, file.getKey(), next);
-            } catch (final Exception exception) {
-                ExNihiloSatellitium.LOGGER.warn("[compost] failed to patch {}", file.getKey(), exception);
             }
+
+            for (final Map.Entry<ResourceLocation, JsonElement> file : sorted) {
+                try {
+                    final JsonObject root = file.getValue().getAsJsonObject();
+                    if (!DataPackJson.modLoaded(root) || !DataPackJson.isPatch(root)) {
+                        continue;
+                    }
+                    if (DataPackJson.removeAll(root)) {
+                        // "remove": true without a list cannot target anything meaningful.
+                        ExNihiloSatellitium.LOGGER.warn(
+                                "[compost] {} needs a remove list, ignoring remove:true", file.getKey());
+                    } else {
+                        removeKeys(builder, DataPackJson.removeList(root));
+                    }
+                    addValues(builder, root, file.getKey(), false);
+                } catch (final Exception exception) {
+                    ExNihiloSatellitium.LOGGER.warn("[compost] failed to patch {}",
+                            file.getKey(), exception);
+                }
+            }
+
+            applyOverlay(builder);
+        } catch (final RuntimeException exception) {
+            ExNihiloSatellitium.LOGGER.error("[compost] rebuild failed, keeping previous snapshot",
+                    exception);
+            return;
         }
 
-        final List<Entry> snapshot = List.copyOf(next);
+        final List<Entry> snapshot = List.copyOf(builder.build().values());
         if (clientView) {
             clientEntries = snapshot;
         } else {
             entries = snapshot;
         }
-        ExNihiloSatellitium.LOGGER.info("[compost] loaded {} entries{}",
-                snapshot.size(), clientView ? " (client)" : "");
+        ExNihiloSatellitium.LOGGER.info("[compost] loaded {} entries ({} overlay){}",
+                snapshot.size(), CustomizationOverlay.forTable(TableId.COMPOST).size(),
+                clientView ? " (client)" : "");
     }
 
-    private static void addValues(final JsonObject root, final ResourceLocation file,
-                                  final List<Entry> next) {
+    private static void applyOverlay(final TableBuilder<String, Entry> builder) {
+        for (final CustomizationOverlay.Customization customization
+                : CustomizationOverlay.forTable(TableId.COMPOST)) {
+            try {
+                final JsonObject root = customization.payload();
+                final boolean replace = customization.action() == CustomizationOverlay.Action.REPLACE;
+                if (replace) {
+                    removeKeys(builder, DataPackJson.removeList(root));
+                }
+                if (customization.action() == CustomizationOverlay.Action.REMOVE) {
+                    List<String> keys = DataPackJson.removeList(root);
+                    if (keys.isEmpty()) {
+                        keys = new ArrayList<>(valueKeys(root));
+                    }
+                    removeKeys(builder, keys);
+                    continue;
+                }
+                addValues(builder, root, overlayLabel(customization), replace);
+            } catch (final RuntimeException exception) {
+                ExNihiloSatellitium.LOGGER.warn("[compost] overlay {} failed: {}",
+                        customization.describe(), exception.toString());
+            }
+        }
+    }
+
+    private static List<String> valueKeys(final JsonObject root) {
+        final List<String> keys = new ArrayList<>();
+        if (root.has("values") && root.get("values").isJsonObject()) {
+            keys.addAll(root.getAsJsonObject("values").keySet());
+        }
+        return keys;
+    }
+
+    private static void removeKeys(final TableBuilder<String, Entry> builder, final List<String> keys) {
+        for (final String raw : keys) {
+            builder.remove(normalizeKey(raw));
+        }
+    }
+
+    private static void addValues(final TableBuilder<String, Entry> builder, final JsonObject root,
+                                  final ResourceLocation file, final boolean replace) {
         if (!root.has("values") || !root.get("values").isJsonObject()) {
             return;
         }
         for (final Map.Entry<String, JsonElement> entry : root.getAsJsonObject("values").entrySet()) {
-            final String key = entry.getKey();
+            final String rawKey = entry.getKey();
             final int value = entry.getValue().getAsInt();
             if (value <= 0) {
                 continue;
             }
-
-            if (key.startsWith("#")) {
-                final ResourceLocation id = ResourceLocation.tryParse(key.substring(1));
-                if (id == null) {
-                    ExNihiloSatellitium.LOGGER.warn("[compost] invalid tag id '{}' in {}", key, file);
-                    continue;
-                }
-                next.add(new Entry(null, TagKey.create(Registries.ITEM, id), value));
+            final String key = normalizeKey(rawKey);
+            final Entry parsed = parseEntry(rawKey, key, value, file);
+            if (parsed == null) {
+                continue;
+            }
+            if (replace) {
+                builder.put(key, parsed, file.toString());
             } else {
-                final ResourceLocation id = ResourceLocation.tryParse(key);
-                if (id == null) {
-                    ExNihiloSatellitium.LOGGER.warn("[compost] invalid item id '{}' in {}", key, file);
-                    continue;
-                }
-                final Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(null);
-                if (item == null || item == Items.AIR) {
-                    ExNihiloSatellitium.LOGGER.warn("[compost] unknown item {}", id);
-                    continue;
-                }
-                next.add(new Entry(item, null, value));
+                builder.merge(key, parsed, CompostRegistry::higher, file.toString());
             }
         }
+    }
+
+    private static Entry higher(final Entry left, final Entry right) {
+        return left.value() >= right.value() ? left : right;
+    }
+
+    /** Item ids keep their form; tag keys are stored with the leading {@code #}. */
+    private static String normalizeKey(final String raw) {
+        final String key = raw.startsWith("#") ? raw.substring(1) : raw;
+        return raw.startsWith("#") ? "#" + key : key;
+    }
+
+    private static Entry parseEntry(final String rawKey, final String key, final int value,
+                                    final ResourceLocation file) {
+        if (rawKey.startsWith("#")) {
+            final ResourceLocation id = ResourceLocation.tryParse(rawKey.substring(1));
+            if (id == null) {
+                ExNihiloSatellitium.LOGGER.warn("[compost] invalid tag id '{}' in {}", rawKey, file);
+                return null;
+            }
+            return new Entry(null, TagKey.create(Registries.ITEM, id), value);
+        }
+        final ResourceLocation id = ResourceLocation.tryParse(rawKey);
+        if (id == null) {
+            ExNihiloSatellitium.LOGGER.warn("[compost] invalid item id '{}' in {}", rawKey, file);
+            return null;
+        }
+        final Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(null);
+        if (item == null || item == Items.AIR) {
+            ExNihiloSatellitium.LOGGER.warn("[compost] unknown item {}", id);
+            return null;
+        }
+        return new Entry(item, null, value);
+    }
+
+    private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = ResourceLocation.tryParse(
+                "exnihilosatellitium:overlay/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
     }
 
     /** @return the best matching compost value, or 0 if the stack is not compostable. */

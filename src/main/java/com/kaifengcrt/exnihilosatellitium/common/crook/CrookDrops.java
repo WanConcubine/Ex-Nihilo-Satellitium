@@ -5,6 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -14,7 +17,6 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,8 @@ import java.util.Set;
  *
  * <p>Tags are bound after the reload listeners run, so {@link #load} builds the
  * concrete part and {@link #rebuild(boolean)} runs again on
- * {@code TagsUpdatedEvent} to expand tags and apply patches.</p>
+ * {@code TagsUpdatedEvent} to expand tags and apply patches. Script
+ * contributions from {@link CustomizationOverlay} are replayed last.</p>
  */
 public final class CrookDrops {
 
@@ -74,76 +77,104 @@ public final class CrookDrops {
         } else {
             sources = read;
         }
-        rebuild(clientView);
+        // Concrete entries are available immediately; tags are expanded on TagsUpdatedEvent.
+        // The client keeps the old bindings across F3+T, so it can expand right away.
+        rebuild(clientView, clientView);
     }
 
     /** Rebuilds from the last read sources; called again after tags are bound. */
     public static void rebuild(final boolean clientView) {
+        rebuild(clientView, true);
+    }
+
+    private static void rebuild(final boolean clientView, final boolean expandTags) {
         final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
-        final boolean tagsReady = DataPackJson.tagsReady();
-        final Map<Block, List<Drop>> built = new HashMap<>();
+        final boolean tagsReady = expandTags && DataPackJson.tagsReady();
+        final TableBuilder<Block, List<Drop>> builder = new TableBuilder<>(TableId.CROOK.id());
         final List<DataPackJson.Source> tagFiles = new ArrayList<>();
         final List<DataPackJson.Source> patchFiles = new ArrayList<>();
 
-        for (final DataPackJson.Source source : sourceList) {
-            if (!DataPackJson.modLoaded(source.root())) {
-                continue;
-            }
-            if (DataPackJson.isPatch(source.root())) {
-                patchFiles.add(source);
-                continue;
-            }
-            final String rawInput = DataPackJson.string(source.root(), "input");
-            if (rawInput == null) {
-                ExNihiloSatellitium.LOGGER.warn("[crook] missing input in {}", source.id());
-                continue;
-            }
-            if (DataPackJson.isTag(rawInput)) {
-                if (tagsReady) {
-                    tagFiles.add(source);
-                }
-                continue;
-            }
-            final List<Block> inputs = blocks(rawInput, source.id());
-            final List<Drop> drops = parseDrops(source.root(), source.id());
-            for (final Block input : inputs) {
-                if (built.putIfAbsent(input, drops) != null) {
-                    ExNihiloSatellitium.LOGGER.warn(
-                            "[crook] duplicate input {} in {}, later entry skipped",
-                            BuiltInRegistries.BLOCK.getKey(input), source.id());
-                }
-            }
-        }
-
-        if (tagsReady) {
-            for (final DataPackJson.Source source : tagFiles) {
-                final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
-                final List<Drop> drops = parseDrops(source.root(), source.id());
-                if (drops.isEmpty()) {
+        try {
+            for (final DataPackJson.Source source : sourceList) {
+                if (!DataPackJson.modLoaded(source.root())) {
                     continue;
                 }
-                for (final Block input : inputs) {
-                    merge(built, input, drops);
+                if (DataPackJson.isPatch(source.root())) {
+                    patchFiles.add(source);
+                    continue;
                 }
+                final String rawInput = DataPackJson.string(source.root(), "input");
+                if (rawInput == null) {
+                    ExNihiloSatellitium.LOGGER.warn("[crook] missing input in {}", source.id());
+                    continue;
+                }
+                if (DataPackJson.isTag(rawInput)) {
+                    if (tagsReady) {
+                        tagFiles.add(source);
+                    }
+                    continue;
+                }
+                applyFile(builder, source);
             }
-            for (final DataPackJson.Source source : patchFiles) {
-                applyPatch(built, source);
+
+            if (tagsReady) {
+                for (final DataPackJson.Source source : tagFiles) {
+                    applyTagFile(builder, source);
+                }
+                for (final DataPackJson.Source source : patchFiles) {
+                    applyPatch(builder, source);
+                }
+                applyOverlay(builder);
             }
+        } catch (final RuntimeException exception) {
+            ExNihiloSatellitium.LOGGER.error("[crook] rebuild failed, keeping previous snapshot",
+                    exception);
+            return;
         }
 
-        final Map<Block, List<Drop>> snapshot = Map.copyOf(built);
+        final Map<Block, List<Drop>> snapshot = builder.build();
         if (clientView) {
             clientTable = snapshot;
         } else {
             table = snapshot;
         }
-        final int drops = built.values().stream().mapToInt(List::size).sum();
-        ExNihiloSatellitium.LOGGER.info("[crook] loaded {} leaves tables, {} drops ({} tag files, {} patches{}){}",
-                built.size(), drops, tagFiles.size(), patchFiles.size(),
-                tagsReady ? "" : ", tags not ready", clientView ? " (client)" : "");
+        final int drops = snapshot.values().stream().mapToInt(List::size).sum();
+        ExNihiloSatellitium.LOGGER.info(
+                "[crook] loaded {} leaves tables, {} drops ({} tag files, {} patches, {} overlay{}){}",
+                snapshot.size(), drops, tagFiles.size(), patchFiles.size(),
+                CustomizationOverlay.forTable(TableId.CROOK).size(),
+                tagsReady ? "" : ", waiting for tags", clientView ? " (client)" : "");
     }
 
-    private static void applyPatch(final Map<Block, List<Drop>> built,
+    private static void applyFile(final TableBuilder<Block, List<Drop>> builder,
+                                  final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+        final List<Drop> drops = parseDrops(source.root(), source.id());
+        if (inputs.isEmpty() || drops.isEmpty()) {
+            return;
+        }
+        for (final Block input : inputs) {
+            if (!builder.putIfAbsent(input, drops, source.id().toString())) {
+                ExNihiloSatellitium.LOGGER.warn(
+                        "[crook] duplicate input {} in {}, later entry skipped",
+                        BuiltInRegistries.BLOCK.getKey(input), source.id());
+            }
+        }
+    }
+
+    private static void applyTagFile(final TableBuilder<Block, List<Drop>> builder,
+                                     final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+        final List<Drop> drops = parseDrops(source.root(), source.id());
+        if (inputs.isEmpty() || drops.isEmpty()) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.merge(input, drops, CrookDrops::union, source.id().toString());
+        }
+    }
+
+    private static void applyPatch(final TableBuilder<Block, List<Drop>> builder,
                                    final DataPackJson.Source source) {
         final JsonObject root = source.root();
         final List<Block> inputs = blocks(DataPackJson.string(root, "input"), source.id());
@@ -152,7 +183,7 @@ public final class CrookDrops {
         }
         if (DataPackJson.removeAll(root)) {
             for (final Block input : inputs) {
-                built.remove(input);
+                builder.remove(input);
             }
             return;
         }
@@ -168,7 +199,8 @@ public final class CrookDrops {
         }
 
         for (final Block input : inputs) {
-            final List<Drop> list = new ArrayList<>(built.getOrDefault(input, List.of()));
+            final List<Drop> current = builder.get(input);
+            final List<Drop> list = new ArrayList<>(current == null ? List.of() : current);
             if (!removed.isEmpty()) {
                 list.removeIf(drop -> removed.contains(drop.item()));
             }
@@ -178,24 +210,125 @@ public final class CrookDrops {
                 }
             }
             if (list.isEmpty()) {
-                built.remove(input);
+                builder.remove(input);
             } else {
-                built.put(input, List.copyOf(list));
+                builder.put(input, List.copyOf(list), source.id().toString());
             }
         }
     }
 
-    private static void merge(final Map<Block, List<Drop>> built, final Block input,
-                              final List<Drop> drops) {
-        final List<Drop> list = new ArrayList<>(built.getOrDefault(input, List.of()));
-        for (final Drop drop : drops) {
+    private static void applyOverlay(final TableBuilder<Block, List<Drop>> builder) {
+        for (final CustomizationOverlay.Customization customization
+                : CustomizationOverlay.forTable(TableId.CROOK)) {
+            try {
+                switch (customization.action()) {
+                    case ADD -> overlayAdd(builder, customization);
+                    case REPLACE -> overlayReplace(builder, customization);
+                    case REMOVE -> overlayRemove(builder, customization);
+                }
+            } catch (final RuntimeException exception) {
+                ExNihiloSatellitium.LOGGER.warn("[crook] overlay {} failed: {}",
+                        customization.describe(), exception.toString());
+            }
+        }
+    }
+
+    private static void overlayAdd(final TableBuilder<Block, List<Drop>> builder,
+                                   final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = overlayLabel(customization);
+        final JsonObject root = customization.payload();
+        final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
+        final List<Drop> drops = parseDrops(root, label);
+        if (inputs.isEmpty() || drops.isEmpty()) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.merge(input, drops, CrookDrops::union, overlaySource(customization));
+        }
+    }
+
+    private static void overlayReplace(final TableBuilder<Block, List<Drop>> builder,
+                                       final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = overlayLabel(customization);
+        final JsonObject root = customization.payload();
+        final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
+        if (!root.has("drops")) {
+            ExNihiloSatellitium.LOGGER.warn("[crook] overlay {} has no drops", customization.describe());
+            return;
+        }
+        final List<Drop> drops = parseDrops(root, label);
+        if (drops.isEmpty() && !isEmptyArray(root, "drops")) {
+            ExNihiloSatellitium.LOGGER.warn(
+                    "[crook] overlay {} has no valid drops, keeping the old entry",
+                    customization.describe());
+            return;
+        }
+        for (final Block input : inputs) {
+            if (drops.isEmpty()) {
+                builder.remove(input);
+            } else {
+                builder.put(input, drops, overlaySource(customization));
+            }
+        }
+    }
+
+    private static void overlayRemove(final TableBuilder<Block, List<Drop>> builder,
+                                      final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = overlayLabel(customization);
+        final JsonObject root = customization.payload();
+        final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
+        if (inputs.isEmpty()) {
+            return;
+        }
+        final List<String> remove = DataPackJson.removeList(root);
+        if (remove.isEmpty()) {
+            for (final Block input : inputs) {
+                builder.remove(input);
+            }
+            return;
+        }
+        final Set<Item> removed = new LinkedHashSet<>();
+        for (final String raw : remove) {
+            removed.addAll(items(raw, label));
+        }
+        for (final Block input : inputs) {
+            final List<Drop> current = builder.get(input);
+            if (current == null) {
+                continue;
+            }
+            final List<Drop> list = new ArrayList<>(current);
+            list.removeIf(drop -> removed.contains(drop.item()));
+            if (list.isEmpty()) {
+                builder.remove(input);
+            } else {
+                builder.put(input, List.copyOf(list), overlaySource(customization));
+            }
+        }
+    }
+
+    private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = ResourceLocation.tryParse(
+                "exnihilosatellitium:overlay/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+    }
+
+    private static String overlaySource(final CustomizationOverlay.Customization customization) {
+        return "customize:" + customization.source() + "#" + customization.sequence();
+    }
+
+    /** {@code true} only for an explicit empty array; missing/invalid arrays are handled earlier. */
+    private static boolean isEmptyArray(final JsonObject root, final String key) {
+        return root.has(key) && root.get(key).isJsonArray() && root.getAsJsonArray(key).isEmpty();
+    }
+
+    private static List<Drop> union(final List<Drop> left, final List<Drop> right) {
+        final List<Drop> list = new ArrayList<>(left);
+        for (final Drop drop : right) {
             if (!list.contains(drop)) {
                 list.add(drop);
             }
         }
-        if (!list.isEmpty()) {
-            built.put(input, List.copyOf(list));
-        }
+        return List.copyOf(list);
     }
 
     private static List<Block> blocks(final String raw, final ResourceLocation file) {

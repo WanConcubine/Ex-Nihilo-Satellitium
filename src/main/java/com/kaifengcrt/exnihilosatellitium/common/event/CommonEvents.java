@@ -2,18 +2,13 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
-import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.command.ExNihiloTablesCommand;
 import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
-import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
 import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
-import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
-import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
-import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
-import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveRegistry;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.table.Tables;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -65,12 +60,7 @@ public final class CommonEvents {
     }
 
     private static void rebuildAll(final boolean clientView) {
-        SieveRegistry.rebuild(clientView);
-        BarrelRecipes.rebuild(clientView);
-        HammerRecipes.rebuild(clientView);
-        CrookDrops.rebuild(clientView);
-        CrucibleRecipes.rebuild(clientView);
-        CrucibleHeat.rebuild(clientView);
+        Tables.rebuildAll(clientView);
     }
 
     @SubscribeEvent

@@ -1379,7 +1379,7 @@ KJS 只能走 `kubejs/data`，CT 只能改原版配方；这与“尽可能支�
 - 每次改表结构要同时改 wiki 和 roadmap 的能力矩阵，并跑 `scripts/check-wiki.py`。
 - 专用服客户端 JEI 的同步（P4）是“看起来等价”的必要条件，但不阻塞 P1–P3。
 
-**当前状态。** P0（数据包 v2）已完成并在两版验证；P1 尚未开始。
+**当前状态。** P0（数据包 v2）已完成并在两版验证；P1（TableBuilder + overlay）已完成（2026-11-03，主线），见 §40。
 
 ## 39. 末影蛋糕（2026-11-03）
 
@@ -1416,3 +1416,43 @@ KJS 只能走 `kubejs/data`，CT 只能改原版配方；这与“尽可能支�
 - `/setblock` 放出来是 `bites=0`（vanilla 默认状态），不是物品放置的 `bites=6`；
   这是命令调试的正常差异，不要当 bug。
 
+## 40. P1：TableBuilder + CustomizationOverlay（2026-11-03）
+
+目标：让“数据包 / KubeJS / CraftTweaker 三条路径等价”从口号变成可执行的基座，
+但不引入任何 KJS/CT 依赖。
+
+1. **一张表一个 builder。** 新增 `common/table/TableBuilder<K,V>`：有序 map + 每个 key 的
+   last source。七张表的 `rebuild()` 都改成“建 builder → 喂文件 → 喂补丁 → 喂 overlay →
+   `build()` 发布不可变快照”。`putIfAbsent` 对应普通文件 / add，`put` 对应补丁 / replace，
+   `merge` 对应筛子/钩子的掉落合并，`remove` 对应删除。这样校验仍在各表的 parser 里，
+   但增删改只有一份装配逻辑。
+2. **overlay 不是“直接改 map”。** `CustomizationOverlay` 保存
+   `(table, action, JsonObject payload, source, sequence)`，每次 rebuild 在文件与补丁之后
+   按提交顺序重放。payload 用该表 datapack 文件的同一套 JSON 字段，所以解析、标签展开、
+   数值校验完全复用；`clear(source)` 让脚本重载只回收自己的贡献。
+3. **失败隔离。** 单条 overlay 包在 try/catch 里，异常只跳过该条；整个 `rebuild()` 也包一层，
+   出错时直接 `return`，上一份 volatile 快照继续服务。`replace` 先解析/校验新值，再删旧规则，
+   所以越界的 `chance`、`speed: 0`、未知 `result` 不会把原条目删掉。验收时故意写坏
+   `chance`、写坏一个数据包文件，dump 都不变。
+4. **可比较输出。** `TableDump` 把七张表格式化成按行排序的纯文本，`/exnihilo dump <table>`
+   直接发到命令源（RCON 可读）。头行只带表名与行数（overlay 数在 `/exnihilo tables`），这样 JSON 与脚本两条 fixture 的 dump 可以直接 diff。P2/P3 的 fixture 验收就是
+   同一份内容分别走 JSON / KJS / CT，然后 diff 这份输出。
+5. **测试入口。** P1 还没有 KJS/CT，于是用 OP 命令
+   `/exnihilo customize <table> add|remove|replace <json>` 驱动 overlay，
+   `/exnihilo customize list|clear [source]` 查看/清理。命令只是入口，真正的消费者是
+   将来的脚本绑定。
+6. **标签时序不变。** overlay 只在 `tagsReady` 之后重放；覆盖层里的 `#tag` 和数据包
+   一样在 `TagsUpdatedEvent` 之后展开。客户端视图同样重放（单人时两边共享静态状态）。
+
+验证：七张表各跑 add/remove/replace，`/reload` 前后 dump 逐字节一致，clear 后回到基线；
+1.20.1 分支用同一套代码复验通过。见 `docs/status.md` 与 `docs/customization-roadmap.md` P1。
+未做：KJS/CT 绑定、overlay 持久化、客户端同步（P2–P4）。
+
+设计取舍：
+
+- **payload 继续用 JSON，而不是先造七套类型化 API。** 校验只写一份，脚本层将来只做
+  “typed 调用 → JsonObject”的薄转换；反过来先造 typed API 会逼着 loader 和脚本各自校验。
+- **overlay 在文件之后。** 脚本是“最后一层”，和资源包/补丁的直觉一致；代价是脚本不能
+  给内置条目“打地基”，只能覆盖它。
+- **不持久化。** 脚本贡献由脚本在每次启动/重载时重新提交；P1 的命令入口只是测试，
+  重启丢失是预期行为，避免把调试状态悄悄写进存档。

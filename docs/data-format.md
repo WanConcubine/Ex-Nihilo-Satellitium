@@ -779,10 +779,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 普通具体条目（按资源 id 排序）
   → 普通标签条目（展开/合并）
   → 补丁（按资源 id 排序）
+  → 脚本 overlay（按提交顺序，最后重放）
 ```
 
 所以：**具体 > 标签**（锤子/熔点/热源），**标签合并**（筛子/钩子），
-**补丁最后**且能覆盖前面所有来源。
+**补丁在文件之后**，**overlay 在补丁之后**且能覆盖前面所有来源。
 
 ### 14.6 自检
 
@@ -792,6 +793,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   紧接着 `TagsUpdatedEvent` 再打印一次完整条数；以第二次为准。
 - 游戏内 `/exnihilo tables`（需要 OP）打印当前生效的条数汇总，改完数据包 `/reload`
   后立刻能看到有没有生效。
+- `/exnihilo dump <table>` 打印单张表按行排序的完整内容，用于和另一份 fixture 做 diff；
+  头行是 `# <table> N lines`，不含 overlay 数（overlay 数看 `/exnihilo tables`）。
 - 解析失败的条目只跳过该条并打 `[sieve]` / `[hammer]` / `[barrel]` / `[compost]` /
   `[crucible]` 前缀的警告；不会拖垮整张表。
 
@@ -806,6 +809,35 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 **生效方式**：服务端 `/reload` 或重启。单人/局域网 JEI 优先读服务端表，
 所以覆盖会同步到 JEI。**专用服客户端**读不到服务端数据包，JEI 仍显示 jar 内置版
 （`assets/exnihilosatellitium/` 镜像），这是客户端限制，可在整合包里给客户端也装同一数据包。
+
+### 14.9 脚本 overlay：同一份 JSON 的另一个入口（P1）
+
+七张表的 loader 现在都经过 `common/table/TableBuilder`；除了数据包文件，还有一张运行期
+overlay 队列（`CustomizationOverlay`）。P1 只通过 OP 命令暴露，用来验证 KJS/CT（P2/P3）
+将来共用的语义：
+
+```
+/exnihilo customize <table> add|remove|replace <json>
+/exnihilo customize list
+/exnihilo customize clear [source]
+/exnihilo dump <table>
+```
+
+- payload 与 datapack 文件字段完全相同，因此解析、校验、`#tag` 展开只写一份；
+- `add` = 普通文件语义；`replace` = 先删目标再写入；`remove` = 删整条，或按 `remove` 列表删；
+  锤子/熔点/热源不需要 `remove` 字段，给 `input`/`block` 即删整条（热源带 `properties`
+  时只删同状态）；
+- 每个操作带 source（命令是 `command`，将来的脚本用自己的 id），按提交顺序重放；
+  后提交者覆盖，`[customize]` 日志打印 payload 与 source；
+- overlay 在**每次 rebuild**（`/reload`、tags 更新、命令改表）时重放，不在 JSON 文件里，
+  所以不会被 `/reload` 丢掉；**不持久化**，重启服务器清空；
+- 失败隔离：单条操作解析异常只跳过该条；整表 rebuild 异常保留上一份快照；
+  `replace` 会先解析并校验新值，再删旧规则（坏 payload 不会把原条目删掉）。
+
+`/exnihilo dump <table>` 输出按行排序的文本（`sieve <input> -> <item> <chance> x<count>`、
+`hammer <block> -> <item> x<min>-<max>` 等）。头行是 `# <table> N lines`，不含 overlay 数，
+这样同一份 fixture 走 JSON 与走 overlay 的 dump 才能逐字节一致；这是 P2/P3 的验收方法。
+
 
 ## 15. M10 自动化机器（2026-11-01）
 
