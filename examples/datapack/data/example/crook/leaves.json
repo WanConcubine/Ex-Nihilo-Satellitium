@@ -1,0 +1,6 @@
+{
+  "input": "#minecraft:leaves",
+  "drops": [
+    { "item": "minecraft:stick", "chance": 0.1 }
+  ]
+}

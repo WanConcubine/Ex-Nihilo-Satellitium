@@ -1,0 +1,6 @@
+{
+  "mod": "tconstruct",
+  "base": "#minecraft:water",
+  "added": { "item": "minecraft:magma_cream" },
+  "result": "minecraft:netherrack"
+}

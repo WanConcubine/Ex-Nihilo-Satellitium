@@ -1,0 +1,6 @@
+{
+  "input": "#c:gravels",
+  "outputs": [
+    { "item": "minecraft:diamond", "chance": 0.01 }
+  ]
+}

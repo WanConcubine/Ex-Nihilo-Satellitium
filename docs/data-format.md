@@ -684,53 +684,124 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 ## 14. 数据包魔改指南（筛子 / 锤子 / 钩子 / 桶 / 堆肥 / 坩埚）
 
-所有玩法表都是**数据包资源**，路径固定：
+所有玩法表都是**数据包资源**，路径固定，加载器会扫描**所有命名空间**：
 
-| 表 | 路径 | 一条 JSON 表示 |
-|---|---|---|
-| 筛子 | `data/<namespace>/sieve/*.json` | 一个输入 + 掉落列表 |
-| 锤子 | `data/<namespace>/hammer/*.json` | 一个方块 + 产物 + 数量区间 |
-| 钩子 | `data/<namespace>/crook/*.json` | 一种树叶 + 追加掉落 |
-| 桶转化 | `data/<namespace>/barrel/*.json` | base + added → 方块 |
-| 堆肥 | `data/<namespace>/compost/*.json` | 物品/标签 → 分值 |
-| 坩埚熔点 | `data/<namespace>/crucible_melt/*.json` | 方块 → 流体 + 量 |
-| 坩埚热源 | `data/<namespace>/crucible_heat/*.json` | 方块（可带状态）→ 速度 |
+| 表 | 路径 | 一条 JSON 表示 | 输入可用 `#tag` |
+|---|---|---|---|
+| 筛子 | `data/<ns>/sieve/*.json` | 一个输入物品 + 掉落列表 | ✅ 物品标签 |
+| 锤子 | `data/<ns>/hammer/*.json` | 一个方块 + 产物 + 数量区间 | ✅ 方块标签 |
+| 钩子 | `data/<ns>/crook/*.json` | 一种树叶方块 + 追加掉落 | ✅ 方块标签 |
+| 桶转化 | `data/<ns>/barrel/*.json` | base 流体 + added → 方块/实体 | ✅ 流体/物品标签 |
+| 堆肥 | `data/<ns>/compost/*.json` | 物品/标签 → 分值 | ✅ 原生 |
+| 坩埚熔点 | `data/<ns>/crucible_melt/*.json` | 方块 → 流体 + 量 | ✅ 方块标签 |
+| 坩埚热源 | `data/<ns>/crucible_heat/*.json` | 方块（可带状态）→ 速度 | ✅ 方块标签 |
 
-**两种用法**：
+### 14.1 三种写法
 
 1. **覆盖内置条目**：在数据包里用同一路径，例如
    `data/exnihilosatellitium/sieve/sand.json` 会替换 jar 内的 `sand.json`
-   （数据包优先级更高，同名资源只保留高优先级那份）。
+   （数据包优先级更高，同名资源只保留高优先级那份）。**覆盖是整文件替换**，
+   要把原有条目一起抄全；只想改一两条时用下面的补丁。
 2. **新增条目**：用自己的命名空间，例如
-   `data/mypack/sieve/soul_sand.json`；加载器会扫描所有命名空间下的 `sieve/`、
-   `hammer/`、`crook/`、`barrel/`、`compost/`、`crucible_melt/`、`crucible_heat/`。
-   同一输入重复时按加载顺序后者覆盖并打警告。
+   `data/mypack/sieve/soul_sand.json`；同一输入重复时内置/同名文件先加载，
+   后加载的覆盖并打 `[sieve] duplicate input ...` 警告。
+3. **补丁**：文件里写 `"patch": true`（或出现 `"remove"`）就是补丁。
+   补丁在**所有普通文件之后**按资源 id 排序应用，所以不用抄全、还能删条目。
 
-示例（给沙子加 2% 钻石，覆盖内置 sand.json 时要把原有条目一起抄全）：
+### 14.2 标签输入
+
+`input` / `block` / `base` / `added` 都可以写 `#` 标签，加载时展开成当前注册表里的
+具体对象，玩法代码仍然按具体 id 查表：
+
+```json
+{ "input": "#minecraft:logs", "outputs": [ { "item": "minecraft:diamond", "chance": 0.01 } ] }
+```
+
+| 表 | 标签字段 | 展开规则 |
+|---|---|---|
+| 筛子 | `input`（物品标签） | **合并**：给每个匹配物品追加掉落；已有条目保留，完全相同的掉落只留一份 |
+| 钩子 | `input`（方块标签） | **合并**：给每个匹配树叶追加掉落，同上 |
+| 锤子 | `input`（方块标签） | **具体条目优先**：已有规则的方块不覆盖 |
+| 坩埚熔点 | `input`（方块标签） | **具体条目优先** |
+| 坩埚热源 | `block`（方块标签） | 按 `block + properties` 去重后追加 |
+| 桶转化 | `base` / `added.fluid` / `added.item` | 展开后做叉积；同一 `base + added` 重复时先到者赢并警告 |
+
+- 标签为空或拼错会打 `[...] empty or unknown tag #...` 警告，不会拖垮加载。
+- **掉落产物**（`item` / `result`）仍必须是具体 id，不支持标签；要“随机掉一种锭”请写多条。
+- 标签在 `/reload` 时重新展开；运行期新加进标签的物品会跟着生效。
+
+### 14.3 `mod` 条件
+
+任何表都可以在**文件根**写 `"mod": "tconstruct"`；模组不在时整个文件静默跳过，
+不会解析里面的物品，也不会刷 unknown id 警告。筛子/钩子的**单条掉落**还可以各自带
+`mod`，用于只缺某一条的软依赖。
+
+```json
+{ "mod": "tconstruct", "input": "minecraft:magma_block", "fluid": "minecraft:lava", "amount": 500 }
+```
+
+### 14.4 补丁与删除
+
+| 表 | `"patch": true` | `"remove": true` | `"remove": ["id", "#tag"]` |
+|---|---|---|---|
+| 筛子 | 追加 `outputs` | 删除该 `input` 整条 | 删除匹配的掉落 |
+| 钩子 | 追加 `drops` | 删除该 `input` 整条 | 删除匹配的掉落 |
+| 锤子 / 熔点 / 热源 | 替换该输入的规则 | 删除该输入 | — |
+| 桶 | 替换该 `base + added` 规则 | 删除该规则 | — |
+| 堆肥 | 追加 `values` | — | 删除匹配的条目（可再用 `values` 加回新值） |
+
+示例：给沙子删掉仙人掌、加一条 50% 钻石，不抄原文件：
 
 ```json
 {
   "input": "minecraft:sand",
-  "outputs": [
-    { "item": "exnihilosatellitium:iron_crushed", "chance": 0.2 },
-    { "item": "minecraft:diamond", "chance": 0.02 }
-  ]
+  "patch": true,
+  "remove": ["minecraft:cactus"],
+  "outputs": [ { "item": "minecraft:diamond", "chance": 0.5 } ]
 }
 ```
 
-热源可带状态属性：
+示例：删掉内置的“水 + 牛奶桶 → 史莱姆”规则：
 
 ```json
-{
-  "block": "minecraft:furnace",
-  "properties": { "lit": "true" },
-  "speed": 0.15
-}
+{ "base": "minecraft:water", "added": { "item": "minecraft:milk_bucket" }, "remove": true }
 ```
 
-**生效方式**：服务端 `/reload` 或重启；单人世界 JEI 现在优先读服务端表，
+- `remove` 里的 id 也可以是 `#tag`（筛子/钩子/堆肥），表示删掉所有匹配的掉落/条目。
+- 热源补丁带 `properties` 时只删/替换同状态的规则；不带则删该方块的全部规则。
+- 补丁按资源 id 排序依次应用；多个补丁改同一条目时，后面的看到前面的结果。
+
+### 14.5 加载顺序
+
+```
+普通具体条目（按资源 id 排序）
+  → 普通标签条目（展开/合并）
+  → 补丁（按资源 id 排序）
+```
+
+所以：**具体 > 标签**（锤子/熔点/热源），**标签合并**（筛子/钩子），
+**补丁最后**且能覆盖前面所有来源。
+
+### 14.6 自检
+
+- 服务端日志每次 reload 都会打印各表条数，例如
+  `[sieve] loaded 17 inputs, 100 drops (1 tag files, 1 patches)`。
+- 游戏内 `/exnihilo tables`（需要 OP）打印当前生效的条数汇总，改完数据包 `/reload`
+  后立刻能看到有没有生效。
+- 解析失败的条目只跳过该条并打 `[sieve]` / `[hammer]` / `[barrel]` / `[compost]` /
+  `[crucible]` 前缀的警告；不会拖垮整张表。
+
+### 14.7 示例包
+
+`examples/datapack/` 是一个可直接丢进 `world/datapacks/` 的最小示例，覆盖标签输入、
+补丁删除、`mod` 门、堆肥改值；用法见该目录的 `README.md`。
+
+### 14.8 生效方式与客户端
+
+**生效方式**：服务端 `/reload` 或重启。单人/局域网 JEI 优先读服务端表，
 所以覆盖会同步到 JEI。**专用服客户端**读不到服务端数据包，JEI 仍显示 jar 内置版
 （`assets/exnihilosatellitium/` 镜像），这是客户端限制，可在整合包里给客户端也装同一数据包。
+
 
 ## 15. M10 自动化机器（2026-11-01）
 
