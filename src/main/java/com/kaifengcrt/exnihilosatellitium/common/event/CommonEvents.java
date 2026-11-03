@@ -8,10 +8,12 @@ import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
 import com.kaifengcrt.exnihilosatellitium.common.table.Tables;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -51,6 +53,15 @@ public final class CommonEvents {
 
     private static void rebuildAll(final boolean clientView) {
         Tables.rebuildAll(clientView);
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(final ServerStoppedEvent event) {
+        final int dropped = CustomizationOverlay.clearAll();
+        if (dropped > 0) {
+            ExNihiloSatellitium.LOGGER.info(
+                    "[customize] cleared {} overlay op(s) on server stop", dropped);
+        }
     }
 
     @SubscribeEvent

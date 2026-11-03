@@ -2,9 +2,12 @@ package com.kaifengcrt.exnihilosatellitium.common.table;
 
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,11 +33,21 @@ import java.util.concurrent.atomic.AtomicLong;
  *       tables, the entries listed under {@code remove}).</li>
  * </ul>
  *
- * <p>Operations are applied in submission order; later operations win, and the
- * conflict is visible in the {@code [customize]} log. {@link #clear(String)}
- * lets a script reload drop only its own contributions.</p>
+ * <p><b>Ordering.</b> Operations are applied by ascending {@code priority}, then
+ * by submission order. A higher priority is applied later, so it wins against a
+ * lower one; two operations at the same priority fall back to "later submission
+ * wins". Data pack files and patches are always applied before any operation, so
+ * scripts are the last layer. The default priority is {@code 0}; KJS/CT (P2/P3)
+ * should give their sources explicit tiers instead of relying on mod load order.</p>
+ *
+ * <p>Operations are cleared when the server stops, so a single-player world
+ * switch cannot leak operations into the next world. Scripts re-submit on load;
+ * the command entry is deliberately not persistent.</p>
  */
 public final class CustomizationOverlay {
+
+    /** Hard cap on queued operations; a runaway script should fail fast, not grow forever. */
+    public static final int MAX_OPERATIONS = 4096;
 
     public enum Action {
         ADD,
@@ -44,11 +57,11 @@ public final class CustomizationOverlay {
 
     /** One queued operation; {@code payload} is defensively copied on submit. */
     public record Customization(TableId table, Action action, JsonObject payload, String source,
-                                long sequence) {
+                                int priority, long sequence) {
 
         public String describe() {
-            return this.table.id() + " " + this.action.name().toLowerCase(java.util.Locale.ROOT)
-                    + " " + this.payload;
+            return this.table.id() + " " + this.action.name().toLowerCase(Locale.ROOT)
+                    + " p" + this.priority + " " + this.payload;
         }
     }
 
@@ -58,33 +71,81 @@ public final class CustomizationOverlay {
     private CustomizationOverlay() {
     }
 
-    public static Customization add(final TableId table, final JsonObject payload, final String source) {
-        return submit(table, Action.ADD, payload, source);
+    public static @Nullable Customization add(final TableId table, final JsonObject payload,
+                                              final String source) {
+        return submit(table, Action.ADD, payload, source, 0);
     }
 
-    public static Customization remove(final TableId table, final JsonObject payload, final String source) {
-        return submit(table, Action.REMOVE, payload, source);
+    public static @Nullable Customization add(final TableId table, final JsonObject payload,
+                                              final String source, final int priority) {
+        return submit(table, Action.ADD, payload, source, priority);
     }
 
-    public static Customization replace(final TableId table, final JsonObject payload, final String source) {
-        return submit(table, Action.REPLACE, payload, source);
+    public static @Nullable Customization remove(final TableId table, final JsonObject payload,
+                                                 final String source) {
+        return submit(table, Action.REMOVE, payload, source, 0);
     }
 
-    public static Customization submit(final TableId table, final Action action, final JsonObject payload,
-                                       final String source) {
+    public static @Nullable Customization remove(final TableId table, final JsonObject payload,
+                                                 final String source, final int priority) {
+        return submit(table, Action.REMOVE, payload, source, priority);
+    }
+
+    public static @Nullable Customization replace(final TableId table, final JsonObject payload,
+                                                  final String source) {
+        return submit(table, Action.REPLACE, payload, source, 0);
+    }
+
+    public static @Nullable Customization replace(final TableId table, final JsonObject payload,
+                                                  final String source, final int priority) {
+        return submit(table, Action.REPLACE, payload, source, priority);
+    }
+
+    /**
+     * Queues one operation.
+     *
+     * @return the queued (or already queued identical) operation, or {@code null} when the
+     *         payload is empty or the {@link #MAX_OPERATIONS cap} has been reached
+     */
+    public static @Nullable Customization submit(final TableId table, final Action action,
+                                                 final JsonObject payload, final String source,
+                                                 final int priority) {
         Objects.requireNonNull(table, "table");
         Objects.requireNonNull(action, "action");
         Objects.requireNonNull(payload, "payload");
         final String origin = source == null || source.isBlank() ? "unknown" : source;
+        if (payload.size() == 0) {
+            ExNihiloSatellitium.LOGGER.warn("[customize] rejected empty payload from {}", origin);
+            return null;
+        }
+        if (OPERATIONS.size() >= MAX_OPERATIONS) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[customize] operation cap {} reached, {} {} from {} rejected",
+                    MAX_OPERATIONS, table.id(), action, origin);
+            return null;
+        }
+        final JsonObject copy = payload.deepCopy();
+        // Re-submitting the exact same operation from the same source (common when a
+        // script reloads without clearing first) is a no-op instead of a second entry.
+        for (final Customization existing : OPERATIONS) {
+            if (existing.table() == table && existing.action() == action
+                    && existing.priority() == priority
+                    && existing.source().equals(origin)
+                    && existing.payload().toString().equals(copy.toString())) {
+                ExNihiloSatellitium.LOGGER.debug(
+                        "[customize] duplicate {} from {} ignored", existing.describe(), origin);
+                return existing;
+            }
+        }
         final Customization customization = new Customization(
-                table, action, payload.deepCopy(), origin, SEQUENCE.incrementAndGet());
+                table, action, copy, origin, priority, SEQUENCE.incrementAndGet());
         OPERATIONS.add(customization);
         ExNihiloSatellitium.LOGGER.info("[customize] queued {} from {}",
                 customization.describe(), origin);
         return customization;
     }
 
-    /** Snapshot of the operations for one table, in submission order. */
+    /** Snapshot of the operations for one table: ascending priority, then submission order. */
     public static List<Customization> forTable(final TableId table) {
         final List<Customization> list = new ArrayList<>();
         for (final Customization customization : OPERATIONS) {
@@ -92,6 +153,8 @@ public final class CustomizationOverlay {
                 list.add(customization);
             }
         }
+        list.sort(Comparator.comparingInt(Customization::priority)
+                .thenComparingLong(Customization::sequence));
         return List.copyOf(list);
     }
 
@@ -102,7 +165,7 @@ public final class CustomizationOverlay {
         return before - OPERATIONS.size();
     }
 
-    /** Drops every operation (used by tests and by a full script reload). */
+    /** Drops every operation (server stop, tests, full script reload). */
     public static int clearAll() {
         final int size = OPERATIONS.size();
         OPERATIONS.clear();
