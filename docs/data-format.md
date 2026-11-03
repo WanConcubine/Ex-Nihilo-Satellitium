@@ -225,6 +225,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。需要分筛料微调时写成对象 `{"gravel":18,"sand":32,"dust":48}` |
 | `ingot` | ❌ | **无条件**复用某个锭：写具体物品名（`minecraft:iron_ingot`）。填了就熔炼到它，不注册自有锭。标签（`#forge:ingots/copper`）**不支持**：读表时标签还没加载，会打警告并按自有锭处理 |
 | `ingots` | ❌ | **受支持模组的有序候选**：`[{"item": "thermal:tin_ingot", "mod": "thermal_foundation"}]`。运行时取第一个 `mod` 已加载的候选；都不在就注册自有 `<id>_ingot`。数据侧 base 配方 `not(or(...))`、第 i 条变体 `mod_loaded(i) + not(之前所有候选)`。**注意 mod id 与物品命名空间可能不同**（Thermal：`thermal_foundation` / `thermal:`） |
+| `gems` | ❌ | **受支持模组的候选矿物**（与 `ingots` 同构）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 已加载时注册**：没装时物品、方块、三档碎料、筛出物、锤表、配方和标签都不出现。装模组时矿砾熔成对方物品。**不能与 `ingot`/`ingots` 混用**，混用整条跳过 |
 | `owner_mod` | ❌ | 主要来源模组，只用于自检与文档 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；表外骨架行默认 `false` |
@@ -255,11 +256,15 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   （`tconstruct:cobalt_ingot`；无匠魂时自有钴锭）；osmium → Mekanism；uranium → Mekanism → IE；
   aluminum → IE；platinum 无候选。IE 只在 1.20.1 有版本，锭 id 是 `ingot_aluminum` 这类；
   它的 crusher 输入走 `forge:ores/<m>`，我们的矿块已在标签里。
+- **矿物候选（2026-11-03）**：`fluorite → Mekanism`（`mekanism:fluorite_gem`）；
+  `apatite / cinnabar / niter / sulfur / ruby / sapphire → Thermal`（`thermal:apatite` / `thermal:ruby` 等）。走 `gems`，
+  **没有自有兜底物品**；无模组时没有熔炼终点。
 
 ### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
 
 **路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
-13 材料 × 6 形态 = 78 条。
+13 种金属材料 × 6 形态 = 78 条。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）不写匠魂熔炼，
+因为 Tinkers 没有对应熔融液体。
 
 ```json
 {
@@ -272,7 +277,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 }
 ```
 
-- 物品（broken / crushed / powdered）→ 60 mB；方块（ore_gravel / ore_sand / ore_dust）→ 240 mB。
+- 物品（broken / crushed / powdered）→ 45 mB（1/2 锭）；方块（ore_gravel / ore_sand / ore_dust）→ 180 mB（2 锭）。
 - result 是流体（`tag` + `amount`，没有 item/id）；`check-data-paths.py` 只对 item/id result
   检查版本键。
 - 温度取 Tinkers 自己的锭配方，时间按 90 mB 锭等比缩放；没匠魂时整批条件跳过。

@@ -1,0 +1,11 @@
+{
+  "mod": "mekanism",
+  "input": "minecraft:gravel",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:fluorite_broken",
+      "chance": 0.125
+    }
+  ],
+  "patch": true
+}

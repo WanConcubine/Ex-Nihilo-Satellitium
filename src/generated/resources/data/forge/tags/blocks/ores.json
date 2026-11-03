@@ -12,6 +12,13 @@
     "#forge:ores/osmium",
     "#forge:ores/zinc",
     "#forge:ores/cobalt",
-    "#forge:ores/uranium"
+    "#forge:ores/uranium",
+    "#forge:ores/fluorite",
+    "#forge:ores/apatite",
+    "#forge:ores/cinnabar",
+    "#forge:ores/niter",
+    "#forge:ores/sulfur",
+    "#forge:ores/ruby",
+    "#forge:ores/sapphire"
   ]
 }

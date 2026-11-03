@@ -28,6 +28,12 @@ public final class OreMaterials {
     private static final Pattern ID = Pattern.compile("[a-z0-9_]{1,64}");
     private static final Pattern COLOR = Pattern.compile("[0-9A-Fa-f]{6}");
     private static final String RESOURCE = "/exnihilosatellitium/materials.json";
+    /**
+     * Set by the {@code runData} JVM. Datagen must see every material so it can emit
+     * the assets for mod-gated {@code gems} entries; a normal game only registers a
+     * gem material when one of its candidate mods is actually loaded.
+     */
+    private static final boolean DATAGEN = Boolean.getBoolean("exnihilosatellitium.datagen");
 
     private static final List<OreMaterial> ALL = load();
 
@@ -59,12 +65,26 @@ public final class OreMaterials {
                 final JsonObject name = entry.getAsJsonObject("name");
                 final String en = name.get("en_us").getAsString();
                 final String zh = name.has("zh_cn") ? name.get("zh_cn").getAsString() : en;
+
+                // A material is either a metal (ingot/ingots) or a mineral (gems).
+                // Mixing the two would make the fallback item and its tag ambiguous.
+                final boolean gem = entry.has("gems");
+                if (gem && (entry.has("ingot") || entry.has("ingots"))) {
+                    ExNihiloSatellitium.LOGGER.error(
+                            "[materials] {}: 'gems' cannot be combined with 'ingot'/'ingots', skipped", id);
+                    continue;
+                }
                 // An unconditional "ingot" wins over the candidate list, so the
                 // candidates are dropped in that case.
-                final String explicitIngot = readIngot(entry, id);
-                final List<OreMaterial.IngotCandidate> candidates = explicitIngot == null
-                        ? readIngotCandidates(entry, id) : List.of();
-                final String ingot = resolveIngot(explicitIngot, candidates, id);
+                final String explicitProduct = gem ? null : readIngot(entry, id);
+                final List<OreMaterial.ProductCandidate> candidates = explicitProduct == null
+                        ? readCandidates(entry, gem ? "gems" : "ingots", id) : List.of();
+                if (gem && !DATAGEN && !anyCandidateLoaded(candidates)) {
+                    ExNihiloSatellitium.LOGGER.info(
+                            "[materials] {} not registered: none of its supporting mods is loaded", id);
+                    continue;
+                }
+                final String product = resolveProduct(explicitProduct, candidates, id);
 
                 if (!ID.matcher(id).matches()) {
                     ExNihiloSatellitium.LOGGER.error("[materials] bad id '{}', skipped", id);
@@ -83,8 +103,8 @@ public final class OreMaterials {
                     ExNihiloSatellitium.LOGGER.error("[materials] duplicate id '{}', later entry skipped", id);
                     continue;
                 }
-                out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity, ingot,
-                        candidates));
+                out.add(new OreMaterial(id, Integer.parseInt(color, 16), en, zh, tier, rarity, product,
+                        candidates, gem));
             }
         } catch (Exception exception) {
             ExNihiloSatellitium.LOGGER.error("[materials] could not read {}: {}", RESOURCE, exception.toString());
@@ -118,54 +138,56 @@ public final class OreMaterials {
     }
 
     /**
-     * Parses the ordered {@code ingots} candidate list ({@code {"item": "...",
-     * "mod": "..."}}). Entries without {@code item} or with an unparseable id are
-     * skipped with a log line; a missing {@code mod} makes the candidate
-     * unconditional.
+     * Parses the ordered candidate list from {@code field} ({@code "ingots"} or
+     * {@code "gems"}), each entry {@code {"item": "...", "mod": "..."}}. Entries
+     * without {@code item} or with an unparseable id are skipped with a log line;
+     * a missing {@code mod} makes the candidate unconditional.
      */
-    private static List<OreMaterial.IngotCandidate> readIngotCandidates(final JsonObject entry,
-                                                                      final String id) {
-        final JsonElement candidates = entry.get("ingots");
+    private static List<OreMaterial.ProductCandidate> readCandidates(final JsonObject entry,
+                                                                     final String field,
+                                                                     final String id) {
+        final JsonElement candidates = entry.get(field);
         if (candidates == null || !candidates.isJsonArray()) {
             return List.of();
         }
-        final List<OreMaterial.IngotCandidate> out = new ArrayList<>();
+        final List<OreMaterial.ProductCandidate> out = new ArrayList<>();
         for (final JsonElement element : candidates.getAsJsonArray()) {
             if (!element.isJsonObject()) {
-                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping a non-object ingots entry", id);
+                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping a non-object {} entry", id, field);
                 continue;
             }
             final JsonObject candidate = element.getAsJsonObject();
             if (!candidate.has("item")) {
-                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping an ingots entry without 'item'", id);
+                ExNihiloSatellitium.LOGGER.warn("[materials] {}: skipping a {} entry without 'item'", id, field);
                 continue;
             }
             final String item = candidate.get("item").getAsString();
             if (ResourceLocation.tryParse(item) == null) {
-                ExNihiloSatellitium.LOGGER.error("[materials] {}: bad ingots item '{}', skipped", id, item);
+                ExNihiloSatellitium.LOGGER.error("[materials] {}: bad {} item '{}', skipped", id, field, item);
                 continue;
             }
             final String mod = candidate.has("mod") ? candidate.get("mod").getAsString() : null;
-            out.add(new OreMaterial.IngotCandidate(item, mod));
+            out.add(new OreMaterial.ProductCandidate(item, mod));
         }
         return List.copyOf(out);
     }
 
     /**
-     * Resolves the ingot the ore blocks smelt into: the first candidate whose mod
-     * is loaded, else our own {@code <id>_ingot} (returned as {@code null}).
+     * Resolves the item the ore blocks smelt into: the first candidate whose mod
+     * is loaded, else our own fallback ({@code <id>_ingot}, or {@code <id>} for
+     * gems; returned as {@code null}).
      *
      * <p>The hand-written conditional smelting recipes carry the same order, so the
      * JSON data and this runtime resolution agree without the recipe existing twice
      * at load time.</p>
      */
-    private static String resolveIngot(final String explicit,
-                                       final List<OreMaterial.IngotCandidate> candidates,
-                                       final String id) {
+    private static String resolveProduct(final String explicit,
+                                         final List<OreMaterial.ProductCandidate> candidates,
+                                         final String id) {
         if (explicit != null) {
             return explicit;
         }
-        for (final OreMaterial.IngotCandidate candidate : candidates) {
+        for (final OreMaterial.ProductCandidate candidate : candidates) {
             if (candidate.mod() != null && !isModLoaded(candidate.mod())) {
                 continue;
             }
@@ -174,6 +196,16 @@ public final class OreMaterials {
             return candidate.item();
         }
         return null;
+    }
+
+    /** True when at least one candidate is unconditional or its mod is loaded. */
+    private static boolean anyCandidateLoaded(final List<OreMaterial.ProductCandidate> candidates) {
+        for (final OreMaterial.ProductCandidate candidate : candidates) {
+            if (candidate.mod() == null || isModLoaded(candidate.mod())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isModLoaded(final String mod) {

@@ -1,7 +1,16 @@
 {
   "values": [
-    "exnihilosatellitium:tin_ore_gravel",
-    "exnihilosatellitium:tin_ore_sand",
-    "exnihilosatellitium:tin_ore_dust"
+    {
+      "id": "exnihilosatellitium:tin_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:tin_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:tin_ore_dust",
+      "required": false
+    }
   ]
 }

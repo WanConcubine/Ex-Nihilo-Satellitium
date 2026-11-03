@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:cobalt_powdered"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_cobalt"
   },
   "temperature": 950,
-  "time": 43
+  "time": 32
 }

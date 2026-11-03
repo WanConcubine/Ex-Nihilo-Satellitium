@@ -85,12 +85,14 @@
 
 | 条目 | 联动对象 | 1.20.1 现状 | 状态 |
 |---|---|---|---|
-| 钴（碎下界岩过筛，原版约 1%） | 匠魂 3 | 已接入 `cobalt` + `tconstruct:cobalt_ingot`；碎下界岩 1%，78 条熔炼（60/240 mB） | ✅ |
+| 钴（碎下界岩过筛，原版约 1%） | 匠魂 3 | 已接入 `cobalt` + `tconstruct:cobalt_ingot`；碎下界岩 1%，78 条熔炼（45/180 mB） | ✅ |
 | 阿迪特（碎下界岩过筛） | 匠魂 3 + 工匠巧思 | Tinkers 3.12.1 已移除；等「工匠巧思」拓展 | ⏸ |
 | 碧空 / 末影黏液草种子 | 匠魂 3 | 条件物品；右键草方块 / 泥土 → `*_vanilla_slime_grass`；泥土筛 2% / 1% | ✅（右键待实测） |
 | 矿砾 / 矿砂 / 矿尘、破碎矿 / 粉碎矿 / 矿粉 | 匠魂 / 龙之进化 | 部分存在 | ❓ |
 | 锭联动（tin / lead / osmium / uranium） | Mekanism 1.21.1 | 已接入：装了 Mek 熔成 `mekanism:ingot_*`，没装用自有锭（`ingots` 候选 + 配方条件） | ✅ |
-| Thermal 系列锭联动 | Thermal 1.20.1 | 接在 **1.20.1 分支**（双版本目标）；1.21.1 侧等它有 1.21.1 版 | ⏳ 随 1.20.1 线 |
+| Thermal 系列锭联动 | Thermal 1.20.1 | 已真装验证（tin/silver/lead/nickel 按 `thermal_foundation` 优先）；1.21.1 侧等它有 1.21.1 版 | ✅ |
+| Mekanism 氟石（矿物链） | Mekanism 1.20.1 / 1.21.1 | 新增 `fluorite` 材料：筛三档 → 矿块 → 熔成 `mekanism:fluorite_gem`；无自有兜底物品 | ✅ |
+| Thermal 六种矿物（矿物链） | Thermal 1.20.1 | 新增 apatite/cinnabar/niter/sulfur/ruby/sapphire：筛三档 → 矿块 → 熔成 `thermal:*`；无自有兜底物品 | ✅ |
 | Immersive Engineering 锭联动 | IE 1.20.1 | 接在 **1.20.1 分支**：silver / lead / nickel / aluminum / uranium 候选；IE 粉碎机走 `forge:ores/<m>` 标签 | ✅ |
 | 黄铀（过筛获得） | 大型反应堆 | 有 1.20.1 移植，未核实 | ❓ |
 | 橡胶树苗（过筛 + 可堆肥） | MFR | 1.20.1 无 MFR | ⏸ 等模组 |

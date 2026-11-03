@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "exnihilosatellitium:apatite_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:apatite_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:apatite_ore_dust",
+      "required": false
+    }
+  ]
+}

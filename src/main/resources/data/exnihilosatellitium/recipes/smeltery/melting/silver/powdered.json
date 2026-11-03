@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:silver_powdered"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_silver"
   },
   "temperature": 790,
-  "time": 40
+  "time": 30
 }

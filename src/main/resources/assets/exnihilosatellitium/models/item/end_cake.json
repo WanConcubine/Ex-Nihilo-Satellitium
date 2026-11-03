@@ -1,3 +1,6 @@
 {
-  "parent": "exnihilosatellitium:block/end_cake"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "exnihilosatellitium:item/end_cake"
+  }
 }

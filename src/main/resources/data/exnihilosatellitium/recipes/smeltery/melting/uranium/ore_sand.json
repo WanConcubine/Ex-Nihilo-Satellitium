@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:uranium_ore_sand"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_uranium"
   },
   "temperature": 830,
-  "time": 163
+  "time": 122
 }

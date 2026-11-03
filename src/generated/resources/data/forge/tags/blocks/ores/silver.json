@@ -1,7 +1,16 @@
 {
   "values": [
-    "exnihilosatellitium:silver_ore_gravel",
-    "exnihilosatellitium:silver_ore_sand",
-    "exnihilosatellitium:silver_ore_dust"
+    {
+      "id": "exnihilosatellitium:silver_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:silver_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:silver_ore_dust",
+      "required": false
+    }
   ]
 }

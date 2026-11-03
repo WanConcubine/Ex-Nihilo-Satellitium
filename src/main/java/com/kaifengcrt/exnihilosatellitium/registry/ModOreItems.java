@@ -40,8 +40,8 @@ public final class ModOreItems {
                 entries.put(stage, ITEMS.register(material.id() + "_" + stage,
                         () -> new Item(new Item.Properties())));
             }
-            if (material.hasOwnIngot()) {
-                entries.put("ingot", ITEMS.register(material.id() + "_ingot",
+            if (material.hasOwnProduct()) {
+                entries.put("product", ITEMS.register(material.ownItemId(),
                         () -> new Item(new Item.Properties())));
             }
             BY_MATERIAL.put(material.id(), entries);

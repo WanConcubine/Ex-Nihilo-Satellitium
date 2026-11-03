@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:niter_ore_gravel",
+  "result": "exnihilosatellitium:niter_crushed",
+  "min": 4,
+  "max": 6,
+  "mod": "thermal_foundation"
+}

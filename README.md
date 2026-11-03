@@ -24,8 +24,8 @@
 
 1. 装好 Forge 47.4.x（Java 17），把 jar 放进 `mods/`。
 2. 可选：**JEI**（配方查询，`runClient -PdevMods` 时从 `libs/` 加载）、**Jade**（方块信息）、
-   **Create / Thermal Foundation / Immersive Engineering / Tinkers' Construct 3 + Mantle**
-   （金属锭、矿石块与匠魂熔炼；全部可选，没装回退自有物品）。
+   **Mekanism / Create / Thermal Foundation / Immersive Engineering / Tinkers' Construct 3 + Mantle**
+   （金属锭有自有兜底；矿砾/矿砂/矿尘与氟石/磷灰石等联动矿物只在装对应模组时出现；匠魂熔炼可选）。
 
 0.2.0 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 

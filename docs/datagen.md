@@ -2,6 +2,11 @@
 
 > 2026-11-02。**三批都已完成**：标签 + 掉落表、配方、blockstate/模型。
 > 现在这条线和主线一样，vanilla 类型的数据全部由 `runData` 生成。
+>
+> **2026-11-03**：data run 带 `-Dexnihilosatellitium.datagen=true`（`build.gradle` 已配）。
+> `gems` 材料只在对应模组加载时注册；datagen 强制包含它们，生成模型/可选标签/带
+> `forge:mod_loaded` 条件的 2×2 配方。当前 164 条生成配方、72 张掉落表（7 种 `gems`
+> 矿块由 `SelfDropBlock` 掉自身）、58 个标签。
 
 ## 1. 本分支现在有什么
 
@@ -12,16 +17,16 @@
 | Provider | 产出 | 文件数 |
 |---|---|---|
 | `ModDataGen` | `GatherDataEvent` 入口 | — |
-| `ModBlockTags` | 方块标签：`forge:ores/<m>`、`mineable/*`、`#exnihilosatellitium:wooden_crucibles` | 18 |
-| `ModItemTags` | 物品标签：`forge:ores|ingots/<m>`、`#exnihilosatellitium:compostable` | 23 |
-| `ModLootTables` | 方块自掉表 | 69 |
-| `ModRecipes` | 配方（矿石链、桶/坩埚、筛/网、锤/钩、机器/插件、人偶、瓷、石子、钴） | 143 |
-| `ModBlockStates` | blockstate + 机械方块模型 | 74 + 29 |
-| `ModItemModels` | 物品模型（从注册表推导） | 157 |
+| `ModBlockTags` | 方块标签：`forge:ores/<m>`、`mineable/*`、`#exnihilosatellitium:wooden_crucibles` | 24 |
+| `ModItemTags` | 物品标签：`forge:ores|ingots|gems/<m>`、`#exnihilosatellitium:compostable` | 35 |
+| `ModLootTables` | 方块自掉表 | 87 |
+| `ModRecipes` | 配方（矿石链、桶/坩埚、筛/网、锤/钩、机器/插件、人偶、瓷、石子、钴） | 164 |
+| `ModBlockStates` | blockstate + 机械方块模型 | 95 + 29 |
+| `ModItemModels` | 物品模型（从注册表推导） | 199 |
 
-- 当前整个 `data/` 树：**278 recipe / 72 loot_tables / 44 tags**（143 条生成 + 135 条手写）。
-- 手写保留：45 条 `*_smelting_<mod>` 候选变体、12 条 `create:crushing`、78 条匠魂熔炼、
-  13 个手绘方块模型、2 个手绘物品模型（`electric_hammer` / `fuel_hammer`），
+- 当前整个 `data/` 树：**321 recipe / 72 loot_tables / 58 tags**（164 条生成 + 157 条手写）。
+- 手写保留：66 条 `*_smelting_<mod>` 候选变体、12 条 `create:crushing`、78 条匠魂熔炼、
+  1 条末影蛋糕、13 个手绘方块模型、2 个手绘物品模型（`electric_hammer` / `fuel_hammer`），
   以及 2 个条件物品模型（匠魂种子；只有匠魂在场才注册）。
 
 ## 2. 1.20.1 侧的三个 API 坑（移植时踩过）

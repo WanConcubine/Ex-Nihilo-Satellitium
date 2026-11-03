@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:nickel_ore_gravel"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_nickel"
   },
   "temperature": 950,
-  "time": 173
+  "time": 130
 }

@@ -1,7 +1,16 @@
 {
   "values": [
-    "exnihilosatellitium:cobalt_ore_gravel",
-    "exnihilosatellitium:cobalt_ore_sand",
-    "exnihilosatellitium:cobalt_ore_dust"
+    {
+      "id": "exnihilosatellitium:cobalt_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:cobalt_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:cobalt_ore_dust",
+      "required": false
+    }
   ]
 }

@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:aluminum_ore_dust"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_aluminum"
   },
   "temperature": 425,
-  "time": 125
+  "time": 94
 }

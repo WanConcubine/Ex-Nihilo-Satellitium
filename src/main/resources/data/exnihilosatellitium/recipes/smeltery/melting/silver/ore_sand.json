@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:silver_ore_sand"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_silver"
   },
   "temperature": 790,
-  "time": 160
+  "time": 120
 }

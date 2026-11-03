@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:platinum_ore_dust"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_platinum"
   },
   "temperature": 970,
-  "time": 173
+  "time": 130
 }

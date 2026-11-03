@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:cobalt_ore_dust"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_cobalt"
   },
   "temperature": 950,
-  "time": 173
+  "time": 130
 }

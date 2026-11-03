@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:copper_ore_sand"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_copper"
   },
   "temperature": 500,
-  "time": 133
+  "time": 100
 }

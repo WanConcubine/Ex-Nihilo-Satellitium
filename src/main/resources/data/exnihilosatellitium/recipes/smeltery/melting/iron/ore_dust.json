@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:iron_ore_dust"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_iron"
   },
   "temperature": 800,
-  "time": 160
+  "time": 120
 }

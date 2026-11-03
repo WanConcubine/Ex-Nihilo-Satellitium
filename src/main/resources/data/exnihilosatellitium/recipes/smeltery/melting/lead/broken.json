@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:lead_broken"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_lead"
   },
   "temperature": 330,
-  "time": 29
+  "time": 22
 }
