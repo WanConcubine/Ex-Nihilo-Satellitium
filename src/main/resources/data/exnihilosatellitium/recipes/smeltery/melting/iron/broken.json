@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:iron_broken"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_iron"
   },
   "temperature": 800,
-  "time": 40
+  "time": 30
 }

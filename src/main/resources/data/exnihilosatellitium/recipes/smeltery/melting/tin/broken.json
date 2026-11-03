@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:tin_broken"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_tin"
   },
   "temperature": 225,
-  "time": 26
+  "time": 20
 }

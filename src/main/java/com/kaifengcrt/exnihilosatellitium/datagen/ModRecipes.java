@@ -30,6 +30,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -72,8 +73,9 @@ public final class ModRecipes extends RecipeProvider {
         // 1.20.1 has no RecipeOutput: wrap every finished recipe so the generated
         // advancement is dropped and optional `conditions` can be attached.
         final Consumer<FinishedRecipe> out = recipe -> output.accept(DatagenRecipe.of(recipe, null));
+        final Map<String, JsonArray> gemPackConditions = gemPackConditions();
 
-        oreChain(out);
+        oreChain(out, gemPackConditions);
         barrels(out);
         woodenCrucibles(out);
         sieveAndMeshes(out);
@@ -86,6 +88,42 @@ public final class ModRecipes extends RecipeProvider {
         silkwormCooking(out);
     }
 
+    /**
+     * Pack-recipe conditions for mod-gated {@code gems}: the 2x2 recipe only exists
+     * while one of its candidate mods is loaded. Metals have no condition.
+     */
+    private static Map<String, JsonArray> gemPackConditions() {
+        final Map<String, JsonArray> out = new LinkedHashMap<>();
+        for (final OreMaterial material : OreMaterials.all()) {
+            if (!material.gem()) {
+                continue;
+            }
+            final List<String> mods = new ArrayList<>();
+            for (final OreMaterial.ProductCandidate candidate : material.candidates()) {
+                if (candidate.mod() != null) {
+                    mods.add(candidate.mod());
+                }
+            }
+            if (!mods.isEmpty()) {
+                out.put(material.id(), anyModLoaded(mods));
+            }
+        }
+        return out;
+    }
+
+    /** {@code [{"type":"forge:or","values":[...]}]} or a single mod_loaded. */
+    private static JsonArray anyModLoaded(final List<String> mods) {
+        if (mods.size() == 1) {
+            return modLoaded(mods);
+        }
+        final JsonObject or = new JsonObject();
+        or.addProperty("type", "forge:or");
+        or.add("values", modLoaded(mods));
+        final JsonArray out = new JsonArray();
+        out.add(or);
+        return out;
+    }
+
     // ------------------------------------------------------------ ore chain
 
     /**
@@ -93,7 +131,8 @@ public final class ModRecipes extends RecipeProvider {
      * {@code ingots} candidate list get a conditional base recipe (our own ingot
      * only while none of those mods is loaded); the per-mod variants stay hand-written.
      */
-    private static void oreChain(final Consumer<FinishedRecipe> out) {
+    private static void oreChain(final Consumer<FinishedRecipe> out,
+                                 final Map<String, JsonArray> gemPackConditions) {
         for (final OreMaterial material : OreMaterials.all()) {
             final Map<String, RegistryObject<Item>> items =
                     ModOreItems.byMaterial().get(material.id());
@@ -104,57 +143,64 @@ public final class ModRecipes extends RecipeProvider {
             final ItemLike sand = items.get("ore_sand").get();
             final ItemLike dust = items.get("ore_dust").get();
 
-            pack(out, material.id() + "_broken_to_ore_gravel", broken, gravel);
-            pack(out, material.id() + "_crushed_to_ore_sand", crushed, sand);
-            pack(out, material.id() + "_powdered_to_ore_dust", powdered, dust);
+            final JsonArray packConditions = gemPackConditions.get(material.id());
+            pack(out, material.id() + "_broken_to_ore_gravel", broken, gravel, packConditions);
+            pack(out, material.id() + "_crushed_to_ore_sand", crushed, sand, packConditions);
+            pack(out, material.id() + "_powdered_to_ore_dust", powdered, dust, packConditions);
+
+            // Gem/mineral entries have no own fallback: without the supported mod
+            // the ore chain simply has no smelting endpoint. The per-mod variants
+            // are hand-written, so datagen emits nothing for these.
+            if (material.gem()) {
+                continue;
+            }
 
             final List<String> loadedMods = new ArrayList<>();
-            for (final OreMaterial.IngotCandidate candidate : material.ingotCandidates()) {
+            for (final OreMaterial.ProductCandidate candidate : material.candidates()) {
                 if (candidate.mod() != null) {
                     loadedMods.add(candidate.mod());
                 }
             }
             final JsonArray conditions;
-            if (material.ingotCandidates().isEmpty()) {
+            if (material.candidates().isEmpty()) {
                 conditions = null;
             } else if (loadedMods.isEmpty()) {
                 // An unconditional candidate always wins, so there is no base recipe.
-                ExNihiloSatellitium.LOGGER.warn("[datagen] {}: unconditional ingot candidate, "
+                ExNihiloSatellitium.LOGGER.warn("[datagen] {}: unconditional product candidate, "
                         + "no base smelting recipe generated", material.id());
                 continue;
             } else {
                 conditions = not(modLoaded(loadedMods));
             }
 
-            final Item ingot = smeltingTarget(material);
-            smelt(out, material.id() + "_ore_gravel_smelting", gravel, ingot, 0.1F, 200, conditions);
-            smelt(out, material.id() + "_ore_sand_smelting", sand, ingot, 0.1F, 200, conditions);
-            smelt(out, material.id() + "_ore_dust_smelting", dust, ingot, 0.1F, 200, conditions);
+            final Item product = smeltingTarget(material);
+            smelt(out, material.id() + "_ore_gravel_smelting", gravel, product, 0.1F, 200, conditions);
+            smelt(out, material.id() + "_ore_sand_smelting", sand, product, 0.1F, 200, conditions);
+            smelt(out, material.id() + "_ore_dust_smelting", dust, product, 0.1F, 200, conditions);
         }
     }
 
-    /** The ingot our own recipes point at; for candidates that is always our fallback. */
+    /** The product our own recipes point at; for candidates that is always our fallback. */
     private static Item smeltingTarget(final OreMaterial material) {
-        if (!material.ingotCandidates().isEmpty() || material.ingot() == null) {
-            final var holder = ModOreItems.byMaterial().get(material.id()).get("ingot");
+        if (!material.candidates().isEmpty() || material.product() == null) {
+            final var holder = ModOreItems.byMaterial().get(material.id()).get("product");
             if (holder == null) {
-                throw new IllegalStateException("material " + material.id() + " has no own ingot item: "
+                throw new IllegalStateException("material " + material.id() + " has no own product item: "
                         + "run datagen without its supported mods on the classpath");
             }
             return holder.get();
         }
-        return requireItem(material.ingot());
+        return requireItem(material.product());
     }
 
     /** 2×2 of one refinement stage back into the ore block. */
     private static void pack(final Consumer<FinishedRecipe> out, final String name, final ItemLike input,
-                             final ItemLike result) {
-                save(out, name, ShapedRecipeBuilder.shaped(MISC, result)
+                             final ItemLike result, @Nullable final JsonArray conditions) {
+        save(out, name, ShapedRecipeBuilder.shaped(MISC, result)
                 .pattern("xx")
                 .pattern("xx")
                 .define('x', input)
-                .unlockedBy("has_" + path(input), has(input))
-                );
+                .unlockedBy("has_" + path(input), has(input)), conditions);
     }
 
     // -------------------------------------------------------------- barrels
@@ -537,13 +583,21 @@ public final class ModRecipes extends RecipeProvider {
      */
     private static void save(final Consumer<FinishedRecipe> out, final String name,
                              final RecipeBuilder builder) {
+        save(out, name, builder, null);
+    }
+
+    private static void save(final Consumer<FinishedRecipe> out, final String name,
+                             final RecipeBuilder builder, @Nullable final JsonArray conditions) {
+        final Consumer<FinishedRecipe> target = conditions == null
+                ? out
+                : recipe -> out.accept(DatagenRecipe.of(recipe, conditions));
         final ResourceLocation wanted = id(name);
         if (RecipeBuilder.getDefaultRecipeId(builder.getResult()).equals(wanted)) {
-            builder.save(out);
+            builder.save(target);
         } else {
             // The id must be namespace-qualified: a bare path would resolve to
             // `minecraft:<path>` and the file would land under data/minecraft/.
-            builder.save(out, wanted.toString());
+            builder.save(target, wanted.toString());
         }
     }
 

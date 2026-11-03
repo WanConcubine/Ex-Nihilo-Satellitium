@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mekanism"
+    }
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:fluorite_powdered"
+    }
+  },
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:fluorite_ore_dust"
+  },
+  "show_notification": true
+}

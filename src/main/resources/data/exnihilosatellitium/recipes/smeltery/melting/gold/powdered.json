@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:gold_powdered"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_gold"
   },
   "temperature": 700,
-  "time": 38
+  "time": 28
 }

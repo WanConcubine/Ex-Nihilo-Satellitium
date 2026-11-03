@@ -106,6 +106,9 @@ minecraft {
         data {
             // example of overriding the workingDirectory set in configureEach above
             workingDirectory project.file('run-data')
+            // Datagen must still see mod-gated `gems` materials so their assets
+            // exist for packs that do install Mekanism/Thermal.
+            property 'exnihilosatellitium.datagen', 'true'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
@@ -215,6 +218,9 @@ dependencies {
     //   ./gradlew runServer -PtechMods      (integration test)
     //   ./gradlew runData                   (datagen, no tech mods)
     // Thermal Foundation needs CoFH Core; Thermal Expansion is only for a realistic pack.
+    if (project.hasProperty("techMods") && file("libs/Mekanism-1.20.1-10.4.16.80.jar").exists()) {
+        runtimeOnly fg.deobf("libs:Mekanism-1.20.1:10.4.16.80")
+    }
     if (project.hasProperty("techMods") && file("libs/cofh_core-1.20.1-11.0.2.56.jar").exists()) {
         runtimeOnly fg.deobf("libs:cofh_core-1.20.1:11.0.2.56")
     }

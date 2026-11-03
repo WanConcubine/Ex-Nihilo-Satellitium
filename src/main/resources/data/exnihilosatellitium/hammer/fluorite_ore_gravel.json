@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:fluorite_ore_gravel",
+  "result": "exnihilosatellitium:fluorite_crushed",
+  "min": 4,
+  "max": 6,
+  "mod": "mekanism"
+}

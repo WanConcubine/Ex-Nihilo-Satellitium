@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:lead_ore_dust"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_lead"
   },
   "temperature": 330,
-  "time": 115
+  "time": 86
 }

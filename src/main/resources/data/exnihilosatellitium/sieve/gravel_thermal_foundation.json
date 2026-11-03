@@ -1,0 +1,31 @@
+{
+  "mod": "thermal_foundation",
+  "input": "minecraft:gravel",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:apatite_broken",
+      "chance": 0.05556
+    },
+    {
+      "item": "exnihilosatellitium:cinnabar_broken",
+      "chance": 0.03125
+    },
+    {
+      "item": "exnihilosatellitium:niter_broken",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:sulfur_broken",
+      "chance": 0.04167
+    },
+    {
+      "item": "exnihilosatellitium:ruby_broken",
+      "chance": 0.01562
+    },
+    {
+      "item": "exnihilosatellitium:sapphire_broken",
+      "chance": 0.01562
+    }
+  ],
+  "patch": true
+}

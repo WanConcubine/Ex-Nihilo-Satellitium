@@ -7,6 +7,7 @@ import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import net.minecraft.core.HolderLookup;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -65,8 +66,9 @@ public final class ModBlockTags extends BlockTagsProvider {
             final var blocks = ModOreBlocks.byMaterial().get(material.id());
             for (final String kind : ModOreBlocks.KINDS) {
                 final Block block = blocks.get(kind).get();
-                shovel.add(block);
-                this.tag(oreTag).add(block);
+                // Optional: a mod-gated gem material may not exist at runtime.
+                shovel.addOptional(ForgeRegistries.BLOCKS.getKey(block));
+                this.tag(oreTag).addOptional(ForgeRegistries.BLOCKS.getKey(block));
             }
             forgeOres.addTag(oreTag);
         }

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "thermal_foundation"
+    }
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:sulfur_broken"
+    }
+  },
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:sulfur_ore_gravel"
+  },
+  "show_notification": true
+}

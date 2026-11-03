@@ -460,3 +460,21 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 
 回程是对 Omnia “不能回传”的有意偏离（用户要求）。
 未验：右键吃/传送、末影之眼补片、模型画面；`/setblock` 默认 `bites=0`，物品放置才是 `bites=6`。
+
+## 14. 科技模组矿物链：氟石 + Thermal 六种（2026-11-03）
+
+- **范围**：Mekanism 氟石，Thermal 磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石；Create 只有锌，已有链。
+- **`gems` schema**：`materials.json` 新增与 `ingots` 同构的 `gems` 数组。按所有者要求，
+  `gems` 是**纯模组产物**：不注册自有兜底物品、不生成 `forge:gems` 标签、不生成 base 熔炼
+  配方；**整条材料只在候选 mod 已加载时注册**（没装时物品/方块/碎料/筛出/锤表/配方/标签都
+  不出现），矿块仍进 `forge:ores/<id>`（`required: false`），无 loot table、由 `SelfDropBlock`
+  掉自身。`gems` 与 `ingot`/`ingots` 不能混用。
+- **不直接掉成品**：7 种矿物都走三档矿链（筛碎料 → 4 合 1 矿块 → 熔炼），与金属同一套
+  `SieveRolls` / `HammerRolls` / JEI 数据源；没有第二份掉落逻辑。
+- **数据**：`gems` 没有 base；21 条变体手写（`conditions` 裸键 + `forge:mod_loaded`）。7 种矿物不写匠魂熔炼，因为 Tinkers 没有对应熔融液体。
+- **验证**：同服装 Mek + Thermal + Create + IE + Tinkers，7 种矿砾 RCON 熔炼 7/7 产出
+  `mekanism:fluorite_gem` / `thermal:apatite|cinnabar|niter|sulfur|ruby|sapphire`；筛表 113、锤表 73。
+  无科技模组：13 entries、筛 90 / 锤 52，`ruby_broken` unknown，无缺失物品/掉落表报错。
+未验：Thermal 机器吃新矿块（只核对标签）、JEI/客户端。
+- **末影蛋糕图标**：物品模型改 `item/generated` + 16×16 透明 `item/end_cake`，`ModItemModels`
+  跳过 `end_cake`，不再用方块模型当物品图标。

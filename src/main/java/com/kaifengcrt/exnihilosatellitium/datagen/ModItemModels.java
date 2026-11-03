@@ -41,8 +41,8 @@ import java.util.Set;
  */
 public final class ModItemModels extends ItemModelProvider {
 
-    /** Hand-built item geometry: these two keep their JSON files. */
-    private static final Set<String> HAND_MODELS = Set.of("electric_hammer", "fuel_hammer");
+    /** Hand-built item geometry/icons: these keep their JSON files. */
+    private static final Set<String> HAND_MODELS = Set.of("electric_hammer", "fuel_hammer", "end_cake");
 
     public ModItemModels(final PackOutput output, final ExistingFileHelper helper) {
         super(output, ExNihiloSatellitium.MOD_ID, helper);

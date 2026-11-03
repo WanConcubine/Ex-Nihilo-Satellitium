@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:aluminum_crushed"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_aluminum"
   },
   "temperature": 425,
-  "time": 31
+  "time": 23
 }

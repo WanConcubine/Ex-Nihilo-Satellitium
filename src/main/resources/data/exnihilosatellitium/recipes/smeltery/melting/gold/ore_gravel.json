@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:gold_ore_gravel"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_gold"
   },
   "temperature": 700,
-  "time": 152
+  "time": 114
 }

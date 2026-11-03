@@ -7,8 +7,8 @@
 
 **M1 木桶 + 七种材质变体已完成**；**M1.5 桶内方块转化已铺好**（2026-11-01：水+熔岩→圆石、
 熔岩+水→黑曜石、熔岩+红石→下界岩、熔岩+荧石→末地石，木桶限温 + 接雨水）；
-**M2 筛子 + 矿链已铺好**（三种筛网、4 张筛料表、13 种材料 4 碎块→方块→锭）；
-**M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、50 条锤表、10 张钩表、沙→尘土）；
+**M2 筛子 + 矿链已铺好**（三种筛网、6 张筛料表、20 种材料 4 碎块→方块→产物；无科技模组时 13 种）；
+**M3 锤/钩 + 尘土方块已铺好**（6 锤 / 2 钩、73 条锤表、10 张钩表、沙→尘土）；
 **M4 坩埚已铺好**（2026-11-01：瓷土 → 未烧制 → 烧制、39 条熔点 / 9 热源、
 熔料+流体双储、JEI 两页 + Jade）。**M6 五刀已铺完**（2026-11-01：巫水 + 古代孢子、瓷桶、
 木坩埚 11 种、木桶补齐 12 种、粉碎下界岩/末地石 + 草种子、蚕/侵染树叶、5 种人偶）；
@@ -17,6 +17,42 @@
 **科技模组锭接入**（2026-11-02）：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
 zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/uranium）与
 Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已加载的模组，自有锭只作兜底。
+**科技模组矿物（2026-11-03）**：Mekanism 氟石 + Thermal 磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石走
+`gems` 三档矿链，**只在对应模组加载时注册**；无模组时物品/方块/碎料/筛出/配方都不出现。
+
+## 当前批次（2026-11-03，科技模组矿物链：Mek 氟石 + Thermal 六种）
+
+- **范围**：Mekanism 氟石 + Thermal 磷灰石 / 朱砂 / 硝石 / 硫磺 / 红宝石 / 蓝宝石。Create
+  只有锌，已有完整链，本轮只做同服回归。与主线共用同一份 `materials.json` 与候选顺序。
+- **形态（按所有者修正）**：新增 7 种 `gems` 材料，走现有三档矿链（筛 → 碎料 → 4 合 1 矿块 →
+  熔炼）；**不注册自有磷灰石/氟石等兜底物品，也不生成 `forge:gems` 标签**。**整条材料只在
+  候选 mod 已加载时注册**：没装时物品、方块、三档碎料、筛出物、锤表、配方和标签都不出现；
+  装模组时矿砾熔成对方物品。矿块仍进 `forge:ores/<id>`（标签 `required: false`），Thermal
+  磨粉机 / Mek 富集机可按标签处理；矿块没有 loot table，由 `SelfDropBlock` 代码掉自身。
+- **数据**：21 条手写 `*_smelting_<mod>` 变体（`conditions` 裸键 + `forge:mod_loaded`）；
+  `gems` **没有 base 配方**（不再有“无模组时熔成自有矿物”）。7 种矿物不写匠魂熔炼。
+- **匠魂熔炼产量修正**：78 条 `tconstruct:melting` 的碎块类（broken/crushed/powdered）改为
+  **45 mB = 1/2 锭**，矿块类（ore_gravel/ore_sand/ore_dust）改为 **180 mB = 2 锭**，时间按
+  0.75 缩放；7 种 `gems` 矿物没有对应熔融液体，仍不写匠魂熔炼。
+- **末影蛋糕图标修正**：物品模型改为 `item/generated` + 16×16 透明
+  `exnihilosatellitium:item/end_cake`；`ModItemModels` 跳过 `end_cake`，不再用方块模型当
+  物品图标，也不再生成重复的 `models/item/end_cake.json`。
+- **开发服**：`build.gradle` 的 `-PtechMods` 增加 Mekanism 1.20.1 条目（libs/ 有 jar 才加载），
+  方便一次启动 Mek + Thermal + Create + IE + Tinkers。
+- **验证**（2026-11-03，Forge 47.4.28 / Java 17）：
+  - 同服装 Mekanism 10.4.16 + Thermal Foundation 11.0.6 + CoFH Core + Create 6.0.8 + IE +
+    Tinkers：日志 7 条 `[materials] ... smelts into ...` 全部命中（fluorite → `mekanism:fluorite_gem`，
+    其余 6 种 → `thermal:*`）；`[materials] loaded 20 entries`。
+  - RCON 熔炉逐个烧 `*_ore_gravel`：7/7 产出对应模组物品；`data get block` 与
+    `execute if block` 都通过。
+  - `/exnihilo dump sieve` 113 行、`dump hammer` 73 行；新条目概率与 main 一致。
+  - 无科技模组：13 entries、筛 90 / 锤 52，`ruby_broken` unknown，无缺失物品/掉落表报错。
+  - `./gradlew build`、`check-textures.py` 通过；generated 树**不再有** 7 种矿物的 fallback
+    物品模型/标签/base 熔炼配方。
+  - 计数：生成配方 164、手写 157（66 条候选变体 + 12 条 `create:crushing` + 78 条匠魂熔炼 +
+    1 条末影蛋糕），合计 321；标签 58、掉落表 72（7 种 `gems` 矿块无 loot table，代码掉自身）。
+  - **未验**：Thermal 磨粉机 / Mek 富集机实际处理新矿块（只核对 `forge:ores/<m>` 标签）；
+    JEI/客户端（本轮会开 1.20.1 客户端）。
 
 ## 当前批次（2026-11-03，末影蛋糕移植）
 
@@ -146,7 +182,7 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
 - **钴**（第 13 种材料）：候选 `tconstruct:cobalt_ingot`，无匠魂回退自有钴锭；
   碎下界岩 1% 出 `cobalt_broken`；broken 贴图用下界岩红棕基底。
 - **下界合金碎片**：碎下界岩 0.4%。
-- **匠魂熔炼**：13 材料 × 6 形态 = 78 条 `tconstruct:melting`；物品 60 mB、方块 240 mB；
+- **匠魂熔炼**：13 材料 × 6 形态 = 78 条 `tconstruct:melting`；物品 45 mB（1/2 锭）、方块 180 mB（2 锭）；
   流体 `forge:molten_<m>`，温度取匠魂锭配方；条件 `mod_loaded(tconstruct)`。
 - **阿迪特暂不做**：Tinkers 3.12.1 已移除，等「工匠巧思」拓展。
 - **验证**：

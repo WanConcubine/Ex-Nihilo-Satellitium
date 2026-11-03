@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:copper_broken"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_copper"
   },
   "temperature": 500,
-  "time": 33
+  "time": 25
 }

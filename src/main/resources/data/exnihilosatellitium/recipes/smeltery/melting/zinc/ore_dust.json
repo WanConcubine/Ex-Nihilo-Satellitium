@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:zinc_ore_dust"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_zinc"
   },
   "temperature": 420,
-  "time": 125
+  "time": 94
 }

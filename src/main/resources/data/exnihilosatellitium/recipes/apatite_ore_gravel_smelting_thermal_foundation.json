@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "exnihilosatellitium:apatite_ore_gravel"
+  },
+  "result": {
+    "item": "thermal:apatite"
+  },
+  "experience": 0.1,
+  "cookingtime": 200,
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "thermal_foundation"
+    }
+  ]
+}

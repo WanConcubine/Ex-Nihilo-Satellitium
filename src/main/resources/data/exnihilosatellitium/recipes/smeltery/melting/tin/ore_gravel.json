@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:tin_ore_gravel"
   },
   "result": {
-    "amount": 240,
+    "amount": 180,
     "tag": "forge:molten_tin"
   },
   "temperature": 225,
-  "time": 104
+  "time": 78
 }

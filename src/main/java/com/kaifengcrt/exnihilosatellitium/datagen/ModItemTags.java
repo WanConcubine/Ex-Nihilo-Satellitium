@@ -8,6 +8,7 @@ import com.kaifengcrt.exnihilosatellitium.registry.ModOreBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import net.minecraft.core.HolderLookup;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider.TagLookup;
@@ -37,19 +38,20 @@ public final class ModItemTags extends ItemTagsProvider {
         for (final OreMaterial material : OreMaterials.all()) {
             final var oreTag = forge("ores/" + material.id());
             for (final String kind : ModOreBlocks.KINDS) {
-                this.tag(oreTag).add(ModOreBlocks.byMaterial().get(material.id()).get(kind).get()
-                        .asItem());
+                // Optional: a mod-gated gem material may not exist at runtime.
+                this.tag(oreTag).addOptional(ForgeRegistries.ITEMS.getKey(
+                        ModOreBlocks.byMaterial().get(material.id()).get(kind).get().asItem()));
             }
             forgeOres.addTag(oreTag);
         }
 
         for (final OreMaterial material : OreMaterials.all()) {
-            if (!material.hasOwnIngot()) {
+            if (!material.hasOwnProduct()) {
                 continue;
             }
-            final var ingot = ModOreItems.byMaterial().get(material.id()).get("ingot");
-            if (ingot != null) {
-                this.tag(forge("ingots/" + material.id())).addOptional(ingot.getId());
+            final var product = ModOreItems.byMaterial().get(material.id()).get("product");
+            if (product != null) {
+                this.tag(forge(material.productTag())).addOptional(product.getId());
             }
         }
 

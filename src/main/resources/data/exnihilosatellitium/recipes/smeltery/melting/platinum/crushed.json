@@ -10,9 +10,9 @@
     "item": "exnihilosatellitium:platinum_crushed"
   },
   "result": {
-    "amount": 60,
+    "amount": 45,
     "tag": "forge:molten_platinum"
   },
   "temperature": 970,
-  "time": 43
+  "time": 32
 }
