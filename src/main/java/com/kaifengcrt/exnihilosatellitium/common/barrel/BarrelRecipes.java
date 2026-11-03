@@ -207,6 +207,7 @@ public final class BarrelRecipes {
             clientRecipes = snapshot;
         } else {
             recipes = snapshot;
+            builder.logConflicts();
         }
         final long fluidReactions = snapshot.stream().filter(Recipe::isFluidReaction).count();
         final long itemReactions = snapshot.stream().filter(Recipe::isItemReaction).count();
@@ -257,10 +258,10 @@ public final class BarrelRecipes {
         if (!removeAll && template == null) {
             return;
         }
-        for (final String key : keys.keys()) {
-            builder.remove(key);
-        }
         if (removeAll) {
+            for (final String key : keys.keys()) {
+                builder.remove(key, source.id().toString());
+            }
             return;
         }
         for (final Fluid base : keys.bases()) {
@@ -293,7 +294,7 @@ public final class BarrelRecipes {
                     case REPLACE -> applyPatch(builder, source);
                     case REMOVE -> {
                         for (final String key : keys.keys()) {
-                            builder.remove(key);
+                            builder.remove(key, source.id().toString());
                         }
                     }
                 }
@@ -473,7 +474,7 @@ public final class BarrelRecipes {
 
     private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
         final ResourceLocation label = ResourceLocation.tryParse(
-                "exnihilosatellitium:overlay/" + customization.sequence());
-        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+                "customize:barrel/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("customize:barrel/0") : label;
     }
 }

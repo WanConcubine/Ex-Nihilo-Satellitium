@@ -33,6 +33,19 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
   - **未验**：进游戏右键吃/传送、末影之眼补片、模型画面；`/setblock` 默认是 `bites=0`，
     物品放置才是 `bites=6`。
 
+## 当前批次（2026-11-03，P1.5：overlay 边角）
+
+- **与主线同步**：overlay 显式 `priority`（升序应用，高的后应用所以赢）、
+  `replaced` / `removed` / `add ignored` 冲突日志（带旧 source）、同 source 重复操作去重、
+  操作上限 4096、空 payload 拒绝、server stop 清空、`/exnihilo dump all`。
+- **验证**（2026-11-03，Forge 47.4.28 / Java 17）：
+  - `build`、`check-textures.py` 通过；
+  - `dump all` 298 行 / 7 个表头；
+  - p10 先提交、p5 后提交，最终 p10 赢；`add ignored`、`replaced` 日志可见；
+  - 同一 sieve add 提交两次，overlay 仍 1 条；空 payload 被拒；
+  - 停止服务器时 `cleared 4 overlay op(s) on server stop`。
+- **未做**：KJS / CT 入口（P2/P3）；客户端同步（P4）。
+
 ## 当前批次（2026-11-03，三路径 P1 移植）
 
 - **与主线同步 P1 基座**：`common/table/`（`TableId` / `TableBuilder` /

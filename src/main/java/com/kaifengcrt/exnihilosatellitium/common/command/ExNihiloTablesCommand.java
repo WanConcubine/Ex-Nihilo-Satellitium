@@ -16,6 +16,7 @@ import com.kaifengcrt.exnihilosatellitium.common.table.TableDump;
 import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
 import com.kaifengcrt.exnihilosatellitium.common.table.Tables;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -39,9 +40,11 @@ import java.util.StringJoiner;
  *
  * <ul>
  *   <li>{@code /exnihilo tables} — effective table sizes after the last reload;</li>
- *   <li>{@code /exnihilo dump <table>} — sorted, diffable lines for one table;</li>
- *   <li>{@code /exnihilo customize <table> add|remove|replace <json>} — queue an
- *       overlay operation; the payload uses the same JSON shape as a datapack file;</li>
+ *   <li>{@code /exnihilo dump <table|all>} — sorted, diffable lines for one table
+ *       or all seven;</li>
+ *   <li>{@code /exnihilo customize <table> add|remove|replace [priority] <json>} —
+ *       queue an overlay operation; the payload uses the same JSON shape as a
+ *       datapack file, and a higher priority is applied later (so it wins);</li>
  *   <li>{@code /exnihilo customize list} — queued operations;</li>
  *   <li>{@code /exnihilo customize clear [source]} — drop overlay operations;</li>
  *   <li>{@code /exnihilo sieve <item>} / {@code hammer <block>} / {@code compost <item>}
@@ -51,8 +54,16 @@ import java.util.StringJoiner;
 public final class ExNihiloTablesCommand {
 
     private static final SuggestionProvider<CommandSourceStack> TABLES = (context, builder) ->
-            SharedSuggestionProvider.suggest(
-                    List.of(TableId.values()).stream().map(TableId::id).toList(), builder);
+            SharedSuggestionProvider.suggest(tableNames(), builder);
+
+    private static List<String> tableNames() {
+        final List<String> names = new ArrayList<>();
+        names.add("all");
+        for (final TableId table : TableId.values()) {
+            names.add(table.id());
+        }
+        return names;
+    }
 
     private ExNihiloTablesCommand() {
     }
@@ -68,8 +79,15 @@ public final class ExNihiloTablesCommand {
                         .then(Commands.argument("table", StringArgumentType.word())
                                 .suggests(TABLES)
                                 .executes(context -> {
-                                    final TableId table = TableId.byId(
-                                            StringArgumentType.getString(context, "table")).orElse(null);
+                                    final String name = StringArgumentType.getString(context, "table");
+                                    if ("all".equalsIgnoreCase(name)) {
+                                        int total = 0;
+                                        for (final TableId table : TableId.values()) {
+                                            total += dump(context.getSource(), table);
+                                        }
+                                        return total;
+                                    }
+                                    final TableId table = TableId.byId(name).orElse(null);
                                     if (table == null) {
                                         context.getSource().sendFailure(
                                                 Component.literal("unknown table"));
@@ -89,18 +107,9 @@ public final class ExNihiloTablesCommand {
                                                 StringArgumentType.getString(context, "source")))))
                         .then(Commands.argument("table", StringArgumentType.word())
                                 .suggests(TABLES)
-                                .then(Commands.literal("add")
-                                        .then(Commands.argument("json", StringArgumentType.greedyString())
-                                                .executes(context -> customize(context,
-                                                        CustomizationOverlay.Action.ADD))))
-                                .then(Commands.literal("remove")
-                                        .then(Commands.argument("json", StringArgumentType.greedyString())
-                                                .executes(context -> customize(context,
-                                                        CustomizationOverlay.Action.REMOVE))))
-                                .then(Commands.literal("replace")
-                                        .then(Commands.argument("json", StringArgumentType.greedyString())
-                                                .executes(context -> customize(context,
-                                                        CustomizationOverlay.Action.REPLACE))))))
+                                .then(customizeAction("add", CustomizationOverlay.Action.ADD))
+                                .then(customizeAction("remove", CustomizationOverlay.Action.REMOVE))
+                                .then(customizeAction("replace", CustomizationOverlay.Action.REPLACE))))
                 .then(Commands.literal("sieve")
                         .then(Commands.argument("item", ResourceLocationArgument.id())
                                 .executes(context -> {
@@ -164,6 +173,21 @@ public final class ExNihiloTablesCommand {
                                 }))));
     }
 
+    /**
+     * One {@code add|remove|replace} branch. The priority is optional and must come
+     * before the JSON ({@code add 100 {...}}); without it the default priority 0 is used.
+     */
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> customizeAction(
+            final String name, final CustomizationOverlay.Action action) {
+        return Commands.literal(name)
+                .then(Commands.argument("priority", IntegerArgumentType.integer())
+                        .then(Commands.argument("json", StringArgumentType.greedyString())
+                                .executes(context -> customize(context, action,
+                                        IntegerArgumentType.getInteger(context, "priority")))))
+                .then(Commands.argument("json", StringArgumentType.greedyString())
+                        .executes(context -> customize(context, action, 0)));
+    }
+
     private static int dump(final CommandSourceStack source, final TableId table) {
         final List<String> lines = TableDump.lines(table);
         source.sendSuccess(() -> Component.literal(TableDump.header(table, lines.size())), false);
@@ -174,7 +198,7 @@ public final class ExNihiloTablesCommand {
     }
 
     private static int customize(final CommandContext<CommandSourceStack> context,
-                                 final CustomizationOverlay.Action action) {
+                                 final CustomizationOverlay.Action action, final int priority) {
         final CommandSourceStack source = context.getSource();
         final TableId table = TableId.byId(StringArgumentType.getString(context, "table")).orElse(null);
         if (table == null) {
@@ -186,12 +210,18 @@ public final class ExNihiloTablesCommand {
             return 0;
         }
         final int before = TableDump.lines(table).size();
-        CustomizationOverlay.submit(table, action, payload, "command");
+        final CustomizationOverlay.Customization customization =
+                CustomizationOverlay.submit(table, action, payload, "command", priority);
+        if (customization == null) {
+            source.sendFailure(Component.literal(
+                    "overlay rejected (empty payload or operation cap reached)"));
+            return 0;
+        }
         Tables.rebuild(table, false);
         final int after = TableDump.lines(table).size();
         source.sendSuccess(() -> Component.literal(
                 table.id() + " " + action.name().toLowerCase(java.util.Locale.ROOT)
-                        + ": " + before + " -> " + after + " rules, overlay "
+                        + " p" + priority + ": " + before + " -> " + after + " rules, overlay "
                         + CustomizationOverlay.forTable(table).size() + " ops"), false);
         return after;
     }

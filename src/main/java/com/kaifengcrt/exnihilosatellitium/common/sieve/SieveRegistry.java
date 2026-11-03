@@ -83,7 +83,8 @@ public final class SieveRegistry {
     private static void rebuild(final boolean clientView, final boolean expandTags) {
         final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
         final boolean tagsReady = expandTags && DataPackJson.tagsReady();
-        final TableBuilder<Item, List<SieveDrop>> builder = new TableBuilder<>(TableId.SIEVE.id());
+        final TableBuilder<Item, List<SieveDrop>> builder = new TableBuilder<>(TableId.SIEVE.id(),
+                item -> BuiltInRegistries.ITEM.getKey(item).toString());
         final List<DataPackJson.Source> tagFiles = new ArrayList<>();
         final List<DataPackJson.Source> patchFiles = new ArrayList<>();
 
@@ -131,6 +132,7 @@ public final class SieveRegistry {
             clientTable = snapshot;
         } else {
             table = snapshot;
+            builder.logConflicts();
         }
         final int drops = snapshot.values().stream().mapToInt(List::size).sum();
         ExNihiloSatellitium.LOGGER.info(
@@ -262,7 +264,7 @@ public final class SieveRegistry {
         }
         for (final Item input : inputs) {
             if (drops.isEmpty()) {
-                builder.remove(input);
+                builder.remove(input, overlaySource(customization));
             } else {
                 builder.put(input, drops, overlaySource(customization));
             }
@@ -280,7 +282,7 @@ public final class SieveRegistry {
         final List<String> remove = DataPackJson.removeList(root);
         if (remove.isEmpty()) {
             for (final Item input : inputs) {
-                builder.remove(input);
+                builder.remove(input, overlaySource(customization));
             }
             return;
         }
@@ -296,17 +298,18 @@ public final class SieveRegistry {
             final List<SieveDrop> list = new ArrayList<>(current);
             list.removeIf(drop -> removed.contains(drop.item()));
             if (list.isEmpty()) {
-                builder.remove(input);
+                builder.remove(input, overlaySource(customization));
             } else {
-                builder.put(input, List.copyOf(list), overlaySource(customization));
+                builder.recordRemoval(input, overlaySource(customization));
+                builder.set(input, List.copyOf(list), overlaySource(customization));
             }
         }
     }
 
     private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
         final ResourceLocation label = ResourceLocation.tryParse(
-                "exnihilosatellitium:overlay/" + customization.sequence());
-        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+                "customize:sieve/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("customize:sieve/0") : label;
     }
 
     private static String overlaySource(final CustomizationOverlay.Customization customization) {
