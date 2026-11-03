@@ -28,6 +28,9 @@ jobs:
       - name: Texture guard
         run: python3 scripts/check-textures.py
 
+      - name: Wiki guard
+        run: python3 scripts/check-wiki.py
+
       - name: Headless server smoke
         run: |
           set +e

@@ -268,3 +268,19 @@ Creatio 是 MIT 授权，允许复制与再分发；完整版权/许可见
   并负责从原图生成蚕动画帧。矿尘方块（`ore_dust_block`）仍走 vanilla-sampled + tint，未受影响。
 - **Sequentia（传承）1.21 是 CC BY-NC-SA 4.0**，只能看风格、不能采用其贴图。
 - 待办：进游戏 4× 目视 6 种锤/2 种钩、蚕动画、尘土方块接缝。
+
+## 末影蛋糕（2026-11-03）
+
+- 4 张 16×16 方块贴图（Creatio MIT 原图经 restyle）：`end_cake_top.png` / `end_cake_side.png` /
+  `end_cake_bottom.png` / `end_cake_inner.png`。
+- 直接采用 **Ex Nihilo: Creatio（MIT）** 的 4 张 `end_cake_*.png`；原图只读在
+  `art/blocks/end_cake/creatio/`。`art/blocks/end_cake/restyle.py` 裁掉透明边
+  （14×14 / 14×8）、放大到 16×16、轻微提高饱和度/对比度并加 1px 深色描边。
+  预览 `art/blocks/end_cake/preview.png`（4× nearest，不进 jar）；物品栏图标预览
+  `art/blocks/end_cake/inventory.png`（`render_inventory.py`，复用 barrel 渲染器）。
+- 顶面保留 Creatio 的末影之眼标志（绿色 end-stone/虹膜/黑瞳），侧面绿色糖霜 + 深紫海绵；
+  这是“直接采用 + 现代化”，不是重新绘制。
+- 模型不复制 vanilla 文件：`models/block/end_cake*.json` 只写
+  `parent: minecraft:block/cake` / `cake_slice1..6` + 覆盖 `particle/bottom/top/side/inside`，
+  几何沿用 vanilla。
+- 改外观只改脚本重跑，不要手改 PNG；跑 `python3 scripts/check-textures.py`。

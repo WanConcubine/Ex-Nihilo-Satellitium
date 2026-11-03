@@ -26,6 +26,9 @@ python3 scripts/check-core-imports.py
 # 数据守卫：数据目录/字段/条件/标签命名空间必须与目标版本一致
 python3 scripts/check-data-paths.py
 
+# 玩家 wiki 结构守卫：页面/链接/JSON/版本矩阵/维护契约
+python3 scripts/check-wiki.py
+
 # 开发服（RCON 已配：localhost:25575 / eni）
 ./gradlew runServer
 
@@ -33,7 +36,7 @@ python3 scripts/check-data-paths.py
 ./gradlew runClient
 ```
 
-- 改完**至少**跑 `build` + `check-textures.py` + `check-data-paths.py`。
+- 改完**至少**跑 `build` + `check-textures.py` + `check-data-paths.py`；改 wiki 再加 `check-wiki.py`。
 - 服务端逻辑用 RCON 验（`/setblock`、`/data merge`、`/execute if block`）。
 - **测试绿 ≠ 画面/手感验过**；没进游戏看过就不要在 status.md 写“已验证”。
 - NeoForge 1.21 运行时用官方名，生产 jar 可以直接放进 `run/mods` 测（已验证 Jade 15 / JEI 19 / Just Enough Characters）；`run/` 已 gitignore，别提交。
@@ -61,6 +64,12 @@ python3 scripts/check-data-paths.py
    - 2026-10-29 的 1.20.1「归档」就是反面案例：见
      [docs/incidents/2026-11-01-unauthorized-archive.md](docs/incidents/2026-11-01-unauthorized-archive.md)。
    - 迁移时只切构建目标，不要顺手给旧线打 `legacy/` tag。
+7. **自定义三路径是产品目标。**
+   - 数据包 / KubeJS / CraftTweaker 最终要能完成同样的 add / remove / replace；
+     当前差距写在 [docs/customization-roadmap.md](docs/customization-roadmap.md)，不要在 wiki 里写成“都支持”。
+   - 任何新表 / 新字段先有 JSON 形态，再谈 KJS / CT 入口；三条路径必须共用同一套校验和 reload 语义。
+   - 改表结构 / 字段 / 加载顺序必须同步 [wiki/](wiki/README.md)，并跑 `python3 scripts/check-wiki.py`。
+   - 文档维护责任见 [wiki/MAINTAINING.md](wiki/MAINTAINING.md)：Owner 是仓库所有者，改表的贡献者在同一提交里更新页面。
 
 ## 4. 代码地图
 
@@ -102,6 +111,8 @@ com/kaifengcrt/exnihilosatellitium/
 | [docs/parity.md](docs/parity.md) | **复刻对照表**：经典项与 Ex Astris 的逐项状态、分档 |
 | [docs/ex-nihilo-basics.md](docs/ex-nihilo-basics.md) | **原版机制基础**：桶/筛/锤/钩/坩埚/矿链怎么运作，含待核清单 |
 | [docs/data-format.md](docs/data-format.md) | 堆肥 JSON、物品标签、NBT 键、命令、比较器 |
+| [wiki/](wiki/README.md) | **玩家向**：数据包 / KubeJS / CraftTweaker 改配方，含 1.21.1 与 1.20.1 差异 |
+| [docs/customization-roadmap.md](docs/customization-roadmap.md) | **三路径等价路线图**：能力矩阵、P1–P4、验收标准 |
 | [docs/porting.md](docs/porting.md) | **多版本分层与移植**：core/platform 边界、1.20.1↔1.21.1 API 差异、P0–P4 顺序 |
 | [docs/textures.md](docs/textures.md) | 纹理路线、色板、引用规则、AI 政策、检查 |
 | [docs/incidents/](docs/incidents/) | 事故复盘（流程/判断问题，不是当前状态） |
@@ -111,6 +122,7 @@ com/kaifengcrt/exnihilosatellitium/
 - 改完功能：先更新 `status.md` 验证表，再补 `DESIGN.md` 的实现记录。
 - 新增/完成一个经典条目或 Ex Astris 条目：同步 `parity.md` 的状态列。
 - 改 JSON/NBT/命令：更新 `data-format.md`。
+- 改表结构 / 字段 / 加载顺序：同步 `wiki/datapack.md`、`wiki/kubejs.md` 和 `docs/customization-roadmap.md`。
 - 改贴图/模型引用规则：更新 `textures.md`，并跑检查脚本。
 - 不要在多处抄同一份“当前进度”；status.md 是唯一出处。
 

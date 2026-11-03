@@ -703,8 +703,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
    （数据包优先级更高，同名资源只保留高优先级那份）。**覆盖是整文件替换**，
    要把原有条目一起抄全；只想改一两条时用下面的补丁。
 2. **新增条目**：用自己的命名空间，例如
-   `data/mypack/sieve/soul_sand.json`；同一输入重复时内置/同名文件先加载，
-   后加载的覆盖并打 `[sieve] duplicate input ...` 警告。
+   `data/mypack/sieve/soul_sand.json`；同一输入重复时按表处理：筛子后加载的覆盖并打
+   `[sieve] duplicate input ...` 警告；锤子/钩子/熔点后加载的跳过并打警告；桶先到者赢。
 3. **补丁**：文件里写 `"patch": true`（或出现 `"remove"`）就是补丁。
    补丁在**所有普通文件之后**按资源 id 排序应用，所以不用抄全、还能删条目。
 
@@ -726,6 +726,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | 坩埚热源 | `block`（方块标签） | 按 `block + properties` 去重后追加 |
 | 桶转化 | `base` / `added.fluid` / `added.item` | 展开后做叉积；同一 `base + added` 重复时先到者赢并警告 |
 
+- 桶的 `base` / `added.fluid` 只展开 **still（source）流体**：`#minecraft:water` 的标签同时含
+  still/flowing，桶里只可能存 still，所以 flowing 规则在加载时被丢弃。
 - 标签为空或拼错会打 `[...] empty or unknown tag #...` 警告，不会拖垮加载。
 - **掉落产物**（`item` / `result`）仍必须是具体 id，不支持标签；要“随机掉一种锭”请写多条。
 - 标签在 `/reload` 时重新展开；运行期新加进标签的物品会跟着生效。
@@ -786,6 +788,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 - 服务端日志每次 reload 都会打印各表条数，例如
   `[sieve] loaded 17 inputs, 100 drops (1 tag files, 1 patches)`。
+- 刚启动 / 刚 reload 时会先看到一次 `waiting for tags`（只有具体条目），
+  紧接着 `TagsUpdatedEvent` 再打印一次完整条数；以第二次为准。
 - 游戏内 `/exnihilo tables`（需要 OP）打印当前生效的条数汇总，改完数据包 `/reload`
   后立刻能看到有没有生效。
 - 解析失败的条目只跳过该条并打 `[sieve]` / `[hammer]` / `[barrel]` / `[compost]` /
@@ -795,13 +799,13 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 `examples/datapack/` 是一个可直接丢进 `world/datapacks/` 的最小示例，覆盖标签输入、
 补丁删除、`mod` 门、堆肥改值；用法见该目录的 `README.md`。
+面向玩家的分路线说明（数据包 / KJS / CT）在 [`wiki/`](../wiki/README.md)。
 
 ### 14.8 生效方式与客户端
 
 **生效方式**：服务端 `/reload` 或重启。单人/局域网 JEI 优先读服务端表，
 所以覆盖会同步到 JEI。**专用服客户端**读不到服务端数据包，JEI 仍显示 jar 内置版
 （`assets/exnihilosatellitium/` 镜像），这是客户端限制，可在整合包里给客户端也装同一数据包。
-
 
 ## 15. M10 自动化机器（2026-11-01）
 
