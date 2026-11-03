@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:chlorophyll_ore_sand",
+  "result": "exnihilosatellitium:chlorophyll_powdered",
+  "min": 4,
+  "max": 6,
+  "mod": "tinkers_thinking"
+}

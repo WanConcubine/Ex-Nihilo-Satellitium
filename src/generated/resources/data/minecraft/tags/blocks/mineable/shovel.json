@@ -148,6 +148,18 @@
       "required": false
     },
     {
+      "id": "exnihilosatellitium:ardite_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:ardite_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:ardite_ore_dust",
+      "required": false
+    },
+    {
       "id": "exnihilosatellitium:uranium_ore_gravel",
       "required": false
     },
@@ -241,6 +253,18 @@
     },
     {
       "id": "exnihilosatellitium:sapphire_ore_dust",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:chlorophyll_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:chlorophyll_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:chlorophyll_ore_dust",
       "required": false
     }
   ]

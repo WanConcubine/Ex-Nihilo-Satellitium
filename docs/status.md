@@ -19,6 +19,59 @@ zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/ura
 Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已加载的模组，自有锭只作兜底。
 **科技模组矿物（2026-11-03）**：Mekanism 氟石 + Thermal 磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石走
 `gems` 三档矿链，**只在对应模组加载时注册**；无模组时物品/方块/碎料/筛出/配方都不出现。
+**工匠巧思（TiT）两种矿已接**（2026-11-03 晚）：碎下界岩 1% → 阿迪特碎矿、草方块 1% → 叶绿素碎矿，
+走本模组自己的三档矿链；阿迪特有自有锭兜底，叶绿素只在 TiT 在场时注册。
+**应用能源 2（AE2）已接**（2026-11-03 晚）：筛沙 **1/6** 出 `ae2:certus_quartz_crystal`、
+**1/12** 出 `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json` 带根级 `"mod": "ae2"`，
+没装时整文件跳过，与主线数据一致。
+
+## 当前批次（2026-11-03 晚，应用能源 2：赛特斯石英粉 / 水晶）
+
+- **对象**：AE2 1.20.1 线 **15.4.12**（Forge，前置 GuideME 20.1.15）；主线 1.21.1 用 19.2.18。
+- **范围（按所有者）**：只做筛沙——**赛特斯石英水晶**与**赛特斯石英水晶粉**。不注册自有物品，
+  不复制对方的贴图 / JSON / 代码；充能赛特斯、天石粉、陨石 / 天石方块不做。
+- **数值**：水晶 **1/6**（经典 Ex Nihilo 档，Omnia 是 5%），粉 **1/12**。充能赛特斯走 AE2 自己的
+  `ae2:charger`（配方只要铁 / 铜 / 赛特斯），所以不进筛表；粉还能由水晶在 AE2 里加工。
+- **形态**：`data/exnihilosatellitium/sieve/sand_ae2.json`，根级 `"mod": "ae2"` + `"patch": true`，
+  对沙追加两条；没装 AE2 时在查物品之前整文件跳过，基表不变、不刷 unknown item。
+- **开发服**：`build.gradle` 的 `-PtechMods` 增加 GuideME + AE2 入口（`libs/` 有 jar 才加载，
+  jar 不进仓库）。AE2 生产 jar **不能直接丢 `run/mods`**：ForgeGradle dev 下会因 SRG mixin
+  `@Shadow field f_129762_ was not located` 崩服，必须走 `fg.deobf`。
+- **验证（2026-11-03，Forge 47.4.28 / Java 17）**：
+  - `-PtechMods` 全装（Mek + Thermal + Create + IE + Tinkers + TiT + AE2 + GuideME）：
+    `[sieve] 7 inputs, 144 drops`（基表 142 + AE2 2 条）；`/exnihilo sieve minecraft:sand`
+    含 `ae2:certus_quartz_crystal 0.16667` / `ae2:certus_quartz_dust 0.08333`；
+    日志无 unknown item。
+  - 同一套 mods 去掉 AE2 / GuideME：`[sieve] 7 inputs, 142 drops`，sand 无 AE2 条目，
+    `sand_ae2.json` 被 `mod` 门整文件跳过，无 unknown item。基表条数随 TiT 批次还在变化，
+    AE2 恒为 +2。
+  - `./gradlew build`、`check-textures.py` 通过（分支没有 `check-data-paths.py` / `check-core-imports.py`）。
+  - **未验**：真实手筛 / 机器筛筛出 AE2 物品、JEI 筛子页目视。
+
+## 当前批次（2026-11-03 晚，工匠巧思：阿迪特 / 叶绿素）
+
+- **对象**：TiT（`tinkers_thinking` 0.2.4，MIT，只有 1.18.2 / 1.19.2 / **1.20.1**，没有 1.21.1），
+  前置 Tinkers 3.12.1+；实测 Tinkers 3.12.1.231 + Mantle 1.11.117 + TiT 0.2.4。
+- **范围（按所有者）**：只做两种矿——**阿迪特**（碎下界岩筛）和**叶绿素**（草方块筛）；走本模组的
+  三档矿链：筛 → 碎矿 → 4 合 1 矿块 → 熔成对方物品。不复制 TiT 的贴图 / JSON / 代码。
+- **阿迪特（`ardite`）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装 TiT 时回退自有
+  `ardite_ingot`；**只从碎下界岩出** `ardite_broken` 1%（砂砾/沙子/尘土不出）；碎块基底用下界岩。
+  新增 **6 条匠魂熔炼**（破碎/粉碎/粉末 45 mB、矿块 180 mB，950°C，时间按 65 t / 90 mB）→
+  `forge:molten_ardite`，总熔炼从 78 条变 **84 条**。
+- **叶绿素（`chlorophyll`，`gems`）**：只在 TiT 在场时注册；**只有草方块** 1% 出 `chlorophyll_broken`
+  （草方块表 = 泥土 24 条 + 这一条，不扩散到砂砾/沙子/尘土）；
+  矿块熔成 `tinkers_thinking:chlorophyte_compound`（原矿 1A+1B 的等价物）。
+- **门控**：叶绿素条目走 `mod` 门，没装时在查物品之前跳过；阿迪特不门控（有自有锭兜底）。
+  分支 `build.gradle` 的 `-PtechMods` 加了 `libs/Tinkers-Thinking-0.2.4.jar` 入口（jar 不进仓库）。
+- **验证（2026-11-03，Forge 47.4.28 / Java 17）**：
+  - 全装 Mek + Thermal + Create + IE + Tinkers + TiT：`[materials] loaded 22 entries`、
+    `ardite smelts into tinkers_thinking:ardite_ingot`、`chlorophyll smelts into
+    tinkers_thinking:chlorophyte_compound`；`[sieve] 7 inputs, 139 drops`（另装 AE2 时 141）、`[hammer] 79 recipes`；
+    `/exnihilo sieve`：草方块 25 条（末条 `chlorophyll_broken 0.01`）、碎下界岩 11 条（`ardite_broken 0.01`）；
+    RCON 熔炉烧出 `tinkers_thinking:ardite_ingot` 与 `tinkers_thinking:chlorophyte_compound`。
+  - 不装 techMods：`14 entries`、`7 inputs, 113 drops`、`hammer 55`，无 unknown item。
+  - `./gradlew build`、`check-textures.py`、`check-data-paths.py`（1.20.1）通过。
+  - **未验**：手筛 / 机器筛实际出货手感、匠魂炉真实熔化、JEI 页面目视。
 
 ## 当前批次（2026-11-03，科技模组矿物链：Mek 氟石 + Thermal 六种）
 
@@ -184,7 +237,8 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
 - **下界合金碎片**：碎下界岩 0.4%。
 - **匠魂熔炼**：13 材料 × 6 形态 = 78 条 `tconstruct:melting`；物品 45 mB（1/2 锭）、方块 180 mB（2 锭）；
   流体 `forge:molten_<m>`，温度取匠魂锭配方；条件 `mod_loaded(tconstruct)`。
-- **阿迪特暂不做**：Tinkers 3.12.1 已移除，等「工匠巧思」拓展。
+- **阿迪特**：Tinkers 3.12.1 本体已移除，改由工匠巧思提供（见顶部当前批次）；我们不写熔炼，
+  只筛 `tinkers_thinking:ardite_ore`。
 - **验证**：
   - 只装 Tinkers 3.12.1 + Mantle 1.11.117：`[materials] cobalt → tconstruct:cobalt_ingot`；
     `[sieve] 92 drops`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；
@@ -287,7 +341,10 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
 | IE 粉碎机（标签） | ⚠️ | 13 种矿块在 `forge:ores/<m>`，IE crusher 输入也是该标签；多方块本身未跑 |
 | 匠魂种子（条件物品） | ✅ | 只装 Tinkers：`summon` 两个种子成功；不装：`[sieve] 90` vs 92，无 unknown item |
 | 匠魂钴 | ✅ | `[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |
-| 匠魂熔炼配方 | ⚠️ | 78 条 `tconstruct:melting` 格式对齐，加载无报错；匠魂炉实际熔化未跑 |
+| 匠魂熔炼配方 | ⚠️ | 84 条 `tconstruct:melting` 格式对齐，加载无报错；匠魂炉实际熔化未跑 |
+| AE2 赛特斯石英（1.20.1） | ✅ | AE2 15.4.12 + GuideME 20.1.15（`-PtechMods` 全装）：筛 **144** drops（基表 142 + 2），RCON sand 含 `certus_quartz_crystal 0.16667` / `dust 0.08333`；不装 AE2 时 142、无 unknown |
+| AE2 dev 环境 | ✅ | GuideME + AE2 放 `libs/` 走 `fg.deobf`；生产 jar 直接丢 `run/mods` 会因 SRG mixin 崩服 |
+| AE2 画面/手感 | ⚠️ | 手筛 / 机器筛实际出货、JEI 筛子页未目视 |
 | 下界合金碎片 | ✅ | 碎下界岩 0.4%；`[sieve] 90`（无匠魂）/ 92（有匠魂） |
 | 匠魂草种子右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块或泥土 → `*_vanilla_slime_grass`；需玩家实测 |
 

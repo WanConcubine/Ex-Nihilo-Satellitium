@@ -1,0 +1,15 @@
+{
+  "mod": "ae2",
+  "patch": true,
+  "input": "minecraft:sand",
+  "outputs": [
+    {
+      "item": "ae2:certus_quartz_crystal",
+      "chance": 0.16667
+    },
+    {
+      "item": "ae2:certus_quartz_dust",
+      "chance": 0.08333
+    }
+  ]
+}

@@ -478,3 +478,21 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 未验：Thermal 机器吃新矿块（只核对标签）、JEI/客户端。
 - **末影蛋糕图标**：物品模型改 `item/generated` + 16×16 透明 `item/end_cake`，`ModItemModels`
   跳过 `end_cake`，不再用方块模型当物品图标。
+
+## 15. 应用能源 2：赛特斯石英（2026-11-03，两版数据与真装）
+
+AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：赛特斯石英只从陨石 / 晶簇来，
+空岛没有陨石。经典 Ex Nihilo 也是筛沙出赛特斯，所以沿用「直接掉对方成品」的接入原则。
+
+1. **只做两条**：沙 → `ae2:certus_quartz_crystal`（1/6）与 `ae2:certus_quartz_dust`（1/12）。
+   不注册自有物品，不复制对方贴图 / JSON / 代码。
+2. **不做充能赛特斯 / 天石粉**：充能赛特斯由 AE2 自己的 `ae2:charger` 充能（配方只要
+   铁 / 铜 / 赛特斯，空岛能凑齐）；天石粉来自陨石天石，不属于空岛缺口。
+3. **门控与形态**：`sieve/sand_ae2.json` 是独立 patch，根级 `"mod": "ae2"` + `"patch": true`；
+   没装时在物品查找之前整文件跳过，基表不变、不刷 unknown item。两版 JSON 逐字相同。
+4. **数值依据**：水晶 1/6 对齐经典 Ex Nihilo（Omnia 是 5%）；粉取水晶的一半。
+5. **1.20.1 dev 坑**：AE2 生产 jar 直接丢 `run/mods` 会因 SRG mixin `@Shadow f_129762_`
+   找不到而崩服；必须放 `libs/`，由 `-PtechMods` 做 `fg.deobf`（`build.gradle` 已加入口）。
+6. **验证**：`-PtechMods` 全装 + AE2 15.4.12 + GuideME 20.1.15：`[sieve] 7 inputs, 144 drops`
+   （基表 142 + 2），RCON sand 含 `certus_quartz_crystal 0.16667` / `dust 0.08333`；
+   去掉 AE2 时 142、无 unknown item。手筛与 JEI 页面未目视。

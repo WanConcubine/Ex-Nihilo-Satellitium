@@ -281,7 +281,14 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - result 是流体（`tag` + `amount`，没有 item/id）；`check-data-paths.py` 只对 item/id result
   检查版本键。
 - 温度取 Tinkers 自己的锭配方，时间按 90 mB 锭等比缩放；没匠魂时整批条件跳过。
-- 阿迪特不在这一批：Tinkers 3.12.1 已移除，等「工匠巧思」拓展。
+- 阿迪特：Tinkers 3.12.1 本体已移除，改由**工匠巧思**（`tinkers_thinking`，只有 1.20.1）提供
+  `forge:molten_ardite`，所以 84 条熔炼里包含阿迪特（碎矿 45 mB / 矿块 180 mB、950°C）。
+  我们筛的是**自己的** `ardite_broken`（碎下界岩 1%，砂砾/沙子/尘土不出），矿块熔成 TiT 的锭。
+  叶绿素是 `gems`，没有熔融液体，不写熔炼。
+- 应用能源 2（`ae2`，两版）：不新增材料，直接给筛沙补丁 `sieve/sand_ae2.json`
+  （根级 `"mod": "ae2"` + `"patch": true`）：`ae2:certus_quartz_crystal` **1/6**、
+  `ae2:certus_quartz_dust` **1/12**；没装 AE2 时整文件跳过，基表仍是 116 条。
+  充能赛特斯 / 天石粉不做：前者用 AE2 自己的 `ae2:charger` 充能，后者来自陨石天石。
 
 ## 9. 桶转化 JSON（M1.5/M6）
 
