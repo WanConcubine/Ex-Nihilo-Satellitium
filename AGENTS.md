@@ -26,7 +26,7 @@ python3 scripts/check-core-imports.py
 # 数据守卫：数据目录/字段/条件/标签命名空间必须与目标版本一致
 python3 scripts/check-data-paths.py
 
-# 玩家 wiki 结构守卫：页面/链接/JSON/版本矩阵/维护契约/nav 覆盖
+# 玩家 wiki 结构守卫：页面/链接/JSON/版本矩阵/维护契约/nav 覆盖/译文覆盖与 JSON 一致性
 python3 scripts/check-wiki.py
 
 # 玩家 wiki 静态站（MkDocs Material；产物 site/ 不提交，不需要服务器）
@@ -74,6 +74,8 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-wiki.txt
      当前差距写在 [docs/customization-roadmap.md](docs/customization-roadmap.md)，不要在 wiki 里写成“都支持”。
    - 任何新表 / 新字段先有 JSON 形态，再谈 KJS / CT 入口；三条路径必须共用同一套校验和 reload 语义。
    - 改表结构 / 字段 / 加载顺序必须同步 [wiki/](wiki/README.md)，并跑 `python3 scripts/check-wiki.py`。
+   - 玩家 wiki 是中英双语：改 `wiki/*.md` 必须在同一提交里同步 `wiki/*.en.md`（JSON 示例逐字一致），
+     否则 `check-wiki.py` 会因缺译文、残留中文或 JSON 漂移而失败；英文站是 `/en/`。
    - 文档维护责任见 [wiki/MAINTAINING.md](wiki/MAINTAINING.md)：Owner 是仓库所有者，改表的贡献者在同一提交里更新页面。
 
 ## 4. 代码地图
