@@ -1,0 +1,116 @@
+{
+  "input": "minecraft:grass_block",
+  "outputs": [
+    {
+      "item": "minecraft:wheat_seeds",
+      "chance": 0.15
+    },
+    {
+      "item": "minecraft:beetroot_seeds",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:potato",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:carrot",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:melon_seeds",
+      "chance": 0.05
+    },
+    {
+      "item": "minecraft:pumpkin_seeds",
+      "chance": 0.05
+    },
+    {
+      "item": "minecraft:sweet_berries",
+      "chance": 0.05
+    },
+    {
+      "item": "exnihilosatellitium:grass_seeds",
+      "chance": 0.06
+    },
+    {
+      "item": "minecraft:oak_sapling",
+      "chance": 0.08
+    },
+    {
+      "item": "minecraft:birch_sapling",
+      "chance": 0.04
+    },
+    {
+      "item": "minecraft:spruce_sapling",
+      "chance": 0.04
+    },
+    {
+      "item": "minecraft:jungle_sapling",
+      "chance": 0.03
+    },
+    {
+      "item": "minecraft:acacia_sapling",
+      "chance": 0.03
+    },
+    {
+      "item": "minecraft:cherry_sapling",
+      "chance": 0.03
+    },
+    {
+      "item": "minecraft:mangrove_propagule",
+      "chance": 0.03
+    },
+    {
+      "item": "minecraft:azalea",
+      "chance": 0.02
+    },
+    {
+      "item": "minecraft:flowering_azalea",
+      "chance": 0.01
+    },
+    {
+      "item": "minecraft:bamboo",
+      "chance": 0.05
+    },
+    {
+      "item": "exnihilosatellitium:sky_slime_grass_seeds",
+      "chance": 0.02,
+      "mod": "tconstruct"
+    },
+    {
+      "item": "exnihilosatellitium:ender_slime_grass_seeds",
+      "chance": 0.01,
+      "mod": "tconstruct"
+    },
+    {
+      "item": "exnihilosatellitium:cobblestone_pebble",
+      "chance": 1.0,
+      "min": 4,
+      "max": 6
+    },
+    {
+      "item": "exnihilosatellitium:andesite_pebble",
+      "chance": 1.0,
+      "min": 4,
+      "max": 6
+    },
+    {
+      "item": "exnihilosatellitium:granite_pebble",
+      "chance": 1.0,
+      "min": 4,
+      "max": 6
+    },
+    {
+      "item": "exnihilosatellitium:diorite_pebble",
+      "chance": 1.0,
+      "min": 4,
+      "max": 6
+    },
+    {
+      "item": "exnihilosatellitium:chlorophyll_broken",
+      "chance": 0.01,
+      "mod": "tinkers_thinking"
+    }
+  ]
+}

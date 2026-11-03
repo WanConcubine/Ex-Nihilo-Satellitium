@@ -1,0 +1,18 @@
+{
+  "type": "tconstruct:melting",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tinkers_thinking"
+    }
+  ],
+  "ingredient": {
+    "item": "exnihilosatellitium:ardite_broken"
+  },
+  "result": {
+    "amount": 45,
+    "tag": "forge:molten_ardite"
+  },
+  "temperature": 950,
+  "time": 32
+}

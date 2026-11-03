@@ -89,9 +89,12 @@ POWDERED = """
 
 STONE = ("#141414", "#2E2E2E", "#4A4A4A", "#6A6A6A", "#8A8A8A")
 
-# Some nether materials sit in a netherrack chunk, not a coal-grey stone one.
+# Some nether materials sit in a netherrack chunk, not a coal-grey stone one;
+# chlorophyll ore is sifted out of grass blocks, so it sits in a dirt chunk.
 NETHERRACK_STONE = ("#2A0D0D", "#4A1414", "#6B1D1D", "#8A2A2A", "#A83A3A")
-STONE_PALETTES = {"cobalt": NETHERRACK_STONE}
+DIRT_STONE = ("#2A1A0E", "#4A2E18", "#6B4426", "#8A5C34", "#A87A4A")
+STONE_PALETTES = {"cobalt": NETHERRACK_STONE, "ardite": NETHERRACK_STONE,
+                  "chlorophyll": DIRT_STONE}
 
 BROKEN_LIGHTS = ((6, 4), (7, 4), (6, 5))
 
@@ -118,6 +121,8 @@ PALETTES = {
     "sulfur": ("#4A420E", "#8A7C1E", "#D8C43A", "#E8DC6A", "#FFF4A8"),
     "ruby": ("#3A0A10", "#8A1A26", "#C93A4A", "#E86A7A", "#FFB0BC"),
     "sapphire": ("#0A1A3A", "#1A3A8A", "#3A6FD9", "#6FA0E8", "#B0D0FF"),
+    "ardite": ("#2B0F0A", "#5E1F16", "#8E3B2E", "#B85C48", "#E39A85"),
+    "chlorophyll": ("#14300E", "#2E6A22", "#4FA83A", "#7CD05C", "#C0F09A"),
 }
 
 

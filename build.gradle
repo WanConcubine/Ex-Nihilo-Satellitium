@@ -247,6 +247,18 @@ dependencies {
     if (project.hasProperty("techMods") && file("libs/TConstruct-1.20.1-3.12.1.231.jar").exists()) {
         runtimeOnly fg.deobf("libs:TConstruct-1.20.1:3.12.1.231")
     }
+    if (project.hasProperty("techMods") && file("libs/Tinkers-Thinking-0.2.4.jar").exists()) {
+        // Tinkers' Thinking (TiT) brings Ardite / Chlorophyll ores; it needs TConstruct 3.12.1+.
+        runtimeOnly fg.deobf("libs:Tinkers-Thinking:0.2.4")
+    }
+    if (project.hasProperty("techMods") && file("libs/guideme-20.1.15.jar").exists()) {
+        // Applied Energistics 2's required library (GuideME 20.1.x for the 1.20.1 line).
+        runtimeOnly fg.deobf("libs:guideme:20.1.15")
+    }
+    if (project.hasProperty("techMods") && file("libs/appliedenergistics2-forge-15.4.12.jar").exists()) {
+        // AE2 15.x is the 1.20.1 Forge line; the prod jar must be deobf'd for the FG dev runtime.
+        runtimeOnly fg.deobf("libs:appliedenergistics2-forge:15.4.12")
+    }
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

@@ -38,6 +38,10 @@
       "chance": 0.01
     },
     {
+      "item": "exnihilosatellitium:ardite_broken",
+      "chance": 0.01
+    },
+    {
       "item": "minecraft:netherite_scrap",
       "chance": 0.004
     }

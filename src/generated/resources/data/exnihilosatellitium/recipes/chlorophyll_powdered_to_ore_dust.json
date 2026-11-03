@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tinkers_thinking"
+    }
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:chlorophyll_powdered"
+    }
+  },
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:chlorophyll_ore_dust"
+  },
+  "show_notification": true
+}
