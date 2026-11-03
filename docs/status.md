@@ -394,7 +394,7 @@ python3 scripts/check-data-paths.py --target 1.20.1 --root build/port-1.20.1
 python3 scripts/compare-recipes.py --expect-old-only '*_mekanism.json'
 python3 scripts/compare-models.py --expect-old-only 'models/block:barrel_base'  # 完整清单见 datagen.md §4.4
 
-# 推送（SakuraCat 代理；SSH 22 会被代理拒，走 ssh.github.com:443）
+# 推送（SakuraCat 代理；代理开着时走 ssh.github.com:443；代理没开时直连 22 也可，2026-11-04 实测）
 export GIT_SSH_COMMAND='ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes -o ProxyCommand="nc -X connect -x 127.0.0.1:12450 %h %p"'
 git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin main
 git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin 1.20.1-forge
