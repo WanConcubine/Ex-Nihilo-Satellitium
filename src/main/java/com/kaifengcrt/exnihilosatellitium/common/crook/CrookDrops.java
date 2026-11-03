@@ -3,24 +3,24 @@ package com.kaifengcrt.exnihilosatellitium.common.crook;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
-import net.minecraftforge.registries.ForgeRegistries;
+import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 /**
  * Extra leaf drops when a crook is used, loaded from
@@ -29,6 +29,16 @@ import java.util.Optional;
  * <p>One file per leaves block: {@code input} is the leaves block and
  * {@code drops} is a list of item/chance entries. Vanilla leaf drops stay
  * untouched; the crook adds the listed entries on top.</p>
+ *
+ * <p>Inputs may be a leaves block id or a {@code #tag}; tag entries extend the
+ * drops of every matching block (identical drops are kept once). A
+ * {@code "patch": true} file is applied after all normal files and can append
+ * drops or remove individual drops listed under {@code "remove"}.</p>
+ *
+ * <p>Tags are bound after the reload listeners run, so {@link #load} builds the
+ * concrete part and {@link #rebuild(boolean)} runs again on
+ * {@code TagsUpdatedEvent} to expand tags and apply patches. Script
+ * contributions from {@link CustomizationOverlay} are replayed last.</p>
  */
 public final class CrookDrops {
 
@@ -38,6 +48,8 @@ public final class CrookDrops {
     private static final String DIR = "crook";
     private static volatile Map<Block, List<Drop>> table = Map.of();
     private static volatile Map<Block, List<Drop>> clientTable = Map.of();
+    private static volatile List<DataPackJson.Source> sources = List.of();
+    private static volatile List<DataPackJson.Source> clientSources = List.of();
 
     private CrookDrops() {
     }
@@ -50,7 +62,7 @@ public final class CrookDrops {
     public static List<Map.Entry<Block, List<Drop>>> all() {
         final Map<Block, List<Drop>> source = table.isEmpty() ? clientTable : table;
         final List<Map.Entry<Block, List<Drop>>> list = new ArrayList<>(source.entrySet());
-        list.sort(Comparator.comparing(entry -> ForgeRegistries.BLOCKS.getKey(entry.getKey()).toString()));
+        list.sort(Comparator.comparing(entry -> BuiltInRegistries.BLOCK.getKey(entry.getKey()).toString()));
         return list;
     }
 
@@ -59,51 +71,309 @@ public final class CrookDrops {
     }
 
     public static void load(final ResourceManager manager, final boolean clientView) {
-        final Map<Block, List<Drop>> built = new HashMap<>();
-        int files = 0;
-        for (final Map.Entry<ResourceLocation, Resource> entry
-                : manager.listResources(DIR, path -> path.getPath().endsWith(".json")).entrySet()) {
-            final ResourceLocation id = entry.getKey();
-            try (InputStreamReader reader = new InputStreamReader(
-                    entry.getValue().open(), StandardCharsets.UTF_8)) {
-                final JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-                final ResourceLocation inputId = ResourceLocation.tryParse(root.get("input").getAsString());
-                final Optional<Block> input = Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(inputId));
-                if (input.isEmpty()) {
-                    ExNihiloSatellitium.LOGGER.warn("[crook] unknown leaves block {} in {}", inputId, id);
-                    continue;
-                }
-                final JsonArray drops = root.getAsJsonArray("drops");
-                final List<Drop> list = new ArrayList<>();
-                for (final JsonElement element : drops) {
-                    final JsonObject drop = element.getAsJsonObject();
-                    final ResourceLocation itemId = ResourceLocation.tryParse(drop.get("item").getAsString());
-                    final Optional<Item> item = Optional.ofNullable(ForgeRegistries.ITEMS.getValue(itemId));
-                    final float chance = drop.get("chance").getAsFloat();
-                    if (item.isEmpty() || item.get() == Items.AIR || !Float.isFinite(chance)
-                            || chance <= 0.0F || chance > 1.0F) {
-                        ExNihiloSatellitium.LOGGER.warn("[crook] bad drop {} in {}", itemId, id);
-                        continue;
-                    }
-                    list.add(new Drop(item.get(), chance));
-                }
-                if (built.putIfAbsent(input.get(), List.copyOf(list)) != null) {
-                    ExNihiloSatellitium.LOGGER.warn("[crook] duplicate input {} in {}, later entry skipped",
-                            inputId, id);
-                    continue;
-                }
-                files++;
-            } catch (final Exception exception) {
-                ExNihiloSatellitium.LOGGER.error("[crook] failed to read {}: {}", id, exception.toString());
-            }
+        final List<DataPackJson.Source> read = DataPackJson.readAll(manager, DIR, "crook");
+        if (clientView) {
+            clientSources = read;
+        } else {
+            sources = read;
         }
-        final Map<Block, List<Drop>> snapshot = Map.copyOf(built);
+        // Concrete entries are available immediately; tags are expanded on TagsUpdatedEvent.
+        // The client keeps the old bindings across F3+T, so it can expand right away.
+        rebuild(clientView, clientView);
+    }
+
+    /** Rebuilds from the last read sources; called again after tags are bound. */
+    public static void rebuild(final boolean clientView) {
+        rebuild(clientView, true);
+    }
+
+    private static void rebuild(final boolean clientView, final boolean expandTags) {
+        final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
+        final boolean tagsReady = expandTags && DataPackJson.tagsReady();
+        final TableBuilder<Block, List<Drop>> builder = new TableBuilder<>(TableId.CROOK.id());
+        final List<DataPackJson.Source> tagFiles = new ArrayList<>();
+        final List<DataPackJson.Source> patchFiles = new ArrayList<>();
+
+        try {
+            for (final DataPackJson.Source source : sourceList) {
+                if (!DataPackJson.modLoaded(source.root())) {
+                    continue;
+                }
+                if (DataPackJson.isPatch(source.root())) {
+                    patchFiles.add(source);
+                    continue;
+                }
+                final String rawInput = DataPackJson.string(source.root(), "input");
+                if (rawInput == null) {
+                    ExNihiloSatellitium.LOGGER.warn("[crook] missing input in {}", source.id());
+                    continue;
+                }
+                if (DataPackJson.isTag(rawInput)) {
+                    if (tagsReady) {
+                        tagFiles.add(source);
+                    }
+                    continue;
+                }
+                applyFile(builder, source);
+            }
+
+            if (tagsReady) {
+                for (final DataPackJson.Source source : tagFiles) {
+                    applyTagFile(builder, source);
+                }
+                for (final DataPackJson.Source source : patchFiles) {
+                    applyPatch(builder, source);
+                }
+                applyOverlay(builder);
+            }
+        } catch (final RuntimeException exception) {
+            ExNihiloSatellitium.LOGGER.error("[crook] rebuild failed, keeping previous snapshot",
+                    exception);
+            return;
+        }
+
+        final Map<Block, List<Drop>> snapshot = builder.build();
         if (clientView) {
             clientTable = snapshot;
         } else {
             table = snapshot;
         }
-        ExNihiloSatellitium.LOGGER.info("[crook] loaded {} leaves tables{}", files,
-                clientView ? " (client)" : "");
+        final int drops = snapshot.values().stream().mapToInt(List::size).sum();
+        ExNihiloSatellitium.LOGGER.info(
+                "[crook] loaded {} leaves tables, {} drops ({} tag files, {} patches, {} overlay{}){}",
+                snapshot.size(), drops, tagFiles.size(), patchFiles.size(),
+                CustomizationOverlay.forTable(TableId.CROOK).size(),
+                tagsReady ? "" : ", waiting for tags", clientView ? " (client)" : "");
+    }
+
+    private static void applyFile(final TableBuilder<Block, List<Drop>> builder,
+                                  final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+        final List<Drop> drops = parseDrops(source.root(), source.id());
+        if (inputs.isEmpty() || drops.isEmpty()) {
+            return;
+        }
+        for (final Block input : inputs) {
+            if (!builder.putIfAbsent(input, drops, source.id().toString())) {
+                ExNihiloSatellitium.LOGGER.warn(
+                        "[crook] duplicate input {} in {}, later entry skipped",
+                        BuiltInRegistries.BLOCK.getKey(input), source.id());
+            }
+        }
+    }
+
+    private static void applyTagFile(final TableBuilder<Block, List<Drop>> builder,
+                                     final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+        final List<Drop> drops = parseDrops(source.root(), source.id());
+        if (inputs.isEmpty() || drops.isEmpty()) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.merge(input, drops, CrookDrops::union, source.id().toString());
+        }
+    }
+
+    private static void applyPatch(final TableBuilder<Block, List<Drop>> builder,
+                                   final DataPackJson.Source source) {
+        final JsonObject root = source.root();
+        final List<Block> inputs = blocks(DataPackJson.string(root, "input"), source.id());
+        if (inputs.isEmpty()) {
+            return;
+        }
+        if (DataPackJson.removeAll(root)) {
+            for (final Block input : inputs) {
+                builder.remove(input);
+            }
+            return;
+        }
+
+        final Set<Item> removed = new LinkedHashSet<>();
+        for (final String raw : DataPackJson.removeList(root)) {
+            removed.addAll(items(raw, source.id()));
+        }
+        final List<Drop> added = root.has("drops") ? parseDrops(root, source.id()) : List.of();
+        if (removed.isEmpty() && added.isEmpty()) {
+            ExNihiloSatellitium.LOGGER.warn("[crook] empty patch {} (no drops/remove)", source.id());
+            return;
+        }
+
+        for (final Block input : inputs) {
+            final List<Drop> current = builder.get(input);
+            final List<Drop> list = new ArrayList<>(current == null ? List.of() : current);
+            if (!removed.isEmpty()) {
+                list.removeIf(drop -> removed.contains(drop.item()));
+            }
+            for (final Drop drop : added) {
+                if (!list.contains(drop)) {
+                    list.add(drop);
+                }
+            }
+            if (list.isEmpty()) {
+                builder.remove(input);
+            } else {
+                builder.put(input, List.copyOf(list), source.id().toString());
+            }
+        }
+    }
+
+    private static void applyOverlay(final TableBuilder<Block, List<Drop>> builder) {
+        for (final CustomizationOverlay.Customization customization
+                : CustomizationOverlay.forTable(TableId.CROOK)) {
+            try {
+                switch (customization.action()) {
+                    case ADD -> overlayAdd(builder, customization);
+                    case REPLACE -> overlayReplace(builder, customization);
+                    case REMOVE -> overlayRemove(builder, customization);
+                }
+            } catch (final RuntimeException exception) {
+                ExNihiloSatellitium.LOGGER.warn("[crook] overlay {} failed: {}",
+                        customization.describe(), exception.toString());
+            }
+        }
+    }
+
+    private static void overlayAdd(final TableBuilder<Block, List<Drop>> builder,
+                                   final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = overlayLabel(customization);
+        final JsonObject root = customization.payload();
+        final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
+        final List<Drop> drops = parseDrops(root, label);
+        if (inputs.isEmpty() || drops.isEmpty()) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.merge(input, drops, CrookDrops::union, overlaySource(customization));
+        }
+    }
+
+    private static void overlayReplace(final TableBuilder<Block, List<Drop>> builder,
+                                       final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = overlayLabel(customization);
+        final JsonObject root = customization.payload();
+        final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
+        if (!root.has("drops")) {
+            ExNihiloSatellitium.LOGGER.warn("[crook] overlay {} has no drops", customization.describe());
+            return;
+        }
+        final List<Drop> drops = parseDrops(root, label);
+        if (drops.isEmpty() && !isEmptyArray(root, "drops")) {
+            ExNihiloSatellitium.LOGGER.warn(
+                    "[crook] overlay {} has no valid drops, keeping the old entry",
+                    customization.describe());
+            return;
+        }
+        for (final Block input : inputs) {
+            if (drops.isEmpty()) {
+                builder.remove(input);
+            } else {
+                builder.put(input, drops, overlaySource(customization));
+            }
+        }
+    }
+
+    private static void overlayRemove(final TableBuilder<Block, List<Drop>> builder,
+                                      final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = overlayLabel(customization);
+        final JsonObject root = customization.payload();
+        final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
+        if (inputs.isEmpty()) {
+            return;
+        }
+        final List<String> remove = DataPackJson.removeList(root);
+        if (remove.isEmpty()) {
+            for (final Block input : inputs) {
+                builder.remove(input);
+            }
+            return;
+        }
+        final Set<Item> removed = new LinkedHashSet<>();
+        for (final String raw : remove) {
+            removed.addAll(items(raw, label));
+        }
+        for (final Block input : inputs) {
+            final List<Drop> current = builder.get(input);
+            if (current == null) {
+                continue;
+            }
+            final List<Drop> list = new ArrayList<>(current);
+            list.removeIf(drop -> removed.contains(drop.item()));
+            if (list.isEmpty()) {
+                builder.remove(input);
+            } else {
+                builder.put(input, List.copyOf(list), overlaySource(customization));
+            }
+        }
+    }
+
+    private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = ResourceLocation.tryParse(
+                "exnihilosatellitium:overlay/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+    }
+
+    private static String overlaySource(final CustomizationOverlay.Customization customization) {
+        return "customize:" + customization.source() + "#" + customization.sequence();
+    }
+
+    /** {@code true} only for an explicit empty array; missing/invalid arrays are handled earlier. */
+    private static boolean isEmptyArray(final JsonObject root, final String key) {
+        return root.has(key) && root.get(key).isJsonArray() && root.getAsJsonArray(key).isEmpty();
+    }
+
+    private static List<Drop> union(final List<Drop> left, final List<Drop> right) {
+        final List<Drop> list = new ArrayList<>(left);
+        for (final Drop drop : right) {
+            if (!list.contains(drop)) {
+                list.add(drop);
+            }
+        }
+        return List.copyOf(list);
+    }
+
+    private static List<Block> blocks(final String raw, final ResourceLocation file) {
+        if (raw == null) {
+            ExNihiloSatellitium.LOGGER.warn("[crook] missing input in {}", file);
+            return List.of();
+        }
+        return DataPackJson.resolve(BuiltInRegistries.BLOCK, raw, "crook", file).values();
+    }
+
+    private static List<Item> items(final String raw, final ResourceLocation file) {
+        final List<Item> resolved = DataPackJson.resolve(BuiltInRegistries.ITEM, raw, "crook", file).values();
+        return resolved.stream().filter(item -> item != Items.AIR).toList();
+    }
+
+    private static List<Drop> parseDrops(final JsonObject root, final ResourceLocation file) {
+        final JsonElement drops = root.get("drops");
+        if (drops == null || !drops.isJsonArray()) {
+            ExNihiloSatellitium.LOGGER.warn("[crook] {} has no drops array", file);
+            return List.of();
+        }
+        final JsonArray array = drops.getAsJsonArray();
+        final List<Drop> list = new ArrayList<>();
+        for (final JsonElement element : array) {
+            final JsonObject drop = element.getAsJsonObject();
+            if (!DataPackJson.modLoaded(drop)) {
+                continue;
+            }
+            final String rawItem = DataPackJson.string(drop, "item");
+            if (rawItem == null) {
+                ExNihiloSatellitium.LOGGER.warn("[crook] drop without item in {}", file);
+                continue;
+            }
+            final ResourceLocation itemId = DataPackJson.id(rawItem, "crook", file);
+            final Item item = itemId == null
+                    ? null
+                    : BuiltInRegistries.ITEM.getOptional(itemId).orElse(null);
+            final float chance = drop.has("chance") ? drop.get("chance").getAsFloat() : Float.NaN;
+            if (item == null || item == Items.AIR || !Float.isFinite(chance)
+                    || chance <= 0.0F || chance > 1.0F) {
+                ExNihiloSatellitium.LOGGER.warn("[crook] bad drop {} in {}", rawItem, file);
+                continue;
+            }
+            list.add(new Drop(item, chance));
+        }
+        return List.copyOf(list);
     }
 }

@@ -419,6 +419,28 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 - RCON：`data merge {Compost:1000,CompostTicks:1}` → 2 秒后仍是桶、`DirtReady=1b`。
 - 未验证：逐个物品右键塞桶的点数（需要玩家）；JSON 与标签的键已用脚本对齐。
 
+## 12. 数据包 v2 移植（2026-11-03）
+
+主线 2026-11-03 的数据包 v2 整套搬到 1.20.1：
+
+1. **同一套 loader**：`common/datapack/DataPackJson` + 七张表的 `rebuild()`。id / 标签解析
+   改用 `BuiltInRegistries`（1.20.1 里可用，且 modded 条目也在其中），不再依赖
+   `ForgeRegistries`；Forge 的 `BuiltInRegistries` 弃用警告不影响运行。
+2. **Forge 事件**：`net.minecraftforge.event.TagsUpdatedEvent`，`SERVER_DATA_LOAD` 重建服务端表，
+   `CLIENT_PACKET_RECEIVED` 且 `shouldUpdateStaticData()` 时重建客户端表。
+   `load()` 只建具体条目，标签在事件里展开，避免 `TagManager` 尚未 bind 时读到空集。
+3. **版本差异**：
+   - 通用标签 `forge:`（`#forge:gravel`），不是主线的 `c:`；
+   - `base` / `added.fluid` 只保留 still 流体（`Fluid#isSource(defaultFluidState())`），
+     因为 `#minecraft:water` 同时含 still/flowing，而桶里只存 still；
+   - 示例包 `pack_format 15`。
+4. **验证**：Forge 47.4.28 dev server + 测试包，tag 展开后 `[sieve] 45/115`、`[hammer] 91`、
+   `[crook] 32`、`[crucible] 11 heat`、`[barrel] 11`；RCON 查 sand / oak_log / end_stone /
+   bread 均符合预期；`/reload` 增删补丁文件能恢复。`build` 与纹理守卫通过。
+
+坑：1.20.1 分支没有 `check-core-imports.py` / `check-data-paths.py`（P1/P2 未回移），
+这两项守卫只能在主线跑；后续回移 P2 时再补。
+
 ## 13. 末影蛋糕（2026-11-03）
 
 补 `parity.md` 的 End Cake 缺口，行为参考 Omnia 1.10.2 `BlockEndCake`：可放置蛋糕，

@@ -33,6 +33,52 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
   - **未验**：进游戏右键吃/传送、末影之眼补片、模型画面；`/setblock` 默认是 `bites=0`，
     物品放置才是 `bites=6`。
 
+## 当前批次（2026-11-03，三路径 P1 移植）
+
+- **与主线同步 P1 基座**：`common/table/`（`TableId` / `TableBuilder` /
+  `CustomizationOverlay` / `Tables` / `TableDump`）、七张表统一走 builder、
+  `/exnihilo dump <table>`、`/exnihilo customize <table> add|remove|replace <json>`、
+  `list` / `clear [source]`。
+- **1.20.1 差异**：命令与表 API 两版相同；`BuiltInRegistries` 的弃用警告照旧；
+  本分支没有 `check-core-imports.py` / `check-data-paths.py`，P1 只跑 build + 纹理守卫。
+- **验证**（2026-11-03，Forge 47.4.28 / Java 17）：
+  - `./gradlew build`、`check-textures.py` 通过；
+  - 七张表 add 各 +1 行；replace 后目标行正确（sand 只剩 diamond 1.0、cobblestone → flint、
+    oak_leaves 只剩 stick、water+sugar → glass、emerald=50、end_stone → water 100、
+    furnace[lit=true]=0.9）；
+  - 连续两次 `/reload` 后七张表 dump 与 reload 前**逐字节一致**；
+  - `clear` 掉 7 条后七张表 dump 与启动基线**逐字节一致**。
+- **未做**：KJS / CT 入口（等主线 P2/P3）；overlay 不持久化；专用服客户端 JEI 同步（P4）。
+
+## 当前批次（2026-11-03，数据包 v2 移植）
+
+- **1.20.1 已对齐主线的数据包 v2**：`#tag` 输入、根级 `"mod"` 门、`"patch": true` /
+  `"remove"`、具体 > 标签的加载顺序、`/exnihilo` 诊断命令全部搬过来了。
+- **FORGE 侧时序**：`TagManager` 同样在所有 listener 之后才 bind，所以 `load()` 只建具体条目，
+  Forge 的 `TagsUpdatedEvent`（`net.minecraftforge.event.TagsUpdatedEvent`）里再 `rebuild()`。
+  日志先 `waiting for tags`、后完整条数，属正常。
+- **1.20.1 特有**：
+  - 通用标签是 `forge:`（`#forge:gravel`），vanilla 标签仍是 `#minecraft:logs` 等。
+  - `base` / `added.fluid` 的流体标签只展开 still（source）流体；`#minecraft:water` 的
+    still/flowing 两个变体里 flowing 规则会被丢掉（桶里只可能存 still）。
+  - 代码从 `ForgeRegistries` 改成 `BuiltInRegistries` 做 id/标签解析，Forge 的
+    `BuiltInRegistries` 弃用警告只是警告，功能正常。
+- **示例包**：`examples/datapack/`（`pack_format 15`，`#forge:gravel`）。
+- **验证**（2026-11-03，Forge 47.4.28 / Java 17）：
+  - `./gradlew build`、`check-textures.py` 通过；本分支没有 `check-core-imports.py` /
+    `check-data-paths.py`（P1/P2 未回移），这两项没跑。
+  - dev server + 测试包：启动 `[sieve] 6 inputs, 90 drops` → 展开后 **45 inputs / 115 drops**；
+    `[hammer] 52 → 91`；`[crook] 22 → 32 drops`；`[crucible] 9 → 11 heat`
+    （`#minecraft:campfires` 展开 2 个）；`[barrel] 12 → 11`（水+牛奶规则被补丁删除）。
+  - RCON：`sieve minecraft:sand` 已无 cactus、有 0.5 钻石；`sieve minecraft:oak_log` 有 1% 钻石；
+    `hammer minecraft:oak_log` → 木棍 1–2；`hammer minecraft:end_stone` → no rule；
+    `compost minecraft:bread` → 100；tag-targeted `remove: true` 把原木锤规则 91 → 51，
+    `"mod": "minecraft"` 正例让桶 +1；删掉测试文件 `/reload` 后恢复 91 / 11。
+- **未做**：专用服客户端 JEI 同步；本分支没有 core/data 守卫脚本；KubeJS / CraftTweaker
+  仍无集成；`materials.json` 仍只认 jar 内那份。
+- **三路径等价**：主线的 `docs/customization-roadmap.md` 是总计划；**P1（TableBuilder +
+  overlay）已同步到本分支**，之后 KJS/CT 入口仍以主线 P2/P3 为准，不在分支单独维护路线图。
+
 ## 0.2.0 发布准备（2026-11-02）
 
 - `mod_version=0.2.0`；`CHANGELOG.md` / `README.md` 已更新；主线的

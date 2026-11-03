@@ -7,14 +7,20 @@ import net.minecraft.util.profiling.ProfilerFiller;
 /** Reload hook: rebuilding the sift table is just a re-read of the JSON files. */
 public final class SieveReloadListener extends SimplePreparableReloadListener<Void> {
 
+    private final boolean clientView;
+
+    public SieveReloadListener(final boolean clientView) {
+        this.clientView = clientView;
+    }
+
     @Override
     protected Void prepare(final ResourceManager manager, final ProfilerFiller profiler) {
-        SieveRegistry.load(manager);
+        // Tag expansion needs the tag bindings, which are only ready in apply().
         return null;
     }
 
     @Override
     protected void apply(final Void unused, final ResourceManager manager, final ProfilerFiller profiler) {
-        // Table already rebuilt in prepare().
+        SieveRegistry.load(manager, this.clientView);
     }
 }

@@ -1,0 +1,6 @@
+{
+  "input": "#forge:gravel",
+  "outputs": [
+    { "item": "minecraft:diamond", "chance": 0.01 }
+  ]
+}

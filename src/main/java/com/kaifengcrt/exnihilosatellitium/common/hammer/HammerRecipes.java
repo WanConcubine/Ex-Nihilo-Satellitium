@@ -1,11 +1,13 @@
 package com.kaifengcrt.exnihilosatellitium.common.hammer;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
-import net.minecraftforge.registries.ForgeRegistries;
+import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
@@ -14,14 +16,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Hammer crush table, loaded from {@code data/<namespace>/hammer/*.json}.
@@ -37,8 +35,16 @@ import java.util.Optional;
  * ore dust      → the ore dust block itself (no further crushing)
  * </pre>
  *
- * <p>Gameplay always reads the server table; the client keeps a copy loaded
+ * <p>One rule per block, so a {@code #tag} input expands to every matching
+ * block but never overwrites a block that already has a concrete rule. Use
+ * {@code "patch": true} to replace a rule and {@code "remove": true} to delete
+ * one. Gameplay always reads the server table; the client keeps a copy loaded
  * from the mirrored assets so JEI works when connected to a dedicated server.</p>
+ *
+ * <p>Tags are bound after the reload listeners run, so {@link #load} builds the
+ * concrete part and {@link #rebuild(boolean)} runs again on
+ * {@code TagsUpdatedEvent} to expand tags and apply patches. Script
+ * contributions from {@link CustomizationOverlay} are replayed last.</p>
  */
 public final class HammerRecipes {
 
@@ -47,6 +53,8 @@ public final class HammerRecipes {
 
     private static volatile Map<Block, Rule> recipes = Map.of();
     private static volatile Map<Block, Rule> clientRecipes = Map.of();
+    private static volatile List<DataPackJson.Source> sources = List.of();
+    private static volatile List<DataPackJson.Source> clientSources = List.of();
 
     /** One hammer rule: the dropped item and the inclusive drop-count range. */
     public record Rule(Item item, int min, int max) {
@@ -69,7 +77,7 @@ public final class HammerRecipes {
     public static List<Map.Entry<Block, Rule>> all() {
         final Map<Block, Rule> source = recipes.isEmpty() ? clientRecipes : recipes;
         final List<Map.Entry<Block, Rule>> list = new ArrayList<>(source.entrySet());
-        list.sort(Comparator.comparing(entry -> ForgeRegistries.BLOCKS.getKey(entry.getKey()).toString()));
+        list.sort(Comparator.comparing(entry -> BuiltInRegistries.BLOCK.getKey(entry.getKey()).toString()));
         return list;
     }
 
@@ -78,50 +86,205 @@ public final class HammerRecipes {
     }
 
     public static void load(final ResourceManager manager, final boolean clientView) {
-        final Map<Block, Rule> built = new HashMap<>();
-        int files = 0;
-        for (final Map.Entry<ResourceLocation, Resource> entry
-                : manager.listResources(DIR, path -> path.getPath().endsWith(".json")).entrySet()) {
-            final ResourceLocation id = entry.getKey();
-            try (InputStreamReader reader = new InputStreamReader(
-                    entry.getValue().open(), StandardCharsets.UTF_8)) {
-                final JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-                final ResourceLocation inputId = ResourceLocation.tryParse(root.get("input").getAsString());
-                final Optional<Block> input = Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(inputId));
-                if (input.isEmpty()) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] unknown input block {} in {}", inputId, id);
-                    continue;
-                }
-                final ResourceLocation resultId = ResourceLocation.tryParse(root.get("result").getAsString());
-                final Optional<Item> result = Optional.ofNullable(ForgeRegistries.ITEMS.getValue(resultId));
-                if (result.isEmpty() || result.get() == Items.AIR) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] unknown result {} in {}", resultId, id);
-                    continue;
-                }
-                final int min = root.has("min") ? root.get("min").getAsInt() : 1;
-                final int max = root.has("max") ? root.get("max").getAsInt() : min;
-                if (min < 1 || max < min || max > MAX_COUNT) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] invalid count range {}..{} in {}, skipped",
-                            min, max, id);
-                    continue;
-                }
-                if (built.putIfAbsent(input.get(), new Rule(result.get(), min, max)) != null) {
-                    ExNihiloSatellitium.LOGGER.warn("[hammer] duplicate input {} in {}, later entry skipped",
-                            inputId, id);
-                    continue;
-                }
-                files++;
-            } catch (final Exception exception) {
-                ExNihiloSatellitium.LOGGER.error("[hammer] failed to read {}: {}", id, exception.toString());
-            }
+        final List<DataPackJson.Source> read = DataPackJson.readAll(manager, DIR, "hammer");
+        if (clientView) {
+            clientSources = read;
+        } else {
+            sources = read;
         }
-        final Map<Block, Rule> snapshot = Map.copyOf(built);
+        // Concrete entries are available immediately; tags are expanded on TagsUpdatedEvent.
+        // The client keeps the old bindings across F3+T, so it can expand right away.
+        rebuild(clientView, clientView);
+    }
+
+    /** Rebuilds from the last read sources; called again after tags are bound. */
+    public static void rebuild(final boolean clientView) {
+        rebuild(clientView, true);
+    }
+
+    private static void rebuild(final boolean clientView, final boolean expandTags) {
+        final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
+        final boolean tagsReady = expandTags && DataPackJson.tagsReady();
+        final TableBuilder<Block, Rule> builder = new TableBuilder<>(TableId.HAMMER.id());
+        final List<DataPackJson.Source> tagFiles = new ArrayList<>();
+        final List<DataPackJson.Source> patchFiles = new ArrayList<>();
+
+        try {
+            for (final DataPackJson.Source source : sourceList) {
+                if (!DataPackJson.modLoaded(source.root())) {
+                    continue;
+                }
+                if (DataPackJson.isPatch(source.root())) {
+                    patchFiles.add(source);
+                    continue;
+                }
+                final String rawInput = DataPackJson.string(source.root(), "input");
+                if (rawInput == null) {
+                    ExNihiloSatellitium.LOGGER.warn("[hammer] missing input in {}", source.id());
+                    continue;
+                }
+                if (DataPackJson.isTag(rawInput)) {
+                    if (tagsReady) {
+                        tagFiles.add(source);
+                    }
+                    continue;
+                }
+                applyFile(builder, source);
+            }
+
+            if (tagsReady) {
+                for (final DataPackJson.Source source : tagFiles) {
+                    applyTagFile(builder, source);
+                }
+                for (final DataPackJson.Source source : patchFiles) {
+                    applyPatch(builder, source);
+                }
+                applyOverlay(builder);
+            }
+        } catch (final RuntimeException exception) {
+            ExNihiloSatellitium.LOGGER.error("[hammer] rebuild failed, keeping previous snapshot",
+                    exception);
+            return;
+        }
+
+        final Map<Block, Rule> snapshot = builder.build();
         if (clientView) {
             clientRecipes = snapshot;
         } else {
             recipes = snapshot;
         }
-        ExNihiloSatellitium.LOGGER.info("[hammer] loaded {} recipes{}", files,
-                clientView ? " (client)" : "");
+        ExNihiloSatellitium.LOGGER.info(
+                "[hammer] loaded {} recipes ({} tag files, {} patches, {} overlay{}){}",
+                snapshot.size(), tagFiles.size(), patchFiles.size(),
+                CustomizationOverlay.forTable(TableId.HAMMER).size(),
+                tagsReady ? "" : ", waiting for tags", clientView ? " (client)" : "");
+    }
+
+    private static void applyFile(final TableBuilder<Block, Rule> builder,
+                                  final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+        final Rule rule = parseRule(source.root(), source.id());
+        if (rule == null) {
+            return;
+        }
+        for (final Block input : inputs) {
+            if (!builder.putIfAbsent(input, rule, source.id().toString())) {
+                ExNihiloSatellitium.LOGGER.warn(
+                        "[hammer] duplicate input {} in {}, later entry skipped",
+                        BuiltInRegistries.BLOCK.getKey(input), source.id());
+            }
+        }
+    }
+
+    private static void applyTagFile(final TableBuilder<Block, Rule> builder,
+                                     final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+        final Rule rule = parseRule(source.root(), source.id());
+        if (rule == null) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.putIfAbsent(input, rule, source.id().toString());
+        }
+    }
+
+    private static void applyPatch(final TableBuilder<Block, Rule> builder,
+                                   final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "input"), source.id());
+        if (inputs.isEmpty()) {
+            return;
+        }
+        if (DataPackJson.removeAll(source.root())) {
+            for (final Block input : inputs) {
+                builder.remove(input);
+            }
+            return;
+        }
+        final Rule rule = parseRule(source.root(), source.id());
+        if (rule == null) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.put(input, rule, source.id().toString());
+        }
+    }
+
+    private static void applyOverlay(final TableBuilder<Block, Rule> builder) {
+        for (final CustomizationOverlay.Customization customization
+                : CustomizationOverlay.forTable(TableId.HAMMER)) {
+            try {
+                final ResourceLocation label = overlayLabel(customization);
+                final JsonObject root = customization.payload();
+                final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
+                if (inputs.isEmpty()) {
+                    continue;
+                }
+                if (customization.action() == CustomizationOverlay.Action.REMOVE) {
+                    for (final Block input : inputs) {
+                        builder.remove(input);
+                    }
+                    continue;
+                }
+                final Rule rule = parseRule(root, label);
+                if (rule == null) {
+                    continue;
+                }
+                final String source = overlaySource(customization);
+                if (customization.action() == CustomizationOverlay.Action.ADD) {
+                    for (final Block input : inputs) {
+                        builder.putIfAbsent(input, rule, source);
+                    }
+                } else {
+                    for (final Block input : inputs) {
+                        builder.put(input, rule, source);
+                    }
+                }
+            } catch (final RuntimeException exception) {
+                ExNihiloSatellitium.LOGGER.warn("[hammer] overlay {} failed: {}",
+                        customization.describe(), exception.toString());
+            }
+        }
+    }
+
+    private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = ResourceLocation.tryParse(
+                "exnihilosatellitium:overlay/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+    }
+
+    private static String overlaySource(final CustomizationOverlay.Customization customization) {
+        return "customize:" + customization.source() + "#" + customization.sequence();
+    }
+
+    private static List<Block> blocks(final String raw, final ResourceLocation file) {
+        if (raw == null) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] missing input in {}", file);
+            return List.of();
+        }
+        return DataPackJson.resolve(BuiltInRegistries.BLOCK, raw, "hammer", file).values();
+    }
+
+    private static Rule parseRule(final JsonObject root, final ResourceLocation file) {
+        final String rawResult = DataPackJson.string(root, "result");
+        if (rawResult == null) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] {} has no result", file);
+            return null;
+        }
+        final ResourceLocation resultId = DataPackJson.id(rawResult, "hammer", file);
+        final Item result = resultId == null
+                ? null
+                : BuiltInRegistries.ITEM.getOptional(resultId).orElse(null);
+        if (result == null || result == Items.AIR) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] unknown result {} in {}", rawResult, file);
+            return null;
+        }
+        final int min = root.has("min") ? root.get("min").getAsInt() : 1;
+        final int max = root.has("max") ? root.get("max").getAsInt() : min;
+        if (min < 1 || max < min || max > MAX_COUNT) {
+            ExNihiloSatellitium.LOGGER.warn("[hammer] invalid count range {}..{} in {}, skipped",
+                    min, max, file);
+            return null;
+        }
+        return new Rule(result, min, max);
     }
 }

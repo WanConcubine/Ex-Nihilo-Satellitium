@@ -17,14 +17,17 @@ public final class CompostReloadListener extends SimpleJsonResourceReloadListene
 
     private static final Gson GSON = new Gson();
 
-    public CompostReloadListener() {
+    private final boolean clientView;
+
+    public CompostReloadListener(final boolean clientView) {
         super(GSON, "compost");
+        this.clientView = clientView;
     }
 
     @Override
     protected void apply(final Map<ResourceLocation, JsonElement> jsons,
                          final ResourceManager resourceManager,
                          final ProfilerFiller profiler) {
-        CompostRegistry.reload(jsons);
+        CompostRegistry.reload(jsons, this.clientView);
     }
 }
