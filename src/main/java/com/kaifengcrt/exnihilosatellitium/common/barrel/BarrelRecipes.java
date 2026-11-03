@@ -4,6 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -14,10 +17,7 @@ import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Barrel transformation table, loaded from {@code data/<namespace>/barrel/*.json}.
@@ -36,7 +36,8 @@ import java.util.Set;
  *
  * <p>Read by the block entity on the server and by JEI on the client (the
  * client's resource manager only exposes {@code assets/}, so processResources
- * mirrors this directory there).</p>
+ * mirrors this directory there). Script contributions from
+ * {@link CustomizationOverlay} are replayed last.</p>
  */
 public final class BarrelRecipes {
 
@@ -69,6 +70,26 @@ public final class BarrelRecipes {
     }
 
     private record Added(boolean fluid, String raw) {
+    }
+
+    /** Resolved base/additive cross product, used by normal files, patches and overlay ops. */
+    private record Keys(boolean fluid, List<Fluid> bases, List<Fluid> addedFluids, List<Item> addedItems) {
+
+        List<String> keys() {
+            final List<String> keys = new ArrayList<>();
+            for (final Fluid base : this.bases) {
+                if (this.fluid) {
+                    for (final Fluid added : this.addedFluids) {
+                        keys.add(key(base, added, null));
+                    }
+                } else {
+                    for (final Item added : this.addedItems) {
+                        keys.add(key(base, null, added));
+                    }
+                }
+            }
+            return keys;
+        }
     }
 
     private static final String DIR = "barrel";
@@ -126,180 +147,184 @@ public final class BarrelRecipes {
         } else {
             sources = read;
         }
-        rebuild(clientView);
+        // Concrete entries are available immediately; tags are expanded on TagsUpdatedEvent.
+        // The client keeps the old bindings across F3+T, so it can expand right away.
+        rebuild(clientView, clientView);
     }
 
     /** Rebuilds from the last read sources; called again after tags are bound. */
     public static void rebuild(final boolean clientView) {
+        rebuild(clientView, true);
+    }
+
+    private static void rebuild(final boolean clientView, final boolean expandTags) {
         final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
-        final boolean tagsReady = DataPackJson.tagsReady();
-        final List<Recipe> built = new ArrayList<>();
-        final Set<String> seen = new LinkedHashSet<>();
+        final boolean tagsReady = expandTags && DataPackJson.tagsReady();
+        final TableBuilder<String, Recipe> builder = new TableBuilder<>(TableId.BARREL.id());
         final List<DataPackJson.Source> tagFiles = new ArrayList<>();
         final List<DataPackJson.Source> patchFiles = new ArrayList<>();
 
-        for (final DataPackJson.Source source : sourceList) {
-            if (!DataPackJson.modLoaded(source.root())) {
-                continue;
-            }
-            if (DataPackJson.isPatch(source.root())) {
-                patchFiles.add(source);
-                continue;
-            }
-            final String rawBase = DataPackJson.string(source.root(), "base");
-            final Added added = parseAdded(source.root(), source.id());
-            if (rawBase == null || added == null) {
-                continue;
-            }
-            if (DataPackJson.isTag(rawBase) || DataPackJson.isTag(added.raw())) {
-                if (tagsReady) {
-                    tagFiles.add(source);
+        try {
+            for (final DataPackJson.Source source : sourceList) {
+                if (!DataPackJson.modLoaded(source.root())) {
+                    continue;
                 }
-                continue;
+                if (DataPackJson.isPatch(source.root())) {
+                    patchFiles.add(source);
+                    continue;
+                }
+                final String rawBase = DataPackJson.string(source.root(), "base");
+                final Added added = parseAdded(source.root(), source.id());
+                if (rawBase == null || added == null) {
+                    continue;
+                }
+                if (DataPackJson.isTag(rawBase) || DataPackJson.isTag(added.raw())) {
+                    if (tagsReady) {
+                        tagFiles.add(source);
+                    }
+                    continue;
+                }
+                applyNormal(builder, source, true);
             }
-            applyNormal(built, seen, source, true);
+
+            if (tagsReady) {
+                for (final DataPackJson.Source source : tagFiles) {
+                    applyNormal(builder, source, false);
+                }
+                for (final DataPackJson.Source source : patchFiles) {
+                    applyPatch(builder, source);
+                }
+                applyOverlay(builder);
+            }
+        } catch (final RuntimeException exception) {
+            ExNihiloSatellitium.LOGGER.error("[barrel] rebuild failed, keeping previous snapshot",
+                    exception);
+            return;
         }
 
-        if (tagsReady) {
-            for (final DataPackJson.Source source : tagFiles) {
-                applyNormal(built, seen, source, false);
-            }
-            for (final DataPackJson.Source source : patchFiles) {
-                applyPatch(built, seen, source);
-            }
-        }
-
-        final List<Recipe> snapshot = List.copyOf(built);
+        final List<Recipe> snapshot = List.copyOf(builder.build().values());
         if (clientView) {
             clientRecipes = snapshot;
         } else {
             recipes = snapshot;
         }
-        final long fluidReactions = built.stream().filter(Recipe::isFluidReaction).count();
-        final long itemReactions = built.stream().filter(Recipe::isItemReaction).count();
+        final long fluidReactions = snapshot.stream().filter(Recipe::isFluidReaction).count();
+        final long itemReactions = snapshot.stream().filter(Recipe::isItemReaction).count();
         ExNihiloSatellitium.LOGGER.info(
-                "[barrel] loaded {} transforms ({} fluid, {} item; {} tag files, {} patches{}){}",
-                built.size(), fluidReactions, itemReactions, tagFiles.size(), patchFiles.size(),
-                tagsReady ? "" : ", tags not ready", clientView ? " (client)" : "");
+                "[barrel] loaded {} transforms ({} fluid, {} item; {} tag files, {} patches, {} overlay{}){}",
+                snapshot.size(), fluidReactions, itemReactions, tagFiles.size(), patchFiles.size(),
+                CustomizationOverlay.forTable(TableId.BARREL).size(),
+                tagsReady ? "" : ", waiting for tags", clientView ? " (client)" : "");
     }
 
-    private static void applyNormal(final List<Recipe> built, final Set<String> seen,
+    private static void applyNormal(final TableBuilder<String, Recipe> builder,
                                     final DataPackJson.Source source, final boolean warnDuplicate) {
-        final String rawBase = DataPackJson.string(source.root(), "base");
-        final Added added = parseAdded(source.root(), source.id());
-        if (rawBase == null || added == null) {
+        final Keys keys = keysFor(source.root(), source.id());
+        if (keys == null) {
             return;
         }
         final Template template = parseTemplate(source.root(), source.id());
         if (template == null) {
             return;
         }
-        final List<Fluid> bases = DataPackJson.resolve(
-                BuiltInRegistries.FLUID, rawBase, "barrel", source.id()).values();
-        final List<Fluid> addFluids = added.fluid()
-                ? DataPackJson.resolve(BuiltInRegistries.FLUID, added.raw(), "barrel", source.id()).values()
-                : List.of();
-        final List<Item> addItems = added.fluid()
-                ? List.of()
-                : DataPackJson.resolve(BuiltInRegistries.ITEM, added.raw(), "barrel", source.id()).values();
-        for (final Fluid base : bases) {
-            if (added.fluid()) {
-                for (final Fluid fluid : addFluids) {
-                    addRecipe(built, seen, new Recipe(base, fluid, null, template.result().copy(),
+        for (final Fluid base : keys.bases()) {
+            if (keys.fluid()) {
+                for (final Fluid fluid : keys.addedFluids()) {
+                    addRecipe(builder, new Recipe(base, fluid, null, template.result().copy(),
                             template.entity(), template.peacefulDrops(), template.cookTicks()),
-                            source.id(), warnDuplicate);
+                            source, warnDuplicate);
                 }
             } else {
-                for (final Item item : addItems) {
-                    if (item == Items.AIR) {
-                        continue;
-                    }
-                    addRecipe(built, seen, new Recipe(base, null, item, template.result().copy(),
+                for (final Item item : keys.addedItems()) {
+                    addRecipe(builder, new Recipe(base, null, item, template.result().copy(),
                             template.entity(), template.peacefulDrops(), template.cookTicks()),
-                            source.id(), warnDuplicate);
+                            source, warnDuplicate);
                 }
             }
         }
     }
 
-    private static void applyPatch(final List<Recipe> built, final Set<String> seen,
+    private static void applyPatch(final TableBuilder<String, Recipe> builder,
                                    final DataPackJson.Source source) {
-        final String rawBase = DataPackJson.string(source.root(), "base");
-        final Added added = parseAdded(source.root(), source.id());
-        if (rawBase == null || added == null) {
+        final Keys keys = keysFor(source.root(), source.id());
+        if (keys == null) {
             return;
         }
-        final List<Fluid> bases = DataPackJson.resolve(
-                BuiltInRegistries.FLUID, rawBase, "barrel", source.id()).values();
-        final List<Fluid> addFluids = added.fluid()
-                ? DataPackJson.resolve(BuiltInRegistries.FLUID, added.raw(), "barrel", source.id()).values()
-                : List.of();
-        final List<Item> addItems = added.fluid()
-                ? List.of()
-                : DataPackJson.resolve(BuiltInRegistries.ITEM, added.raw(), "barrel", source.id()).values();
-
-        final Set<String> keys = new HashSet<>();
-        for (final Fluid base : bases) {
-            if (added.fluid()) {
-                for (final Fluid fluid : addFluids) {
-                    keys.add(key(base, fluid, null));
+        final boolean removeAll = DataPackJson.removeAll(source.root());
+        // Parse the replacement before touching the table: a malformed patch must
+        // not delete the rule it failed to replace.
+        final Template template = removeAll ? null : parseTemplate(source.root(), source.id());
+        if (!removeAll && template == null) {
+            return;
+        }
+        for (final String key : keys.keys()) {
+            builder.remove(key);
+        }
+        if (removeAll) {
+            return;
+        }
+        for (final Fluid base : keys.bases()) {
+            if (keys.fluid()) {
+                for (final Fluid fluid : keys.addedFluids()) {
+                    putRecipe(builder, new Recipe(base, fluid, null, template.result().copy(),
+                            template.entity(), template.peacefulDrops(), template.cookTicks()), source);
                 }
             } else {
-                for (final Item item : addItems) {
-                    keys.add(key(base, null, item));
-                }
-            }
-        }
-        if (keys.isEmpty()) {
-            return;
-        }
-        built.removeIf(recipe -> keys.contains(key(recipe)));
-        seen.removeAll(keys);
-        if (DataPackJson.removeAll(source.root())) {
-            return;
-        }
-
-        final Template template = parseTemplate(source.root(), source.id());
-        if (template == null) {
-            return;
-        }
-        for (final Fluid base : bases) {
-            if (added.fluid()) {
-                for (final Fluid fluid : addFluids) {
-                    addRecipe(built, seen, new Recipe(base, fluid, null, template.result().copy(),
-                            template.entity(), template.peacefulDrops(), template.cookTicks()),
-                            source.id(), false);
-                }
-            } else {
-                for (final Item item : addItems) {
-                    if (item == Items.AIR) {
-                        continue;
-                    }
-                    addRecipe(built, seen, new Recipe(base, null, item, template.result().copy(),
-                            template.entity(), template.peacefulDrops(), template.cookTicks()),
-                            source.id(), false);
+                for (final Item item : keys.addedItems()) {
+                    putRecipe(builder, new Recipe(base, null, item, template.result().copy(),
+                            template.entity(), template.peacefulDrops(), template.cookTicks()), source);
                 }
             }
         }
     }
 
-    private static void addRecipe(final List<Recipe> built, final Set<String> seen,
-                                  final Recipe recipe, final ResourceLocation file,
-                                  final boolean warnDuplicate) {
-        if (built.size() >= MAX_RECIPES) {
-            ExNihiloSatellitium.LOGGER.warn("[barrel] recipe cap {} reached, {} skipped",
-                    MAX_RECIPES, file);
-            return;
-        }
-        if (!seen.add(key(recipe))) {
-            if (warnDuplicate) {
-                ExNihiloSatellitium.LOGGER.warn("[barrel] duplicate rule {} + {} in {}",
-                        BuiltInRegistries.FLUID.getKey(recipe.base()),
-                        addedKey(recipe), file);
+    private static void applyOverlay(final TableBuilder<String, Recipe> builder) {
+        for (final CustomizationOverlay.Customization customization
+                : CustomizationOverlay.forTable(TableId.BARREL)) {
+            try {
+                final DataPackJson.Source source = new DataPackJson.Source(
+                        overlayLabel(customization), customization.payload());
+                final Keys keys = keysFor(customization.payload(), source.id());
+                if (keys == null) {
+                    continue;
+                }
+                switch (customization.action()) {
+                    case ADD -> applyNormal(builder, source, false);
+                    case REPLACE -> applyPatch(builder, source);
+                    case REMOVE -> {
+                        for (final String key : keys.keys()) {
+                            builder.remove(key);
+                        }
+                    }
+                }
+            } catch (final RuntimeException exception) {
+                ExNihiloSatellitium.LOGGER.warn("[barrel] overlay {} failed: {}",
+                        customization.describe(), exception.toString());
             }
+        }
+    }
+
+    private static void addRecipe(final TableBuilder<String, Recipe> builder, final Recipe recipe,
+                                  final DataPackJson.Source source, final boolean warnDuplicate) {
+        if (builder.size() >= MAX_RECIPES) {
+            ExNihiloSatellitium.LOGGER.warn("[barrel] recipe cap {} reached, {} skipped",
+                    MAX_RECIPES, source.id());
             return;
         }
-        built.add(recipe);
+        if (!builder.putIfAbsent(key(recipe), recipe, source.id().toString()) && warnDuplicate) {
+            ExNihiloSatellitium.LOGGER.warn("[barrel] duplicate rule {} + {} in {}",
+                    BuiltInRegistries.FLUID.getKey(recipe.base()), addedKey(recipe), source.id());
+        }
+    }
+
+    private static void putRecipe(final TableBuilder<String, Recipe> builder, final Recipe recipe,
+                                  final DataPackJson.Source source) {
+        if (builder.size() >= MAX_RECIPES && !builder.contains(key(recipe))) {
+            ExNihiloSatellitium.LOGGER.warn("[barrel] recipe cap {} reached, {} skipped",
+                    MAX_RECIPES, source.id());
+            return;
+        }
+        builder.put(key(recipe), recipe, source.id().toString());
     }
 
     private static String key(final Recipe recipe) {
@@ -318,6 +343,41 @@ public final class BarrelRecipes {
         return recipe.addedFluid() != null
                 ? "fluid:" + BuiltInRegistries.FLUID.getKey(recipe.addedFluid())
                 : "item:" + BuiltInRegistries.ITEM.getKey(recipe.addedItem());
+    }
+
+    @Nullable
+    private static Keys keysFor(final JsonObject root, final ResourceLocation file) {
+        final String rawBase = DataPackJson.string(root, "base");
+        final Added added = parseAdded(root, file);
+        if (rawBase == null || added == null) {
+            return null;
+        }
+        final List<Fluid> bases = sourceFluids(rawBase, file);
+        final List<Fluid> addedFluids = added.fluid() ? sourceFluids(added.raw(), file) : List.of();
+        final List<Item> addedItems = added.fluid()
+                ? List.of()
+                : DataPackJson.resolve(BuiltInRegistries.ITEM, added.raw(), "barrel", file).values()
+                        .stream().filter(item -> item != Items.AIR).toList();
+        if (bases.isEmpty() || (added.fluid() ? addedFluids.isEmpty() : addedItems.isEmpty())) {
+            return null;
+        }
+        return new Keys(added.fluid(), bases, addedFluids, addedItems);
+    }
+
+    /**
+     * Resolves a fluid id or tag to <em>source</em> fluids only.
+     *
+     * <p>Fluid tags such as {@code #minecraft:water} contain both the still and the
+     * flowing variant. A barrel tank only ever holds the still fluid, so a flowing
+     * rule would never match; dropping it keeps the table and {@code /exnihilo tables}
+     * honest.</p>
+     */
+    private static List<Fluid> sourceFluids(final String raw, final ResourceLocation file) {
+        final List<Fluid> resolved = DataPackJson.resolve(
+                BuiltInRegistries.FLUID, raw, "barrel", file).values();
+        return resolved.stream()
+                .filter(fluid -> fluid.isSource(fluid.defaultFluidState()))
+                .toList();
     }
 
     @Nullable
@@ -409,5 +469,11 @@ public final class BarrelRecipes {
             resultStack = new ItemStack(result);
         }
         return new Template(resultStack, entityId, List.copyOf(peacefulDrops), cookTicks);
+    }
+
+    private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
+        final ResourceLocation label = ResourceLocation.tryParse(
+                "exnihilosatellitium:overlay/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
     }
 }

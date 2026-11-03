@@ -133,6 +133,9 @@ sieve.add(<item:minecraft:sand>, <item:minecraft:diamond>, 0.01);
 CT 用户请用数据包或 KJS 的 `kubejs/data`。进度见
 [`docs/customization-roadmap.md`](../docs/customization-roadmap.md)。
 
+P1（2026-11-03）已经在 Java 侧落了 `TableBuilder` + `CustomizationOverlay`；
+P3 会在这个基座上做 `@ZenRegister`，不会另写一套表。
+
 ## 参考
 
 - [CraftingTable（1.21.1）](https://docs.blamejared.com/1.21.1/en/tutorial/Recipes/Crafting/crafting_table/)

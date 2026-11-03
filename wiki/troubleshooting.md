@@ -6,7 +6,7 @@
 
 1. `/reload`
 2. `/datapack list` → 你的包在列表里且是 enabled
-3. `/exnihilo tables` → 条数有没有变化
+3. `/exnihilo tables` → 条数有没有变化；`/exnihilo dump <table>` → 整表内容
 4. 看服务端日志里对应的 `[sieve]` / `[hammer]` / `[barrel]` / `[compost]` / `[crucible]` 行
 
 如果第 3 步条数没变，基本是**文件没被加载**；如果条数变了但行为不对，基本是**字段/概率写错**。
@@ -24,6 +24,7 @@
 | `remove` 写了没反应 | 没写 `patch: true` 或 `remove` 不是补丁字段；或目标 id 不对 |
 | 1.21.1 的包放到 1.20.1 | `pack_format` 应为 `15`；`recipe/` vs `recipes/` 等路径不同 |
 | `/reload` 后第一次条数少 | 正常：先 `waiting for tags`，`TagsUpdatedEvent` 后才是完整条数 |
+| 改完不知道整表长什么样 | `/exnihilo dump <table>`；按行排序，可直接和另一份表 diff |
 
 ## 3. `waiting for tags` 是什么
 

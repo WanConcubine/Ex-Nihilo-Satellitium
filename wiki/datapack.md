@@ -364,10 +364,16 @@ saves/<世界名>/datapacks/my_pack/
 ```mcfunction
 /reload
 /exnihilo tables
+/exnihilo dump sieve
 /exnihilo sieve minecraft:sand
 /exnihilo hammer minecraft:cobblestone
 /exnihilo compost minecraft:bread
 ```
+
+- `/exnihilo dump <table>` 输出整张表的排序文本（`sieve` / `hammer` / `crook` / `barrel` /
+  `compost` / `crucible_melt` / `crucible_heat`），用来确认补丁到底改了哪几行。
+- `/exnihilo customize ...` 是 P1 的内部调试入口（直接向运行期 overlay 排队，不写文件、
+  重启即清空），不是玩家功能；KJS / CT 的正式入口在 roadmap 的 P2 / P3。
 
 日志前缀：
 

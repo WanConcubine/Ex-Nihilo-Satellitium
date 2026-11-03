@@ -4,6 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -36,7 +39,8 @@ import java.util.Map;
  * {@code properties}, only matching rules are removed, otherwise every rule for
  * the block is. Tags are bound after the reload listeners run, so
  * {@link #load} builds the concrete part and {@link #rebuild(boolean)} runs
- * again on {@code TagsUpdatedEvent}.</p>
+ * again on {@code TagsUpdatedEvent}. Script contributions from
+ * {@link CustomizationOverlay} are replayed last.</p>
  */
 public final class CrucibleHeat {
 
@@ -121,103 +125,210 @@ public final class CrucibleHeat {
         } else {
             files = read;
         }
-        rebuild(clientView);
+        // Concrete entries are available immediately; tags are expanded on TagsUpdatedEvent.
+        // The client keeps the old bindings across F3+T, so it can expand right away.
+        rebuild(clientView, clientView);
     }
 
     /** Rebuilds from the last read sources; called again after tags are bound. */
     public static void rebuild(final boolean clientView) {
+        rebuild(clientView, true);
+    }
+
+    private static void rebuild(final boolean clientView, final boolean expandTags) {
         final List<DataPackJson.Source> sourceList = clientView ? clientFiles : files;
-        final boolean tagsReady = DataPackJson.tagsReady();
-        final List<HeatSource> built = new ArrayList<>();
+        final boolean tagsReady = expandTags && DataPackJson.tagsReady();
+        final TableBuilder<String, HeatSource> builder = new TableBuilder<>(TableId.CRUCIBLE_HEAT.id());
         final List<DataPackJson.Source> tagFiles = new ArrayList<>();
         final List<DataPackJson.Source> patchFiles = new ArrayList<>();
 
-        for (final DataPackJson.Source source : sourceList) {
-            if (!DataPackJson.modLoaded(source.root())) {
-                continue;
-            }
-            if (DataPackJson.isPatch(source.root())) {
-                patchFiles.add(source);
-                continue;
-            }
-            final String rawBlock = DataPackJson.string(source.root(), "block");
-            if (rawBlock == null) {
-                ExNihiloSatellitium.LOGGER.warn("[crucible] missing block in {}", source.id());
-                continue;
-            }
-            if (DataPackJson.isTag(rawBlock)) {
-                if (tagsReady) {
-                    tagFiles.add(source);
-                }
-                continue;
-            }
-            final HeatSource heat = parseSource(source.root(), source.id());
-            if (heat != null) {
-                built.add(heat);
-            }
-        }
-
-        if (tagsReady) {
-            for (final DataPackJson.Source source : tagFiles) {
-                final List<Block> inputs = blocks(DataPackJson.string(source.root(), "block"), source.id());
-                final Map<String, String> properties = properties(source.root());
-                final float speed = speed(source.root(), source.id());
-                if (speed <= 0.0F) {
+        try {
+            for (final DataPackJson.Source source : sourceList) {
+                if (!DataPackJson.modLoaded(source.root())) {
                     continue;
                 }
-                for (final Block input : inputs) {
-                    if (!hasSource(built, input, properties)) {
-                        built.add(new HeatSource(input, properties, speed));
+                if (DataPackJson.isPatch(source.root())) {
+                    patchFiles.add(source);
+                    continue;
+                }
+                final String rawBlock = DataPackJson.string(source.root(), "block");
+                if (rawBlock == null) {
+                    ExNihiloSatellitium.LOGGER.warn("[crucible] missing block in {}", source.id());
+                    continue;
+                }
+                if (DataPackJson.isTag(rawBlock)) {
+                    if (tagsReady) {
+                        tagFiles.add(source);
                     }
+                    continue;
                 }
+                applyFile(builder, source);
             }
 
-            for (final DataPackJson.Source source : patchFiles) {
-                final List<Block> inputs = blocks(DataPackJson.string(source.root(), "block"), source.id());
-                final Map<String, String> properties = properties(source.root());
-                built.removeIf(heat -> inputs.contains(heat.block())
-                        && (properties.isEmpty() || properties.equals(heat.properties())));
-                if (DataPackJson.removeAll(source.root())) {
-                    continue;
+            if (tagsReady) {
+                for (final DataPackJson.Source source : tagFiles) {
+                    applyTagFile(builder, source);
                 }
-                final float speed = speed(source.root(), source.id());
-                if (speed <= 0.0F) {
-                    continue;
+                for (final DataPackJson.Source source : patchFiles) {
+                    applyPatch(builder, source);
                 }
-                for (final Block input : inputs) {
-                    built.add(new HeatSource(input, properties, speed));
-                }
+                applyOverlay(builder);
             }
+        } catch (final RuntimeException exception) {
+            ExNihiloSatellitium.LOGGER.error("[crucible] rebuild failed, keeping previous snapshot",
+                    exception);
+            return;
         }
 
-        final List<HeatSource> snapshot = List.copyOf(built);
+        final List<HeatSource> snapshot = List.copyOf(builder.build().values());
         if (clientView) {
             clientSources = snapshot;
         } else {
             sources = snapshot;
         }
-        ExNihiloSatellitium.LOGGER.info("[crucible] loaded {} heat sources ({} tag files, {} patches{}){}",
-                built.size(), tagFiles.size(), patchFiles.size(),
-                tagsReady ? "" : ", tags not ready", clientView ? " (client)" : "");
+        ExNihiloSatellitium.LOGGER.info(
+                "[crucible] loaded {} heat sources ({} tag files, {} patches, {} overlay{}){}",
+                snapshot.size(), tagFiles.size(), patchFiles.size(),
+                CustomizationOverlay.forTable(TableId.CRUCIBLE_HEAT).size(),
+                tagsReady ? "" : ", waiting for tags", clientView ? " (client)" : "");
     }
 
-    private static boolean hasSource(final List<HeatSource> built, final Block block,
-                                     final Map<String, String> properties) {
-        for (final HeatSource heat : built) {
-            if (heat.block() == block && heat.properties().equals(properties)) {
-                return true;
+    private static void applyFile(final TableBuilder<String, HeatSource> builder,
+                                  final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "block"), source.id());
+        final Map<String, String> properties = properties(source.root());
+        final float speed = speed(source.root(), source.id());
+        if (inputs.isEmpty() || speed <= 0.0F) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.putIfAbsent(key(input, properties),
+                    new HeatSource(input, properties, speed), source.id().toString());
+        }
+    }
+
+    private static void applyTagFile(final TableBuilder<String, HeatSource> builder,
+                                     final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "block"), source.id());
+        final Map<String, String> properties = properties(source.root());
+        final float speed = speed(source.root(), source.id());
+        if (inputs.isEmpty() || speed <= 0.0F) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.putIfAbsent(key(input, properties),
+                    new HeatSource(input, properties, speed), source.id().toString());
+        }
+    }
+
+    private static void applyPatch(final TableBuilder<String, HeatSource> builder,
+                                   final DataPackJson.Source source) {
+        final List<Block> inputs = blocks(DataPackJson.string(source.root(), "block"), source.id());
+        if (inputs.isEmpty()) {
+            return;
+        }
+        final Map<String, String> properties = properties(source.root());
+        removeMatching(builder, inputs, properties);
+        if (DataPackJson.removeAll(source.root())) {
+            return;
+        }
+        final float speed = speed(source.root(), source.id());
+        if (speed <= 0.0F) {
+            return;
+        }
+        for (final Block input : inputs) {
+            builder.put(key(input, properties), new HeatSource(input, properties, speed),
+                    source.id().toString());
+        }
+    }
+
+    private static void applyOverlay(final TableBuilder<String, HeatSource> builder) {
+        for (final CustomizationOverlay.Customization customization
+                : CustomizationOverlay.forTable(TableId.CRUCIBLE_HEAT)) {
+            try {
+                final ResourceLocation label = ResourceLocation.tryParse(
+                        "exnihilosatellitium:overlay/" + customization.sequence());
+                final JsonObject root = customization.payload();
+                final List<Block> inputs = blocks(DataPackJson.string(root, "block"), label);
+                if (inputs.isEmpty()) {
+                    continue;
+                }
+                final Map<String, String> properties = properties(root);
+                switch (customization.action()) {
+                    case REMOVE -> removeMatching(builder, inputs, properties);
+                    case ADD -> {
+                        final float speed = speed(root, label);
+                        if (speed <= 0.0F) {
+                            continue;
+                        }
+                        for (final Block input : inputs) {
+                            builder.putIfAbsent(key(input, properties),
+                                    new HeatSource(input, properties, speed),
+                                    overlaySource(customization));
+                        }
+                    }
+                    case REPLACE -> {
+                        final float speed = speed(root, label);
+                        if (speed <= 0.0F) {
+                            continue;
+                        }
+                        removeMatching(builder, inputs, properties);
+                        for (final Block input : inputs) {
+                            builder.put(key(input, properties),
+                                    new HeatSource(input, properties, speed),
+                                    overlaySource(customization));
+                        }
+                    }
+                }
+            } catch (final RuntimeException exception) {
+                ExNihiloSatellitium.LOGGER.warn("[crucible] overlay {} failed: {}",
+                        customization.describe(), exception.toString());
             }
         }
-        return false;
     }
 
-    private static HeatSource parseSource(final JsonObject root, final ResourceLocation file) {
-        final List<Block> inputs = blocks(DataPackJson.string(root, "block"), file);
-        final float speed = speed(root, file);
-        if (inputs.isEmpty() || speed <= 0.0F) {
-            return null;
+    private static void removeMatching(final TableBuilder<String, HeatSource> builder,
+                                       final List<Block> inputs, final Map<String, String> properties) {
+        if (!properties.isEmpty()) {
+            for (final Block input : inputs) {
+                builder.remove(key(input, properties));
+            }
+            return;
         }
-        return new HeatSource(inputs.get(0), properties(root), speed);
+        // No properties in the payload: drop every rule for these blocks, whatever their state.
+        final List<String> doomed = new ArrayList<>();
+        for (final String key : builder.keys()) {
+            for (final Block input : inputs) {
+                final String blockId = BuiltInRegistries.BLOCK.getKey(input).toString();
+                if (key.equals(blockId) || key.startsWith(blockId + "[")) {
+                    doomed.add(key);
+                    break;
+                }
+            }
+        }
+        for (final String key : doomed) {
+            builder.remove(key);
+        }
+    }
+
+    private static String overlaySource(final CustomizationOverlay.Customization customization) {
+        return "customize:" + customization.source() + "#" + customization.sequence();
+    }
+
+    /** Canonical key: block id plus the property map in sorted order. */
+    private static String key(final Block block, final Map<String, String> properties) {
+        final StringBuilder key = new StringBuilder(BuiltInRegistries.BLOCK.getKey(block).toString());
+        if (!properties.isEmpty()) {
+            final List<String> names = new ArrayList<>(properties.keySet());
+            names.sort(String::compareTo);
+            key.append('[');
+            for (final String name : names) {
+                key.append(name).append('=').append(properties.get(name)).append(',');
+            }
+            key.setLength(key.length() - 1);
+            key.append(']');
+        }
+        return key.toString();
     }
 
     private static List<Block> blocks(final String raw, final ResourceLocation file) {

@@ -31,6 +31,12 @@
 **结论：** 目前只有数据包是完整路径；KJS 是“数据包通道 + 原版配方脚本”，
 CT 只覆盖原版配方。这是当前事实，wiki 不得写成“三条都支持”。
 
+**P1 更新（2026-11-03）：** 玩家可见的能力没有变化，但内部基座已落地：
+七张表共用 `common/table/TableBuilder`，脚本贡献进 `CustomizationOverlay`，
+每次 reload 在 JSON 与补丁之后重放；OP 可以用 `/exnihilo customize` 验证
+add / remove / replace，用 `/exnihilo dump <table>` 对比快照。KJS/CT 仍没有暴露
+这些入口（P2 / P3）。
+
 ## 3. 目标矩阵
 
 | 能力 | 数据包 | KubeJS | CraftTweaker |
@@ -50,26 +56,31 @@ CT 只覆盖原版配方。这是当前事实，wiki 不得写成“三条都支
 
 ### 4.1 一张规范表，三个入口
 
-现在七张表的 loader 各自解析 JSON，直接生成运行时表。为了接脚本，需要抽一层：
+P1（2026-11-03）已落地：
 
 ```
 JSON 文件 ─┐
-KJS 事件  ─┼─> TableBuilder（add/remove/replace/validate）─> 快照 ─> 原子替换
-CT 脚本   ─┘
+补丁       ─┼─> 各表 parser（同一份校验）─> TableBuilder ─> 不可变快照 ─> volatile swap
+overlay    ─┘         （KJS/CT 绑定在 P2/P3，payload 仍是同表 JSON）
 ```
 
-- `TableBuilder` 放在 `common/table/`，core 层，不 import NeoForge/Forge。
-- JSON loader 和脚本入口都只调用 `TableBuilder`，校验逻辑只写一份。
-- 快照类型保持现在的 `SieveDrop` / `Rule` / `Recipe` / `Entry` 等不可变结构。
-- reload 分三步：读 JSON → 应用脚本 overlay → 原子 swap；失败保留旧快照并打日志。
+- `TableBuilder` 在 `common/table/`，core 层，不 import NeoForge/Forge
+  （`check-core-imports.py` 已把它纳入扫描）。
+- 校验仍在各表的 parser 里：每个字段只解析一次；builder 只负责
+  add（`putIfAbsent`/`merge`）、replace（`put`）、remove，以及记录 last source。
+- 快照类型保持原来的 `SieveDrop` / `Rule` / `Recipe` / `Entry` 等不可变结构。
+- reload：读文件 → 展开标签 → 应用补丁 → 重放 overlay → 发布；单条 overlay 异常只跳过，
+  整表异常保留旧快照并打日志。
 
 ### 4.2 脚本 overlay 的生命周期
 
-- 脚本贡献不是“直接改全局 map”，而是注册到一个 `CustomizationOverlay`，
-  在每次 reload 后重新应用，避免 `/reload` 丢条目或重复叠加。
-- overlay 必须可清空（脚本重载时先清空自己的贡献，再重新注册）。
-- 冲突策略：后应用者覆盖，并在 `[customize]` 日志里打印 `source + entry + winner`；
-  不静默吞掉。
+- 已实现：`CustomizationOverlay.submit(table, action, payload, source)` 入队，
+  `forTable` 在每次 rebuild 时按提交顺序重放；`clear(source)` 让脚本重载只回收自己的贡献，
+  `clearAll()` 给测试/重置用。
+- overlay 不在 JSON 文件里，所以 `/reload` 不会丢；它也不持久化，脚本应在每次加载时重新提交
+  （KJS 的 server 脚本本来就会随 reload 重跑）。
+- 冲突策略：按提交顺序，后应用者覆盖；`[customize]` 日志打印 source + payload，
+  加载日志打印每张表的 overlay 条数。
 
 ### 4.3 KubeJS
 
@@ -129,16 +140,28 @@ CT 脚本   ─┘
 
 **验收：** 两版 dev server 实测；build + 守卫绿；wiki 结构守卫绿。
 
-### P1 — 规范表 + 脚本 overlay 基座
+### P1 — 规范表 + 脚本 overlay 基座（已完成，2026-11-03）
 
-- 抽 `TableBuilder` / `CustomizationOverlay`；
-- JSON loader 改为走 builder；
-- 加 `/exnihilo dump <table>`（稳定、可比较的输出）；
-- 先用一个测试入口（命令/测试代码）验证 overlay 的 add/remove/replace；
+- `common/table/`：`TableId`（七张表的唯一 id）、`TableBuilder`（有序工作集 +
+  source 记录）、`CustomizationOverlay`（按 source 排队、可清空、按提交顺序重放）、
+  `Tables`（统一 rebuild / size 入口）、`TableDump`（稳定行输出）；
+- 七张表的 loader 全部改为“建 builder → 喂 JSON/补丁 → 喂 overlay → 发布不可变快照”，
+  表内排序与原先一致（筛子/钩子按输入合并掉落，锤子/熔点/热源/桶/堆肥按 key 覆盖）；
+- overlay 的 payload 用**该表 datapack 文件的同一套 JSON 字段**，因此复用同一份解析和校验：
+  `ADD` = 普通文件语义，`REPLACE` = 先删目标再写入，`REMOVE` = 删整条或 `remove` 列表；
+- 命令测试入口 `/exnihilo customize <table> add|remove|replace <json>`、
+  `clear [source]`、`list`；`/exnihilo dump <table>` 输出按行排序、可 diff；
+- 失败语义：单条 overlay 异常只跳过该条并打 `[customize]` 警告；整表 rebuild 抛异常时
+  保留上一份不可变快照（日志 `rebuild failed, keeping previous snapshot`）；
 - 不引入 KJS/CT 依赖。
 
-**验收：** JSON + 程序化 overlay 对七张表都能 add/remove/replace；
-`/reload` 两次结果一致；失败不破坏旧快照。
+**验收（2026-11-03，dev server + RCON）：** 七张表各跑 add / remove / replace；
+每次操作后 `/exnihilo dump` 只出现预期的那一行变化；`/reload` 后七张表 dump 逐字节一致；
+21 条 overlay 全部 clear 后七张表 dump 与基线逐字节一致；坏 overlay（`chance` 非数字）
+与坏数据包（同文件）都不会改动旧快照；`replace` 的坏 payload（越界 chance / speed 0 /
+未知 result）保留原规则。细节见 `docs/status.md`。
+**1.20.1 分支**用同一套代码跑了 add / replace、`/reload` 一致、clear 回基线，
+build + 纹理守卫通过（分支没有 core/data 守卫脚本）。
 
 ### P2 — KubeJS 插件
 
@@ -195,10 +218,16 @@ CT 不在时模组正常启动。
 
 ## 8. 待定问题
 
-1. KJS 和 CT 同时改同一条目时，优先级按加载顺序还是显式 `priority`？
+1. ~~KJS 和 CT 同时改同一条目时，优先级按加载顺序还是显式 `priority`？~~
+   **P1 已定：按提交顺序，后提交者覆盖**；`[customize]` 日志打印 source + payload，
+   `clear(source)` 让脚本重载只回收自己的贡献。显式 priority 留到 P2 真出现冲突再加。
 2. `remove` 的粒度：只按产物删，还是支持按 chance/条件删？
-3. `/exnihilo dump` 的输出格式要不要稳定成可 diff 的 JSON？
+3. ~~`/exnihilo dump` 的输出格式要不要稳定成可 diff 的 JSON？~~
+   **P1 已定：先用按行排序的纯文本**（`<table> <key> ... -> ...`），因为命令输出
+   就是 RCON 日志，文本最方便粘贴/对比；需要机器可读时再在 P4 加 JSON 模式。
 4. CT 是否需要 recipe type 才能在 JEI 里显示，还是接受“脚本 API + 无 JEI 分类”？
 5. 客户端同步是否也覆盖 `compost` 的标签交互预测？
+6. P2/P3 暴露脚本 API 时，payload 继续用 JSON 形状，还是给每张表加类型化 wrapper？
+   P1 的 overlay 已经固定 JSON 形状（复用校验），类型化 wrapper 只做转换、不另开解析。
 
 这些问题在 P1/P2 开始前由 Owner 定；先记在这里，避免实现时临时拍脑袋。
