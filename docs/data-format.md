@@ -838,6 +838,8 @@ overlay 队列（`CustomizationOverlay`）。P1 只通过 OP 命令暴露，用�
 - 同一 source 重复提交完全相同的操作会去重；总操作数上限 4096；空 payload 直接拒绝。
 - KubeJS 绑定（1.21.1 与 1.20.1）走同一个 overlay：source `kubejs`、priority 100，
   脚本重载前清空；两版的绑定对象与脚本写法相同。
+- CraftTweaker 入口走同一个 overlay：source `crafttweaker`、priority 200，
+  在每次 resource reload 的 listener 阶段前清空；没有 CT recipe type。
 - 失败隔离：单条操作解析异常只跳过该条；整表 rebuild 异常保留上一份快照；
   `replace` 会先解析并校验新值，再删旧规则（坏 payload 不会把原条目删掉）。
 

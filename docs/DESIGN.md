@@ -1379,7 +1379,7 @@ KJS 只能走 `kubejs/data`，CT 只能改原版配方；这与“尽可能支�
 - 每次改表结构要同时改 wiki 和 roadmap 的能力矩阵，并跑 `scripts/check-wiki.py`。
 - 专用服客户端 JEI 的同步（P4）是“看起来等价”的必要条件，但不阻塞 P1–P3。
 
-**当前状态。** P0（数据包 v2）已完成并在两版验证；P1 + P1.5（TableBuilder / overlay / priority）已完成；P2（KubeJS 插件，1.21.1）已完成。见 §40–§42。
+**当前状态。** P0（数据包 v2）已完成并在两版验证；P1 + P1.5（TableBuilder / overlay / priority）、P2（KubeJS 插件）、P3（CraftTweaker）均已完成（两版）。见 §40–§43。
 
 ## 39. 末影蛋糕（2026-11-03）
 
@@ -1524,3 +1524,34 @@ P1 的 overlay 只有“提交顺序”，没有优先级，也不清楚最终�
 - **编译期依赖**。`compileOnly` 拉 KJS/Rhino（不打包），代价是开发构建需要能访问 Modrinth
   Maven；`--offline` 在缓存齐全时可继续用。1.20.1 开发服还需要 Architectury，用
   `-PkjsMods` 才会进运行时，普通 `runServer` 保持无 KJS。
+
+## 43. P3：CraftTweaker 入口（2026-11-03，两版）
+
+目标：让 ZenScript 直接改七张表，同时不把 CT 变成硬依赖，也不把七张表塞进
+vanilla `RecipeManager`。
+
+1. **入口形态**。CT 按 `@ZenRegister` 扫描类；用
+   `@ZenRegister @ZenCodeType.Name("mods.exnihilosatellitium.Sieve")` 这一层暴露
+   `Sieve` / `Hammer` / `Crook` / `Barrel` / `Compost` / `CrucibleMelt` / `CrucibleHeat`。
+   每个类都是静态方法：常用 `add` / `remove` / `replace`，复杂结构用
+   `addJson` / `removeJson` / `replaceJson`。没有 `@CraftTweakerPlugin` 类——生命周期
+   不需要 CT 自己的 plugin 钩子。
+2. **复用 overlay**。Zen 方法把参数拼成 datapack JSON，提交
+   `CustomizationOverlay`（source `crafttweaker`，priority 200）。数据包是 0、KJS 是 100，
+   所以 CT 是最后一层；`#tag`、根级 `mod`、校验、`replace` 先校验后删旧规则全部共用。
+3. **生命周期**。CT 脚本在 resource reload 的 listener 阶段执行；`onAddReloadListenerEvent`
+   在监听器执行前清空旧 `crafttweaker` 贡献，所以 `/reload` 是替换而不是叠加。
+   最初想用 `IListenerRegistrationHandler.onExecuteRun`，但 CT 每次 reload 会跑多个
+   loader（`initialize` / `tags` / `crafttweaker`），且 `initialize` 在 `/reload` 不重复，
+   容易清错批次；放在 listener 事件更稳。
+4. **依赖与开发服**。CT 是 compileOnly：1.21.1 用 21.0.39，1.20.1 用 14.0.60。
+   BlameJared maven 在本机 Gradle 上有 TLS handshake 失败，构建脚本用
+   `downloadCraftTweaker` 通过构建 JVM 下载到 `libs/crafttweaker/`（gitignored），
+   再作为本地依赖；1.20.1 的 Forge jar 是 SRG 名，开发服用 `-PctMods` + `fg.deobf`
+   放入运行时。CT 不在时这些类不会被加载。
+5. **不做 recipe type**。CT 的 recipe type 需要 RecipeType/serializer/IRecipeManager 和
+   JEI category，版本风险高；P3 的验收是“能改表 + dump 一致”，不是“JEI 里有 CT 页”。
+
+验证：两版各七个入口生效；改脚本 `/reload` 清旧贡献、应用新条目；同一 fixture 用
+datapack 跑，七张表 dump 与 CT 逐字节一致；移除 CT 后正常启动。
+未做：CT recipe type / JEI 分类；P4 客户端 JEI 同步。

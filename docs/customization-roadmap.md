@@ -16,20 +16,21 @@
 
 | 能力 | 数据包 | KubeJS | CraftTweaker |
 |---|---|---|---|
-| 筛子 add / remove / replace | ✅ | ✅ 脚本 API（两版） | ❌ |
-| 锤子 / 钩子 | ✅ | ✅ 脚本 API（两版） | ❌ |
-| 桶转化 | ✅ | ✅ 脚本 API（两版） | ❌ |
-| 堆肥 | ✅ | ✅ 脚本 API + `ServerEvents.tags`（两版） | ❌ |
-| 坩埚熔点 / 热源 | ✅ | ✅ 脚本 API（两版） | ❌ |
-| `#tag` 输入 | ✅ | ✅ 脚本与 JSON 都接受 | ❌ |
-| `mod` 条件 | ✅ | ✅ overlay 根级 `mod` 生效 | ❌ |
+| 筛子 add / remove / replace | ✅ | ✅ 脚本 API（两版） | ✅ 脚本 API（两版） |
+| 锤子 / 钩子 | ✅ | ✅ 脚本 API（两版） | ✅ 脚本 API（两版） |
+| 桶转化 | ✅ | ✅ 脚本 API（两版） | ✅ 脚本 API（两版） |
+| 堆肥 | ✅ | ✅ 脚本 API + `ServerEvents.tags`（两版） | ✅ 脚本 API（两版） |
+| 坩埚熔点 / 热源 | ✅ | ✅ 脚本 API（两版） | ✅ 脚本 API（两版） |
+| `#tag` 输入 | ✅ | ✅ 脚本与 JSON 都接受 | ✅ 脚本与 JSON 都接受 |
+| `mod` 条件 | ✅ | ✅ overlay 根级 `mod` 生效 | ✅ overlay 根级 `mod` 生效 |
 | 原版合成 / 熔炼 | 只能加，不能删 | ✅ add / remove | ✅ add / remove |
 | 注册新物品 / 方块 | ❌ | ✅（KJS 自己的内容） | ❌ |
 | 新增材料（`materials.json`） | ❌ | ❌ | ❌ |
 | 专用服客户端 JEI 同步 | ❌ | ❌ | ❌ |
 
-**结论：** 数据包和 KubeJS 两版都有七张表脚本 API（`SieveEvents` / `HammerEvents` / …）；
-CT 只覆盖原版配方。wiki 不得把 CT 写成“已支持七张表”。
+**结论：** 数据包、KubeJS、CraftTweaker 两版都有七张表入口
+（KJS：`SieveEvents` / `HammerEvents` / …；CT：`mods.exnihilosatellitium.Sieve` / …）；
+CT 还同时覆盖原版配方。剩下的是专用服客户端 JEI 同步和 fixture CI（P4）。
 
 **P1 更新（2026-11-03）：** 七张表共用 `common/table/TableBuilder`，脚本贡献进
 `CustomizationOverlay`，每次 reload 在 JSON 与补丁之后重放；OP 可以用
@@ -39,6 +40,10 @@ CT 只覆盖原版配方。wiki 不得把 CT 写成“已支持七张表”。
 `ExNihiloKubeJSPlugin`，server 脚本里直接调用 `SieveEvents.add(...)` 等绑定；
 贡献走同一个 overlay（source `kubejs`，priority 100）；脚本重载前清空旧贡献。
 1.21.1 用 2101 API，1.20.1 用 2001 API，绑定对象相同。
+
+**P3 更新（2026-11-03）：** CraftTweaker 入口已接（两版）：
+`@ZenRegister` 的 `mods.exnihilosatellitium.*` 七个类，source `crafttweaker`、priority 200；
+`onAddReloadListenerEvent` 在脚本批次前清空旧贡献。没有注册 CT recipe type，JEI 分类后置。
 
 ## 3. 目标矩阵
 
@@ -109,10 +114,10 @@ overlay    ─┘         （KJS/CT 绑定在 P2/P3，payload 仍是同表 JSON�
 
 - **不强行做 RecipeType**：七张表不是 vanilla `RecipeManager` 的 recipe，
   做 recipe type 成本和版本风险都高。
-- 优先做 ZenScript API：`mods.exnihilosatellitium.sieve.add(...)` 这类
-  `@ZenRegister` 入口，内部仍然调用 `TableBuilder`。
-- 如果以后要 JEI 里显示成 CT recipe type，再单独做 recipe type；
-  先保证“能改表”，再保证“能在 CT 的 recipe 浏览器里看到”。
+- 已实现 ZenScript API：`mods.exnihilosatellitium.Sieve.add(...)` 这类
+  `@ZenRegister` 入口，内部构造 datapack JSON 并提交 `CustomizationOverlay`。
+- 没有注册 CT recipe type：先保证“能改表”，JEI 的 CT 配方页后置；
+  如果以后要做，再单独注册 recipe type / serializer / category。
 - 目标形态：
 
   ```zenscript
@@ -210,15 +215,23 @@ KJS 脚本与 datapack fixture 的七张表 dump 逐字节一致；不带 `-Pkjs
 
 **未做：** 专用服客户端 JEI 同步（P4）；CT（P3）。
 
-### P3 — CraftTweaker API
+### P3 — CraftTweaker API（已完成，2026-11-03，两版）
 
-- `@ZenRegister` 的 ZenScript 入口；
-- 七张表 add/remove/replace；
-- 不要求 recipe type；JEI 显示可以后置；
-- 文档 `wiki/crafttweaker.md` 从“只能原版配方”改为“两条入口”。
+- `compileOnly` CT：1.21.1 用 21.0.39，1.20.1 用 14.0.60；不随 jar 分发。
+  BlameJared maven 的 Gradle TLS 问题用构建内 `downloadCraftTweaker` 下载到
+  `libs/crafttweaker/`（gitignored）绕过；1.20.1 开发服 `-PctMods` 用 deobf 运行时。
+- `@ZenRegister` + `@ZenCodeType.Name` 的七个类：
+  `mods.exnihilosatellitium.Sieve` / `Hammer` / `Crook` / `Barrel` / `Compost` /
+  `CrucibleMelt` / `CrucibleHeat`；常用 `add` / `remove` / `replace` +
+  `addJson` / `removeJson` / `replaceJson`；
+- 内部构造 datapack JSON 提交 `CustomizationOverlay`（source `crafttweaker`，
+  priority 200，晚于数据包和 KJS）；`#tag` / `mod` / 校验 / replace 语义共用；
+- 不注册 recipe type；JEI 分类后置；
+- `onAddReloadListenerEvent` 在每次 reload 清空旧 `crafttweaker` 贡献（CT 脚本在该事件后执行）。
 
-**验收：** 同一 fixture 用 CT 脚本和 JSON 各跑一遍，快照一致；
-CT 不在时模组正常启动。
+**验收（2026-11-03，两版 dev server）：** 七个入口各一条，七张表条数正确；改脚本
+`/reload` 后旧贡献被清、新条目生效；同一 fixture 用 datapack 跑，七张表 dump 与 CT
+逐字节一致；CT 不在时正常启动（1.20.1 旧世界会有 `Missing data pack mod:crafttweaker` 警告）。
 
 ### P4 — 客户端同步 + 自动守卫
 
@@ -262,7 +275,9 @@ CT 不在时模组正常启动。
 3. ~~`/exnihilo dump` 的输出格式要不要稳定成可 diff 的 JSON？~~
    **P1 已定：先用按行排序的纯文本**（`<table> <key> ... -> ...`），因为命令输出
    就是 RCON 日志，文本最方便粘贴/对比；需要机器可读时再在 P4 加 JSON 模式。
-4. CT 是否需要 recipe type 才能在 JEI 里显示，还是接受“脚本 API + 无 JEI 分类”？
+4. ~~CT 是否需要 recipe type 才能在 JEI 里显示，还是接受“脚本 API + 无 JEI 分类”？~~
+   **P3 已定：接受“脚本 API + 无 JEI 分类”。** 先保证能改表；recipe type 的成本
+   和版本风险留到确实需要 JEI 页时再评估。
 5. 客户端同步是否也覆盖 `compost` 的标签交互预测？
 6. ~~P2/P3 暴露脚本 API 时，payload 继续用 JSON 形状，还是给每张表加类型化 wrapper？~~
    **P2 已定：两者都要。** 常用签名（`SieveEvents.add(input, output, chance)`）做类型化薄 wrapper，
