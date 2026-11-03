@@ -32,10 +32,11 @@ zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/a
 M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完成**（TableBuilder + CustomizationOverlay +
 `/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
 
-## 当前批次（2026-11-03，P2：KubeJS 插件，仅 1.21.1）
+## 当前批次（2026-11-03，P2：KubeJS 插件，两版）
 
-- **依赖**：`compileOnly maven.modrinth:kubejs:2101.7.2-build.348` +
-  `maven.modrinth:rhino:2101.2.7-build.81+Rhino-1.21`；不随 jar 分发。
+- **依赖**：`compileOnly` KubeJS + Rhino，不随 jar 分发。1.21.1 用
+  `2101.7.2-build.348` / Rhino `2101.2.7-build.81`；1.20.1 用 `2001.6.5-build.26` /
+  Rhino `2001.2.3-build.10`，开发服另需 Architectury `9.2.14`（`runServer -PkjsMods`）。
 - **插件发现**：`src/main/resources/kubejs.plugins.txt` 指向
   `com.kaifengcrt.exnihilosatellitium.compat.kubejs.ExNihiloKubeJSPlugin`；
   KJS 不在时该文件不被读取，插件类也不会被加载（已实测无 KJS 启动）。
@@ -48,15 +49,23 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   解析/校验/`#tag`/根级 `mod` 与数据包完全共用；脚本贡献在数据包和补丁之后应用。
 - **生命周期**：`beforeScriptsLoaded` 在每次 server 脚本批次前清空旧 `kubejs` 贡献；
   应用由 tags rebuild 和 `ServerStartedEvent` 触发；脚本改完 `/reload` 不会残留旧条目。
-- **验证**（2026-11-03，KubeJS 2101.7.2 + Rhino，dev server）：
+- **1.20.1 差异**：2001 的 `KubeJSPlugin` 是类、绑定是 `BindingsEvent`（不是 2101 的
+  `KubeJSPlugin` 接口 / `BindingRegistry`）；插件单独实现，在 `registerBindings`
+  （server 脚本批次前）清旧 `kubejs` 贡献。绑定对象和脚本写法与主线完全相同。
+- **验证（1.21.1，KubeJS 2101.7.2 + Rhino，dev server）：**
   - 七个绑定各一条：`[sieve] 90→91 drops`、hammer 52→53、crook 22→23、barrel 12→13、
     compost 67→68、melt 39→40、heat 9→10；`/exnihilo dump` 分别出现预期条目。
   - 脚本删除 sieve 条目、compost 300→150 后 `/reload`：`dropped 6 old op(s)`，
     sieve emerald 消失、compost=150，overlay 6 条。
   - 同一 fixture 用命令 overlay（priority 100）重放，七张表 `dump` 与 KJS 结果逐字节一致。
   - 移除 KJS/Rhino 后服务端正常启动，无 `NoClassDefFoundError`。
-- **未做**：1.20.1 分支的 KJS `2001.x` 插件（分支仍用 `kubejs/data`）；
-  专用服客户端 JEI 同步（P4）。
+- **验证（1.20.1，KubeJS 2001.6.5 + Rhino 2001.2.3 + Architectury 9.2.14，dev server）：**
+  - 七个绑定全部生效，七张表条数与主线一致（sieve 91 drops、hammer 53、crook 23、barrel 13、
+    compost 68、melt 40、heat 10）；
+  - 改脚本后 `/reload`：`dropped 7 old op(s)`，旧 sieve 条目消失、compost 300→150；
+  - KJS 脚本与 datapack fixture 的七张表 dump 逐字节一致；
+  - 不带 `-PkjsMods`（无 KJS）正常启动，无 `NoClassDefFoundError`。
+- **未做**：专用服客户端 JEI 同步（P4）；CraftTweaker（P3）。
 
 ## 当前批次（2026-11-03，P1.5：overlay 边角）
 
@@ -389,8 +398,8 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| P2 KubeJS 插件 | ✅ | 七张表绑定 + JSON 逃生口；KJS 脚本、命令 overlay、datapack fixture 三者 dump 逐字节一致 |
-| P2 KJS 生命周期 | ✅ | `beforeScriptsLoaded` 清旧贡献、`/reload` 改脚本生效；无 KJS 正常启动 |
+| P2 KubeJS 插件 | ✅ | 两版七张表绑定 + JSON 逃生口；KJS、命令 overlay、datapack fixture 三者 dump 逐字节一致 |
+| P2 KJS 生命周期 | ✅ | 2101 用 `beforeScriptsLoaded`、2001 用 `registerBindings` 清旧贡献；无 KJS 正常启动 |
 | P1.5 priority / conflicts | ✅ | p10 先提交仍赢 p5；`add ignored` / `replaced` / `removed` 带旧 source；两版 RCON |
 | P1.5 生命周期 | ✅ | 重复提交去重、空 payload 拒绝、`dump all` 298 行、server stop 清理 3/4 条 |
 | P1 TableBuilder / overlay | ✅ | 2026-11-03：七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致；clear 21 条后回基线 |

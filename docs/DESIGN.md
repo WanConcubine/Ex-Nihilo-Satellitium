@@ -1505,10 +1505,15 @@ P1 的 overlay 只有“提交顺序”，没有优先级，也不清楚最终�
    清空旧 `kubejs` 贡献；脚本重新提交后由 tags rebuild / `ServerStartedEvent` 应用。
    `clearCaches` 不能用——实测它在服务端脚本之后才调用，会把刚提交的贡献清掉。
    client 脚本的 `beforeScriptsLoaded` 必须跳过，否则单人客户端脚本重载会清掉服务端队列。
-5. **验收**：七个绑定各写一条，startup 后七张表条数/条目正确；改脚本 `/reload` 后旧条目
-   被清、新条目生效；同一 fixture 用命令 overlay（priority 100）重放，七张表 dump 逐字节一致；
+5. **验收**：两版各七个绑定写一条，startup 后七张表条数/条目正确；改脚本 `/reload` 后旧条目
+   被清、新条目生效；同一 fixture 用 datapack 与命令 overlay 各跑一遍，七张表 dump 逐字节一致；
    移除 KJS/Rhino 后正常启动。
-6. **未做**：1.20.1 的 `2001.x` 插件（分支仍走 `kubejs/data`）；P4 客户端 JEI 同步。
+6. **1.20.1（2001 线）**。API 与 2101 不同：`KubeJSPlugin` 是类不是接口，绑定事件是
+   `BindingsEvent`（`getType()` + `add`），没有 `beforeScriptsLoaded`。所以分支单独实现
+   `ExNihiloKubeJSPlugin extends KubeJSPlugin`，在 `registerBindings`（server 脚本批次前）
+   清旧 `kubejs` 贡献；绑定对象和脚本写法与主线完全一致。开发服里 KJS/Rhino/Architectury
+   是 SRG 名，必须 `fg.deobf` 并放到 `-PkjsMods` 运行时依赖里，否则 mixin 找不到方法。
+7. **未做**：P4 客户端 JEI 同步；P3 CraftTweaker。
 
 取舍：
 
@@ -1517,4 +1522,5 @@ P1 的 overlay 只有“提交顺序”，没有优先级，也不清楚最终�
 - **priority 固定 100**。数据包/补丁是 0，KJS 是覆盖层；将来 CT 用 200，冲突时 CT 赢。
   如果 KJS 内部需要分先后，脚本可以用命令入口的显式 priority，或等 P3 再加 per-source 配置。
 - **编译期依赖**。`compileOnly` 拉 KJS/Rhino（不打包），代价是开发构建需要能访问 Modrinth
-  Maven；`--offline` 在缓存齐全时可继续用。
+  Maven；`--offline` 在缓存齐全时可继续用。1.20.1 开发服还需要 Architectury，用
+  `-PkjsMods` 才会进运行时，普通 `runServer` 保持无 KJS。
