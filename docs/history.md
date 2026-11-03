@@ -1,7 +1,83 @@
-# 历史批次（2026-11-01 ～ 2026-11-02）
+# 历史批次（2026-11-01 ～ 2026-11-03）
 
 > 从 [status.md](status.md) 搬出来的批次叙事：只记「当时做了什么、怎么验的」。
 > **当前状态、验证表、下一步只看 status.md**；这里的内容不再维护，只作追溯用。
+
+## 2026-11-03（数据包 v2 / 末影蛋糕 / 三路径 / 科技矿物链）
+
+### 数据包 v2：标签 / mod 门 / 补丁
+
+- 筛 / 锤 / 钩 / 桶 / 熔点 / 热源六张表的 id 字段接受 `#tag`，加载时展开；`TagManager` 只在
+  reload 里存结果、标签在所有 listener 之后才绑定，所以 `load()` 先建具体条目，
+  `TagsUpdatedEvent` 再 `rebuild()`（日志先 `waiting for tags` 是正常的）。
+- 所有表支持根级 `"mod"`，筛 / 钩单条掉落也支持；`"patch": true`（或出现 `"remove"`）
+  在所有普通文件之后按资源 id 应用，`remove: true` 删整条、`remove: [...]` 删列表条目。
+- 诊断命令 `/exnihilo tables`、`/exnihilo sieve|hammer|compost`；示例包 `examples/datapack/`
+  （`pack_format 48`）。玩家 wiki 按数据包 / KubeJS / CraftTweaker 三路线写，中英双语 + 静态站。
+- 验证：测试包下 `[sieve] 45 inputs, 115 drops`、`[hammer] 91`、`[crook] 32`、
+  `[crucible] 49 heat`、`[barrel] 11`；RCON 验证标签展开与 patch 删除；删补丁后 `/reload` 回基线。
+
+### 末影蛋糕（End Cake）
+
+- 可放置蛋糕：主世界吃一片 → 末地中央岛；末地吃 → 玩家床 / 世界出生点；下界不传送。
+- 放置时只有 1 片（`bites=6`），末影之眼右键补 1 片、最多 7 片；每次 +2 饥饿 / 0.1 饱和度，
+  始终可吃；8 末影珍珠 + 1 蛋糕。
+- 复用 vanilla `block/cake` 父模型，只覆盖 4 张 16×16 贴图；无掉落表；1.20.1 同步。
+- 验证：`/setblock ... [bites=0/1/5/6]` 全部命中；右键吃 / 传送 / 补片未目视。
+
+### 三路径 P1 → P3（两版）
+
+- **P1 基座**：`common/table/`（`TableId` / `TableBuilder` / `CustomizationOverlay` / `Tables` /
+  `TableDump`），七张表统一 rebuild；命令 `/exnihilo customize <table> add|remove|replace`
+  与 `/exnihilo dump`；失败隔离（坏 overlay 只 warning，坏数据包保留旧快照）。
+- **P1.5**：显式 priority、冲突日志（replaced / removed / add ignored）、同 source 去重、
+  4096 操作上限、server stop 清空 overlay。
+- **P2 KubeJS**：2101 插件接口 / 2001 类 + `BindingsEvent`，七张表 add/remove/replace +
+  `addJson/removeJson/replaceJson`；source `kubejs` priority 100。
+- **P3 CraftTweaker**：21.0.39 / 14.0.60，`@ZenRegister` 七个类；source `crafttweaker` priority 200；
+  每次 reload 清旧贡献。没有注册 CT recipe type（JEI 不出现七张表的 CT 页）。
+- 验证：两版七张表与 datapack fixture 的 `dump` 逐字节一致；改脚本 `/reload` 替换而非叠加；
+  无 KJS / CT 正常启动。
+
+### 科技模组矿物链：Mek 氟石 + Thermal 六种
+
+- `materials.json` 新增可选 `gems`（与 `ingots` 同构，**不能混用**）：纯模组产物，
+  **不注册自有物品、不生成 gems 标签、没有 base 熔炼**；整条材料只在候选 mod 加载时注册。
+- 7 种：fluorite 1/8、apatite 1/18、cinnabar 1/32、niter 1/24、sulfur 1/24、ruby/sapphire 1/64；
+  三档筛料共用同一 `rarity`，21 条手写 `*_smelting_<mod>` 变体。
+- 矿块进 `c:ores/<id>` / `forge:ores/<id>`（`required:false`），Mek 富集机 / Thermal 磨粉机
+  可按标签处理；矿块无 loot table，由 `SelfDropBlock` 掉自身。
+- 验证：main + Mek：氟石矿砾 → `mekanism:fluorite_gem`；1.20.1 + Thermal：6 种矿砾
+  → `thermal:*` 6/6 通过；无科技模组时整条静默跳过、无 unknown item。
+
+## 2026-11-02 发布记录
+
+- **0.1.0 已发**：main tag `v0.1.0`（`d4a6dc2`）、分支 `v0.1.0-1.20.1`（`35d98d4`），
+  jar 649 KB / 587 KB（sha256 `2f3d1af5…` / `1168ca77…`）；已推 origin。
+  CurseForge / Modrinth 上传需要所有者操作。
+- **0.2.0 准备**：两条线 `mod_version=0.2.0`，jar 657 KB / 663 KB；tag 与商店上传待所有者确认。
+  打包剔除 datagen `.cache/`，带 LICENSE / THIRD-PARTY.md / icon.png。
+
+## 2026-11-02（Tinkers' Construct 3 接入）
+
+- 碧空 / 末影黏液草种子：只在 `tconstruct` 在场时注册；右键草方块 / 泥土 →
+  `tconstruct:sky/ender_vanilla_slime_grass`；泥土筛 2% / 1%，条目带 `mod`；模型/贴图手写。
+- 钴（第 13 种材料）：候选 `tconstruct:cobalt_ingot`，无匠魂回退自有钴锭；碎下界岩 1% 出
+  `cobalt_broken`，broken 贴图用下界岩红棕基底。
+- 下界合金碎片：碎下界岩 0.4%，双线都加。
+- 匠魂熔炼：78 条 `tconstruct:melting`（碎块 45 mB / 矿块 180 mB，`forge:molten_<m>`）。
+- 验证：只装 Tinkers 时 `cobalt → tconstruct:cobalt_ingot`；RCON 熔炉通过；不装时 90 drops。
+
+## 2026-11-02（Immersive Engineering 接入）
+
+- silver / nickel → Thermal → IE；lead → Mek / Thermal → IE；aluminum → IE；uranium → Mek → IE；
+  15 条熔炼变体；IE 粉碎机走 `forge:ores/<m>` 标签，不补配方。
+- 只装 IE 时 5 材料全部解析到 IE；Thermal+Create+IE 同装时优先级正确；主线无 IE 回退自有铝锭。
+
+## 2026-11-02（树的起点：树苗 / 竹子 / 下界菌岩孢子）
+
+- 泥土筛 9 种树苗（合计 31%/次）+ 竹子 5%；碎下界岩筛菌岩孢子各 5% + 骨粉催菌/巨菌；
+  新物品贴图 / 模型 / 堆肥 100。当时 `[sieve] 88 drops` / `[compost] 67 entries`。
 
 ## 上一批次（2026-11-02，科技模组锭接入：Mekanism / Thermal / Create）
 

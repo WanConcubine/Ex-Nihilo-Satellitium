@@ -1,419 +1,61 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-03
-> 先看这 20 行；细节再翻 [DESIGN.md](DESIGN.md)、[data-format.md](data-format.md)、[textures.md](textures.md)。
+> 最后更新：2026-11-04
+> 先看这 25 行；批次叙事在 [history.md](history.md)，架构/取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
-（`1.20.1-forge` 分支，当前停在 M10，M1.5–M10 已全部铺完）。原来的 `legacy/1.20.1-forge` tag
-已于 2026-11-01 按所有者要求删除，1.20.1 以分支为准（见
-[incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
-M1–M4、M6 已实现；**M10 自动化已完成并由作者验收**（电动 / 内能 × 自动筛 / 自动锤 + 6 个插件，
-GUI、32×32 模型、工作动画、JEI、管道都过了目视/手感），**自动输出配置也已实现**（服务端 RCON 验过，
-GUI 待目视）。**supported mods 框架 + Mekanism 已接**（1.21.1）。**P1 薄门面已完成**：core 只通过
-`ConfigValues` / `Platform` / `MachineHooks` / `GuiLayers` 读平台，版本胶水收进顶层 `platform/`，
-`check-core-imports.py` 的 known 清零。**P2 数据管线已完成**：生成器 `--target 1.21.1|1.20.1`、
-`scripts/port_data.py`、`scripts/check-data-paths.py`。**1.20.1 分支已补到 M10**（M1.5 桶转化 + M2 筛子/矿链 + M3 锤/钩/尘土 + M4 坩埚 +
-M6 巫水/孢子/瓷桶/木坩埚/12 种桶/蚕/人偶 + M10 四台机器/插件/自动输出 +
-`crucible.*`/`machine.*` config；分支提交 `6a733e8`）。
-顺带按原版修正了分支的木桶合成（4 板 + 台阶），并补上 `dust`/`crucible`/`unfired_crucible`
-缺失的掉落表。1.20.1 侧只剩画面/手感验收；主线下一步是 P3 状态机拆分。
-**M7 datagen（两条线各三批）**：`runData` 生成标签 58 + 方块掉落表 72 + **配方 164**
-（`ModRecipes`）+ **96 个 blockstate + 251 个模型**（`ModBlockStates` + `ModItemModels`），
-输出到 `src/generated/resources`；仍手写 79 条配方（66 条 `*_smelting_<mod>` 候选变体 +
-12 条 `create:crushing` + 1 条末影蛋糕，产物都是对方模组的物品）、15 个手绘模型、全部语言文件。
-1.20.1 分支在 2026-11-02 晚补齐同样三批，并再加 78 条匠魂熔炼，见 [datagen.md](datagen.md) §5。
-**科技模组锭接入（2026-11-02）**：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
-zinc → Create；**1.20.1 再补 Immersive Engineering**（silver/lead/nickel/aluminum/uranium）
-和 **Tinkers' Construct 钴**（`tconstruct:cobalt_ingot`），运行时取第一个已加载模组的锭，
-自有锭只作兜底。
-**科技模组矿物（2026-11-03）**：Mekanism 氟石 + Thermal 磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石接进 `gems`
-三档矿链（筛碎料 → 矿块 → 熔成对方矿物），**只在对应模组加载时注册**；两版都已验证；Create 只有锌，已有链。
-**M9 发布：0.1.0 已发（两条线都有 tag）；0.2.0 内容与 jar 已备，tag / 商店上传待确认；
-M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完成**（TableBuilder + CustomizationOverlay +
-`/exnihilo dump`，见当前批次；KJS/CT 入口仍待 P2/P3）。
-**工匠巧思（TiT）两种矿已接**（2026-11-03 晚）：碎下界岩 1% → 阿迪特碎矿、草方块 1% → 叶绿素碎矿，
-从 4 合 1 矿块到熔炼走本模组自己的三档链；阿迪特有自有锭兜底，叶绿素只在 TiT 在场时注册。
-**应用能源 2（AE2）已接**（2026-11-03 晚）：筛沙 **1/6** 出 `ae2:certus_quartz_crystal`、
-**1/12** 出 `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json` 带根级 `"mod": "ae2"`，
-没装时整文件跳过，双线数据一致。
+（`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
+**0.1.0 已发布**（两条线都有 tag）；**0.2.0 内容已增加 TiT/AE2，旧 jar 需重打**，
+ tag / 商店上传待所有者确认。
+**最新一批（2026-11-03 晚）**：工匠巧思（TiT）阿迪特 / 叶绿素 + 应用能源 2（AE2）赛特斯石英，
+两版数据与 dev 环境都已接好，已提交并推送（main `1417924` / 1.20.1 `10454db`）。
+**联动**：22 种材料（14 金属 + 8 矿物）；Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2
+全部可选，缺失即降级；核心门面 P1 与三路径（数据包 / KubeJS / CraftTweaker）已完成。
+**当前表尺**：筛子 7 输入 / 116 掉落（无科技模组；1.20.1 113，缺 3 条钴历史差异）；
++AE2 118 / 115；1.20.1 全装 +TiT 139、再加 AE2 141；主线 Mek+Thermal 137、+AE2 139。
+锤表 55 基础 / 79 全装；桶 12、堆肥 67、坩埚 39 熔点 / 9 热源。
+**下一步**：0.2.0 发布 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
 
-## 当前批次（2026-11-03 晚，应用能源 2：赛特斯石英粉 / 水晶）
+## 当前批次（2026-11-03 晚，TiT 两种矿 + AE2 赛特斯石英）
 
-- **对象**：[AE2]应用能源 2（mod id `ae2`，两版都有）。1.21.1 用 **19.2.18**（NeoForge，前置
-  GuideME 21.1.22），1.20.1 用 **15.4.12**（Forge，前置 GuideME 20.1.15）。
-- **范围（按所有者）**：只做筛沙——**赛特斯石英水晶**与**赛特斯石英水晶粉**。不注册自有物品，
-  不复制对方的贴图 / JSON / 代码；充能赛特斯、天石粉、陨石 / 天石方块不做。
-- **数值**：水晶 **1/6**（经典 Ex Nihilo 的沙 → 赛特斯档；Omnia 是 5%），粉 **1/12**。
-  充能赛特斯由 AE2 自己的 `ae2:charger` 充能得到（充电器只要铁 / 铜 / 赛特斯），所以不塞筛表；
-  粉还能由水晶在 AE2 里加工，1/12 只是给前期种子链一个更快的起点。
-- **形态**：新文件 `data/exnihilosatellitium/sieve/sand_ae2.json`，根级 `"mod": "ae2"` +
-  `"patch": true`，对 `minecraft:sand` 追加两条掉落。没装 AE2 时**在查物品之前**整文件跳过，
-  不刷 unknown item；装了以后按补丁语义追加，不覆盖 `sand.json`，因此数据包改沙表不会冲突。
-- **为什么直接掉对方成品**：赛特斯石英是 AE2 的基础资源（不是锭），AE2 自带完整的
-  种子 / 充能 / 氟石链；再复制一套三档矿链只会多出和 AE2 数值对不上的中间物。这点和 TiT 的
-  阿迪特 / 叶绿素（走本模组材料链）不同，是按对方链的形态分别选的接入方式。
+- **对象**：工匠巧思（`tinkers_thinking` 0.2.4，只有 1.20.1）与 AE2（1.21.1 `19.2.18` /
+  1.20.1 `15.4.12`，前置 GuideME `21.1.22` / `20.1.15`）。两者都是可选依赖，不写 `mods.toml`。
+- **TiT 阿迪特（`ardite`，金属）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装时回退
+  自有 `ardite_ingot`。**单源**：碎下界岩 1% → `ardite_broken`，再走三档链（碎矿 ×4 → 矿块 →
+  熔炼）；砂砾/沙子/尘土不出。1.20.1 另有 6 条 `tconstruct:melting`（碎矿 45 mB / 矿块 180 mB，
+  950°C，`forge:molten_ardite`）。
+- **TiT 叶绿素（`chlorophyll`，`gems`）**：只在 TiT 在场时注册；**单源**：草方块 1% →
+  `chlorophyll_broken`（草方块表 = 泥土 24 条 + 这一条，由生成器从 `dirt.json` 生成），
+  矿块熔成 `tinkers_thinking:chlorophyte_compound`（原矿 1A+1B 的等价物）。没装 TiT 时整条
+  （物品/方块/碎料/筛出/锤表/配方/标签）都不出现。
+- **AE2 赛特斯**：独立补丁 `sieve/sand_ae2.json`（根级 `"mod": "ae2"` + `"patch": true`），
+  沙 → `ae2:certus_quartz_crystal` **1/6**、`ae2:certus_quartz_dust` **1/12**。
+  不注册自有物品；充能赛特斯走 AE2 自己的 `ae2:charger`（配方只要铁/铜/赛特斯），
+  天石粉/陨石不做。缺 AE2 时整文件在查物品之前跳过。
+- **为什么形态不同**：TiT 的两种矿本身没有「空岛可得的成品链」，所以走本模组三档材料链；
+  AE2 的赛特斯是基础资源且 AE2 自带种子/充能/氟石/ME 全链，直接掉成品不会多出对不上的中间物。
 - **验证**：
-  - `./gradlew build`、`check-textures.py`、`check-data-paths.py`、`check-core-imports.py`、
-    `check-wiki.py` 全绿。
-  - 1.21.1 dev server（AE2 19.2.18 + GuideME 21.1.22）：`[sieve] loaded 7 inputs, 118 drops`
-    （该轮基表 116 + AE2 2 条）；`/exnihilo sieve minecraft:sand` 列出
-    `ae2:certus_quartz_dust 0.08333` / `ae2:certus_quartz_crystal 0.16667`；无 unknown item。
-  - 1.20.1 dev server（AE2 15.4.12 + GuideME 20.1.15，`-PtechMods` 全装）：`[sieve] 7 inputs,
-    144 drops`（基表 142 + 2）；`/exnihilo sieve minecraft:sand` 含同样两条 AE2 条目。
-  - 不装 AE2：1.21.1 `118 → 116` drops、1.20.1 `144 → 142`，`sand_ae2.json` 被 `mod` 门
-    整文件跳过，无 unknown item / 缺失掉落表。基表条数随 TiT 批次还在变化，AE2 恒为 +2。
-  - **未验**：真实手筛 / 机器筛筛出这两个物品、JEI 筛子页目视。
-- **坑（1.20.1 dev）**：AE2 的生产 jar 在 ForgeGradle dev 里会因 SRG mixin 报
-  `@Shadow field f_129762_ was not located`；必须放进 `libs/` 并由 `-PtechMods` 走 `fg.deobf`
-  （`build.gradle` 已加入口），不能直接丢 `run/mods`。1.21.1 NeoForge dev 用官方名，生产 jar
-  可直接丢 `run/mods`。
-- **坑**：AE2 是可选依赖，不写进 `mods.toml`；`run/mods`（主线）与 `libs/`（分支）里的 AE2 /
-  GuideME 已放进本轮 dev 环境，方便直接试玩；删掉它们即回到无 AE2 的基表，发布 jar 不打包。
-
-## 当前批次（2026-11-03 晚，工匠巧思：阿迪特 / 叶绿素）
-
-- **对象**：[TiT]工匠巧思（mod id `tinkers_thinking`，0.2.4，MIT，Forge + NeoForge **只有 1.20.1**
-  （以及 1.18.2 / 1.19.2），**没有 1.21.1**）。前置 Tinkers 3.12.1+；本轮实测用 Tinkers 3.12.1.231 +
-  Mantle 1.11.117 + TiT 0.2.4。不复制 TiT 的贴图 / JSON / 代码。
-- **范围（按所有者）**：只做两种矿——**阿迪特**（碎下界岩筛）和**叶绿素**（草方块筛）。走本模组现有的
-  三档矿链：筛 → `broken` / `crushed` / `powdered` 碎矿 → 4 合 1 矿块 → 熔成对方物品；不直接掉对方的
-  矿石方块。
-- **阿迪特（`ardite`，金属）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装 TiT 时回退自有
-  `ardite_ingot`（和钴同一套）。**只从碎下界岩出** `ardite_broken` 1%（不扩散到砂砾/沙子/尘土）；
-  颜色 `8E3B2E`，碎块基底用下界岩（`STONE_PALETTES`）。1.20.1 补了 **6 条匠魂熔炼**：
-  碎矿 45 mB / 矿块 180 mB、温度 950（TiT 的锭配方）、时间按 65 t / 90 mB 折算 → `forge:molten_ardite`。
-- **叶绿素（`chlorophyll`，`gems`）**：没有锭的矿物，按 `gems` 规则**只在 `tinkers_thinking` 在场时注册**
-  （没装时物品、方块、碎矿、筛出物、锤表、配方、标签都不出现），熔成
-  `tinkers_thinking:chlorophyte_compound`（叶绿混合物）。选它当产物是因为 TiT 的原矿正好掉
-  1 个叶绿素 A + 1 个 B，合成 1 个混合物——我们一块矿 = 一份等价物。
-  筛源：**只有草方块 1%**（新输入，表 = 泥土 24 条 + 叶绿素碎矿，由 `scripts/generate_sieve_assets.py`
-  从 `dirt.json` 生成；不扩散到砂砾/沙子/尘土）。
-- **门控**：叶绿素的全部条目走 `mod` 门（文件级 patch 或单条 `mod`），没装 TiT 时在查物品之前跳过；
-  1.21.1 上叶绿素永远不注册（TiT 没有 1.21.1），阿迪特则照常存在、熔成自有锭。
-- **验证**：
-  - 1.20.1 同服全装 Mek + Thermal + Create + IE + Tinkers + TiT：`[materials] loaded 22 entries`、
-    `ardite smelts into tinkers_thinking:ardite_ingot`、`chlorophyll smelts into
-    tinkers_thinking:chlorophyte_compound`；`[sieve] 7 inputs, 139 drops`（另装 AE2 时 141）、`[hammer] 79 recipes`；
-    `/exnihilo sieve` 里草方块 25 条（末条 `chlorophyll_broken 0.01`）、碎下界岩 11 条（`ardite_broken 0.01`）；
-    RCON 熔炉：`ardite_ore_gravel → tinkers_thinking:ardite_ingot`、`chlorophyll_ore_gravel →
-    tinkers_thinking:chlorophyte_compound`，两个都真的烧出来了。
-  - 不装 TiT（主线 1.21.1 无科技模组）：`[materials] loaded 14 entries`、`[sieve] 7 inputs, 116 drops`（另装 AE2 时 118）、
-    `[hammer] 55`，叶绿素条目静默跳过、无 unknown item；RCON 熔炉 `ardite_ore_gravel → 自有
-    exnihilosatellitium:ardite_ingot`（兜底生效）。
-  - `./gradlew build`（主线 toolchain 21 / 分支 Java 17）、`check-textures.py`、`check-data-paths.py`、
-    `check-core-imports.py` 全绿；`runData` 生成新材料的 blockstate/模型/配方/标签，无 warning。
-  - **未验**：手筛 / 机器筛的实际出货手感、匠魂炉真实熔化、JEI 两页目视。
-- **坑**：阿迪特矿和叶绿素矿在 TiT 里**都要钻石镐**，阿迪特没有熔炉配方（只有高炉 / 冶炼炉）；
-  我们自己的矿块只负责“给空岛一个来源”，碎矿→矿块→熔炼仍是我们自己的链路。
-
-## 当前批次（2026-11-03，科技模组矿物链：Mek 氟石 + Thermal 六种）
-
-- **目标**：把三家科技模组里「空岛拿不到、又不是金属锭」的矿物接进本模组的矿链。范围：
-  **Mekanism 氟石** + **Thermal 磷灰石 / 朱砂 / 硝石 / 硫磺 / 红宝石 / 蓝宝石**；Create 只有
-  锌，已有完整链，本轮只做回归验证。
-- **形态**：不直接掉对方成品，而是新增 7 种材料，走现有三档矿链——
-  筛 砂砾/沙子/尘土 → `*_broken` / `*_crushed` / `*_powdered` → 4 合 1 成
-  `*_ore_gravel/sand/dust` → 熔炼成 `mekanism:fluorite_gem` / `thermal:apatite` 等。
-  锤表、筛表、JEI、创造栏都从同一张材料表派生。
-- **schema（按所有者修正）**：`materials.json` 新增可选 `gems` 数组（与 `ingots` 同构，
-  **不能混用**）。`gems` 是**纯模组产物**：**不注册自有磷灰石/氟石之类的物品，也不生成
-  `c:gems` / `forge:gems` 标签**。**整条材料只在候选 mod 已加载时注册**：没装时物品、方块、
-  三档碎料、筛出物、锤表、配方和标签都不出现；装对应模组时，我们的矿砾/矿砂/矿尘熔成对方
-  物品。矿块仍进 `c:ores/<id>` / `forge:ores/<id>`（标签条目 `required: false`），所以对方
-  机器可以按标签处理；矿块没有 loot table，由 `SelfDropBlock` 代码掉自身。
-- **数据**：`gems` 材料**不生成 base 熔炼配方**，只有手写的 `*_smelting_<mod>` 变体
-  （共 21 条：7 种 × 3 档）。金属仍保留原来的 base + 候选变体。
-- **数值**：fluorite 1/8、apatite 1/18、cinnabar 1/32、niter 1/24、sulfur 1/24、
-  ruby/sapphire 1/64；三种筛料同一 `rarity`。
-- **末影蛋糕图标修正**：物品模型改为 `item/generated` + 16×16 透明
-  `exnihilosatellitium:item/end_cake`（由 `art/blocks/end_cake/inventory.png` 提供）；
-  `ModItemModels` 跳过 `end_cake`，不再用方块模型当物品图标，也不会再生成重复的
-  `models/item/end_cake.json`。
-- **验证（main 1.21.1 / NeoForge 21.1.265）**：
-  - `./gradlew build`、`check-textures.py`、`check-data-paths.py`、`check-core-imports.py`
-    全绿；
-    全装 Mek+Thermal 时 20 种材料、筛表 **114** drops、锤表 **73** 条；无科技模组时
-    13 种、筛 **93** / 锤 **52**；只装 Mek 时 14 种、筛 **96** / 锤 **55**。生成配方 **164** 条
-    （39 条 base 熔炼 + 桶/坩埚/机器等），手写 **79** 条（66 条候选变体 + 12 条
-    `create:crushing` + 1 条末影蛋糕）。
-  - 无科技模组：13 entries、筛 93 / 锤 52；`exnihilosatellitium:ruby_broken` 为 unknown；
-    无缺失物品/掉落表报错。
-  - 只装 Mekanism 10.7.19.85：14 entries、筛 96 / 锤 55；日志 `fluorite smelts into
-    mekanism:fluorite_gem`，RCON 熔炉通过；Thermal 六种仍不注册（`ruby_broken` unknown）。
-  - `gems` 的 2×2 打包配方带 `neoforge:conditions`；矿块无 loot table，使用 `SelfDropBlock`。
-  - **未验**：Thermal 在 1.21.1 不存在，主线只验了 Mek 路径；JEI/客户端未目视。
-- **验证（1.20.1-forge / Forge 47.4.28 / Java 17）**：
-  - 同时装 Mekanism 10.4.16 + Thermal Foundation 11.0.6 + CoFH Core + Create 6.0.8 + IE +
-    Tinkers：`[materials] loaded 20 entries`，7 条 `smelts into` 全部命中；RCON 熔炉把
-    `fluorite/apatite/cinnabar/niter/sulfur/ruby/sapphire` 的矿砾分别熔成
-    `mekanism:fluorite_gem` / `thermal:*`，**7/7 通过**。
-  - 无科技模组：13 entries、筛 90 / 锤 52，`ruby_broken` unknown，无缺失物品/掉落表报错。
-  - `/exnihilo dump sieve` 113 行、`dump hammer` 73 行；新条目概率与 main 一致。
-  - `./gradlew build`（Java 17）、`check-textures.py` 通过；generated 树不再有 7 种矿物的
-    fallback 物品模型/标签/base 熔炼配方/掉落表。
-  - **未验**：Thermal 磨粉机 / Mek 富集机实际吃我们新矿块（只核对了 `forge:ores/<m>` 标签）；
-    JEI/客户端未目视（本轮会再开 1.20.1 客户端）。
-- **1.20.1 匠魂熔炼产量修正**：78 条 `tconstruct:melting` 的碎块类改为 45 mB（1/2 锭）、
-  矿块类 180 mB（2 锭），时间按 0.75 缩放；7 种 `gems` 矿物无对应熔融液体，仍不写。
-- **边界**：7 种矿物**不写匠魂熔炼**（Tinkers 没有对应熔融液体）；合金仍由科技模组自己做。
-
-## 当前批次（2026-11-03，P3：CraftTweaker，两版）
-
-- **依赖**：`compileOnly` CraftTweaker，不随 jar 分发。1.21.1 用 21.0.39，1.20.1 用
-  14.0.60。BlameJared maven 在本机 Gradle 上有 TLS handshake 问题，构建脚本用
-  `downloadCraftTweaker` 任务经构建 JVM 下载到 `libs/crafttweaker/`（gitignored），
-  再作为本地依赖编译；1.20.1 开发服用 `-PctMods` 把 deobf 的 CT 放进运行时。
-- **入口**：`@ZenRegister` + `@ZenCodeType.Name` 的七个类：
-  `mods.exnihilosatellitium.Sieve` / `.Hammer` / `.Crook` / `.Barrel` / `.Compost` /
-  `.CrucibleMelt` / `.CrucibleHeat`。每个类有常用 `add` / `remove` / `replace` 与
-  `addJson` / `removeJson` / `replaceJson`，内部构造 datapack JSON 后提交 overlay。
-- **语义**：CT source `crafttweaker`，priority 200（数据包 0、KJS 100 之后）；
-  `#tag`、`mod` 门、校验、replace 先校验后删旧规则全部复用。没有注册 CT recipe type，
-  JEI 不会出现七张表的 CT 配方页（P4/可选）。
-- **生命周期**：`onAddReloadListenerEvent` 在每次 reload 的清点阶段清空旧
-  `crafttweaker` 贡献；CT 的脚本执行在该事件之后，所以 `/reload` 是替换而不是叠加。
-- **验证（1.21.1，CT 21.0.39）**：
-  - 七个入口各写一条，七张表条数/条目正确（sieve 91 drops、hammer 53、crook 23、
-    barrel 13、compost 68、melt 40、heat 10）。
-  - 改脚本（删 sieve、compost 300→150）后 `/reload`：`cleared 6 stale crafttweaker op(s)`，
-    旧条目消失、新条目生效，overlay 6。
-  - 同一 fixture 用 datapack 跑，七张表 `dump` 与 CT 逐字节一致。
-  - 移除 CT jar 后服务端正常启动，无 `NoClassDefFoundError`。
-- **验证（1.20.1，CT 14.0.60）**：
-  - 七个入口全部生效；改脚本 `/reload` 清 7 条旧贡献、应用 6 条新贡献；
-  - CT 与 datapack fixture 的七张表 `dump` 逐字节一致；
-  - 不带 `-PctMods`（无 CT）正常启动；旧世界会提示 `Missing data pack mod:crafttweaker`，
-    这是移除模组后的正常警告。
-- **未做**：CT recipe type / JEI 分类（可选，后置）；P4 客户端 JEI 同步。
-
-## 当前批次（2026-11-03，P2：KubeJS 插件，两版）
-
-- **依赖**：`compileOnly` KubeJS + Rhino，不随 jar 分发。1.21.1 用
-  `2101.7.2-build.348` / Rhino `2101.2.7-build.81`；1.20.1 用 `2001.6.5-build.26` /
-  Rhino `2001.2.3-build.10`，开发服另需 Architectury `9.2.14`（`runServer -PkjsMods`）。
-- **插件发现**：`src/main/resources/kubejs.plugins.txt` 指向
-  `com.kaifengcrt.exnihilosatellitium.compat.kubejs.ExNihiloKubeJSPlugin`；
-  KJS 不在时该文件不被读取，插件类也不会被加载（已实测无 KJS 启动）。
-- **七个绑定**（只注册到 server 脚本）：
-  `SieveEvents` / `HammerEvents` / `CrookEvents` / `BarrelEvents` / `CompostEvents` /
-  `CrucibleMeltEvents` / `CrucibleHeatEvents`。每个都有常用的
-  `add` / `remove` / `replace` 签名，以及 `addJson` / `removeJson` / `replaceJson`
-  直接喂 datapack JSON（复杂桶实体规则、未来新字段走这条）。
-- **语义**：绑定只构造 payload 并提交 overlay（source `kubejs`，priority 100），
-  解析/校验/`#tag`/根级 `mod` 与数据包完全共用；脚本贡献在数据包和补丁之后应用。
-- **生命周期**：`beforeScriptsLoaded` 在每次 server 脚本批次前清空旧 `kubejs` 贡献；
-  应用由 tags rebuild 和 `ServerStartedEvent` 触发；脚本改完 `/reload` 不会残留旧条目。
-- **1.20.1 差异**：2001 的 `KubeJSPlugin` 是类、绑定是 `BindingsEvent`（不是 2101 的
-  `KubeJSPlugin` 接口 / `BindingRegistry`）；插件单独实现，在 `registerBindings`
-  （server 脚本批次前）清旧 `kubejs` 贡献。绑定对象和脚本写法与主线完全相同。
-- **验证（1.21.1，KubeJS 2101.7.2 + Rhino，dev server）：**
-  - 七个绑定各一条：`[sieve] 90→91 drops`、hammer 52→53、crook 22→23、barrel 12→13、
-    compost 67→68、melt 39→40、heat 9→10；`/exnihilo dump` 分别出现预期条目。
-  - 脚本删除 sieve 条目、compost 300→150 后 `/reload`：`dropped 6 old op(s)`，
-    sieve emerald 消失、compost=150，overlay 6 条。
-  - 同一 fixture 用命令 overlay（priority 100）重放，七张表 `dump` 与 KJS 结果逐字节一致。
-  - 移除 KJS/Rhino 后服务端正常启动，无 `NoClassDefFoundError`。
-- **验证（1.20.1，KubeJS 2001.6.5 + Rhino 2001.2.3 + Architectury 9.2.14，dev server）：**
-  - 七个绑定全部生效，七张表条数与主线一致（sieve 91 drops、hammer 53、crook 23、barrel 13、
-    compost 68、melt 40、heat 10）；
-  - 改脚本后 `/reload`：`dropped 7 old op(s)`，旧 sieve 条目消失、compost 300→150；
-  - KJS 脚本与 datapack fixture 的七张表 dump 逐字节一致；
-  - 不带 `-PkjsMods`（无 KJS）正常启动，无 `NoClassDefFoundError`。
-- **未做**：专用服客户端 JEI 同步（P4）；CraftTweaker（P3）。
-
-## 当前批次（2026-11-03，P1.5：overlay 边角）
-
-- **显式 priority**：`CustomizationOverlay` 的操作带 `priority`（默认 0）；应用顺序是
-  **priority 升序，再按提交顺序**，高 priority 后应用所以覆盖低 priority。
-  命令形态：`/exnihilo customize <table> add|remove|replace [priority] <json>`。
-- **冲突可见**：`TableBuilder` 记录 overlay 的 `replaced` / `removed` / `add ignored`，
-  rebuild 后打印一行一条，带旧 source：
-  - `[customize] hammer replaced minecraft:cobblestone (was exnihilosatellitium:hammer/cobblestone.json)`
-  - `[customize] hammer add ignored for minecraft:cobblestone (kept ...)`
-  - `[customize] barrel removed ...` / `sieve removed ...`
-- **生命周期**：服务器停止时清空 overlay（单人切世界不会泄漏到下一个世界）；同一 source
-  重复提交完全相同的操作会去重；总操作数上限 4096；空 payload 直接拒绝。
-- **诊断**：`/exnihilo dump all` 一次输出七张表（298 行，7 个表头）。
-- **验证**（2026-11-03，dev server + RCON）：
-  - priority：先提交 `p10 cobblestone→flint`、再提交 `p5 cobblestone→gravel`，
-    最终 dump 是 flint（p10 后应用）；冲突日志显示 p5 覆盖文件、p10 覆盖 p5。
-  - `add ignored`：对已有文件规则的锤子 add 被拒绝并记录保留的 source。
-  - 去重：同一 sieve add 提交两次，overlay 仍是 1 条。
-  - 空 payload：`/exnihilo customize sieve add {}` 返回 rejected，overlay 不变。
-  - 连续两次 `/reload`：dump 一致，conflict 日志重复但最终表不变。
-  - 停止服务器：日志 `cleared 3 overlay op(s) on server stop`，重启后 `overlay 0 ops`。
-- **1.20.1**：代码已同步，build + 纹理守卫通过；P1.5 的 RCON 复验见分支 `docs/status.md`。
-
-## 当前批次（2026-11-03，三路径 P1：TableBuilder + overlay 基座）
-
-- **新包 `common/table/`**：
-  - `TableId` —— 七张表的唯一 id（`sieve` / `hammer` / `crook` / `barrel` / `compost` /
-    `crucible_melt` / `crucible_heat`），命令、dump、未来的脚本绑定共用；
-  - `TableBuilder` —— JSON loader 与 overlay 共用的有序工作集，记录每个 key 的 last source；
-  - `CustomizationOverlay` —— 脚本/命令贡献按 source 排队，每次 rebuild 在**文件 + 补丁之后**
-    重放，可按 source 清空；不持久化，重启即空；
-  - `Tables` / `TableDump` —— 统一 rebuild 入口与稳定行输出。
-- **七张表**的 rebuild 全部改为“建 builder → 喂 JSON/补丁 → 喂 overlay → 发布不可变快照”；
-  原有语义保持：筛子/钩子合并掉落、锤子/熔点/热源具体优先、桶按 base+added 覆盖、
-  堆肥同 key 取 max。启动日志：`[sieve] 6 inputs/90 drops`、`[hammer] 52`、
-  `[crook] 10/22`、`[barrel] 12`、`[compost] 67`、`[crucible] 39 melt / 9 heat`。
-- **命令（OP 2）**：
-  - `/exnihilo customize <table> add|remove|replace <json>`：payload 与 datapack 文件同字段，
-    复用同一套解析/校验；`/exnihilo customize list`、`clear [source]`；
-  - `/exnihilo dump <table>`：按行排序、可直接 diff；头行 `# <table> N lines`
-    （overlay 数量看 `/exnihilo tables`）。
-- **失败语义**：单条 overlay 解析异常只跳过该条并打 `[customize]` 警告；整表 rebuild 抛异常时
-  保留上一份快照（`rebuild failed, keeping previous snapshot`）。
-- **验证**（2026-11-03，dev server + RCON）：
-  - `./gradlew build`、`check-core-imports.py`（`common/table` 已纳入扫描）、
-    `check-textures.py`、`check-data-paths.py`、`check-wiki.py` 全绿。
-  - 七张表各跑 add：dump 只多一行；remove 掉刚加的条目后回到基线；筛子额外删了 sand 的
-    cactus 验证“删现有掉落”；replace 后目标只剩新规则（sand 只剩 diamond 1.0、
-    cobblestone → flint x1-3、oak_leaves 只剩 stick、water+sugar → glass、
-    emerald=50、end_stone → water 100、furnace[lit=true]=0.9）。
-  - 连续两次 `/reload` 后七张表 dump 与 reload 前**逐字节一致**（overlay 只重放一次，不叠加）。
-  - `/exnihilo customize clear` 清掉 21 条后，七张表 dump 与启动基线**逐字节一致**。
-  - 坏 overlay（`chance` 写成字符串）只打 warning，表不变；坏数据包（同一错误）触发
-    `[sieve] rebuild failed, keeping previous snapshot`，dump 仍是旧表。
-  - `replace` 先校验再删旧规则：`chance` 越界 / `speed: 0` / 未知 `result` 的 replace
-    都保留原条目（筛子/热源/桶各验一次）。
-  - tag payload：hammer 的 `#minecraft:logs` 展开 52 → 92 条，`clear command` 回到 52。
-- **1.20.1**：已移植并单独验证（`common/table/` + 七张表 + 命令整体带过去；
-  build + 纹理守卫、七张表 add/replace、`/reload` 一致、clear 回基线），
-  见分支 `docs/status.md`「三路径 P1 移植」。
-- **未做**：KJS / CT 的脚本绑定（P2 / P3）；overlay 持久化；专用服客户端 JEI 同步（P4）。
-
-## 当前批次（2026-11-03，末影蛋糕）
-
-- **新方块/物品 `exnihilosatellitium:end_cake`**：可放置蛋糕，吃一片**主世界 ↔ 末地**双向传送
-  （主世界 → 末地中央岛；末地 → 玩家床/世界出生点）；下界不传送。放置时只有 **1 片**
-  （`bites=6`），末影之眼右键补 1 片，最多 7 片；每次吃 +2 饥饿 / 0.1 饱和度，
-  **始终可吃**（不要求饥饿值，保证末地回程）。顶面是末影之眼标志（绿色 end-stone 底 +
-  teal 虹膜 + 黑瞳）。
-- **配方**：8 末影珍珠 + 1 蛋糕（3×3 环，蛋糕居中），1.20.1 同配方。
-- **资源**：几何复用 vanilla `minecraft:block/cake` / `cake_slice1..6` 父模型，只覆盖 4 张
-  16×16 贴图（Creatio 原图经 `art/blocks/end_cake/restyle.py` 裁边/放大/描边）；
-  无掉落表（和 vanilla 蛋糕一样，打掉不返还）。
-- **验证**（2026-11-03，main）：
-  - `./gradlew build`、`check-textures.py`、`check-data-paths.py`、`check-wiki.py` 全绿。
-  - dev server：`Loaded 1434 recipes` / `our recipes=144`（+1 条 End Cake）；
-    `/setblock ... end_cake[bites=0/1/5/6]` 均可放置并通过 `execute if block` 检查。
-  - **未验**：进游戏右键吃/传送、末影之眼补片、模型画面；`getStateForPlacement` 的
-    `bites=6` 需要物品放置才能看到（命令 `/setblock` 走默认 `bites=0`）。
-- **1.20.1**：已同步同一套方块/物品/贴图/模型/配方，`compileJava` + `check-textures.py` 通过；
-  服务端 `/setblock ... [bites=6]` 验过。
-
-## 当前批次（2026-11-03，数据包 v2：标签 / mod 门 / 补丁）
-
-- **标签输入**：`sieve` / `hammer` / `crook` / `barrel` / `crucible_melt` / `crucible_heat` 的
-  id 字段接受 `#tag`（物品 / 方块 / 流体标签），加载时展开；堆肥原本就支持 `#tag`。
-- **时序坑（重要）**：`TagManager` 只在 reload 里存结果，标签在所有 listener 之后才绑定，
-  所以 `load()` 只建具体条目，`TagsUpdatedEvent` 里再 `rebuild()` 展开标签。日志会先出现
-  `waiting for tags`，随后出现完整条数，这是正常的，不是漏加载。
-- **mod 门**：所有表支持根级 `"mod": "x"`；筛子 / 钩子的单条掉落也支持 `mod`。
-- **补丁**：`"patch": true`（或出现 `"remove"`）在所有普通文件之后按资源 id 排序应用；
-  `remove: true` 删整条规则，`remove: ["id", "#tag"]` 删列表条目（筛子 / 钩子 / 堆肥）。
-  具体条目优先于标签；筛子 / 钩子的标签是合并，锤子 / 熔点 / 热源是具体优先。
-- **诊断命令**（OP）：`/exnihilo tables`、`/exnihilo sieve <item>`、
-  `/exnihilo hammer <block>`、`/exnihilo compost <item>`。
-- **示例包**：`examples/datapack/`（`pack_format 48`），可直接丢进 `world/datapacks/`。
-- **玩家 wiki**：`wiki/` 按「数据包 / KubeJS / CraftTweaker」三条路线写，覆盖 1.21.1 与
-  1.20.1 的路径/标签差异；CT 明确写清只改原版配方、碰不到七张表。
-- **维护契约**：`wiki/MAINTAINING.md` 定义 Owner / Definition of Done / 发布前检查；
-  `scripts/check-wiki.py` 守卫页面、链接、JSON、版本矩阵和“最后核对”头。
-- **静态站**（2026-11-03 上线）：<https://wanconcubine.github.io/Ex-Nihilo-Satellitium/>；
-  `mkdocs.yml` + `requirements-wiki.txt`，源目录仍是 `wiki/`，`_sidebar.md` 保留但不发布；
-  `check-wiki.py` 守卫 nav 覆盖与译文，`mkdocs build --strict` 本地与 CI 都通过；
-  `.github/workflows/wiki.yml` 在 push main（或手动 dispatch）后部署 Pages。
-- **中英双语**（2026-11-03）：`mkdocs-static-i18n` 后缀结构，`wiki/*.en.md` 为英文，`/` 中文、`/en/` 英文，
-  语言切换器与 `hreflang` 自动生成；JSON 示例两边逐字一致，缺译文或英文页残留中文会让
-  `check-wiki.py` 失败。`navigation.instant` 因与切换器不兼容已关闭。
-- **三路径路线图**：`docs/customization-roadmap.md` 列出当前能力矩阵、P1（规范表 + overlay 基座）、
-  P2（KJS 插件）、P3（CT API）、P4（客户端同步）的验收标准；**当前只有数据包是完整路径**。
-- **验证**（2026-11-03，main）：
-  - `./gradlew build`、`check-textures.py`、`check-core-imports.py`、`check-data-paths.py`、
-    `check-wiki.py` 全绿。
-  - dev server + 测试包（`#minecraft:logs` / `#minecraft:leaves` / `#minecraft:saplings` 标签、
-    sand 补丁、end_stone 删除、水 + 牛奶删除、tconstruct mod 门、面包 125→100、tag 删树苗）：
-    - 启动：先 `waiting for tags`，随后 **测试包下** `[sieve] 45 inputs, 115 drops`、
-      `[hammer] 91`、`[crook] 32 drops`、`[crucible] 49 heat`、`[barrel] 11`；
-      无 unknown item / empty tag 警告。
-    - RCON：`sieve minecraft:sand` 已无 cactus、有 0.5 钻石；`sieve minecraft:oak_log` 有 1%
-      钻石（tag）；`hammer minecraft:oak_log` → 木棍 1–2；`hammer minecraft:end_stone` → no rule；
-      `compost minecraft:bread` → 100；删掉补丁文件后 `/reload` 恢复 `hammer 91`、`barrel 11`。
-- **1.20.1**：已移植并单独验证，见分支的 `docs/status.md`「数据包 v2 移植」。
-- **未做**：专用服客户端 JEI 仍只读本地镜像 / 本地数据包；KubeJS / CraftTweaker 仍无集成；
-  下一步是 roadmap 的 **P1（TableBuilder / overlay 基座）**，之后才谈 KJS/CT 等价。
-
-## 0.2.0 发布准备（2026-11-02）
-
-- 两条线 `mod_version=0.2.0`；`CHANGELOG.md` / `README.md` / [release-0.2.0.md](release-0.2.0.md)
-  已更新。
-- 产物：主线 `build/libs/exnihilosatellitium-0.2.0.jar`（657 KB，
-  sha256 `fff01fc6…2624cc7`）、1.20.1 分支同名 jar（663 KB，sha256 `e579e3a1…cc1ff`）。
-- 两个 jar 的 `mods.toml` 版本号、`LICENSE` / `THIRD-PARTY.md` / `icon.png` 均已核对。
-- **待所有者确认**：版本号 / 发布日期、tag（`v0.2.0` / `v0.2.0-1.20.1`）、
-  CurseForge / Modrinth 上传、README 下载链接。
-
-## 0.1.0 已发布（2026-11-02）
-
-- **tag / 远端**：主线 `v0.1.0`（`d4a6dc2`）、1.20.1 分支 `v0.1.0-1.20.1`（`35d98d4`），
-  两条线都已推到 `origin`（推送走 SakuraCat 代理：`ssh.github.com:443`，见下方常用命令）。
-- **产物**：`build/libs/exnihilosatellitium-0.1.0.jar`（1.21.1 / 649 KB，
-  sha256 `2f3d1af5…ecb49`）、分支同名 jar（1.20.1 / 587 KB，sha256 `1168ca77…3e1ba`）。
-- **打包口径**：jar 里剔除 datagen 的 `.cache/`，带上 `LICENSE` + `THIRD-PARTY.md` 与
-  `icon.png`（`art/icon/generate.py`，128×128）；与源码比对 0 缺失，只多出给 JEI 用的
-  `assets/.../{barrel,sieve,...}` 镜像。
-- **发布材料**：`CHANGELOG.md`（首版内容 / 兼容矩阵 / 已知限制 / 安装）、README「下载与安装」。
-- **还差**：CurseForge / Modrinth 的商店页与文件上传需要所有者操作（本机没有 API key 与 `gh`），
-  文案见 CHANGELOG；上传后再把下载链接补进 README。
-
-## 当前批次（2026-11-02 晚，Tinkers' Construct 3 接入）
-
-- **碧空 / 末影黏液草种子**：`sky_slime_grass_seeds` / `ender_slime_grass_seeds`，
-  **只在 `tconstruct` 在场时注册**（`ModItems` 条件注册；缺失时字段为 `null`，创造栏/JEI 不出现）。
-  右键**草方块或泥土** → `tconstruct:sky_vanilla_slime_grass` / `ender_vanilla_slime_grass`；
-  泥土筛 2% / 1%，筛表条目带 `"mod": "tconstruct"`，没匠魂时整条不参与加载、也不刷 unknown item。
-  贴图 / 模型手写，因为 datagen 在无匠魂时不会注册这两个物品。
-- **钴**（第 13 种材料）：`materials.json` 加 `cobalt`，候选 `tconstruct:cobalt_ingot`；
-  无匠魂时回退自有 `cobalt_ingot`。碎下界岩筛 `cobalt_broken` 1%，走普通 4→块→熔炼链；
-  **broken 贴图改用下界岩红棕基底**（`STONE_PALETTES`），不再用其他矿碎块的煤炭灰底。
-- **下界合金碎片**：碎下界岩 0.4%，**双线都加**。
-- **匠魂熔炼**：13 材料 × 6 形态 = **78 条** `tconstruct:melting`（1.20.1 分支）：
-  - 碎块 / 粉碎 / 粉末物品 → **45 mB**（1/2 锭）；
-  - 对应矿砾 / 矿砂 / 矿尘方块 → **180 mB**（2 锭）；
-  - 流体用 `forge:molten_<m>`，温度取 Tinkers 自己的锭配方，时间按 90 mB 锭等比缩放；
-  - 全部带 `conditions: mod_loaded(tconstruct)`，没匠魂时整批跳过。
-- **阿迪特/叶绿素**：本批已接（见顶部当前批次；碎下界岩 / 草方块出我们自己的碎矿）。
-- **验证**：
-  - 1.20.1 只装 Tinkers 3.12.1 + Mantle 1.11.117：`[materials] cobalt → tconstruct:cobalt_ingot`；
-    `[sieve] 6 inputs, 92 drops`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot`；
-    `summon` 两个种子物品名字正常；目标黏液草方块 `setblock` 成功。
-  - 不装 Tinkers：`[sieve] 90 drops`（两个种子条目被 `mod` 过滤掉），无 unknown recipe/item 报错。
-  - 主线 1.21.1：`[sieve] 90 drops`、`Loaded 1433 recipes`、`[compost] 67 entries`。
-  - **右键草方块/泥土、匠魂炉实际熔化、JEI 页仍未进游戏**。
-- **配方计数**：`runData` 生成 **143** 条（137 + cobalt 6）；主线手写 **57** 条
-  （45 条候选变体 + 12 条 `create:crushing`）；1.20.1 再手写 78 条匠魂熔炼 → **135** 条。
-
-## 上一批次（2026-11-02，Immersive Engineering 接入）
-
-- silver / nickel → Thermal → IE；lead → Mek / Thermal → IE；aluminum → IE；uranium → Mek → IE；
-  15 条熔炼变体，IE 粉碎机走 `forge:ores/<m>` 标签（不补配方）。
-- 只装 IE 时 5 材料全部解析到 IE；Thermal+Create+IE 同时装时优先级正确；主线无 IE 回退自有铝锭。
-
-## 更早批次（2026-11-02，树的起点：树苗 / 竹子 / 下界菌岩孢子）
-
-- 泥土筛 9 种树苗（合计 31%/次）+ 竹子 5%；碎下界岩筛菌岩孢子各 5% + 骨粉催菌/巨菌；
-  新物品贴图 / 模型 / 堆肥 100。当时 `[sieve] 88 drops` / `[compost] 67 entries`。
+  - `./gradlew build`（主线 21 / 分支 17）+ `check-textures.py` + `check-data-paths.py` +
+    `check-core-imports.py` + `check-wiki.py` 全绿；两棵树提交后 `git status` 干净。
+  - 1.21.1（AE2 19.2.18 + GuideME 21.1.22）：`[materials] 14 entries`、`[sieve] 7 inputs,
+    116 → 118 drops`、`[hammer] 55`；`/exnihilo sieve minecraft:sand` 含
+    `certus_quartz_crystal 0.16667` / `certus_quartz_dust 0.08333`；不装 AE2 时 116、无 unknown。
+  - 1.20.1（`-PtechMods` 全装 Mek+Thermal+Create+IE+Tinkers+TiT+AE2）：`[materials] 22 entries`、
+    `[sieve] 7 inputs, 141 drops`（基表 139 + AE2 2）、`[hammer] 79`；RCON 熔炉
+    `ardite_ore_gravel → tinkers_thinking:ardite_ingot`、`chlorophyll_ore_gravel →
+    tinkers_thinking:chlorophyte_compound`；去掉 AE2 时 139、sand 无 AE2 条目。
+  - **未验**：真实手筛 / 机器筛筛出 TiT/AE2 物品、JEI 页面、匠魂炉实际熔化。
+- **坑**：TiT 的两种原矿都要钻石镐，阿迪特没有熔炉配方（高炉/冶炼炉）；AE2 的 1.20.1
+  生产 jar 不能在 FG dev 直丢 `run/mods`（SRG mixin 崩服），见「踩过的坑」。
 
 ## 历史批次（详细见 [history.md](history.md)）
 
-- **2026-11-02**：M7 datagen 第二批（配方 133 条）、第三批（blockstate + 模型 244 个）、
-  科技模组锭接入（Mekanism / Thermal / Create）、泥土筛石子 + Create 粉碎桥。
-- **2026-11-01**：1.20.1 分支 M2–M10（筛子/矿链、锤钩、坩埚、巫水/瓷桶/蚕/人偶、机器）、
-  P1 薄门面、P2 数据管线、M6 六刀、M10 自动化与自动输出配置。
+- **2026-11-03**：数据包 v2（标签/mod 门/补丁）、末影蛋糕、三路径 P1/P1.5/P2/P3、
+  Mekanism 氟石 + Thermal 六种矿物链。
+- **2026-11-02**：M7 datagen 第二/三批、科技模组锭接入、泥土筛石子 + Create 粉碎桥。
+- **2026-11-01**：1.20.1 分支 M2–M10、P1 薄门面、P2 数据管线、M6 六刀、M10 自动化。
 
 ## 功能现状
 
@@ -423,10 +65,12 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   接雨水、比较器、破坏返还、管道状态互斥都已实现。
 - 桶转化 12 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、熔岩+荧石→末地石、
   水+尘土→粘土、水+牛奶→史莱姆；巫水+沙→灵魂沙、巫水+树苗→深色橡树苗；
-  5 条人偶规则（熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者）。
-- 筛子 6 输入 / 88 掉落（砂砾 / 沙 / 泥土 / 尘土 / 粉碎下界岩 / 粉碎末地石）；
+  4 条人偶规则（熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者）。
+- 筛子 7 输入 / 116 掉落（无科技模组：砂砾 / 沙 / 泥土 / 尘土 / 草方块 / 粉碎下界岩 / 粉碎末地石）；
+  装模组后 1.20.1 全装 +TiT 139、再加 AE2 141；主线 Mek+Thermal 137、+AE2 139。
   三档筛网只影响耐久。
-- 矿物链：4 碎块 → 矿方块 → 熔炼成锭；锤矿砾/矿砂掉 4–6、粉尘掉自身。
+- 矿物链：22 种材料（14 金属 + 8 矿物）；4 碎块 → 矿方块 → 熔炼成锭/对方矿物；
+  锤矿砾/矿砂掉 4–6、粉尘掉自身。`gems` 材料只在对应模组在场时注册。
 - **泥土的石头来源**：四种石子（圆石/安山岩/花岗岩/闪长岩）每次 4-6 个、100% 出，
   四个合成一块对应石头。
 - **泥土的树苗来源**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3% +
@@ -485,6 +129,16 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   内容存 `exnihilosatellitium:fluid_contents` 组件，`IFluidHandlerItem` 已接。
   3 瓷土按原版桶形（`x x` / ` x `）→ 未烧制瓷桶 → 熔炉烧 200 tick → 可用瓷桶。
 
+### 联动（supported mods）
+
+- 材料表 `materials.json`：14 金属（铁/金/铜/锡/银/铅/镍/铂/铝/锇/锌/钴/铀/阿迪特）
+  + 8 矿物（`gems`：氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石/叶绿素）。
+- 锭候选按数组顺序取第一个已加载模组：Mekanism / Thermal / Create / IE / Tinkers / TiT；
+  没有候选时回退自有锭。`gems` 没有自有兜底，模组不在就整条不注册。
+- 直接掉落：TiT 阿迪特（碎下界岩 1%）、TiT 叶绿素（草方块 1%）、AE2 赛特斯石英
+  （沙 1/6 水晶 + 1/12 粉）。三条都带 `mod` 门，缺失时在查物品之前跳过。
+- 所有联动都是可选的；`mods.toml` 不声明硬依赖，发布 jar 不打包对方代码/资源。
+
 ### 自动化（M10，2026-11-01）
 
 - 四台机器共用 `MachineBlock`（kind = 筛/锤，power = 电动/内能），BE 分 `ElectricMachineBlockEntity` /
@@ -508,41 +162,21 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 
 ## 交接清单（下次会话先做）
 
-- **1.20.1 分支**：同级 git worktree `../Ex-Nihilo-Satellitium-1.20.1`
-  （`git worktree add ../Ex-Nihilo-Satellitium-1.20.1 1.20.1-forge` 可复现；
-  `1.20.1-forge` @ `a564ab1`，含一次性验收清单），已到 **M10**（含 `crucible.*` + `machine.*` config），
-  下一步只剩一次性画面/手感验收。
-  分支的 `docs/status.md` 里有当前批次、验证表、构建/客户端命令（`runClient -PdevMods`）
-  和固定套路。新会话在分支工作区开工即可。
-
-- **先读** [porting.md](porting.md) §3 的 P2 记录；本批从 **1.20.1 分支补 M2** 开始（清单见「下一步」）。
-- **先跑** `./gradlew build` + `python3 scripts/check-textures.py` + `python3 scripts/check-core-imports.py`
-  + `python3 scripts/check-data-paths.py`（后两条必须 `0 known leak(s)` / `passed for 1.21.1`）。
-- **datagen 自检**：`./gradlew runData --offline` 后 `git status` 应为空（已迁移的两批稳定）；
-  配方要重新比对时用 `python3 scripts/compare-recipes.py --expect-old-only '*_mekanism.json'`。
-- **数据管线验收（不需要进游戏）**：
-  `python3 scripts/port_data.py --out build/port-1.20.1 --force` →
-  `python3 scripts/check-data-paths.py --target 1.20.1 --root build/port-1.20.1`；
-  四个生成器重跑不应产生 diff（`git status --short` 应为空）。
-- 进游戏验收（服务端逻辑都已验过，剩下“看得见/摸得着”的）：
-  - **M4 坩埚**：1 块圆石只占 12.5%、8 块满 2000、第 9 块被拒；沙子/尘土 100、花岗岩 250；
-    桶/瓶抽流体；熔料↔流体显示切换；Jade 熔料剩余 + 热源速度；三个配置键热改；JEI 两页。
-  - **M6 人偶**：5 种配方（含镜像摆法）；满桶右键立即出结果（和平掉战利品 / 非和平生成生物）；桶变空。
-  - **M6 木坩埚**：11 种变种的外观与合成；树叶/树苗 → 水的手感（0.5 mB/t）；熔岩被拒的提示。
-  - **M6 蚕**：右键树叶 → 侵染；变白进度；Jade 百分比；扩散；破坏掉线；创造模式不掉落。
-  - **M6 瓷桶**：未烧制 → 烧制；舀水/熔岩/巫水；倒进木桶/坩埚。
-  - **M3**：6 锤/2 钩、左键链、右键无反应、矿砾/矿砂 4–6、锤钩 JEI 35/10、蚕动画。
-  - **M2/M6 筛子**：6 个输入、88 掉落；JEI 筛子页；粉碎方块平铺料层；粉碎下界岩两页（旧产物 + 菌岩孢子）。
-  - **M10 机器**：四台机器右键开 GUI；能量条/火焰条/进度条动；插件槽只收插件、燃料槽只收燃料；
-    筛网/锤在 GUI 里显示耐久；破坏机器掉出全部内容；贴图观感；上下漏斗在游戏里再走一遍。
-  - **M10 自动输出 GUI（第二版）**：左侧标签页的观感/悬停/变绿；配置面板从左边伸出、与面板齐平、
-    不挡机器 GUI；6 个面按钮（上/下/前/后/左/右）与 tooltip 世界方向对得上；绿色边框选中态；
-    关掉最后一个面会自动关总开关；Esc/E 返回；开/关后状态下发与 `data get` 对得上。
-  - **筛料渲染**：新料层不再穿过盘壁、不再和盘边交替闪烁；变薄动画照旧（三种筛料各看一遍）。
-  - **木桶竖棱**：木桶/石桶四条竖棱不再是细条纹；俯视/平视都看一遍。
-  - **机器镐挖掘**：木镐不掉落、石镐及以上正常掉机器（含内容物掉落逻辑不变）。
-- **未验证**：上面这些画面/交互，以及 P1 重构后的客户端实测（服务端已 RCON 验过）、桶/筛旧内容目视。
-- 不要提交 `build/`、`run/`、`reference/`、`libs/`。
+- **工作树**：主线 `/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium`；分支
+  `/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`（`1.20.1-forge` @ `10454db`）。
+  两条线都已推到 `origin`，`git status` 应为空。
+- **先跑**：`./gradlew build` + `python3 scripts/check-textures.py` +
+  `python3 scripts/check-core-imports.py` + `python3 scripts/check-data-paths.py` +
+  `python3 scripts/check-wiki.py`。分支没有后三个脚本，只跑 `build` + 纹理。
+- **datagen 自检**：`./gradlew runData --offline` 后 `git status` 应为空；配方比对用
+  `python3 scripts/compare-recipes.py`，模型比对用 `python3 scripts/compare-models.py`。
+- **dev 环境**：主线 `run/mods` 有 AE2 + GuideME（默认 118 drops）；分支 `libs/` 有
+  Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME，用 `-PtechMods` 启动。删掉即回基表。
+- **已知不一致**：1.20.1 分支筛表少 3 条钴（沙/砂砾/尘土各 1/64），基表 113 vs 主线 116；
+  分支生成器缺失（没有 `generate_sieve_assets.py`），下次要么补脚本要么手工对齐。
+- **进游戏验收（剩余）**：M1.5–M10 的画面/右键手感（机器 GUI/自动输出抽屉/BER/筛料渲染/
+  木桶竖棱/镐挖机器）、TiT 与 AE2 的实际筛出与 JEI 页、匠魂炉实际熔化。
+- 不要提交 `build/`、`run/`、`reference/`、`libs/`、`.gradle/`。
 
 ## 已完成的里程碑
 
@@ -552,204 +186,65 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
 | M1.5 | 水/熔岩凝固、木桶限温 433 K、接雨水、熔岩掺红石/荧石；转化表 JSON 化 | [DESIGN §13/§14](DESIGN.md) |
 | M2 | 筛子 + 三档筛网 + 数据驱动掉落 + JEI；4 碎块 → 矿方块 → 熔炼成锭 | [DESIGN §12](DESIGN.md) |
 | 桶 JEI | `barrel` / `barrel_compost` 两个分类，读同一张 `BarrelRecipes` / `CompostRegistry` | [DESIGN §14](DESIGN.md) |
-| M3 | 6 锤 / 2 钩 / `dust` / 蚕动画 / 熟蚕 / 粘土 / 47 条锤表 / 锤钩 JEI | 🚧 待验收（[DESIGN §15–16、§18](DESIGN.md)） |
+| M3 | 6 锤 / 2 钩 / `dust` / 蚕动画 / 熟蚕 / 粘土 / 55 条基础锤表（全装 79）/ 锤钩 JEI | 🚧 待验收（[DESIGN §15–16、§18](DESIGN.md)） |
 | M4 | 坩埚 + 热源；19 熔点 / 9 热源；容量可配；Creatio 模型；熔料/流体显示；Jade；JEI 两页 | 服务端✅ / 画面🚧（[DESIGN §17](DESIGN.md)） |
 | M6 | 巫水 / 古代孢子 / 瓷桶 / 11 种木坩埚 / 12 种木桶 / 蚕 / 5 种人偶 / 筛出物扩充 | 服务端✅ / 画面🚧（[DESIGN §21–26](DESIGN.md)） |
 | M10 | 电动/内能 × 自动筛/自动锤 + 速度/时运插件 + 自动输出配置；手动与机器共用判定函数 | ✅（GUI/模型/动画作者已验收；自动输出 GUI 待目视）（[DESIGN §27](DESIGN.md)） |
 
 ## 验证状态
 
+> 只保留当前仍有效的证据；2026-11-02 之前的逐项记录见 [history.md](history.md)。
+> **测试绿 ≠ 画面/手感验过**；没进游戏看过的一律标 ⚠️。
+
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| P3 CraftTweaker | ✅ | 两版七张表 ZenScript 入口 + JSON 逃生口；CT、datapack fixture dump 逐字节一致 |
-| P3 CT 生命周期 | ✅ | reload 清旧贡献；无 CT 正常启动（1.20.1 有旧世界 missing pack 警告） |
-| P2 KubeJS 插件 | ✅ | 两版七张表绑定 + JSON 逃生口；KJS、命令 overlay、datapack fixture 三者 dump 逐字节一致 |
-| P2 KJS 生命周期 | ✅ | 2101 用 `beforeScriptsLoaded`、2001 用 `registerBindings` 清旧贡献；无 KJS 正常启动 |
-| P1.5 priority / conflicts | ✅ | p10 先提交仍赢 p5；`add ignored` / `replaced` / `removed` 带旧 source；两版 RCON |
-| P1.5 生命周期 | ✅ | 重复提交去重、空 payload 拒绝、`dump all` 298 行、server stop 清理 3/4 条 |
-| P1 TableBuilder / overlay | ✅ | 2026-11-03：七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致；clear 21 条后回基线 |
-| P1 `/exnihilo dump` | ✅ | 七张表排序行输出（RCON 可读）；头行只有表名 + 行数，便于跨路径 diff |
-| P1 失败隔离 | ✅ | 坏 overlay 只 `[customize]` warning；坏数据包 `[sieve] rebuild failed` 且旧表不变 |
-| P1 core 守卫 | ✅ | `check-core-imports.py` 已纳入 `common/table`，`0 known leak(s)` |
-| P1 1.20.1 移植 | ✅ | 2026-11-03：分支 build + 纹理守卫；七张表 add/replace、`/reload` 一致、clear 回基线 |
-| `./gradlew build` | ✅ | 2026-11-02：`BUILD SUCCESSFUL`（`--offline`）；JEI 依赖走 `maven.blamejared.com` |
-| `python3 scripts/check-core-imports.py` | ✅ | core 层无 NeoForge import；`0 known leak(s)` |
-| `python3 scripts/check-textures.py` | ✅ | 方块/物品 16×16、蚕动画 16×64 + mcmeta、坩埚贴图存在；无 `minecraft:item/*` 引用 |
-| 数据表 JSON | ✅ | 50 hammer / 10 crook / 19 melt / 9 heat / 5 barrel / 67 compost / 6 sieve；全部可解析 |
-| 客户端启动（最后一次） | ✅ | 2026-10-31 00:16：`[hammer] 47`、`[crook] 10`、`[crucible] 6`、`[jei] 47/6/5/3/10`；无 missing model/texture |
-| 客户端启动（当前代码） | ✅ | 2026-10-31 09:26 客户端日志：`[jei] 35 hammer` / `19 meltables, 9 heat sources` / `5 barrel, 65 compost` / `4 sieve` / `10 crook`；`[sieve] 4 inputs, 52 drops`；无 missing model/texture |
-| 桶：堆肥→泥土 | ✅ | 2026-10-29：苹果 +100 / 仙人掌 +100 / 树叶 +125，满 1000 后 `dirt=true` |
-| 桶：流体装填 | ✅ | 2026-10-29：岩浆桶倒入成功；石桶 NBT 读回 `minecraft:lava` / 1000 |
-| 桶：水+熔岩 / 熔岩+水 | ✅ | RCON：圆石 / 黑曜石两条 Solid 反应通过 |
-| 桶：接雨水 | ✅ | `/weather rain` 12 秒积水 80 mB |
-| 桶：木桶拒热 | ⚠️ | `tank.fill` 按 433 K 拒绝；消息/手感未实测 |
-| 桶：红石/荧石掺料 | ⚠️ | 已进 `barrel/*.json`；未玩家实测 |
-| 桶：流动水 → 黑曜石 | ✅ | RCON：满熔岩桶，上方放水源、桶顶格是 `water[level=8]` 流动水，1.5 秒后 `Solid=obsidian`（`FlowingFluid#getSource()` 归一化） |
-| 桶：水+尘土→粘土 | ⚠️ | JSON 已写；未实测 |
-| 桶：水+牛奶→史莱姆/粘液球 | ✅ | RCON 2026-11-02：满水 + 牛奶桶 → 桶清空、空桶返还；Normal 生成史莱姆、Peaceful 掉 `slime_ball` |
-| 巫水：满水 + 菌丝发酵 | ✅ | RCON：满水木桶 + 2 菌丝，约 25 秒变 `exnihilosatellitium:witch_water`，`Spore` 归零 |
-| 巫水：蘑菇煲起酵 | ✅ | RCON：只写 `Spore:1` 无菌丝，约 50 秒后变巫水 |
-| 巫水：流体方块 | ✅ | RCON `setblock ... exnihilosatellitium:witch_water` 成功并可被 `execute if block` 命中 |
-| 巫水：桶装/倒 | ⚠️ | `witch_water_bucket` 已注册；未玩家实测 |
-| 巫水：两条转化 | ⚠️ | JSON 已加载（`[barrel] 7 transforms`）；未玩家实测 |
-| 古代孢子：沙筛 | ⚠️ | `sieve/sand.json` 1/128；未实测 |
-| 古代孢子：泥土→菌丝 / 牛→哞菇 | ⚠️ | 逻辑已写；未实测 |
-| 巫水：画面/桶纹理 | ⚠️ | 流体用原版 water_still/flow + 紫色 tint；桶图标由原版水桶重着色；未进游戏目视 |
-| 木坩埚：被动熔化 | ✅ | RCON：放树叶 10 秒 100 → 1.0 固体 / 99 mB 水（≈0.5 mB/t）；底下加篝火速率不变 |
-| 木坩埚：11 种木材变种 | ✅ | RCON：11 个变种 `setblock` 后 `execute if block` 全部命中；生成脚本 `scripts/generate_wooden_crucible_variants.py` |
-| 木坩埚：水类限定 | ⚠️ | `canAccept` 拒非水熔料、`fill` 拒 >433 K；未用熔岩桶实测 |
-| 瓷桶：物品/组件 | ✅ | RCON：`summon item` 带 `fluid_contents` 可读回熔岩 1000 / 巫水 1000 |
-| 瓷桶：画面/舀水/倒液体 | ⚠️ | 模型 predicate、tint、右键舀水、倒进木桶/坩埚均未玩家实测 |
-| 瓷桶：合成/烧制 | ⚠️ | 3 瓷土（`x x` / ` x `）→ 未烧制瓷桶 → 烧制；未实测 |
-| 桶 JEI | ✅ | 转化 1/2 页、堆肥 1/22 页已目视；[截图](images/jei-barrel-transform.png) |
-| 筛子（1.21.1） | ✅ | 作者已实际筛出产物；2026-10-31 服务端日志 `[sieve] loaded 4 inputs, 52 drops`（泥土/沙两档新增未实测） |
-| 筛子 JEI | ✅ | 7×3 + 166×60 已目视；[截图](images/jei-sieve.png)（还是 3 输入时的样子） |
-| 筛子：泥土 → 种子/作物 | ⚠️ | `sieve/dirt.json` 6 条（小麦 15% / 甜菜·土豆·胡萝卜 6% / 西瓜·南瓜 5%）；服务端已加载，未实测 |
-| 筛子：沙 → 仙人掌/甘蔗 | ⚠️ | `sieve/sand.json` 补 2 条（1/32、1/24）；未实测 |
-| 筛子：M6 新资源 | ✅ | 服务端 `[sieve] 6 inputs, 72 drops`、`[hammer] 49 recipes`；粉碎下界岩/末地石可放置并掉自己 |
-| 蚕：侵染树叶 / 扩散 | ✅ | RCON：进度 0.65 → 0.849（20 秒，0.0005/tick 对得上）；20 秒内 4/8 邻近树叶变侵染 |
-| 蚕：右键转化 / 掉线 | ⚠️ | 逻辑已写；需玩家右键树叶实测、破坏看掉落 |
-| 蚕：渲染 / 变白 | ⚠️ | BER 画回原树叶 + 白色遮罩（alpha 随进度）+ 白灰粒子；未目视 |
-| 人偶：烹饪生成 | ✅ | RCON：写入 `CookEntity` 后非和平模式刷出烈焰人；和平模式掉烈焰棒 |
-| 人偶：配方 / 桶规则 | ⚠️ | 8 条配方 + 4 条桶规则已加载（`[barrel] 11 transforms`）；未玩家实测 |
-| 人偶：潜影贝 / 守卫者 | ✅ | RCON：Normal 难度刷出潜影贝/守卫者；和平掉落列表随机取一个（实测海晶砂粒/海晶碎片各一次） |
-| 人偶：右键链路 | ✅ | 用 FakePlayer 走真实 `use()`：满水桶 + 守卫者人偶 → `use=SUCCESS`、`CookTicks=600`、`CookEntity=guardian`；30 秒后和平模式掉海晶碎片 |
-| 人偶：即时转换 | ⚠️ | 现在任何难度都是右键立即生效（和平掉落 / 非和平生成）；`cook_ticks`/Jade 倒计时只给旧存档兜底，未再实测 |
-| 蚕：Jade | ⚠️ | 显示 `原树叶：…` + `侵染：xx%`（成熟后显示「已成熟」）；未目视 |
-| 粉碎下界岩/末地石：外观/筛 | ⚠️ | 方块已注册；未进游戏看贴图、未实际筛 |
-| 草种子 | ⚠️ | `grass_seeds` 右键泥土 → 草方块；未实测 |
-| 矿物链 | ⚠️ | 4 块→方块→熔炼已 RCON 通过；锤降档未玩家实测；9 锭未目视 |
-| M3 锤/钩玩法 | ⚠️ | 左键链路/耐久/右键无反应/4–6 掉落未实测 |
-| M3 贴图 | ✅ | 9 张 Creatio 采用 + 1 张换色 + 蚕 4 帧动画；[预览](images/m3-textures.png) |
-| M3 收尾 | ⚠️ | 粘土/砂岩/熟蚕 JSON 已写，未实测 |
-| M4 坩埚方块 | ⚠️ | 两个方块 + BE + 流体 capability + 比较器；仅右键投放/抽流体未实测 |
-| M4 熔点/热源表 | ✅ | 19 + 9 条 JSON；服务端启动日志 `[crucible] loaded 19 meltables` / `9 heat sources` |
-| M4 熔化速率 | ✅ | RCON 实测：篝火 0.25、点燃熔炉 0.15、熄灭熔炉 0（`lit=false` 不熔）；240 tick 内实测值与 `speed × tick` 差 ≤1 mB |
-| M4 容量钳制 | ✅ | RCON：熔料 250 + 流体 7900 → 熔到 150/8000 停住；流体 8000 时熔料不动 |
-| M4 比较器 | ✅ | RCON：7604/8000 → 信号 14，红石灯亮；100/8000 → 信号 0，灯灭 |
-| M4 熔料/流体显示 | ⚠️ | 固体 > 流体显示熔料方块，反之流体；未目视 |
-| M4 Jade | ⚠️ | 熔料剩余 + 热源速度；未目视 |
-| M4 配置 | ✅ | 热改已验：`capacity` 8000→3000 下一秒内把 8000 mB 压到 3000；`heatSpeedMultiplier` 2.0 → 实测 0.5 mB/t |
-| M4 JEI | ⚠️ | 坩埚/热源两页；未目视 |
-| 瓷土/坩埚配方 | ⚠️ | 瓷土、未烧制坩埚、烧制；未实测 |
-| 锤/钩 JEI | ⚠️ | 35 / 10 条 + catalyst；未目视 |
-| M10 内能筛 | ✅ | RCON：120 tick 后输入 64→63、筛网 damage 1、`BurnHalfTicks` 3200→2600、产出燧石 |
-| M10 电动筛 | ✅ | RCON（旧 4 秒档）：`Energy:20000`，101 tick 后 17980（20/tick 对得上）、输入 63、产出铝碎块/海晶结晶；5 秒/48000 档待重测 |
-| M10 电动锤 + 速度 III + 时运 III | ✅ | RCON：5 秒 5 次（20 tick/次）、输入 64→59、锤 damage 5、20 砂砾（1×4 roll×5） |
-| M10 内能锤 | ✅ | RCON：80 tick 一次、输入 63、锤 damage 1、`BurnHalfTicks` 2700、1 砂砾 |
-| M10 管道 | ✅ | RCON：下方漏斗只抽到砂砾，锤/插件仍在；上方漏斗把圆石补进输入槽 |
-| M10 内能筛（存档实证） | ✅ | 2026-11-01 存档 `新的世界`：`(198,72,-489)` 丝筛网 damage 12、粉碎末地石 52、煤 62，
-  产出末地石×5 / 紫颂果×1 / 末影珍珠×2，`BurnHalfTicks` 1470——机器实际已处理 12 次 |
-| M10 GUI / 仪表 / JEI | ✅ | 作者已进游戏确认：虚影/状态行/三块仪表/点箭头开 JEI/时运槽规则 |
-| M10 模型 / 贴图 | ✅ | 作者确认：筛子薄托盘 + 锤子四柱压锤，32×32 贴图；预览图见 `docs/images/m10-*.png` |
-| M10 工作动画 / 粒子 | ✅ | 作者确认：锤头下压铁砧、筛料薄层变薄、电动蓝火花/内能火焰烟 |
-| M10 5 秒 / 48k / 叠加 | ✅ | RCON：无升级 124 tick → 1 次 + Work24、20 FE/t；2 个速度 III（同槽 count2）→ 7 次 + Work12（16 tick/件）、25 FE/t |
-| M10 配方 | ⚠️ | 四台机器 + 6 个插件配方已注册，未实际合成 |
-| M10 电动筛配方 | ⚠️ | 2026-11-01 按作者要求换成 `IRI / RBR / ISI`（铁锭角 + 红石 ×3 + **铁块** + 筛子底），替换原来 `IRI / RSI / IRI`；服务端 1423 条配方加载无报错，JEI 未目视 |
-| supported mods（Mek 在场） | ✅ | 服务端加 Mekanism 10.7.19.85：日志 `tin/lead/osmium/uranium smelts into mekanism:ingot_*`；`summon` 自有 `tin_ingot` 得到 Air（未注册），`mekanism:ingot_tin` 正常；1423 → 3001 条配方（Mek 自带 + 我们的 12 条变体） |
-| supported mods（Mek 不在） | ✅ | 无 Mek：1423 条配方照旧；熔炉烧 `tin_ore_gravel` 产出 `exnihilosatellitium:tin_ingot`（fallback 条件生效） |
-| supported mods（Mek 在场熔炼） | ✅ | 有 Mek：熔炉烧同一块 `tin_ore_gravel` 产出 `mekanism:ingot_tin` |
-| 矿物链（Mek 氟石，1.21.1） | ✅ | 有 Mek：日志 `fluorite smelts into mekanism:fluorite_gem`；RCON 熔炉 `fluorite_ore_gravel → mekanism:fluorite_gem`；自有 `exnihilosatellitium:fluorite` 未注册（按设计不造） |
-| 矿物链（无科技模组，1.21.1） | ✅ | 无 Mek/Thermal：13 entries、筛 93 / 锤 52；`ruby_broken` unknown；无缺失物品/掉落表报错 |
-| 矿物链（只装 Mek，1.21.1） | ✅ | 14 entries、筛 96 / 锤 55；氟石注册，Thermal 六种仍不注册；无缺失物品/掉落表报错 |
-| 矿物链（Thermal 六种，1.20.1） | ✅ | Thermal Foundation 11.0.6 + CoFH Core：RCON 把 apatite/cinnabar/niter/sulfur/ruby/sapphire 的矿砾分别熔成 `thermal:*`，6/6 通过 |
-| 矿物链（三档数据，两版） | ✅ | 全装：main 筛 114 / 锤 73；1.20.1 筛 113 / 锤 73。无科技模组：main 93/52、1.20.1 90/52；只装 Mek：main 96/55 |
-| AE2 赛特斯石英（1.21.1） | ✅ | AE2 19.2.18 + GuideME 21.1.22：筛 **118** drops（基表 116 + 2）；RCON `/exnihilo sieve minecraft:sand` 两条都在（dust 0.08333 / crystal 0.16667），无 unknown item |
-| AE2 缺省降级（1.21.1） | ✅ | 不装 AE2：筛 116 drops；`sand_ae2.json` 被 `mod` 门整文件跳过，无 unknown item |
-| AE2 赛特斯石英（1.20.1） | ✅ | AE2 15.4.12 + GuideME 20.1.15（`-PtechMods` 全装）：筛 **144** drops（基表 142 + 2），RCON sand 含两条 AE2；不装 AE2 时 142、无 unknown |
-| AE2 画面/手感 | ⚠️ | 手筛 / 机器筛实际出货、JEI 筛子页未目视 |
-| supported mods（JEI/客户端） | ⚠️ | 服务端已验；JEI 里的熔炼页与创造栏未在客户端目视 |
-| M10 自动输出（下推） | ✅ | RCON 2026-11-01：`AutoOutput=1/OutputMask=1` + 下方箱子，一件后箱子拿到 `iron_crushed`、输出格清空 |
-| M10 自动输出（关闭） | ✅ | RCON：`AutoOutput=0` 后产物留在槽 6..10，下方箱子不再增长 |
-| M10 自动输出（换面） | ✅ | RCON：`OutputMask=2`（只推上）→ 缓冲 5 件 + 新 1 件全进上方箱子，下方不变 |
-| M10 自动输出（20 tick 重试） | ✅ | RCON：无邻居时 3 燧石留槽；放箱子后**无新操作**，20 tick 内推进箱子 |
-| M10 自动输出（内能筛） | ✅ | RCON：`fuel_sieve` 同配置 4 次产出 3 件进下方箱子（1 次 roll 空手） |
-| M10 自动输出 GUI | ⚠️ | 首版（内嵌按钮 + 东南西北）作者反馈：面按钮方向不直观、入口位置不对；已改为左侧标签页 + 左侧抽屉 + 相对方向，**待目视** |
-| 筛料渲染溢出 | ⚠️ | 作者截图确认料层与盘壁交替渲染；已改为 0.6 宽 + 抬到 10.5 px，**待目视** |
-| 木桶/石桶竖棱 | ⚠️ | 作者反馈棱上渲染怪；已去掉 4 个 1×15 端面的 `rotation:90`（离线渲染对比确认条纹消失），**待目视** |
-| 机器镐挖掘 | ⚠️ | 已加 `mineable/pickaxe` + `needs_stone_tool`（石镐及以上掉方块），**待游戏内挖一次确认** |
-| 1.20.1 M2 build | ✅ | `1.20.1-forge` @ `9b92322`：`./gradlew build`（Temurin 17）通过 |
-| 1.20.1 M2 筛子结构 | ✅ | RCON：`setblock ... sieve`、`[mesh=0/3]` 命中、`data merge` 的 `Mesh`/`Contents` 读回 |
-| 1.20.1 M2 数据 | ✅ | `[sieve] loaded 3 inputs, 48 drops`；`[compost] loaded 65`；83 个 recipe JSON |
-| 1.20.1 M2 锭物品 | ✅ | RCON `summon item ... tin_ingot` → `Tin Ingot`（9 种自有锭） |
-| 1.20.1 M2 右键筛料 | ⚠️ | 需要玩家右键（客户端已启动）；未由 agent 实测 |
-| 1.20.1 M3 表加载 | ✅ | `[hammer] 47`、`[crook] 10`、`[sieve] 4 inputs 62 drops` |
-| 1.20.1 M3 物品 | ✅ | RCON summon 锤/钩/尘土均成功，`dust` 方块可放置 |
-| 1.20.1 M3 手感 | ⚠️ | 锤左键链路/耐久、骨钩 ×1.5 待玩家 |
-| 1.20.1 M4 坩埚 | ✅ | 表加载 39/9；RCON 篝火 0.25、熄灭停、火把 0.1；JEI 两页注册 |
-| 1.20.1 M4 交互 | ⚠️ | 右键投料/取流体、Jade 画面待玩家 |
-| P2 数据守卫 | ✅ | `python3 scripts/check-data-paths.py` → `passed for 1.21.1 (200 recipes, 72 loot tables, 44 tags)`；Tinkers 流体 result 已豁免 item 键检查 |
-| P2 生成器幂等 | ✅ | 1.21.1 四个生成器写入仓库副本后 `diff -r` 与仓库逐字节一致（含 lang/筛表） |
-| P2 移植数据 | ✅ | `port_data.py`：145 recipe / 69 loot / 41 tag / 125 其他；`check-data-paths --target 1.20.1` 通过 |
-| P2 生成器 1.20.1 | ✅ | `--target 1.20.1 --out`：107 recipe / 60 loot / 39 tag 通过守卫；与 port 产物 240 文件逐字节一致 |
-| P2 1.20.1 分支 | ⚠️ | 分支本身还没铺数据、没补 M2 |
-| M7 datagen 第二批（配方） | ✅ | 2026-11-02：`ModRecipes` 生成 133 条；`compare-recipes.py` → `145 old, 133 generated, 12 old-only (0 unexpected), 0 new-only, 0 different` |
-| M7 datagen 幂等 | ✅ | 删掉 133 条手写配方后再跑 `runData`：`HashCache ... written: 0`，没有旧文件复活 |
-| M7 datagen 第二批（服务端） | ✅ | `runServer`：`Loaded 1423 recipes`（与迁移前同）、`[debug] our recipes=133`、无 recipe 解析错误 |
-| M7 配方语义 | ✅ | 生成物只多出 codec 默认字段（`count:1` / `category:"misc"`）；没有 advancement 文件 |
-| M7 datagen 移植链路 | ✅ | `port_data.py` 现在合并 main + generated：145 recipe / 69 loot / 41 tag / 126 other，`check-data-paths --target 1.20.1` 通过（只读 main 的旧默认会漏 133 配方） |
-| M7 datagen 第三批（模型） | ✅ | 2026-11-02：`ModBlockStates` 71 blockstate + 29 模型、`ModItemModels` 144 物品模型；`compare-models.py` → `259 old, 244 generated, 244 identical` |
-| M7 datagen 第三批（守卫） | ✅ | `check-textures.py` 现在同时扫 main+generated，并检查 blockstate→模型、parent 引用；故意写坏会报错 |
-| M7 datagen 第三批（客户端） | ✅ | `runClient` 启动完成、纹理图集生成，日志无 `missing model` / `unable to load model` / missing texture |
-| M7 datagen 第三批（生成器） | ✅ | 三个 Python 生成器原地重跑 `git status` 无资产 diff；不再写 blockstates/models |
-| M7 datagen 第三批（画面） | ⚠️ | 桶/坩埚/筛子/机器/矿块的观感未目视（客户端已启动待看） |
-| 科技模组锭（主 1.21.1 + Mek） | ✅ | 熔炉烧 `tin_ore_gravel` → `mekanism:ingot_tin`；自有 `tin_ingot` 未注册；`[materials]` 日志 4 条 |
-| 科技模组锭（主，兜底） | ✅ | 无 Create：烧 `zinc_ore_gravel` → `exnihilosatellitium:zinc_ingot` |
-| 科技模组锭（1.20.1 分支） | ✅ | 无模组：0 条解析错误、42 条变体跳过、`tin_ore_gravel → tin_ingot`；`conditions` 键生效 |
-| 科技模组锭（Thermal/Create） | ✅ | 1.20.1 分支真装 Thermal Foundation 11.0.6.70 + Create 6.0.8：`tin/silver/lead/nickel → thermal:*_ingot`、`zinc → create:zinc_ingot`，RCON 熔炉实测通过，自有锭未注册 |
-| IE 锭候选（1.20.1，仅 IE） | ✅ | 1.20.1 分支装 IE 10.2.0-183：`[materials]` 的 silver/lead/nickel/aluminum/uranium 全部 → `immersiveengineering:ingot_*` |
-| IE 熔炼 RCON | ✅ | IE-only 分支：熔炉烧 `aluminum_ore_gravel` → `ingot_aluminum`，烧 `silver_ore_sand` → `ingot_silver` |
-| IE 优先级（Thermal+Create+IE） | ✅ | `[materials]`：tin/silver/lead/nickel → Thermal、zinc → Create、aluminum/uranium → IE；0 条 `Unknown item` |
-| IE 粉碎机（标签） | ⚠️ | 20 种矿块在 `forge:ores/<m>` 里，IE 的 crusher 输入也用该标签；多方块本身未跑 |
-| IE 主 1.21.1 回退 | ✅ | 主线无 IE：`Loaded 1427 recipes`；熔炉烧 `aluminum_ore_gravel` → 自有 `aluminum_ingot`；IE 变体不加载 |
-| 匠魂种子（条件物品） | ✅ | 只装 Tinkers：`summon` 两个种子物品成功；不装：`[sieve] 90` vs 92，无 unknown item |
-| 匠魂钴 | ✅ | 只装 Tinkers：`[materials] cobalt → tconstruct:cobalt_ingot`；RCON 熔炉 `cobalt_ore_gravel → tconstruct:cobalt_ingot` |
-| 匠魂熔炼配方 | ⚠️ | 84 条 `tconstruct:melting` 按 Tinkers 自己的格式生成，加载无报错；匠魂炉实际熔化未跑 |
-| 工匠巧思：阿迪特矿链 | ✅ | 碎下界岩 1% → `ardite_broken`（砂砾/沙子/尘土不出）；1.20.1 全装 `[materials] 22 entries`、`ardite → tinkers_thinking:ardite_ingot`、`7 inputs / 139 drops`（+AE2 141）、`hammer 79`；RCON 熔炉 `ardite_ore_gravel → tinkers_thinking:ardite_ingot`；无 TiT 时烧成自有 `ardite_ingot`；手筛未测 |
-| 工匠巧思：叶绿素矿链 | ✅ | `gems` 材料（仅 TiT 在场注册）；草方块 1% → `chlorophyll_broken`（只此一处）；RCON 熔炉 `chlorophyll_ore_gravel → tinkers_thinking:chlorophyte_compound`；无 TiT 时整条（含草方块表那一条）静默跳过、`7 inputs / 116 drops`（+AE2 118） |
-| 下界合金碎片 | ✅ | 碎下界岩 0.4%，双线都加；`[sieve] 90`（无匠魂）/ 92（有匠魂） |
-| 匠魂草种子右键 | ⚠️ | `TinkersGrassSeedItem` 右键草方块或泥土 → `*_vanilla_slime_grass`；需要玩家右键实测 |
-| 钴碎块贴图 | ✅ | broken 用下界岩红棕基底，其余钴形态蓝色；`check-textures` 通过 |
-| 配方条件键守卫 | ✅ | `check-data-paths.py` 对 1.20.1 的 `forge:conditions` 报错（负向测试） |
-| 泥土筛石子（数量） | ✅ | 分支机器筛：7 次 → 圆石 34 / 安山岩 38 / 花岗岩 32 / 闪长岩 34（每种每次 4-6，100%） |
-| 泥土筛树苗 | ✅ | 主线/分支 `[sieve] 6 inputs, 88 drops`；1.20.1 机器筛 8 次 → 橡木/金合欢树苗各 1（旧 5 种，≈22%） |
-| 泥土筛新树苗（樱花/红树/杜鹃） | ✅ | 四条新表加载无警告；9 种合计 31%/次；数值待作者试玩 |
-| 泥土筛竹子 | ✅ | 泥土加 `minecraft:bamboo` 5%；服务端 88 drops 加载无警告；竹子堆肥/竹桶/竹坩埚已有，只补来源 |
-| 下界菌岩孢子（数据/物品） | ✅ | 主线 `runServer`：`[sieve] 6 inputs, 88 drops`、`[compost] 67 entries`；1.20.1 分支同样 88 / 67；两边 RCON `summon` 两个孢子物品名字正常 |
-| 下界菌岩孢子（右键/骨粉） | ⚠️ | `NyliumSporesItem` 右键下界岩 → 菌岩；骨粉催菌/催巨菌沿用原版；未进游戏右键 |
-| 孢子贴图/模型 | ✅ | 2 张 16×16 自有像素（`art/items/sieve_extras/generate.py`）；datagen 生成 item model；`check-textures` 通过 |
-| 泥土筛石子（贴图/模型） | ✅ | 4 张 16×16 贴图 + 模型（主线 datagen 自动、分支手写）；`check-textures` 通过 |
-| 矿块接 Create 粉碎 | ✅ | 分支装 Create 6.0.8：12 条 `create:crushing`（铁/金/铜/锌 ×3）0 解析错误；粉碎轮实际输出待目视 |
-| 矿块接 Thermal 磨粉机 | ✅ | 全部走 `forge:ores/<m>` 标签（Thermal 自己的配方），无需我们补 |
-| 筛表 min/max 兼容 | ✅ | 老表不写 `min`/`max` 仍按 1 件；`[sieve] 6 inputs, 76 drops`，无警告 |
-| P1 core 守卫 | ✅ | `python3 scripts/check-core-imports.py` → `core purity check passed (0 known leak(s))` |
-| P1 服务端启动 | ✅ | 2026-11-01 `runServer`：`[materials] loaded 12 entries`，`our recipes=133`，无 ERROR |
-| P1 ConfigValues | ✅ | RCON：电动筛 217 tick，`Energy` 20000→15660（正好 20 FE/t） |
-| P1 MachineHooks（自动输出） | ✅ | RCON：`AutoOutput=1/OutputMask=1` + 下方箱子，产物 1 秒内进箱子 |
-| P1 MachineItemHandler（漏斗） | ✅ | RCON：下方漏斗只抽走 3 燧石，铁筛网/沙/输入仍留在机器 |
-| P1 客户端 | ⚠️ | 只编译与跑服务端；画面未进游戏看（P1 不改渲染） |
-| P0/P1 修复 | ⚠️ | 破坏返还、管道灌桶、F3+T 分离、红石/荧石未玩家实测 |
-| 旧内容目视 | ⚠️ | 桶/筛比例、Jade tooltip 等仍待作者确认；桶的两道外凸箍已按反馈删除（2026-10-31） |
+| 三路径 P1–P3 | ✅ | TableBuilder/overlay、KubeJS 2101+2001、CraftTweaker 21+14；两版七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致 |
+| P1 生命周期/失败隔离 | ✅ | 重复提交去重、空 payload 拒绝、server stop 清 overlay；坏 overlay 只 warning、坏数据包保留旧快照 |
+| P1 core 守卫 | ✅ | `check-core-imports.py` → `0 known leak(s)`，`common/table` 已纳入扫描 |
+| `./gradlew build` | ✅ | 2026-11-03 提交后两版 `BUILD SUCCESSFUL`（`--offline --no-daemon`） |
+| `check-textures.py` | ✅ | 主线 264 模型 / 102 blockstate / 153 纹理；分支 266 / 102 / 149；无 `minecraft:item/*` |
+| `check-data-paths.py` | ✅ | 1.21.1：258 recipes / 75 loot / 63 tags；1.20.1 分支未见报错 |
+| `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 68 JSON / 7 nav |
+| 数据表 JSON | ✅ | 7 输入筛表 116（基表）、55 锤、10 钩、12 桶、67 堆肥、39 熔点 / 9 热源；全部可解析 |
+| 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
+| 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
+| 巫水 / 古代孢子 | ✅ | 满水+菌丝约 25 秒变巫水；蘑菇煲起酵；流体方块可放置；沙筛 1/128 |
+| 坩埚：熔点/热源/容量 | ✅ | RCON：19+9 条加载；篝火 0.25 / 熔炉 0.15 / 熄灭 0；容量 8000→3000 热改生效 |
+| 坩埚：显示 / Jade / JEI | ⚠️ | 熔料↔流体切换、Jade 剩余、两页 JEI 未目视 |
+| 筛子：基础表 | ✅ | 2026-11-04 审计：`[sieve] 7 inputs, 116 drops`（无科技模组），含树苗 9 种、竹子、海晶、菌岩孢子、下界合金碎片 |
+| 筛子：矿物/联动 | ✅ | Mek+Thermal 137；1.20.1 +TiT 139；+AE2 141；RCON 概率与 JSON 一致，无 unknown item |
+| 筛子：草方块 / 泥土 | ✅ | 草方块 = 泥土 24 条 + 叶绿素碎矿 1%；四种石子 4-6 个 100% 出 |
+| 筛子：手筛 / 机器 / JEI | ⚠️ | 实际出货手感、JEI 筛子页未目视（尤其 TiT/AE2 条目） |
+| 锤 / 钩 | ⚠️ | 6 锤 / 2 钩、左键唯一路径、耐久与 4–6 掉落逻辑就位；手感与 JEI 未验 |
+| 矿物链 | ✅ | 4 碎块→矿块→熔炼 RCON 通过；14 金属 + 8 矿物按候选解析；`gems` 缺模组整条不注册 |
+| 蚕 / 侵染树叶 | ⚠️ | 进度/扩散 RCON 验过；右键、变白渲染、破坏掉线未目视 |
+| 瓷桶 / 木坩埚 / 人偶 | ⚠️ | 组件/熔化/生成 RCON 验过；舀水/倒液体/11 变种外观未目视 |
+| M10 机器 | ✅ | 电动/内能 × 筛/锤、插件、管道、自动输出（下推/关闭/换面/20 tick 重试）RCON 全过 |
+| M10 GUI / 自动输出面板 | ⚠️ | 机器 GUI/仪表作者已验收；自动输出左侧抽屉与面按钮待目视 |
+| supported mods：Mek | ✅ | 1.21.1 + 1.20.1：`tin/lead/osmium/uranium` 熔成 `mekanism:ingot_*`；氟石矿砾 → `mekanism:fluorite_gem` |
+| supported mods：Thermal | ✅ | 1.20.1：磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石 6/6 熔成 `thermal:*` |
+| supported mods：Create / IE | ✅ | Create 锌锭 + 12 条 crushing；IE 五锭候选与 `forge:ores` 标签；多方块未跑 |
+| supported mods：Tinkers / TiT | ✅ | 钴 → `tconstruct:cobalt_ingot`；阿迪特/叶绿素 22 entries、RCON 熔炉两条都通过 |
+| supported mods：AE2 | ✅ | 1.21.1 116→118 / 1.20.1 139→141；RCON sand 两条；缺 AE2 静默跳过、无 unknown |
+| 客户端画面 | ⚠️ | 最近一次客户端验收停在 2026-10-31；TiT/AE2 物品与 JEI 页未进游戏看过 |
+| 旧内容目视 | ⚠️ | 桶/筛比例、木桶竖棱、筛料层、Jade tooltip 等仍待作者确认 |
 
 ## 下一步（按价值排序）
 
-> 自定义三路径：**P1 + P1.5 + P2（KJS）+ P3（CraftTweaker）两版都已完成**；
+> 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 
-1. **1.20.1 一次性验收 M1.5–M10**：服务端逻辑都已 RCON 验过，剩下机器 GUI/自动输出抽屉/
-   BER 动画、M6 美术与右键手感。Thermal / Create / IE 的锭与粉碎接入已真装验过（见当前批次），
-   剩下的是机器多方块与画面。
-2. **补 M4 / M6 / M10 的画面与右键验收**（含自动输出配置 GUI、筛料渲染、木桶竖棱、镐挖机器）：
-   清单见交接清单。
-3. **P3 状态机拆分**（P2 之后才有意义：`BarrelState` 等纯类 + 第一批 JUnit）。
-4. **M7 余项**：只剩语言文件（建议保持手写 JSON，见 [datagen.md](datagen.md) §4.6）；
-   标签/掉落/配方/模型四批都已完成。config 与 JEI 已齐。
-5. **工程收尾**：advancement 树、mod 图标、CI、零测试（tech-debt P3 #37）。
-6. **M8 月光魔法联动** / **M9 发布**。
-7. **更多 supported mods**：IE + Tinkers 钴已接（1.20.1）；**TiT 的阿迪特 / 叶绿素矿**
-   与 **AE2 的赛特斯石英**已接（数据双线；AE2 两版真装验过）。下一步可以看 AE2 的充能赛特斯 /
-   天石粉（若所有者要）、TiT 的其它矿（锆 / 锆石之类）、IE 1.21.1 / 其它科技模组，按
-   [data-format.md](data-format.md) §8 的规则加候选 + 手写变体即可（只接基础资源，不接合金）。
+1. **0.2.0 发布收尾**：版本号/日期确认、tag（`v0.2.0` / `v0.2.0-1.20.1`）、
+   CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
+2. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
+   木桶竖棱、镐挖机器；清单见「交接清单」。
+3. **P4 客户端 JEI 同步 + fixture CI**：专用服客户端 JEI 目前只读本地镜像/数据包。
+4. **P3 状态机拆分**：`BarrelState` 等纯类 + 第一批 JUnit（P2 之后才有意义）。
+5. **工程收尾**：advancement 树、CI、零测试（tech-debt P3 #37）；M8 月光魔法联动占位。
+6. **更多 supported mods**：AE2 充能赛特斯 / 天石粉（若所有者要）、TiT 其它矿（锆/锆石）、
+   IE 1.21.1、其它科技模组；按 [data-format.md](data-format.md) §8 加候选/补丁（只接基础资源）。
+7. **修 1.20.1 分支筛表钴差异**：沙/砂砾/尘土各缺 1 条 1/64（基表 113 vs 116），
+   决定是补生成器还是手工对齐。
 
 ## 已拍板的决策
 
@@ -874,7 +369,14 @@ M8 月光魔法联动仍未开始。三路径 P1 基座 + P2 KubeJS 插件已完
   比较器 `facing` 指向**输入**侧，输出在反方向。
 - **不要用 `data merge` 往 `FluidTank` 写 `{id:"minecraft:air",amount:0}`**：日志会刷
   `Tried to load invalid fluid`（测试副作用，不影响存档）；清空直接不写 `Fluid` 键。
-
+- **AE2 1.20.1 dev 必须 deobf**：生产 jar 直丢 `run/mods` 会在 ForgeGradle dev 里报
+  `@Shadow field f_129762_ was not located`（SRG mixin），服务端起不来；放 `libs/` 由
+  `-PtechMods` 走 `fg.deobf`。1.21.1 NeoForge dev 用官方名，生产 jar 可直接进 `run/mods`。
+- **AE2 是可选依赖**：不写 `mods.toml`；`sieve/sand_ae2.json` 根级 `mod` 门保证缺模组时
+  在查物品之前整文件跳过。发布 jar 不带 AE2 / GuideME。
+- **TiT 阿迪特 / 叶绿素是单源**：`scripts/generate_sieve_assets.py` 的 `SINGLE_SOURCE`
+  把两种材料从砂砾/沙子/尘土（以及 gems 的 patch 文件）排除，只保留碎下界岩 / 草方块入口；
+  重跑生成器不会把旧的多源条目加回来。
 ## 常用命令
 
 ```bash
@@ -894,13 +396,17 @@ python3 scripts/compare-models.py --expect-old-only 'models/block:barrel_base'  
 
 # 推送（SakuraCat 代理；SSH 22 会被代理拒，走 ssh.github.com:443）
 export GIT_SSH_COMMAND='ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes -o ProxyCommand="nc -X connect -x 127.0.0.1:12450 %h %p"'
-git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin main refs/tags/v0.1.0
-git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin 1.20.1-forge refs/tags/v0.1.0-1.20.1
+git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin main
+git -c url."ssh://git@ssh.github.com:443/WanConcubine/Ex-Nihilo-Satellitium.git".insteadOf="git@github.com:WanConcubine/Ex-Nihilo-Satellitium.git" push origin 1.20.1-forge
+
+# 分支（worktree ../Ex-Nihilo-Satellitium-1.20.1）
+./gradlew runServer -PtechMods      # 全装 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME（libs/ 有 jar 才加载）
+./gradlew runClient -PdevMods -PtechMods
 python3 scripts/generate_ore_variants.py             # 矿物链物品贴图 + 锤表 + lang（JSON 归 datagen）
 python3 art/items/tools/restyle.py                   # 锤/钩/蚕/熟蚕/尘土贴图 + 预览
 python3 art/blocks/crucible/restyle.py               # 坩埚模型/贴图（Creatio 现代化）
 python3 scripts/generate_machine_assets.py           # M10 机器方块/插件/GUI 贴图（模型归 datagen）
-./gradlew runServer   # RCON：localhost:25575 / eni
+./gradlew runServer   # RCON：localhost:25575 / eni（AE2/GuideME 在 run/mods 时 118 drops）
 ./gradlew runClient
 ```
 
@@ -941,7 +447,9 @@ src/main/java/com/kaifengcrt/exnihilosatellitium/
 └── compat/
     ├── MoonlightCompat.java
     ├── jade/                          # 可选 HUD：桶/筛/坩埚
-    └── jei/                           # 筛/桶/堆肥/坩埚/锤/钩/机器 分类
+    ├── jei/                           # 筛/桶/堆肥/坩埚/锤/钩/机器 分类
+    ├── kubejs/                        # P2：七张表的 KubeJS 绑定
+    └── crafttweaker/                  # P3：七张表的 ZenScript 入口
 └── datagen/                           # runData：标签、掉落、配方、blockstate+模型
                                        # ModRecipes / ModBlockStates / ModItemModels / WoodTypes
 ```

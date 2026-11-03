@@ -1641,9 +1641,9 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
    两个版本的 JSON 逐字相同（mod id 与物品 id 在 1.20.1 / 1.21.1 一致）。
 4. **数值依据**：水晶 1/6 对齐经典 Ex Nihilo（Omnia 是 5%）；粉取水晶的一半，因为粉还能用
    水晶在 AE2 里加工，1/12 只是给前期「赛特斯种子」一个更快的起点。
-5. **验证**：1.21.1 + AE2 19.2.18（GuideME 21.1.22）：`[sieve] 7 inputs, 121 drops`
-   （基表 119 + 2），`/exnihilo sieve minecraft:sand` 两条都在；不装 AE2 时 119、无 unknown item。
-   1.20.1 + AE2 15.4.12（GuideME 20.1.15，`-PtechMods` 全装）：`147 drops`（基表 145 + 2），
-   不装时 145。手筛的实际手感与 JEI 页面还没进游戏看。
+5. **验证**：1.21.1 + AE2 19.2.18（GuideME 21.1.22）：`[sieve] 7 inputs, 118 drops`
+   （基表 116 + 2），`/exnihilo sieve minecraft:sand` 两条都在；不装 AE2 时 116、无 unknown item。
+   1.20.1 + AE2 15.4.12（GuideME 20.1.15，`-PtechMods` 全装）：`141 drops`（基表 139 + 2），
+   不装时 139。手筛的实际手感与 JEI 页面还没进游戏看。
 6. **1.20.1 dev 坑**：AE2 生产 jar 走 FG dev 时 SRG mixin 找不到 `f_129762_`，必须放 `libs/`
    由 `-PtechMods` 做 `fg.deobf`；1.21.1 的 NeoForge dev 用官方名，生产 jar 可直接进 `run/mods`。
