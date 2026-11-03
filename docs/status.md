@@ -1,6 +1,6 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-01
+> 最后更新：2026-11-03
 > 先看这 20 行，细节再翻 [DESIGN.md](DESIGN.md)、[data-format.md](data-format.md)、[textures.md](textures.md)。
 
 ## 一句话
@@ -17,6 +17,21 @@
 **科技模组锭接入**（2026-11-02）：tin/lead → Mekanism → Thermal，silver/nickel → Thermal，
 zinc → Create，再补 Immersive Engineering（silver/lead/nickel/aluminum/uranium）与
 Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已加载的模组，自有锭只作兜底。
+
+## 当前批次（2026-11-03，末影蛋糕移植）
+
+- **新方块/物品 `exnihilosatellitium:end_cake`**：可放置蛋糕，吃一片**主世界 ↔ 末地**双向传送
+  （主世界 → 末地中央岛；末地 → 玩家床/世界出生点）；下界不传送。放置时 1 片（`bites=6`），
+  末影之眼右键补 1 片，最多 7 片；每次吃 +2 饥饿 / 0.1 饱和度，始终可吃（不要求饥饿值）。
+- **配方/资源**：8 末影珍珠 + 蛋糕；4 张 16×16 贴图（Creatio 原图经 restyle），模型只写 `parent: minecraft:block/cake*`
+  + 覆盖贴图；无掉落表（和 vanilla 蛋糕一致）。资源在主线和 1.20.1 是同一套。
+- **1.20.1 实现差异**：`EndCakeBlock` 用 1.20.1 的 `use(...)`（没有 `useItemOn` /
+  `useWithoutItem`），`stack.shrink(1)` 代替 `ItemStack.consume`，`InteractionResult.sidedSuccess`。
+- **验证**（2026-11-03）：
+  - `./gradlew build` / `compileJava`、`check-textures.py` 通过；
+  - 服务端 `/setblock ... end_cake[bites=6]` 并通过 `execute if block` 检查；
+  - **未验**：进游戏右键吃/传送、末影之眼补片、模型画面；`/setblock` 默认是 `bites=0`，
+    物品放置才是 `bites=6`。
 
 ## 0.2.0 发布准备（2026-11-02）
 
@@ -145,6 +160,9 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
+| P1 TableBuilder / overlay（1.20.1） | ✅ | 2026-11-03：七张表 add/replace；`/reload` 前后 dump 逐字节一致；clear 7 条回基线 |
+| P1 `/exnihilo dump`（1.20.1） | ✅ | 七张表排序行输出；命令与主线同一份代码 |
+| P1 守卫（1.20.1） | ⚠️ | 只跑 build + `check-textures.py`；本分支没有 core/data 守卫脚本 |
 | `./gradlew build` | ✅ | 2026-11-02：`--offline` 下 `BUILD SUCCESSFUL`；直连 TLS 失败时用缓存 |
 | `python3 scripts/check-textures.py` | ✅ | 七个子模型只引用 vanilla **block** 贴图 |
 | 服务端启动 | ✅ | 无 Jade 也能启动；`Done (3.5s)` |

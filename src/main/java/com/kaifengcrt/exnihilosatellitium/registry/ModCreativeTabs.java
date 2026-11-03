@@ -50,6 +50,7 @@ public final class ModCreativeTabs {
                 ModItems.PEBBLES.forEach(pebble -> output.accept(pebble.get()));
                 output.accept(ModItems.CRUSHED_NETHERRACK.get());
                 output.accept(ModItems.CRUSHED_END_STONE.get());
+                output.accept(ModItems.END_CAKE.get());
                 output.accept(ModItems.ANCIENT_SPORES.get());
                 if (ModItems.SKY_SLIME_GRASS_SEEDS != null) {
                     output.accept(ModItems.SKY_SLIME_GRASS_SEEDS.get());
