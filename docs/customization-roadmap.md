@@ -16,11 +16,11 @@
 
 | 能力 | 数据包 | KubeJS | CraftTweaker |
 |---|---|---|---|
-| 筛子 add / remove / replace | ✅ | ✅ 脚本 API（1.21.1；1.20.1 仅 JSON） | ❌ |
-| 锤子 / 钩子 | ✅ | ✅ 脚本 API（1.21.1） | ❌ |
-| 桶转化 | ✅ | ✅ 脚本 API（1.21.1） | ❌ |
-| 堆肥 | ✅ | ✅ 脚本 API + `ServerEvents.tags`（1.21.1） | ❌ |
-| 坩埚熔点 / 热源 | ✅ | ✅ 脚本 API（1.21.1） | ❌ |
+| 筛子 add / remove / replace | ✅ | ✅ 脚本 API（两版） | ❌ |
+| 锤子 / 钩子 | ✅ | ✅ 脚本 API（两版） | ❌ |
+| 桶转化 | ✅ | ✅ 脚本 API（两版） | ❌ |
+| 堆肥 | ✅ | ✅ 脚本 API + `ServerEvents.tags`（两版） | ❌ |
+| 坩埚熔点 / 热源 | ✅ | ✅ 脚本 API（两版） | ❌ |
 | `#tag` 输入 | ✅ | ✅ 脚本与 JSON 都接受 | ❌ |
 | `mod` 条件 | ✅ | ✅ overlay 根级 `mod` 生效 | ❌ |
 | 原版合成 / 熔炼 | 只能加，不能删 | ✅ add / remove | ✅ add / remove |
@@ -28,17 +28,17 @@
 | 新增材料（`materials.json`） | ❌ | ❌ | ❌ |
 | 专用服客户端 JEI 同步 | ❌ | ❌ | ❌ |
 
-**结论：** 数据包是完整路径；1.21.1 的 KubeJS 已有七张表脚本 API
-（`SieveEvents` / `HammerEvents` / …），1.20.1 分支暂时仍只能走 `kubejs/data`；
+**结论：** 数据包和 KubeJS 两版都有七张表脚本 API（`SieveEvents` / `HammerEvents` / …）；
 CT 只覆盖原版配方。wiki 不得把 CT 写成“已支持七张表”。
 
 **P1 更新（2026-11-03）：** 七张表共用 `common/table/TableBuilder`，脚本贡献进
 `CustomizationOverlay`，每次 reload 在 JSON 与补丁之后重放；OP 可以用
 `/exnihilo customize` 验证 add / remove / replace，用 `/exnihilo dump <table>` 对比快照。
 
-**P2 更新（2026-11-03）：** KubeJS 7 插件已接（1.21.1）：`kubejs.plugins.txt` 注册
+**P2 更新（2026-11-03）：** KubeJS 7 插件已接（两版）：`kubejs.plugins.txt` 注册
 `ExNihiloKubeJSPlugin`，server 脚本里直接调用 `SieveEvents.add(...)` 等绑定；
 贡献走同一个 overlay（source `kubejs`，priority 100）；脚本重载前清空旧贡献。
+1.21.1 用 2101 API，1.20.1 用 2001 API，绑定对象相同。
 
 ## 3. 目标矩阵
 
@@ -103,7 +103,7 @@ overlay    ─┘         （KJS/CT 绑定在 P2/P3，payload 仍是同表 JSON�
 - `beforeScriptsLoaded` 在每个 server 脚本批次前清空旧 `kubejs` 贡献；应用由
   tags rebuild / server start 触发。
 - KJS 是 compileOnly：没装时插件类不被加载，jar 里只有 `kubejs.plugins.txt` 这个空钩子。
-- 1.20.1 的 `2001.x` 需要单独适配（KJS 7 API 接近，但 Forge 事件/版本不同），当前分支未移植。
+- 1.20.1 已单独适配 `2001.x`：插件是类、绑定用 `BindingsEvent`；绑定对象与脚本写法不变。
 
 ### 4.4 CraftTweaker
 
@@ -178,9 +178,11 @@ build + 纹理守卫通过（分支没有 core/data 守卫脚本）。
 - 生命周期：server stop 清空 overlay（防单人切世界泄漏）；同一 source 的完全相同操作去重；
   上限 4096 条；空 payload 拒绝；`/exnihilo dump all` 一次看七张表。
 
-### P2 — KubeJS 插件（已完成，2026-11-03，仅 1.21.1）
+### P2 — KubeJS 插件（已完成，2026-11-03，两版）
 
-- `compileOnly` KubeJS `2101.7.2-build.348` + Rhino `2101.2.7-build.81`（不随 jar 分发）；
+- `compileOnly` KubeJS + Rhino（不随 jar 分发）：1.21.1 用 `2101.7.2-build.348` /
+  Rhino `2101.2.7-build.81`；1.20.1 用 `2001.6.5-build.26` / Rhino `2001.2.3-build.10`，
+  开发服还需 Architectury `9.2.14`（`runServer -PkjsMods`）；
 - `kubejs.plugins.txt` + `ExNihiloKubeJSPlugin`，server 脚本注册
   `SieveEvents` / `HammerEvents` / `CrookEvents` / `BarrelEvents` / `CompostEvents` /
   `CrucibleMeltEvents` / `CrucibleHeatEvents` 七个绑定对象；
@@ -200,8 +202,13 @@ build + 纹理守卫通过（分支没有 core/data 守卫脚本）。
 - 同一份 fixture 用命令 overlay（priority 100）重放，七张表 `dump` 与 KJS 结果逐字节一致；
 - 把 KJS/Rhino 从 `run/mods` 移除后服务端正常启动，无 `NoClassDefFoundError`。
 
-**未做：** 1.20.1 分支的 KJS `2001.x` 插件移植（分支仍用 `kubejs/data`）；
-专用服客户端 JEI 同步（P4）。
+**1.20.1 分支：** 2001 API 的 `KubeJSPlugin` 是类、绑定走 `BindingsEvent`（不是 2101 的
+`KubeJSPlugin`/`BindingRegistry`），已单独实现插件；在 `registerBindings`（脚本批次前）
+清旧贡献。Forge 开发服用 `-PkjsMods` 跑 deobf 的 KJS/Rhino/Architectury。
+验收：七个绑定全部生效；改脚本 `/reload` 后旧 6 条清掉、新条目生效；
+KJS 脚本与 datapack fixture 的七张表 dump 逐字节一致；不带 `-PkjsMods` 正常启动。
+
+**未做：** 专用服客户端 JEI 同步（P4）；CT（P3）。
 
 ### P3 — CraftTweaker API
 

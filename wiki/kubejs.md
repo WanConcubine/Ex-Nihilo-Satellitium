@@ -1,7 +1,7 @@
 # KubeJS：数据包通道 + 七张表脚本 API
 
-> 最后核对：2026-11-03 · 适用：1.21.1（主线）；1.20.1 分支暂未移植脚本 API
-> KubeJS 版本：`2101.x`（KubeJS 7 / 1.21.1）；1.20.1 线对应 `2001.x`
+> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> KubeJS 版本：1.21.1 用 `2101.x`，1.20.1 用 `2001.x`；绑定名和调用写法相同
 
 KubeJS 现在有两条通道：
 
@@ -13,10 +13,7 @@ KubeJS 现在有两条通道：
 | 注册自己的物品 / 方块 | `StartupEvents.registry`（只属于 KJS 内容） |
 | 新增本模组材料（`materials.json`） | ❌ 做不到 |
 
-> **1.20.1 现状**：分支尚未移植 KubeJS 插件；在分支上请继续用 §2 的 `kubejs/data` JSON。
-> 本页 §1 的脚本写法只适用于 1.21.1 主线。
-
-## 1. 七张表的脚本 API（1.21.1）
+## 1. 七张表的脚本 API（两版）
 
 把脚本放到 `kubejs/server_scripts/`，例如 `exnihilo_tables.js`：
 
@@ -60,6 +57,8 @@ CrucibleHeatEvents.add('minecraft:torch', 0.1)
 - 脚本重载时旧贡献会先被清掉，再按新脚本重新提交；`/reload` 不会重复叠加。
 - 改完 `/reload`；`/exnihilo tables` 看条数，`/exnihilo dump <table>` 看整表，
   `[customize]` 日志看谁覆盖了谁。
+- 1.20.1 的 KJS 2001 API 与 1.21.1 的 2101 不同，但本模组暴露的绑定对象和写法完全一样；
+  两个版本都验证过同一份脚本。
 
 ### JSON 逃生口
 
@@ -103,7 +102,7 @@ kubejs/data/mypack/sieve/sand_patch.json
 
 - 推荐自己的命名空间 + `"patch": true`，不要依赖覆盖顺序。
 - 七张表的字段、`#tag`、`mod` 门、`remove` 规则与[数据包页面](datapack.md)一致。
-- 1.20.1 分支目前只能走这条通道。
+- 没装 KJS / 不想写脚本时，这条通道两版都能用。
 
 ## 3. 原版配方：用脚本
 
