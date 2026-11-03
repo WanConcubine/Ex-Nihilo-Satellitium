@@ -161,3 +161,15 @@ python3 scripts/check-textures.py
 - 流体侧面、流动纹理还没画；现在只有液面。
 - `art/barrel/barrel_side*.png` 等早期自绘图留作参考；如果将来要改用自有贴图，
   需要同时去掉模型里的外凸箍，避免和贴图里画好的箍叠在一起。
+
+## 末影蛋糕（2026-11-03）
+
+- 4 张 16×16 方块贴图（Creatio MIT 原图经 restyle）：`end_cake_top.png` / `end_cake_side.png` /
+  `end_cake_bottom.png` / `end_cake_inner.png`。
+- 直接采用 **Ex Nihilo: Creatio（MIT）** 的 4 张 `end_cake_*.png`（原图只读在
+  `art/blocks/end_cake/creatio/`）；`art/blocks/end_cake/restyle.py` 裁掉透明边
+  （14×14 / 14×8）、放大到 16×16、轻微提高饱和度/对比度并加 1px 深色描边。
+  预览 `art/blocks/end_cake/preview.png`（4× nearest，不进 jar）；物品栏图标预览
+  `art/blocks/end_cake/inventory.png`（`render_inventory.py`，复用 barrel 渲染器）。
+- 模型只写 `parent: minecraft:block/cake` / `cake_slice1..6` + 覆盖
+  `particle/bottom/top/side/inside`，几何沿用 vanilla，不复制模型文件。

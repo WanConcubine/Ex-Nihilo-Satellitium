@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.block.BarrelBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.CrucibleBlock;
+import com.kaifengcrt.exnihilosatellitium.common.block.EndCakeBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.InfestedLeavesBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.SieveBlock;
 import com.kaifengcrt.exnihilosatellitium.common.block.UnfiredCrucibleBlock;
@@ -108,6 +109,11 @@ public final class ModBlocks {
     /** M3: the dust block (hammer sand -> dust; sifting dust gives redstone etc.). */
     public static final RegistryObject<Block> DUST =
             BLOCKS.register("dust", () -> new Block(BlockBehaviour.Properties.copy(Blocks.SAND)));
+
+    /** The End route: a cake that teleports the eater to the End. */
+    public static final RegistryObject<Block> END_CAKE =
+            BLOCKS.register("end_cake", () -> new EndCakeBlock(
+                    BlockBehaviour.Properties.copy(Blocks.CAKE)));
 
     /** M6: hammered netherrack / end stone, sifted as blocks for nether/end loot. */
     public static final RegistryObject<Block> CRUSHED_NETHERRACK =

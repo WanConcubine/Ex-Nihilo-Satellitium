@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "EEE",
+    "ECE",
+    "EEE"
+  ],
+  "key": {
+    "E": { "item": "minecraft:ender_pearl" },
+    "C": { "item": "minecraft:cake" }
+  },
+  "result": {
+    "item": "exnihilosatellitium:end_cake",
+    "count": 1
+  }
+}

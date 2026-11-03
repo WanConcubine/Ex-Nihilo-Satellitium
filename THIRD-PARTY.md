@@ -65,3 +65,36 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 Jade 是可选依赖，**不随本项目分发**。本项目只以 `compileOnly` 方式引用其 API
 （`maven.modrinth:jade:11.13.3+forge`）来编译 HUD 插件；用户需要自行安装 Jade。
 Jade 的许可证与版权归其作者所有，见其项目页。
+
+## Ex Nihilo: Creatio（MIT，贴图/模型直接采用）
+
+工具/尘土/熟蚕、坩埚与末影蛋糕的贴图/模型几何采用 **Ex Nihilo: Creatio**
+（1.12.2 分支，<https://github.com/BloodyMods/ExNihiloCreatio>）。该项目按 **MIT** 授权，
+允许复制、修改、再分发；许可证全文与版权声明见
+[third-party/MIT-ExNihiloCreatio.txt](third-party/MIT-ExNihiloCreatio.txt)
+（版权：MikeLydeamore 2015 / Jacky1356400 2017 / BloodWorkXGaming 2017 /
+SirLyle 2017 / Wolforce 2019 textures）。
+
+| 本仓库文件 | Creatio 源文件 |
+|---|---|
+| `textures/item/wooden_crook.png` | `textures/items/tools/crook/crook_wood.png` |
+| `textures/item/bone_crook.png` | `textures/items/tools/crook/crook_bone.png` |
+| `textures/item/wooden_hammer.png` | `textures/items/hammerwood.png` |
+| `textures/item/stone_hammer.png` | `textures/items/hammerstone.png` |
+| `textures/item/iron_hammer.png` | `textures/items/hammeriron.png` |
+| `textures/item/golden_hammer.png` | `textures/items/hammergold.png` |
+| `textures/item/diamond_hammer.png` | `textures/items/hammerdiamond.png` |
+| `textures/block/dust.png` | `textures/blocks/blockdust.png` |
+| `textures/item/cooked_silkworm.png` | `textures/items/silkwormcooked.png` |
+| `textures/block/crucible.png` | `textures/blocks/blockcrucible.png` |
+| `textures/block/unfired_crucible.png` | `textures/blocks/blockcrucibleunfired.png` |
+| `textures/block/end_cake_top.png` | `textures/blocks/end_cake_top.png`（经 `restyle.py` 裁边/放大/描边） |
+| `textures/block/end_cake_side.png` | `textures/blocks/end_cake_side.png`（同上） |
+| `textures/block/end_cake_bottom.png` | `textures/blocks/end_cake_bottom.png`（同上） |
+| `textures/block/end_cake_inner.png` | `textures/blocks/end_cake_inner.png`（同上） |
+| `models/block/crucible_base.json` | `models/block/block_crucible_big.json`（几何；cullface 已修正） |
+
+派生：`textures/item/netherite_hammer.png`（钻石锤换色）、
+`textures/item/silkworm.png` + `.mcmeta`（4 帧位移动画）；均按 MIT 衍生。
+末影蛋糕原图只读保存在 `art/blocks/end_cake/creatio/`，微调规则见
+`art/blocks/end_cake/restyle.py`。MIT 允许修改与再分发，微调版仍按 MIT 授权，版权归原作者。

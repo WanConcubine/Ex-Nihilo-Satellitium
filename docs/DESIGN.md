@@ -418,3 +418,23 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 - 服务端 `/reload` 日志：`[compost] loaded 65 entries`，无 `unknown item` / `invalid tag`。
 - RCON：`data merge {Compost:1000,CompostTicks:1}` → 2 秒后仍是桶、`DirtReady=1b`。
 - 未验证：逐个物品右键塞桶的点数（需要玩家）；JSON 与标签的键已用脚本对齐。
+
+## 13. 末影蛋糕（2026-11-03）
+
+补 `parity.md` 的 End Cake 缺口，行为参考 Omnia 1.10.2 `BlockEndCake`：可放置蛋糕，
+放置 1 片，末影之眼右键补 1 片（`bites-1`），空手右键吃一片：主世界传送到末地、末地传回主世界
+（床/世界出生点）；+2 饥饿 / 0.1 饱和度；下界不传送。
+
+1.20.1 实现：
+
+- `EndCakeBlock extends CakeBlock`；`getStateForPlacement` 返回 `bites=6`。
+- `use(...)`：末影之眼且 `bites>0` → `bites-1`、`stack.shrink(1)`（创造不消耗）、
+  `ENDER_EYE_LAUNCH`；空手且可进食 → 吃、`bites+1` 或移除、按维度传送（主世界→末地，末地→主世界）。
+- 传送用 `ServerPlayer.teleportTo(ServerLevel, ...)`：主世界 → 末地中央岛
+  （`Heightmap.MOTION_BLOCKING_NO_LEAVES`）；末地 → 主世界床/重生点或世界出生点。
+  不创建 1.10 的末地平台。
+- 配方 8 末影珍珠 + 蛋糕；4 张 16×16 贴图（Creatio 原图经 `art/blocks/end_cake/restyle.py` 裁边/放大/描边），
+  模型只写 `parent: minecraft:block/cake*` + `textures`；无掉落表。
+
+回程是对 Omnia “不能回传”的有意偏离（用户要求）。
+未验：右键吃/传送、末影之眼补片、模型画面；`/setblock` 默认 `bites=0`，物品放置才是 `bites=6`。
