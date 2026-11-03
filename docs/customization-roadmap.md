@@ -74,13 +74,14 @@ overlay    ─┘         （KJS/CT 绑定在 P2/P3，payload 仍是同表 JSON�
 
 ### 4.2 脚本 overlay 的生命周期
 
-- 已实现：`CustomizationOverlay.submit(table, action, payload, source)` 入队，
-  `forTable` 在每次 rebuild 时按提交顺序重放；`clear(source)` 让脚本重载只回收自己的贡献，
-  `clearAll()` 给测试/重置用。
+- 已实现：`CustomizationOverlay.submit(table, action, payload, source, priority)` 入队，
+  `forTable` 在每次 rebuild 时按 **priority 升序 → 提交顺序** 重放；`clear(source)`
+  让脚本重载只回收自己的贡献，`clearAll()` 给测试/重置用。
 - overlay 不在 JSON 文件里，所以 `/reload` 不会丢；它也不持久化，脚本应在每次加载时重新提交
-  （KJS 的 server 脚本本来就会随 reload 重跑）。
-- 冲突策略：按提交顺序，后应用者覆盖；`[customize]` 日志打印 source + payload，
-  加载日志打印每张表的 overlay 条数。
+  （KJS 的 server 脚本本来就会随 reload 重跑）。服务器停止时队列清空，避免单人切世界泄漏。
+- 冲突策略：后应用者覆盖；`TableBuilder` 对 overlay 的覆盖/删除/被挡分别打印
+  `replaced` / `removed` / `add ignored`（带旧 source），队列日志保留 payload 和 priority。
+- 同一 source 重复提交完全相同的操作会去重；总上限 4096 条；空 payload 直接拒绝。
 
 ### 4.3 KubeJS
 
@@ -163,6 +164,15 @@ overlay    ─┘         （KJS/CT 绑定在 P2/P3，payload 仍是同表 JSON�
 **1.20.1 分支**用同一套代码跑了 add / replace、`/reload` 一致、clear 回基线，
 build + 纹理守卫通过（分支没有 core/data 守卫脚本）。
 
+**P1.5（P1 边角，已完成，2026-11-03）：**
+
+- overlay 操作带显式 `priority`（默认 0）；应用顺序为 **priority 升序 → 提交顺序**，
+  高 priority 后应用所以赢。KJS/CT（P2/P3）应给自己的 source 固定 tier，不依赖模组加载顺序。
+- `TableBuilder` 记录并打印 overlay 的 `replaced` / `removed` / `add ignored`，带旧 source，
+  “谁覆盖了谁”不再靠猜。
+- 生命周期：server stop 清空 overlay（防单人切世界泄漏）；同一 source 的完全相同操作去重；
+  上限 4096 条；空 payload 拒绝；`/exnihilo dump all` 一次看七张表。
+
 ### P2 — KubeJS 插件
 
 - `compileOnly` KJS 依赖 + `@KubeJSPlugin`；
@@ -219,8 +229,8 @@ CT 不在时模组正常启动。
 ## 8. 待定问题
 
 1. ~~KJS 和 CT 同时改同一条目时，优先级按加载顺序还是显式 `priority`？~~
-   **P1 已定：按提交顺序，后提交者覆盖**；`[customize]` 日志打印 source + payload，
-   `clear(source)` 让脚本重载只回收自己的贡献。显式 priority 留到 P2 真出现冲突再加。
+   **P1.5 已定：显式 `priority`，默认 0；升序应用（高的后应用所以赢），同 priority 按提交顺序。**
+   KJS/CT 插件应给各自 source 固定 tier；`clear(source)` 仍用于脚本重载回收自己的贡献。
 2. `remove` 的粒度：只按产物删，还是支持按 chance/条件删？
 3. ~~`/exnihilo dump` 的输出格式要不要稳定成可 diff 的 JSON？~~
    **P1 已定：先用按行排序的纯文本**（`<table> <key> ... -> ...`），因为命令输出

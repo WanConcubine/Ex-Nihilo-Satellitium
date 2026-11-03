@@ -91,7 +91,8 @@ public final class CrucibleRecipes {
     private static void rebuild(final boolean clientView, final boolean expandTags) {
         final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
         final boolean tagsReady = expandTags && DataPackJson.tagsReady();
-        final TableBuilder<Block, Melt> builder = new TableBuilder<>(TableId.CRUCIBLE_MELT.id());
+        final TableBuilder<Block, Melt> builder = new TableBuilder<>(TableId.CRUCIBLE_MELT.id(),
+                block -> BuiltInRegistries.BLOCK.getKey(block).toString());
         final List<DataPackJson.Source> tagFiles = new ArrayList<>();
         final List<DataPackJson.Source> patchFiles = new ArrayList<>();
 
@@ -138,6 +139,7 @@ public final class CrucibleRecipes {
             clientRecipes = snapshot;
         } else {
             recipes = snapshot;
+            builder.logConflicts();
         }
         ExNihiloSatellitium.LOGGER.info(
                 "[crucible] loaded {} meltables ({} tag files, {} patches, {} overlay{}){}",
@@ -199,7 +201,7 @@ public final class CrucibleRecipes {
                 : CustomizationOverlay.forTable(TableId.CRUCIBLE_MELT)) {
             try {
                 final ResourceLocation label = ResourceLocation.tryParse(
-                        "exnihilosatellitium:overlay/" + customization.sequence());
+                        "customize:crucible_melt/" + customization.sequence());
                 final JsonObject root = customization.payload();
                 final List<Block> inputs = blocks(DataPackJson.string(root, "input"), label);
                 if (inputs.isEmpty()) {
@@ -207,7 +209,7 @@ public final class CrucibleRecipes {
                 }
                 if (customization.action() == CustomizationOverlay.Action.REMOVE) {
                     for (final Block input : inputs) {
-                        builder.remove(input);
+                        builder.remove(input, overlaySource(customization));
                     }
                     continue;
                 }
@@ -215,8 +217,7 @@ public final class CrucibleRecipes {
                 if (template == null) {
                     continue;
                 }
-                final String source = "customize:" + customization.source()
-                        + "#" + customization.sequence();
+                final String source = overlaySource(customization);
                 if (customization.action() == CustomizationOverlay.Action.ADD) {
                     for (final Block input : inputs) {
                         builder.putIfAbsent(input, template.toMelt(input), source);
@@ -231,6 +232,10 @@ public final class CrucibleRecipes {
                         customization.describe(), exception.toString());
             }
         }
+    }
+
+    private static String overlaySource(final CustomizationOverlay.Customization customization) {
+        return "customize:" + customization.source() + "#" + customization.sequence();
     }
 
     private static List<Block> blocks(final String raw, final ResourceLocation file) {

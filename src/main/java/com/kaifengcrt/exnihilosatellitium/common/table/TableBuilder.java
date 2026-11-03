@@ -1,13 +1,18 @@
 package com.kaifengcrt.exnihilosatellitium.common.table;
 
+import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 /**
  * Ordered working set shared by every JSON loader and by the script overlay.
@@ -23,20 +28,42 @@ import java.util.function.BinaryOperator;
  * the same files plus the same overlay always produce the same order, which
  * makes {@code /exnihilo dump} diffable and makes {@code /reload} idempotent.</p>
  *
- * <p>The builder also remembers which source last wrote a key. The dump command
- * and the conflict log use it to answer "why is this entry here?".</p>
+ * <p>The builder remembers which source last wrote a key. When an overlay source
+ * (a source name starting with {@code customize:}) overwrites, deletes or fails
+ * to add a key, the builder records a {@link Conflict}; {@link #logConflicts()}
+ * prints one line per conflict with the previous source, so "who won" is in the
+ * log instead of having to be guessed from load order.</p>
  *
  * @param <K> key type (registry object, composite string, ...)
  * @param <V> immutable entry type ({@code SieveDrop} list, {@code Rule}, ...)
  */
 public final class TableBuilder<K, V> {
 
+    /** One overlay write that interacted with an existing entry. */
+    public record Conflict<K>(K key, Kind kind, String previousSource, String newSource) {
+
+        public enum Kind {
+            REPLACE,
+            REMOVE,
+            ADD_IGNORED
+        }
+    }
+
+    private static final String OVERLAY_PREFIX = "customize:";
+
     private final String table;
+    private final Function<K, String> keyLabel;
     private final LinkedHashMap<K, V> entries = new LinkedHashMap<>();
     private final Map<K, String> sources = new HashMap<>();
+    private final List<Conflict<K>> conflicts = new ArrayList<>();
 
     public TableBuilder(final String table) {
+        this(table, String::valueOf);
+    }
+
+    public TableBuilder(final String table, final Function<K, String> keyLabel) {
         this.table = Objects.requireNonNull(table, "table");
+        this.keyLabel = Objects.requireNonNull(keyLabel, "keyLabel");
     }
 
     public String table() {
@@ -51,6 +78,9 @@ public final class TableBuilder<K, V> {
      */
     public boolean putIfAbsent(final K key, final V value, final String source) {
         if (this.entries.containsKey(key)) {
+            if (isOverlay(source)) {
+                record(key, Conflict.Kind.ADD_IGNORED, this.sources.get(key), source);
+            }
             return false;
         }
         this.entries.put(key, value);
@@ -65,9 +95,21 @@ public final class TableBuilder<K, V> {
      */
     public boolean put(final K key, final V value, final String source) {
         final boolean added = !this.entries.containsKey(key);
+        if (!added && isOverlay(source)) {
+            record(key, Conflict.Kind.REPLACE, this.sources.get(key), source);
+        }
         this.entries.put(key, value);
         this.sources.put(key, source);
         return added;
+    }
+
+    /**
+     * Updates a value without reporting a conflict; used by overlay operations
+     * that only edit part of an existing list (e.g. removing one sieve drop).
+     */
+    public void set(final K key, final V value, final String source) {
+        this.entries.put(key, value);
+        this.sources.put(key, source);
     }
 
     /**
@@ -81,8 +123,26 @@ public final class TableBuilder<K, V> {
     }
 
     public boolean remove(final K key) {
-        this.sources.remove(key);
-        return this.entries.remove(key) != null;
+        return remove(key, null);
+    }
+
+    public boolean remove(final K key, final String source) {
+        final String previous = this.sources.remove(key);
+        final boolean removed = this.entries.remove(key) != null;
+        if (removed && isOverlay(source)) {
+            record(key, Conflict.Kind.REMOVE, previous, source);
+        }
+        return removed;
+    }
+
+    /**
+     * Records that an overlay removed part of an existing list value without
+     * replacing the whole key (sieve / crook drop removal).
+     */
+    public void recordRemoval(final K key, final String source) {
+        if (isOverlay(source) && this.entries.containsKey(key)) {
+            record(key, Conflict.Kind.REMOVE, this.sources.get(key), source);
+        }
     }
 
     public V get(final K key) {
@@ -110,8 +170,42 @@ public final class TableBuilder<K, V> {
         return this.sources.getOrDefault(key, "?");
     }
 
+    /** Conflicts seen during this rebuild, in write order. */
+    public List<Conflict<K>> conflicts() {
+        return List.copyOf(this.conflicts);
+    }
+
+    /**
+     * Prints one {@code [customize]} line per overlay conflict. Called after the
+     * snapshot is published so a reload shows the same winners every time.
+     */
+    public void logConflicts() {
+        for (final Conflict<K> conflict : this.conflicts) {
+            final String label = this.keyLabel.apply(conflict.key());
+            final String previous = conflict.previousSource() == null
+                    ? "?" : conflict.previousSource();
+            switch (conflict.kind()) {
+                case REPLACE -> ExNihiloSatellitium.LOGGER.info(
+                        "[customize] {} replaced {} (was {})", this.table, label, previous);
+                case REMOVE -> ExNihiloSatellitium.LOGGER.info(
+                        "[customize] {} removed {} (was {})", this.table, label, previous);
+                case ADD_IGNORED -> ExNihiloSatellitium.LOGGER.info(
+                        "[customize] {} add ignored for {} (kept {})", this.table, label, previous);
+            }
+        }
+    }
+
     /** Immutable, insertion-ordered snapshot handed to gameplay/JEI. */
     public Map<K, V> build() {
         return Collections.unmodifiableMap(new LinkedHashMap<>(this.entries));
+    }
+
+    private void record(final K key, final Conflict.Kind kind, final String previousSource,
+                        final String newSource) {
+        this.conflicts.add(new Conflict<>(key, kind, previousSource, newSource));
+    }
+
+    private static boolean isOverlay(final String source) {
+        return source != null && source.startsWith(OVERLAY_PREFIX);
     }
 }

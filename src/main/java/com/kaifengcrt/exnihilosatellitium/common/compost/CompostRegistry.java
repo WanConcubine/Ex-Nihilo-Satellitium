@@ -108,7 +108,7 @@ public final class CompostRegistry {
                         ExNihiloSatellitium.LOGGER.warn(
                                 "[compost] {} needs a remove list, ignoring remove:true", file.getKey());
                     } else {
-                        removeKeys(builder, DataPackJson.removeList(root));
+                        removeKeys(builder, DataPackJson.removeList(root), null);
                     }
                     addValues(builder, root, file.getKey(), false);
                 } catch (final Exception exception) {
@@ -129,6 +129,7 @@ public final class CompostRegistry {
             clientEntries = snapshot;
         } else {
             entries = snapshot;
+            builder.logConflicts();
         }
         ExNihiloSatellitium.LOGGER.info("[compost] loaded {} entries ({} overlay){}",
                 snapshot.size(), CustomizationOverlay.forTable(TableId.COMPOST).size(),
@@ -142,14 +143,15 @@ public final class CompostRegistry {
                 final JsonObject root = customization.payload();
                 final boolean replace = customization.action() == CustomizationOverlay.Action.REPLACE;
                 if (replace) {
-                    removeKeys(builder, DataPackJson.removeList(root));
+                    removeKeys(builder, DataPackJson.removeList(root), null);
                 }
                 if (customization.action() == CustomizationOverlay.Action.REMOVE) {
                     List<String> keys = DataPackJson.removeList(root);
                     if (keys.isEmpty()) {
                         keys = new ArrayList<>(valueKeys(root));
                     }
-                    removeKeys(builder, keys);
+                    removeKeys(builder, keys,
+                            "customize:" + customization.source() + "#" + customization.sequence());
                     continue;
                 }
                 addValues(builder, root, overlayLabel(customization), replace);
@@ -168,9 +170,10 @@ public final class CompostRegistry {
         return keys;
     }
 
-    private static void removeKeys(final TableBuilder<String, Entry> builder, final List<String> keys) {
+    private static void removeKeys(final TableBuilder<String, Entry> builder, final List<String> keys,
+                                   final String source) {
         for (final String raw : keys) {
-            builder.remove(normalizeKey(raw));
+            builder.remove(normalizeKey(raw), source);
         }
     }
 
@@ -233,8 +236,8 @@ public final class CompostRegistry {
 
     private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
         final ResourceLocation label = ResourceLocation.tryParse(
-                "exnihilosatellitium:overlay/" + customization.sequence());
-        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+                "customize:compost/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("customize:compost/0") : label;
     }
 
     /** @return the best matching compost value, or 0 if the stack is not compostable. */

@@ -105,7 +105,8 @@ public final class HammerRecipes {
     private static void rebuild(final boolean clientView, final boolean expandTags) {
         final List<DataPackJson.Source> sourceList = clientView ? clientSources : sources;
         final boolean tagsReady = expandTags && DataPackJson.tagsReady();
-        final TableBuilder<Block, Rule> builder = new TableBuilder<>(TableId.HAMMER.id());
+        final TableBuilder<Block, Rule> builder = new TableBuilder<>(TableId.HAMMER.id(),
+                block -> BuiltInRegistries.BLOCK.getKey(block).toString());
         final List<DataPackJson.Source> tagFiles = new ArrayList<>();
         final List<DataPackJson.Source> patchFiles = new ArrayList<>();
 
@@ -152,6 +153,7 @@ public final class HammerRecipes {
             clientRecipes = snapshot;
         } else {
             recipes = snapshot;
+            builder.logConflicts();
         }
         ExNihiloSatellitium.LOGGER.info(
                 "[hammer] loaded {} recipes ({} tag files, {} patches, {} overlay{}){}",
@@ -221,7 +223,7 @@ public final class HammerRecipes {
                 }
                 if (customization.action() == CustomizationOverlay.Action.REMOVE) {
                     for (final Block input : inputs) {
-                        builder.remove(input);
+                        builder.remove(input, overlaySource(customization));
                     }
                     continue;
                 }
@@ -248,8 +250,8 @@ public final class HammerRecipes {
 
     private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {
         final ResourceLocation label = ResourceLocation.tryParse(
-                "exnihilosatellitium:overlay/" + customization.sequence());
-        return label == null ? ResourceLocation.tryParse("exnihilosatellitium:overlay/0") : label;
+                "customize:hammer/" + customization.sequence());
+        return label == null ? ResourceLocation.tryParse("customize:hammer/0") : label;
     }
 
     private static String overlaySource(final CustomizationOverlay.Customization customization) {
