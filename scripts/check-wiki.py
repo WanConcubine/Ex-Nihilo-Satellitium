@@ -6,6 +6,7 @@ the semantic ones:
 
 * required pages exist and every page has a "最后核对" header;
 * README / sidebar link to every page;
+* mkdocs.yml nav covers every page (local page with no entry is unreachable);
 * local Markdown links resolve;
 * fenced code blocks are balanced and every ```json block parses;
 * the datapack page mentions all seven table directories;
@@ -28,6 +29,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WIKI = ROOT / "wiki"
 SIDEBAR = WIKI / "_sidebar.md"
+MKDOCS = ROOT / "mkdocs.yml"
 
 CONTENT_PAGES = [
     "README.md",
@@ -52,6 +54,7 @@ TABLE_DIRS = [
 
 HEADER = re.compile(r"^> 最后核对：\d{4}-\d{2}-\d{2} · 适用：", re.MULTILINE)
 LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+NAV_ITEM = re.compile(r"^\s+-\s+[^:]+:\s*(\S+\.md)\s*$")
 FENCE = re.compile(r"```")
 
 
@@ -117,6 +120,44 @@ def check_index(errors: list[str]) -> None:
             errors.append(f"wiki/_sidebar.md: sidebar does not link to {name}")
 
 
+def check_site_nav(errors: list[str]) -> int:
+    """Every content page must be reachable from mkdocs.yml nav.
+
+    MkDocs happily builds a page that no nav entry points at; the page then
+    exists but nobody can reach it. Keep the site nav and the guard together.
+    """
+    if not MKDOCS.is_file():
+        errors.append("missing mkdocs.yml (static site config)")
+        return 0
+
+    lines = MKDOCS.read_text(encoding="utf-8").splitlines()
+    try:
+        start = next(i for i, line in enumerate(lines) if line.rstrip() == "nav:")
+    except StopIteration:
+        errors.append("mkdocs.yml: no `nav:` block")
+        return 0
+
+    targets: list[str] = []
+    for line in lines[start + 1 :]:
+        if line.strip() and not line[0].isspace():
+            break  # back to a top-level key
+        match = NAV_ITEM.match(line)
+        if match:
+            targets.append(match.group(1))
+
+    if not targets:
+        errors.append("mkdocs.yml: `nav:` has no page entries")
+        return 0
+
+    for target in targets:
+        if not (WIKI / target).is_file():
+            errors.append(f"mkdocs.yml: nav entry points to missing wiki/{target}")
+    for name in CONTENT_PAGES:
+        if name not in targets:
+            errors.append(f"mkdocs.yml: nav does not list wiki/{name} (page would be unreachable)")
+    return len(targets)
+
+
 def check_content(errors: list[str]) -> None:
     datapack = (WIKI / "datapack.md").read_text(encoding="utf-8")
     for directory in TABLE_DIRS:
@@ -164,6 +205,7 @@ def main() -> int:
     json_blocks = check_fences(errors)
     links = check_links(errors)
     check_index(errors)
+    nav_pages = check_site_nav(errors)
     check_content(errors)
 
     if errors:
@@ -172,7 +214,10 @@ def main() -> int:
             print(f"  ERROR: {error}", file=sys.stderr)
         return 1
 
-    print(f"wiki check passed ({len(CONTENT_PAGES)} pages, {links} links, {json_blocks} JSON blocks)")
+    print(
+        f"wiki check passed ({len(CONTENT_PAGES)} pages, {links} links, "
+        f"{json_blocks} JSON blocks, {nav_pages} nav entries)"
+    )
     return 0
 
 

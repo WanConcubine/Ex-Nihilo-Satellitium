@@ -26,8 +26,13 @@ python3 scripts/check-core-imports.py
 # 数据守卫：数据目录/字段/条件/标签命名空间必须与目标版本一致
 python3 scripts/check-data-paths.py
 
-# 玩家 wiki 结构守卫：页面/链接/JSON/版本矩阵/维护契约
+# 玩家 wiki 结构守卫：页面/链接/JSON/版本矩阵/维护契约/nav 覆盖
 python3 scripts/check-wiki.py
+
+# 玩家 wiki 静态站（MkDocs Material；产物 site/ 不提交，不需要服务器）
+python3 -m venv .venv && .venv/bin/pip install -r requirements-wiki.txt
+.venv/bin/mkdocs serve          # 本地预览 http://127.0.0.1:8000
+.venv/bin/mkdocs build --strict # 坏链 / 未进 nav 直接失败
 
 # 开发服（RCON 已配：localhost:25575 / eni）
 ./gradlew runServer
@@ -36,7 +41,7 @@ python3 scripts/check-wiki.py
 ./gradlew runClient
 ```
 
-- 改完**至少**跑 `build` + `check-textures.py` + `check-data-paths.py`；改 wiki 再加 `check-wiki.py`。
+- 改完**至少**跑 `build` + `check-textures.py` + `check-data-paths.py`；改 wiki 再加 `check-wiki.py` + `mkdocs build --strict`。
 - 服务端逻辑用 RCON 验（`/setblock`、`/data merge`、`/execute if block`）。
 - **测试绿 ≠ 画面/手感验过**；没进游戏看过就不要在 status.md 写“已验证”。
 - NeoForge 1.21 运行时用官方名，生产 jar 可以直接放进 `run/mods` 测（已验证 Jade 15 / JEI 19 / Just Enough Characters）；`run/` 已 gitignore，别提交。

@@ -141,4 +141,4 @@ ServerEvents.tags('item', event => {
 ## 参考
 
 - KubeJS 文档：<https://kubejs.com/>
-- 七张表字段：[数据包页面](datapack.md)；三路径进度：[roadmap](../docs/customization-roadmap.md)。
+- 七张表字段：[数据包页面](datapack.md)；三路径进度：[roadmap](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/docs/customization-roadmap.md)。

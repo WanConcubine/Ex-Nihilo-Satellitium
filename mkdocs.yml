@@ -1,0 +1,100 @@
+# 玩家 wiki 的静态站点配置。源文件仍然是 wiki/ 下的 Markdown，
+# `mkdocs build` 只生成 site/（已 gitignore），不需要服务器。
+#
+# 本地预览：
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements-wiki.txt
+#   .venv/bin/mkdocs serve          # http://127.0.0.1:8000
+#
+# 守卫：`mkdocs build --strict` 把坏链/未进导航的页面当错误；CI 见
+# .github/workflows/wiki.yml。
+
+site_name: "Ex Nihilo: Satellitium · 自定义配方 Wiki"
+site_description: "用数据包 / KubeJS / CraftTweaker 修改筛子、锤子、钩子、桶、堆肥、坩埚配方"
+site_url: https://wanconcubine.github.io/Ex-Nihilo-Satellitium/
+repo_url: https://github.com/WanConcubine/Ex-Nihilo-Satellitium
+repo_name: WanConcubine/Ex-Nihilo-Satellitium
+edit_uri: edit/main/wiki/
+copyright: MIT · 每页页首的“最后核对”是内容时效的唯一出处
+
+docs_dir: wiki
+site_dir: site
+
+# _sidebar.md 是给 scripts/check-wiki.py 和 docsify 兼容用的旧导航，
+# 站点导航以下面的 nav 为准，不发布这个文件。
+exclude_docs: |
+  _sidebar.md
+
+# 指向 wiki/ 之外的文档（docs/ 是开发向）一律用 GitHub 绝对链接，
+# 保持“玩家向 / 开发向”的边界。
+
+theme:
+  name: material
+  language: zh
+  # 关掉 Google Fonts：国内访问会拖慢首屏，用系统字体即可
+  font: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: 切换到深色
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: 切换到浅色
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+    - search.suggest
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - 首页: README.md
+  - 数据包: datapack.md
+  - KubeJS: kubejs.md
+  - CraftTweaker: crafttweaker.md
+  - 常见任务: cookbook.md
+  - 排错: troubleshooting.md
+  - 维护契约: MAINTAINING.md
+
+plugins:
+  - search:
+      lang: zh
+      separator: '[\\s\\-]+'
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 2-3
+      # Python-Markdown 默认把中文标题削成 #_1 / #_2；用 pymdownx 的
+      # slugify 保留中文，锚点稳定且可读（#版本差异）。
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+
+validation:
+  omitted_files: warn
+  absolute_links: relative_to_docs
+  unrecognized_links: warn
+  anchors: warn
+  links:
+    not_found: warn
+    absolute_links: info
+    anchors: warn
+
+strict: true

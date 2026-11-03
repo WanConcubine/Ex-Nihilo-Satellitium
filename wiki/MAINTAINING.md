@@ -78,7 +78,8 @@
 python3 scripts/check-wiki.py
 ```
 
-- [ ] 脚本通过（链接、围栏、JSON、必需页面/章节、版本矩阵）
+- [ ] 脚本通过（链接、围栏、JSON、必需页面/章节、版本矩阵、nav 覆盖）
+- [ ] `mkdocs build --strict` 通过（新增页面已同时加进 `mkdocs.yml` 的 `nav` 和 `_sidebar.md`）
 - [ ] 每个页面顶部日期已更新
 - [ ] `README.md` 能力矩阵与实际代码一致
 - [ ] 1.20.1 / 1.21.1 的 `pack_format`、标签命名空间、配方路径没有写反
@@ -103,3 +104,23 @@ python3 scripts/check-wiki.py
 - **用 `check-wiki.py` 做结构守卫**，用 release 检查做语义守卫。
 
 等三条路径真正等价、字段稳定后，再考虑从 schema 生成 API 参考页。
+
+## 9. 静态站点
+
+`wiki/` 同时是 [MkDocs Material](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/mkdocs.yml) 站点的源目录：`mkdocs build` 只产出 `site/`
+（已 gitignore），**不需要服务器**，托管走 GitHub Pages。
+
+- **导航有两处**：`mkdocs.yml` 的 `nav`（站点侧栏）和 `_sidebar.md`（GitHub 目录页 / 旧 docsify 约定）。
+  `scripts/check-wiki.py` 要求两处都覆盖所有内容页；新增页面两处都要加，否则守卫失败。
+- **链到 `docs/` 必须用 GitHub 绝对 URL**：站点只发布 `wiki/`，`../docs/...` 在站内是坏链，
+  `mkdocs build --strict` 会直接失败。
+- 本地预览：
+
+  ```bash
+  python3 -m venv .venv
+  .venv/bin/pip install -r requirements-wiki.txt
+  .venv/bin/mkdocs serve   # http://127.0.0.1:8000
+  ```
+- 发布：push 到 `main` 触发 `.github/workflows/wiki.yml`（先跑守卫，再 `mkdocs build --strict`，
+  最后部署 Pages）；PR 只校验、不发布。首次启用要在仓库 Settings → Pages 里把 Source 选成
+  “GitHub Actions”。
