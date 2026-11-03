@@ -33,6 +33,26 @@ Tinkers' Construct 钴（`tconstruct:cobalt_ingot`）；运行时取第一个已
   - **未验**：进游戏右键吃/传送、末影之眼补片、模型画面；`/setblock` 默认是 `bites=0`，
     物品放置才是 `bites=6`。
 
+## 当前批次（2026-11-03，P2：KubeJS 插件）
+
+- **KubeJS 2001 插件**：`compileOnly` KubeJS `2001.6.5-build.26` + Rhino
+  `2001.2.3-build.10`（不随 jar 分发）；`kubejs.plugins.txt` 注册
+  `ExNihiloKubeJSPlugin extends KubeJSPlugin`。
+- **与 1.21.1 的差异**：2001 的插件是类、绑定是 `BindingsEvent`（`getType()` + `add`），
+  没有 `beforeScriptsLoaded`；在 `registerBindings`（server 脚本批次前）清旧 `kubejs` 贡献。
+  七个绑定对象（`SieveEvents` 等）和脚本写法与主线完全相同。
+- **开发服运行**：KJS/Rhino/Architectury 的发布 jar 是 SRG 名，直接放 `run/mods` 会
+  mixin 报 `m_7038_` 找不到；用 `./gradlew runServer -PkjsMods` 让 ForgeGradle
+  deobf + 进运行时。普通 `runServer` 不带 KJS。
+- **验证**（2026-11-03，KubeJS 2001.6.5 / Rhino 2001.2.3 / Architectury 9.2.14）：
+  - 七个绑定各一条：`[sieve] 90→91 drops`、hammer 52→53、crook 22→23、barrel 12→13、
+    compost 67→68、melt 39→40、heat 9→10；`/exnihilo dump` 出现预期条目。
+  - 改脚本（删 sieve、compost 300→150）后 `/reload`：`dropped 7 old op(s)`，
+    sieve emerald 消失、compost=150，overlay 6 条。
+  - 同一 fixture 用 datapack（`pack_format 15`）跑，七张表 dump 与 KJS 结果逐字节一致。
+  - 不带 `-PkjsMods`（无 KJS）正常启动，无 `NoClassDefFoundError`。
+- **未做**：P4 客户端 JEI 同步；P3 CraftTweaker。
+
 ## 当前批次（2026-11-03，P1.5：overlay 边角）
 
 - **与主线同步**：overlay 显式 `priority`（升序应用，高的后应用所以赢）、
