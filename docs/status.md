@@ -29,6 +29,8 @@
   没装 ER 时物品/方块/筛表补丁不出现，基表 115 不变；装 ER 时筛表 +9、锤表 +9。
 - 三档矿链熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；
   石墨仍烧煤，cyanite/blutonium 等继续由反应堆产出。
+- **匠魂**：yellorium 碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 / 块 810，铸造回 ER 锭/块；
+  用 ER 自带的 `forge:yellorium` 流体，共 10 条（6 熔炼 + 2 锭/块熔炼 + 2 铸造），不新增流体。
 - **矿石识别（补齐）**：ER 把 `yellorite_ore` 同时登记在 `forge:ores/yellorite` 和
   `forge:ores/uranium`；我们的 yellorium 矿块现在同样进这两个 tag（块 + 物品），
   `yellorium_broken` 进 `forge:raw_materials/yellorium`（及根 tag）。Mekanism 的 `enriching`、
@@ -169,7 +171,7 @@
 | Extreme Reactors | ✅ | ER 2.0.84 + ZeroCore 2.1.45 真装：`[materials] 25`、`[sieve] 154`、`[hammer] 88`；`yellorium` 1/8、`anglesite`/`benitoite` 各 1/64；RCON 三种矿块熔炉分别出 ER 锭 / 铅矾 / 蓝锥矿，`RecipesUsed` 指向 `*_smelting_bigreactors`；手筛/JEI 未目视 |
 | BambooMod 资源 | ✅ | BambooMod 0.6.2 真装：`[sieve] 173`（+19，泥土/草各 8、砂砾 3）；RCON 泥土 32 / 砂砾 31 含 4 树苗 + 竹笋 + 3 作物 + 3 宝石；`/setblock` 树苗/竹笋成功；堆肥靠现有 leaves/saplings 标签；手筛/生长/JEI 未测 |
 | Mek / Thermal / Create / IE | ✅ | 锭候选与矿砾熔炼 6/6、IE 五锭、Create 锌 + 12 条 crushing；多方块未跑 |
-| Tinkers 钴 / 种子 / 熔炼 | ✅ | 钴 → `tconstruct:cobalt_ingot`；两个黏液草种子条件注册；84 条匠魂熔炼加载无报错 |
+| Tinkers 钴 / 种子 / 熔炼 | ✅ | 钴 → `tconstruct:cobalt_ingot`；两个黏液草种子条件注册；92 条匠魂熔炼 + 2 条铸造（共 94）加载无报错（含 ER yellorium 10） |
 | M10 机器 | ✅ | 电动/内能 × 筛/锤、插件、漏斗、自动输出 RCON 全过；JEI 箭头点击已修 |
 | 桶 / 堆肥 / 固化 | ✅ | RCON：堆肥成土、满桶固化、牛奶史莱姆、比较器/雨水 |
 | 坩埚 / 巫水 / 瓷桶 | ✅ | 39+9 表、篝火/熔炉速率、巫水发酵与转化、瓷桶 capability |
