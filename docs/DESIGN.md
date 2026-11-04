@@ -577,3 +577,16 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 
 **验证**：服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各
 `damage=1`（修复前 0）；`build` + `check-textures.py` 通过。
+
+## 51. 筛表补骨粉 / 烈焰粉（2026-11-04，两版）
+
+**为什么**：骨粉卡着瓷土与菌岩催菌，却只有骷髅掉落；烈焰粉只从碎下界岩（熔岩 + 红石）出，
+酿造 / 末影之眼 / 愤怒人偶被卡在中后期。按所有者要求补进筛表。
+
+**数值**：`sieve/dust.json` 加 `minecraft:bone_meal` **20%**（经典尘土 1/5）；
+`sieve/sand.json` 加 `minecraft:blaze_powder` **3%**；碎下界岩 6% 保留。两版同步，
+`merge_table` 保留手写条目。
+
+**验证**：基表 113 → 115（全装 +TiT 139 → 141、+AE2 143 → 145）；
+`build`（Java 17 / `--offline`）、`check-textures.py`、主线 `check-data-paths.py --target 1.20.1`
+通过；未进游戏手筛。

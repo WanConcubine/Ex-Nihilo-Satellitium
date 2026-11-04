@@ -94,6 +94,10 @@
       "chance": 0.02
     },
     {
+      "item": "minecraft:blaze_powder",
+      "chance": 0.03
+    },
+    {
       "item": "exnihilosatellitium:ancient_spores",
       "chance": 0.0078
     }
