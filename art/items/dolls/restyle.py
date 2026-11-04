@@ -32,6 +32,8 @@ PALETTES = {
     # Thermal mobs: blitz is a storm/lightning elemental (gold), blizz is ice (pale blue).
     "blitz_doll": [(66, 48, 10), (150, 116, 30), (214, 176, 66), (252, 232, 148)],
     "blizz_doll": [(26, 52, 82), (74, 128, 178), (146, 204, 236), (222, 246, 255)],
+    # Villager doll: emerald ring, zombie-villager green silhouette.
+    "villager_doll": [(22, 60, 34), (54, 128, 74), (104, 190, 122), (178, 238, 186)],
 }
 
 

@@ -1,7 +1,26 @@
-# 历史批次（2026-11-01 ～ 2026-11-03）
+# 历史批次（2026-11-01 ～ 2026-11-04）
 
 > 从 [status.md](status.md) 搬出来的批次叙事：只记「当时做了什么、怎么验的」。
 > **当前状态、验证表、下一步只看 status.md**；这里的内容不再维护，只作追溯用。
+
+## 2026-11-04（热力人偶：狂风 / 暴雪）
+
+- **对象**：热力（Thermal Foundation 11.0.x，含 Thermal Core；本地可用的发行版是 1.20.1）。
+  新增两个**条件物品** `blitz_doll`（狂风人偶）/ `blizz_doll`（暴雪人偶），中文名按所有者指定，
+  **不沿用参考图的「劲风 / 冻结」**。
+- **配方**（照所有者给的两张图）：`xyx / zwz / xvx`，中心是普通人偶，四角 4 个
+  `thermal:niter_dust`（硝石粉）或 `minecraft:snowball`，上中红石、两侧荧石粉、下中下界疣。
+  两张都是工作台配方，和愤怒 / 诡异 / 漂浮 / 守卫者人偶同形。**手写 JSON**，不进 datagen。
+- **桶规则**（右键立即生效，和平模式掉材料，桶恢复空桶）：
+  - 满熔岩 + `blitz_doll` → `thermal:blitz`（狂风人），和平掉 `thermal:blitz_rod`；
+  - 满水 + `blizz_doll` → `thermal:blizz`（暴雪人），和平掉 `thermal:blizz_rod`。
+- **门控三处一致**：物品注册（主线 `Platform.isModLoaded("thermal_foundation")` / 分支 `ModList`）、
+  配方条件（1.21.1 `neoforge:conditions` / 1.20.1 根级 `conditions`）、桶规则根级
+  `"mod": "thermal_foundation"`。没装 Thermal 时物品、配方、桶规则一起消失。
+- **datagen 防撞**：`ModItemModels.HAND_FLAT_MODELS` 按名字跳过手写模型；字段 `@Nullable`。
+  临时强制注册跑 `runData` 不会写出同名模型。
+- **验证**：1.20.1 `[barrel] 14`、dump 两条规则、`/summon` 两个物品；主线无 Thermal 时桶 12、
+  物品不存在；配方经 `/reload` 解析探测。合成 / 右键 / JEI 未实测。
 
 ## 2026-11-03 晚（工匠巧思 + AE2 赛特斯石英）
 

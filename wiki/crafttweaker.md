@@ -73,6 +73,7 @@ mods.exnihilosatellitium.Barrel.addJson('{"base":"minecraft:witch_water","added"
 ```
 
 七张表都有 `addJson` / `removeJson` / `replaceJson`；字段与[数据包页面](datapack.md)一致。
+桶的新字段 `result_fluid` / `delay_ticks` / `drain` 同样通过 `addJson` 生效（见数据包页 §6）。
 
 ### 容易踩的坑
 

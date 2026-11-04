@@ -1685,3 +1685,42 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 - 配方文件通过 `/reload` 解析探测：临时写坏 JSON 会报 `Couldn't parse data file
   exnihilosatellitium:blitz_doll`，恢复后无错。
 - **未验**：工作台实际摆放、右键桶生成 / 和平掉落、JEI 页、游戏内贴图亮度。
+
+## 48. 村民 / 脑白金 / 蜂蜜链 / 蜜蜂 / 蜂箱 / AE2 陨石粉（2026-11-04）
+
+**来源**
+
+- 所有者本批次的需求：村民人偶（8 绿宝石围人偶 → 巫水桶出僵尸村民）、脑白金
+  （蛋 4 + 糖 4 + 绿宝石，右键傻子村民 → 普通村民）、糖水 → 浓缩蜂蜜汁 → 蜂蜜瓶、
+  浓缩蜂蜜汁养蜂、木板 + 蜂蜜瓶蜂箱配方、沙砾/沙筛陨石粉。
+- 蜂蜜链的“桶里放糖/蒲公英黄/玻璃瓶”沿用现有桶内转化框架；不是复制任何外部模组的代码或资源。
+
+**实现**
+
+- **物品**：`villager_doll`（64×64，翠绿人偶轮廓）、`brain_platinum`（16×16 蓝色礼盒 + 金丝带）；
+  `BrainPlatinumItem#interactLivingEntity` 只对 `VillagerProfession.NITWIT` 生效，
+  改成 `NONE` + `level 1` + `xp 0`，消耗 1 个，播放 `VILLAGER_YES` + 绿色粒子。
+- **桶表新规则**（`BarrelRecipes.Recipe`）：
+  - `result_fluid`：满桶 + 物品 → 整桶换成目标流体，`delay_ticks` 可延迟（糖水 600 tick）；
+  - `drain` + `result`：桶内至少 `drain` mB 即可右键，扣流体、给物品（玻璃瓶 250 mB → 蜂蜜瓶）；
+  - `result_fluid` / `drain` 分别与 `result` / `entity` 互斥；`drain` 只配 `added.item`。
+- **BE 状态机**：`PendingFluidFrom/To/Ticks` 保存延迟换液；到点且桶内仍是原流体才替换；
+  每 20 tick 同步一次（Jade 倒计时），粒子用 `FALLING_HONEY`。
+- **两个桶专用流体**：`sugar_water` / `concentrated_honey`（+ flowing），只注册 still/flowing 对和
+  `FluidType`，**不注册方块和桶**；客户端复用原版水贴图 + 金色/橙色 tint。
+- **养蜂**：桶内有任意数量浓缩蜂蜜时，每 100 tick 1/6 概率在 6 格内生成 1 只蜜蜂，
+  附近上限 5 只；`PersistenceRequired`，生成前做 `noCollision` 检查。
+- **JEI / Jade / dump**：JEI 结果槽按 `producesFluid()` 切到流体渲染并提示延迟/抽取量；
+  Jade 区分“生成中 / 转化中”；`/exnihilo dump` 输出 `fluid:` / `delay:` / `drain:`。
+- **AE2**：`sieve/sand_ae2.json` 增加 `ae2:sky_dust` 1/16，新增 `sieve/gravel_ae2.json` 1/16。
+- **蜂箱**：datagen 生成 `beehive_honey_bottles`（3 木板 + 3 蜂蜜瓶 + 3 木板 → `minecraft:beehive`）。
+
+**验证**
+
+- 1.20.1 `-PtechMods`：`[barrel] 18 transforms (2 fluid, 16 item)`，dump 四条新规则齐全；
+  `data merge` 设置 `sugar_water` + `PendingFluid*` 后约 4 秒变 `concentrated_honey`；
+  浓缩蜂蜜桶在 10 秒内生成一只蜜蜂（`PersistenceRequired: 1b`）。
+- 1.21.1 无 Thermal：`[barrel] 16 transforms (2 fluid, 14 item)`，同样验证延迟换液与养蜂；
+  `/summon` 两个新物品正常；沙/砂砾 dump 各含 `sky_dust 0.0625`。
+- 两版 `build` + `runData` 通过，生成 5 个新资源（2 模型 + 3 配方）。
+- **未验**：玩家实际右键糖/蒲公英黄/玻璃瓶/人偶、脑白金对傻子村民、JEI 页面与流体亮度。

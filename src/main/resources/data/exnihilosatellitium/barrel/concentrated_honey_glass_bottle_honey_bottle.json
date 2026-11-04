@@ -1,0 +1,8 @@
+{
+  "base": "exnihilosatellitium:concentrated_honey",
+  "added": {
+    "item": "minecraft:glass_bottle"
+  },
+  "drain": 250,
+  "result": "minecraft:honey_bottle"
+}

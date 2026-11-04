@@ -1,0 +1,11 @@
+{
+  "mod": "ae2",
+  "patch": true,
+  "input": "minecraft:gravel",
+  "outputs": [
+    {
+      "item": "ae2:sky_dust",
+      "chance": 0.0625
+    }
+  ]
+}

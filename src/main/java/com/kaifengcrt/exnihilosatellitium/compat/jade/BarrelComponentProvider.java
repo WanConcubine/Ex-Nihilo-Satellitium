@@ -35,8 +35,9 @@ public enum BarrelComponentProvider implements IBlockComponentProvider {
         }
 
         if (barrel.isCooking()) {
-            tooltip.add(Component.translatable("jade.exnihilosatellitium.barrel.cooking",
-                    barrel.getCookSeconds()));
+            tooltip.add(Component.translatable(barrel.isConvertingFluid()
+                    ? "jade.exnihilosatellitium.barrel.converting"
+                    : "jade.exnihilosatellitium.barrel.cooking", barrel.getCookSeconds()));
             return;
         }
 

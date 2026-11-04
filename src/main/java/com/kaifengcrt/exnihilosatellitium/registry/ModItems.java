@@ -10,6 +10,7 @@ import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.BrainPlatinumItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.NyliumSporesItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
@@ -122,6 +123,13 @@ public final class ModItems {
             ITEMS.register("shulker_doll", () -> new Item(new Item.Properties().stacksTo(16)));
     public static final DeferredHolder<Item, Item> GUARDIAN_DOLL =
             ITEMS.register("guardian_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final DeferredHolder<Item, Item> VILLAGER_DOLL =
+            ITEMS.register("villager_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+
+    /** "Brain Platinum": turns a nitwit villager into an ordinary unemployed villager. */
+    public static final DeferredHolder<Item, Item> BRAIN_PLATINUM =
+            ITEMS.register("brain_platinum", () -> new BrainPlatinumItem(
+                    new Item.Properties().stacksTo(16)));
 
     /**
      * Thermal dolls: the crafting catalyst (niter dust) and the summoned mobs
