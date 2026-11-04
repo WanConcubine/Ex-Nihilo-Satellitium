@@ -13,11 +13,9 @@ import java.util.function.Consumer;
  */
 public final class TintedWaterFluidType extends FluidType {
 
-    private final int tint;
-
     public TintedWaterFluidType(final String descriptionId, final int density, final int viscosity,
                                 final int temperature, final boolean canSwim,
-                                final boolean canExtinguish, final int tint) {
+                                final boolean canExtinguish) {
         super(FluidType.Properties.create()
                 .descriptionId(descriptionId)
                 .density(density)
@@ -27,11 +25,24 @@ public final class TintedWaterFluidType extends FluidType {
                 .canSwim(canSwim)
                 .canExtinguish(canExtinguish)
                 .supportsBoating(false));
-        this.tint = tint;
     }
 
+    /**
+     * {@link FluidType}'s constructor calls this before our own fields are
+     * initialized, so the tint must be derived from the description id that the
+     * super constructor has already stored. Passing a field here would hand the
+     * client a 0 (black) tint.
+     */
     @Override
     public void initializeClient(final Consumer<IClientFluidTypeExtensions> consumer) {
-        consumer.accept(new TintedWaterClientExtensions(this.tint));
+        consumer.accept(new TintedWaterClientExtensions(tintFor(this.getDescriptionId())));
+    }
+
+    private static int tintFor(final String descriptionId) {
+        return switch (descriptionId) {
+            case "fluid_type.exnihilosatellitium.sugar_water" -> 0xFFE8C97A;
+            case "fluid_type.exnihilosatellitium.concentrated_honey" -> 0xFFD98A2B;
+            default -> 0xFFFFFFFF;
+        };
     }
 }
