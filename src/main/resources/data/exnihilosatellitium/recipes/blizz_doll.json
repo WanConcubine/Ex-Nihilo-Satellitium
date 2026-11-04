@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "minecraft:snowball"
+    },
+    "y": {
+      "item": "minecraft:redstone"
+    },
+    "z": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "w": {
+      "item": "exnihilosatellitium:doll"
+    },
+    "v": {
+      "item": "minecraft:nether_wart"
+    }
+  },
+  "pattern": [
+    "xyx",
+    "zwz",
+    "xvx"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:blizz_doll"
+  },
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "thermal_foundation"
+    }
+  ]
+}

@@ -3,6 +3,22 @@
 > 从 [status.md](status.md) 搬出来的批次叙事与日期流水：只记「当时做了什么、怎么验的」。
 > **当前状态、验证表、下一步只看 status.md**；这里不再维护，只作追溯用。
 
+## 2026-11-03 晚（工匠巧思 + AE2 赛特斯石英）
+
+- **对象**：TiT `0.2.4`（只有 1.20.1）+ AE2 `15.4.12`（前置 GuideME `20.1.15`）。两者都可选，
+  不写 `mods.toml`；AE2/GuideME 的生产 jar 放 `libs/`，由 `-PtechMods` 走 `fg.deobf`。
+- **TiT 阿迪特（`ardite`，金属）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装时回退
+  自有 `ardite_ingot`；**单源**碎下界岩 1% → `ardite_broken`，走三档链 → 矿块 → 熔炼；
+  6 条 `tconstruct:melting`（碎矿 45 mB / 矿块 180 mB，950°C，`forge:molten_ardite`）。
+- **TiT 叶绿素（`chlorophyll`，`gems`）**：只在 TiT 在场时注册；**单源**草方块 1% →
+  `chlorophyll_broken`（草方块表 = 泥土 24 条 + 这一条），矿块熔成
+  `tinkers_thinking:chlorophyte_compound`。没装 TiT 时整条不出现。
+- **AE2 赛特斯**：`sieve/sand_ae2.json` 对沙追加 `ae2:certus_quartz_crystal` **1/6**、
+  `ae2:certus_quartz_dust` **1/12**；不注册自有物品；充能赛特斯走 AE2 自己的充电器，
+  天石粉/陨石不做；缺 AE2 时整文件跳过。
+- **验证**：`-PtechMods` 全装 `22 entries` / `141 drops` / `79` 锤；RCON 熔炉阿迪特与叶绿素
+  通过；去掉 AE2 时 139、无 unknown；手筛 / JEI / 匠魂炉未目视。
+
 ## 2026-11-03（数据包 v2 / 末影蛋糕 / 三路径 / 科技矿物链移植）
 
 ### 数据包 v2 移植

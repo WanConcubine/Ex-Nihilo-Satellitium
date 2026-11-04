@@ -1,0 +1,9 @@
+{
+  "mod": "thermal_foundation",
+  "base": "minecraft:water",
+  "added": {
+    "item": "exnihilosatellitium:blizz_doll"
+  },
+  "entity": "thermal:blizz",
+  "peaceful_drop": "thermal:blizz_rod"
+}

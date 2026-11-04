@@ -65,6 +65,13 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CREEPY_DOLL.get());
                 output.accept(ModItems.SHULKER_DOLL.get());
                 output.accept(ModItems.GUARDIAN_DOLL.get());
+                // Thermal dolls are only registered while Thermal is loaded.
+                if (ModItems.BLITZ_DOLL != null) {
+                    output.accept(ModItems.BLITZ_DOLL.get());
+                }
+                if (ModItems.BLIZZ_DOLL != null) {
+                    output.accept(ModItems.BLIZZ_DOLL.get());
+                }
                 for (final OreMaterial material : OreMaterials.all()) {
                     final var entries = ModOreItems.byMaterial().get(material.id());
                     for (final String kind : ModOreBlocks.KINDS) {

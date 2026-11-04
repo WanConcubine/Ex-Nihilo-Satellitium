@@ -222,6 +222,17 @@ public final class ModItems {
     public static final RegistryObject<Item> GUARDIAN_DOLL =
             ITEMS.register("guardian_doll", () -> new Item(new Item.Properties().stacksTo(16)));
 
+    /**
+     * Thermal dolls: the crafting catalyst (niter dust) and the summoned mobs
+     * both come from Thermal (1.20.1 only), so the items only exist while
+     * Thermal Foundation is loaded. The fields stay {@code null} otherwise and
+     * the hand-written recipe / barrel JSON is gated on the same mod id.
+     */
+    public static final RegistryObject<Item> BLITZ_DOLL =
+            registerThermalDoll("blitz_doll");
+    public static final RegistryObject<Item> BLIZZ_DOLL =
+            registerThermalDoll("blizz_doll");
+
     /** M6: infested leaves item; the block-entity tag picks 0 % or mature. */
     public static final RegistryObject<Item> INFESTED_LEAVES =
             ITEMS.register("infested_leaves", () -> new InfestedLeavesBlockItem(
@@ -327,6 +338,14 @@ public final class ModItems {
         }
         return ITEMS.register(name, () -> new TinkersGrassSeedItem(
                 new Item.Properties(), targetBlock));
+    }
+
+    /** Conditional item: absent unless Thermal Foundation is on the mod list. */
+    private static RegistryObject<Item> registerThermalDoll(final String name) {
+        if (ModList.get() == null || !ModList.get().isLoaded("thermal_foundation")) {
+            return null;
+        }
+        return ITEMS.register(name, () -> new Item(new Item.Properties().stacksTo(16)));
     }
 
     public static void register(final IEventBus modBus) {
