@@ -1,5 +1,58 @@
 # 更新记录
 
+## 1.2.0 — 2026-11-04（内容更新）
+
+> 本版新增 **Extreme Reactors**（两版）与 **BambooMod**（仅 1.20.1）联动，补骨粉 / 烈焰粉两条筛出物，
+> 并修掉“我们的 yellorium 矿块不被 Mekanism / IE / Create 识别”的问题。
+> BambooMod 与匠魂只存在于 1.20.1 线；1.21.1 线只有 ER 与两条筛出物。
+
+### 新增
+
+- **骨粉**：尘土筛 20% 出 `minecraft:bone_meal`（对齐经典 Ex Nihilo 的 1/5），
+  瓷土与菌岩催菌不再只靠骷髅掉落。
+- **烈焰粉**：沙子筛 3% 出 `minecraft:blaze_powder`；碎下界岩 6% 保留为更高产的第二来源。
+- **Extreme Reactors（两版）**：新增 `yellorium`（1/8）、`anglesite` / `benitoite`（各 1/64）
+  三条 `gems` 门控材料；三档矿链 → 熔成 `bigreactors:yellorium_ingot` /
+  `anglesite_crystal` / `benitoite_crystal`。没装 ER 时整条不注册，基表 118 / 115 不变；
+  装 ER 时筛表 +9、锤表 +9。
+- **ER 矿石识别**：yellorium 矿块同时进 `forge:ores/yellorite` 与 `forge:ores/uranium`
+  （1.21.1 为 `c:` 别名），`yellorium_broken` 进 `forge:raw_materials/yellorium`。
+  这样 Mekanism `enriching`、IE crusher、Create crushing 能像处理 ER 原矿一样处理我们的矿块
+  （输出对方的铀粉 / 粉碎铀，不是 yellorium）。
+- **BambooMod（仅 1.20.1）**：泥土/草方块各 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、
+  番茄 4%），砂砾 3 条宝石（银杏/枫/樱各 1/64）；全部 `mod: bamboomod` 门控。
+  它的树叶/树苗/竹笋已在 `#minecraft:leaves` / `#minecraft:saplings`，堆肥直接按 125 分。
+- **匠魂（仅 1.20.1）**：yellorium 碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 / 块 810；
+  再加锭/块 2 条铸造。复用 ER 自带的 `forge:yellorium` 流体，不新增流体。
+
+### 修复
+
+- **yellorium 矿块不被其他模组识别**：我们的矿块原先只在 `forge:ores/yellorium`，
+  而 ER 的 yellorite 同时是 `forge:ores/yellorite` 与 `forge:ores/uranium`，机器按后者取矿。
+  现在两个别名都补上，`yellorium_broken` 也进 raw 标签。
+
+### 数据
+
+- 材料 22 → **25** 种（14 金属 + 11 矿物；ER 三条走 `gems` 门控）。
+- 筛表：基表 118 / 1.20.1 115 不变；装 ER 各 +9；1.20.1 装 BambooMod +19
+  （泥土 8 / 草 8 / 砂砾 3），全装 173。
+- 匠魂：92 条熔炼 + 2 条铸造（原 84 + ER 10）。
+
+### 验证
+
+- 两版 `build`、`check-textures.py`、`check-data-paths.py`、`check-wiki.py` 通过。
+- 两版真装 ER + ZeroCore：`[materials] 25`（1.20.1 全装）、`[sieve] 154`、RCON 熔炉三种 ER 产物通过。
+- 1.20.1 真装 BambooMod：`[sieve] 173`、`[hammer] 88`、`/setblock` 树苗/竹笋通过。
+- 匠魂配方随服务端加载无解析错误；实机熔炉熔化尚未逐项点过。
+- 未做：手动右键筛、树苗生长、JEI 页面目视。
+
+### 已知限制
+
+- **BambooMod 只有 1.20.1**；1.21.1 线不加载。
+- **anglesite / benitoite 没有匠魂熔炼**：它们没有对应熔融流体；要支持需新增 molten 流体。
+- **Thermal 磨粉机没有 yellorium / uranium 配方**；Mekanism / IE / Create 按 `forge:ores/uranium` 工作。
+- 1.20.1 分支筛表仍比主线少 3 条钴（历史差异）。
+
 ## 1.1.2 — 2026-11-04（Bug 修复版）
 
 > 这是一个**纯 bug 修复版**，没有新增玩法内容，也不改任何数据表。
