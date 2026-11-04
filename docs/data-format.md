@@ -306,11 +306,27 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
     "entity": "minecraft:slime", "peaceful_drop": "minecraft:slime_ball" }
   ```
   非和平在桶上方生成实体，和平掉 `peaceful_drop`；`peaceful_drop` 可为数组。
+- **流体结果**用 `result_fluid` 代替 `result`/`entity`，可选 `delay_ticks`：
+  ```json
+  { "base": "minecraft:water", "added": { "item": "minecraft:sugar" },
+    "result_fluid": "exnihilosatellitium:sugar_water" }
+  ```
+  ```json
+  { "base": "exnihilosatellitium:sugar_water", "added": { "item": "minecraft:yellow_dye" },
+    "result_fluid": "exnihilosatellitium:concentrated_honey", "delay_ticks": 600 }
+  ```
+  桶必须满；延迟期间保留原流体，到点整桶换液（600 tick = 30 秒）。
+- **部分抽取**用 `drain` + `result`（只配 `added.item`），不要求满桶：
+  ```json
+  { "base": "exnihilosatellitium:concentrated_honey",
+    "added": { "item": "minecraft:glass_bottle" }, "drain": 250, "result": "minecraft:honey_bottle" }
+  ```
 - **物品规则优先于流体容器路径**：牛奶桶同时是物品和流体容器，先匹配 `added.item`；
   消耗后把 `getCraftingRemainingItem()`（牛奶桶 → 空桶）还给玩家。
-- 当前 14 条（缺 Thermal 时 12 条）：基础 5（水+熔岩、熔岩+水、熔岩+红石、熔岩+荧石、水+尘土）、
-  牛奶 1、巫水 2、人偶 6（含热力 2 条：熔岩+狂风人偶→`thermal:blitz`、水+暴雪人偶→`thermal:blizz`，
-  根级 `"mod": "thermal_foundation"`，和平掉 `thermal:blitz_rod` / `thermal:blizz_rod`）。
+- 当前 18 条（缺 Thermal 时 16 条）：基础 5、牛奶 1、巫水 2、人偶 7（含村民人偶；
+  热力 2 条：熔岩+狂风人偶→`thermal:blitz`、水+暴雪人偶→`thermal:blizz`，根级
+  `"mod": "thermal_foundation"`，和平掉 `thermal:*_rod`）、糖水/蜂蜜 3。
+  浓缩蜂蜜桶每 100 tick 1/6 概率在 6 格内养 1 只蜜蜂（上限 5）。
 - 未知 base/added/result/entity 只跳过该条并打 `[barrel]` 警告；删掉 JSON 就不反应。
 
 ## 10. 数据包魔改指南（七张玩法表，2026-11-03）

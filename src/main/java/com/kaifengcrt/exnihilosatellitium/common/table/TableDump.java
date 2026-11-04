@@ -111,7 +111,17 @@ public final class TableDump {
         } else {
             line.append(" + item:").append(id(recipe.addedItem()));
         }
-        line.append(" -> ").append(id(recipe.result().getItem()));
+        if (recipe.producesFluid()) {
+            line.append(" -> fluid:").append(BuiltInRegistries.FLUID.getKey(recipe.resultFluid()));
+            if (recipe.delayTicks() > 0) {
+                line.append(" delay:").append(recipe.delayTicks());
+            }
+        } else {
+            line.append(" -> ").append(id(recipe.result().getItem()));
+            if (recipe.drainsFluid()) {
+                line.append(" drain:").append(recipe.drain());
+            }
+        }
         if (recipe.spawnsEntity()) {
             line.append(" entity:").append(recipe.entity());
             line.append(" cook:").append(recipe.cookTicks());

@@ -10,6 +10,10 @@
     {
       "item": "ae2:certus_quartz_dust",
       "chance": 0.08333
+    },
+    {
+      "item": "ae2:sky_dust",
+      "chance": 0.0625
     }
   ]
 }

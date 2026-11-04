@@ -48,12 +48,18 @@ public final class BarrelRecipeCategory extends AbstractRecipeCategory<BarrelRec
     public void setRecipe(final IRecipeLayoutBuilder builder, final BarrelRecipes.Recipe recipe,
                           final IFocusGroup focuses) {
         final Fluid base = recipe.base();
+        final int baseAmount = recipe.drainsFluid() ? recipe.drain() : BarrelBlockEntity.CAPACITY;
         builder.addInputSlot(BASE_X, SLOT_Y)
                 .setStandardSlotBackground()
                 .setFluidRenderer(BarrelBlockEntity.CAPACITY, false, 16, 16)
-                .addFluidStack(base, BarrelBlockEntity.CAPACITY)
+                .addFluidStack(base, baseAmount)
                 .addRichTooltipCallback((view, tooltip) -> {
-                    tooltip.add(Component.translatable("jei.exnihilosatellitium.barrel.base"));
+                    if (recipe.drainsFluid()) {
+                        tooltip.add(Component.translatable(
+                                "jei.exnihilosatellitium.barrel.base_any", baseAmount));
+                    } else {
+                        tooltip.add(Component.translatable("jei.exnihilosatellitium.barrel.base"));
+                    }
                     if (base == Fluids.LAVA) {
                         tooltip.add(Component.translatable("jei.exnihilosatellitium.barrel.base_lava"));
                     }
@@ -74,11 +80,33 @@ public final class BarrelRecipeCategory extends AbstractRecipeCategory<BarrelRec
                             Component.translatable("jei.exnihilosatellitium.barrel.added_item")));
         }
 
-        builder.addOutputSlot(RESULT_X, SLOT_Y)
-                .setStandardSlotBackground()
-                .addItemStack(recipe.result())
-                .addRichTooltipCallback((view, tooltip) -> tooltip.add(
-                        Component.translatable("jei.exnihilosatellitium.barrel.result")));
+        if (recipe.producesFluid()) {
+            builder.addOutputSlot(RESULT_X, SLOT_Y)
+                    .setStandardSlotBackground()
+                    .setFluidRenderer(BarrelBlockEntity.CAPACITY, false, 16, 16)
+                    .addFluidStack(recipe.resultFluid(), BarrelBlockEntity.CAPACITY)
+                    .addRichTooltipCallback((view, tooltip) -> {
+                        tooltip.add(Component.translatable(
+                                "jei.exnihilosatellitium.barrel.result_fluid"));
+                        if (recipe.delayTicks() > 0) {
+                            tooltip.add(Component.translatable(
+                                    "jei.exnihilosatellitium.barrel.delay",
+                                    (recipe.delayTicks() + 19) / 20));
+                        }
+                    });
+        } else {
+            builder.addOutputSlot(RESULT_X, SLOT_Y)
+                    .setStandardSlotBackground()
+                    .addItemStack(recipe.result())
+                    .addRichTooltipCallback((view, tooltip) -> {
+                        tooltip.add(Component.translatable(
+                                "jei.exnihilosatellitium.barrel.result"));
+                        if (recipe.drainsFluid()) {
+                            tooltip.add(Component.translatable(
+                                    "jei.exnihilosatellitium.barrel.drain", recipe.drain()));
+                        }
+                    });
+        }
     }
 
     @Override

@@ -1,0 +1,8 @@
+{
+  "base": "exnihilosatellitium:sugar_water",
+  "added": {
+    "item": "minecraft:yellow_dye"
+  },
+  "result_fluid": "exnihilosatellitium:concentrated_honey",
+  "delay_ticks": 600
+}

@@ -65,6 +65,8 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CREEPY_DOLL.get());
                 output.accept(ModItems.SHULKER_DOLL.get());
                 output.accept(ModItems.GUARDIAN_DOLL.get());
+                output.accept(ModItems.VILLAGER_DOLL.get());
+                output.accept(ModItems.BRAIN_PLATINUM.get());
                 // Thermal dolls are only registered while Thermal is loaded.
                 if (ModItems.BLITZ_DOLL != null) {
                     output.accept(ModItems.BLITZ_DOLL.get());
