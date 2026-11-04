@@ -1,10 +1,10 @@
 # 1.3.0 发布材料（1.20.1 线）
 
-> 状态：**1.3.0 已构建、打 tag；推送与 CurseForge / Modrinth 上传待办。**
+> 状态：**1.3.0 已构建、打 tag 并推送；CurseForge / Modrinth 上传待所有者操作。**
 > 版本号：`1.3.0`；本文件是 **1.20.1 / Forge 47.4** 线，1.21.1 线的同版本说明在 `main` 分支。
 > 性质：**内容更新**——龙之进化（Draconic Evolution）龙尘 / 龙锭联动 + 破碎龙矿贴图修正。
 > 上一版：1.2.0（2026-11-04）。
-> tag `v1.3.0-1.20.1`（2026-11-05）；推送状态见文末清单。
+> 已推送：`1.20.1-forge` b046e19 / `main` 794413e；tag `v1.3.0-1.20.1`（2026-11-05）。
 
 ## 产物
 
@@ -75,7 +75,7 @@ jar 包含 `LICENSE`、`THIRD-PARTY.md`、`icon.png` 和 `META-INF/mods.toml`；
 - [x] `build` 成功，jar 内版本号 1.3.0
 - [x] jar 大小 / sha256 回填
 - [x] 打 tag：`v1.3.0-1.20.1`
-- [ ] 推送分支与 tag 到 origin
+- [x] 推送分支与 tag 到 origin
 - [ ] CurseForge 上传 1.20.1 文件
 - [ ] Modrinth 上传对应版本
 - [ ] 把商店下载链接补进 README
