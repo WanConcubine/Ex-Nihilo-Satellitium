@@ -1,0 +1,11 @@
+{
+  "mod": "draconicevolution",
+  "patch": true,
+  "input": "exnihilosatellitium:crushed_end_stone",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:draconium_broken",
+      "chance": 0.125
+    }
+  ]
+}

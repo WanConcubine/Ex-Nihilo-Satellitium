@@ -1,5 +1,26 @@
 # 更新记录
 
+## 未发布 — 龙之进化联动（两版）
+
+> 新增 **Draconic Evolution（龙之进化）** 的 `draconium` 材料：粉碎末地石 1/8 单源 →
+> 破碎龙矿 → 4 合 1 矿块 → 熔成龙锭。DE 不在场时整条不注册，基表不变。
+
+### 新增
+
+- **龙尘（`draconium`）**：`gems` 门控材料（`draconicevolution`），tier `rare`、rarity 64。
+  工作台 2×2 把 4 个破碎龙矿压成矿砾，矿砂 / 矿尘同理；锤矿砾→粉碎、矿砂→粉末各 4–6。
+- **唯一入口**：粉碎末地石 **1/8** 出 `draconium_broken`（`sieve/crushed_end_stone_draconicevolution.json`，
+  根级 `mod` + `patch`），末地石本身由熔岩 + 荧石获得。
+- **熔炼**：矿砾 / 矿砂 / 矿尘进 `c:ores/draconium`（1.20.1 `forge:ores/draconium`），
+  直接复用 DE 的标签熔炼，出 `draconicevolution:draconium_ingot`；不写重复的自有变体。
+- **不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心）与混沌碎片（混沌守卫）保持 DE 原流程。
+
+### 数据
+
+- 材料 25 → **26** 种（14 金属 + 12 矿物）。
+- 筛表：基表 118 / 115 不变；装 DE 各 +1（主线 AE2+ER 131 → 132，1.20.1 全装 173 → 174）。
+- 锤表：装 DE 各 +3（主线 AE2+ER 64 → 67，1.20.1 全装 88 → 91）。
+
 ## 1.2.0 — 2026-11-04（内容更新）
 
 > 本版新增 **Extreme Reactors**（两版）与 **BambooMod**（仅 1.20.1）联动，补骨粉 / 烈焰粉两条筛出物，

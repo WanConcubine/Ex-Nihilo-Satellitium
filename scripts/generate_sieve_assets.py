@@ -35,10 +35,11 @@ MATS = [m for m in json.load(open(SOURCE / f"{MOD_ID}/materials.json", encoding=
 METALS = [m for m in MATS if "gems" not in m]
 GEMS = [m for m in MATS if "gems" in m]
 # Single-source materials: each arrives from one hand-written table only
-# (ardite from crushed netherrack, chlorophyll from grass blocks).  They must not
-# leak into the overworld gravel / sand / dust tables, where the player would
-# read "ardite from gravel" — the generators below skip them on both paths.
-SINGLE_SOURCE = frozenset({"ardite", "chlorophyll"})
+# (ardite from crushed netherrack, chlorophyll from grass blocks, draconium from
+# crushed end stone).  They must not leak into the overworld gravel / sand / dust
+# tables, where the player would read "ardite from gravel" — the generators below
+# skip them on both paths.
+SINGLE_SOURCE = frozenset({"ardite", "chlorophyll", "draconium"})
 SOIL_METALS = [m for m in METALS if m["id"] not in SINGLE_SOURCE]
 SOIL_GEMS = [m for m in GEMS if m["id"] not in SINGLE_SOURCE]
 

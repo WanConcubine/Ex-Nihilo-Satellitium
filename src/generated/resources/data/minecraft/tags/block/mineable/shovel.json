@@ -302,6 +302,18 @@
     {
       "id": "exnihilosatellitium:benitoite_ore_dust",
       "required": false
+    },
+    {
+      "id": "exnihilosatellitium:draconium_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:draconium_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:draconium_ore_dust",
+      "required": false
     }
   ]
 }
