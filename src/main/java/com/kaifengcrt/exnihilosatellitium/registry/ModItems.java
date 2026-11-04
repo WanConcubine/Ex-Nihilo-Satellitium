@@ -26,6 +26,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -228,8 +229,10 @@ public final class ModItems {
      * Thermal Foundation is loaded. The fields stay {@code null} otherwise and
      * the hand-written recipe / barrel JSON is gated on the same mod id.
      */
+    @Nullable
     public static final RegistryObject<Item> BLITZ_DOLL =
             registerThermalDoll("blitz_doll");
+    @Nullable
     public static final RegistryObject<Item> BLIZZ_DOLL =
             registerThermalDoll("blizz_doll");
 
@@ -341,6 +344,7 @@ public final class ModItems {
     }
 
     /** Conditional item: absent unless Thermal Foundation is on the mod list. */
+    @Nullable
     private static RegistryObject<Item> registerThermalDoll(final String name) {
         if (ModList.get() == null || !ModList.get().isLoaded("thermal_foundation")) {
             return null;
