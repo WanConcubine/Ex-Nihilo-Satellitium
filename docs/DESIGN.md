@@ -522,6 +522,8 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 
 - **物品**：`villager_doll`（8 绿宝石围人偶；巫水桶 → 僵尸村民，和平掉腐肉）、
   `brain_platinum`（蛋 4 + 糖 4 + 绿宝石；右键傻子村民 → 普通无职业村民）。
+  脑白金另接 `PlayerInteractEvent.EntityInteract`：原版村民会先开交易界面，事件在
+  `Entity#interact` 之前取消，普通右键即可生效（不必 Shift）。
 - **桶表**：`BarrelRecipes` 增加 `resultFluid` / `delayTicks` / `drain`；`result_fluid` 与
   `result`/`entity` 互斥，`drain` 只配 `added.item` 且不要求满桶。
 - **BE**：`PendingFluidFrom/To/Ticks` 保存 30 秒换液；到点且仍是原流体才替换，每 20 tick 同步；

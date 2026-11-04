@@ -117,7 +117,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | 坩埚 / 巫水 / 瓷桶 | ✅ | 39+9 表、篝火/熔炉速率、巫水发酵与转化、瓷桶 capability |
 | 蚕 / 人偶 | ✅ | 侵染进度/扩散、8 种人偶（含热力 2 只、村民）生成与和平掉落 RCON 验过 |
 | 热力人偶 | ✅ / ⚠️ | `[barrel] 18`、dump 两条规则（`thermal:blitz` / `thermal:blizz`，和平 `thermal:*_rod`）、`/summon` 两物品通过；配方经 `/reload` 解析探测；合成 / 右键 / JEI 未实测 |
-| 村民 / 蜂蜜 | ✅ / ⚠️ | 两个新物品 `/summon` 正常、配方由 datagen 生成；data merge 验证 30 秒换液、蜜蜂生成（`PersistenceRequired`）；真实右键 / 玻璃瓶抽取 / JEI 未测 |
+| 村民 / 蜂蜜 | ✅ / ⚠️ | 两个新物品 `/summon` 正常、配方由 datagen 生成；data merge 验证 30 秒换液、蜜蜂生成（`PersistenceRequired`）；脑白金已改为 `EntityInteract` 抢先于交易界面（免 Shift）；真实右键 / 玻璃瓶抽取 / JEI 未测 |
 | 客户端画面 | ⚠️ | 最近一次客户端冒烟停在 2026-11-02；新物品/流体、热力人偶、TiT/AE2 物品、JEI 页未目视 |
 | 合成 / 右键手感 | ⚠️ | 全部配方 JSON 已加载，但没有玩家逐项实测 |
 
@@ -179,6 +179,10 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 - **条件物品的模型不能交给 datagen**：热力人偶只在 Thermal 在场时注册，模型手写；
   `ModItemModels.HAND_FLAT_MODELS` 按名字跳过，否则 datagen 一旦看到 Thermal 就会写出同名
   模型和手写文件撞路径。字段是 `@Nullable`，用它的地方（创造栏等）必须 null 检查。
+- **村民交易界面会抢右键**：`Item#interactLivingEntity` 在村民身上只有潜行时才走到
+  （Forge 只在 `Villager#mobInteract` 的 `!isSecondaryUseActive()` 分支里继续）；
+  要免 Shift 必须在 `PlayerInteractEvent.EntityInteract` 里取消事件（该事件在 `Entity#interact`
+  之前）。脑白金走这个入口，`BrainPlatinumItem.tryConvert` 仍保留给潜行/其它路径。
 - **TiT 阿迪特/叶绿素是单源**：只从碎下界岩 / 草方块出，不再扩散到砂砾/沙子/尘土；
   改筛表前先看 `scripts/generate_sieve_assets.py`（分支没有这个脚本，需手工对齐）。
 ## 常用命令
