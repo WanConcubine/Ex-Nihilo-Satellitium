@@ -1700,6 +1700,9 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 - **物品**：`villager_doll`（64×64，翠绿人偶轮廓）、`brain_platinum`（16×16 蓝色礼盒 + 金丝带）；
   `BrainPlatinumItem#interactLivingEntity` 只对 `VillagerProfession.NITWIT` 生效，
   改成 `NONE` + `level 1` + `xp 0`，消耗 1 个，播放 `VILLAGER_YES` + 绿色粒子。
+  **免 Shift**：原版 `Villager#mobInteract` 会先开交易界面，只在潜行时才把右键让给物品；
+  所以另接 `PlayerInteractEvent.EntityInteract`（在 `Entity#interact` 之前）取消事件并调用
+  `tryConvert`，普通右键也能生效。
 - **桶表新规则**（`BarrelRecipes.Recipe`）：
   - `result_fluid`：满桶 + 物品 → 整桶换成目标流体，`delay_ticks` 可延迟（糖水 600 tick）；
   - `drain` + `result`：桶内至少 `drain` mB 即可右键，扣流体、给物品（玻璃瓶 250 mB → 蜂蜜瓶）；

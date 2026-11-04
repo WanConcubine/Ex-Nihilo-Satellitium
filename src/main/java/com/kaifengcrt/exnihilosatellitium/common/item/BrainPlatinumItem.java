@@ -31,9 +31,29 @@ public final class BrainPlatinumItem extends Item {
     @Override
     public InteractionResult interactLivingEntity(final ItemStack stack, final Player player,
                                                   final LivingEntity target, final InteractionHand hand) {
+        return tryConvert(player, target, stack)
+                ? InteractionResult.sidedSuccess(player.level().isClientSide)
+                : InteractionResult.PASS;
+    }
+
+    /**
+     * Converts a nitwit villager into an ordinary unemployed villager.
+     *
+     * <p>Called from both {@link #interactLivingEntity} and the
+     * {@code PlayerInteractEvent.EntityInteract} handler: vanilla opens the
+     * trade screen on a normal right-click, so the item method only runs while
+     * sneaking. The event runs before the villager interaction and can cancel
+     * it, which keeps the item usable without Shift.</p>
+     *
+     * @return true when the target is a nitwit (whether or not this is the
+     *         logical server); the caller decides whether to cancel the
+     *         vanilla interaction.
+     */
+    public static boolean tryConvert(final Player player, final LivingEntity target,
+                                     final ItemStack stack) {
         if (!(target instanceof Villager villager)
                 || villager.getVillagerData().getProfession() != VillagerProfession.NITWIT) {
-            return InteractionResult.PASS;
+            return false;
         }
 
         final Level level = player.level();
@@ -53,6 +73,6 @@ public final class BrainPlatinumItem extends Item {
                         8, 0.4D, 0.5D, 0.4D, 0.0D);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return true;
     }
 }
