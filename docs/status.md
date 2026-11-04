@@ -288,6 +288,9 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
   被 `FluidTank`、JEI 和渲染器使用；但玩家无法舀取。糖水/蜂蜜后来补了 source block + 桶
   （`LiquidBlock` + `BucketItem`），否则只能“有流体没桶装物”。无论哪种形态，都必须注册
   still/flowing 对与 `FluidType`，并在客户端注册 tint，否则渲染成紫黑格。
+- **1.20.1 的 `FluidType.initializeClient` 在构造器里调用，早于子类字段初始化**：tint 不能
+  存到实例字段再在 `initializeClient` 里读，否则读到 0（黑色 tint）；应按 `descriptionId`
+  映射常量，或在 1.21.1 的 `RegisterClientExtensionsEvent` 里传常量。
 - **`result_fluid` 规则的 `result()` 是空栈**：JEI 必须按 `producesFluid()` 分流到流体槽，
   `TableDump` 也必须输出 `fluid:`；任何“取 `result().getItem()`”的旧代码都要加分支。
 - **`drain` 规则不要求满桶**：`itemMixRule` 只看满桶，抽取规则走单独的 `drainRule`，且在
