@@ -7,9 +7,10 @@
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
 （`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.1.0 已发布**（两条线 tag：`v1.1.0` / `v1.1.0-1.20.1`）；1.0.0 / 1.1.0 的商店上传待所有者。
-**最新一批（2026-11-04 下午）**：村民人偶 / 脑白金 / 糖水 + 浓缩蜂蜜汁 / 蜜蜂 / 蜂箱配方 /
-AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规则，1.20.1 与 1.21.1 同步。
+**1.1.1 已发布**（两条线 tag：`v1.1.1` / `v1.1.1-1.20.1`）；1.0.0 / 1.1.0 / 1.1.1 的商店上传待所有者。
+**最新一批（2026-11-04 晚，1.1.1）**：木桶堆肥改成“原版泥土模型 + 投入物加权混色”，
+坩埚熔料改成真实方块模型（木坩埚里的树叶不再变成纯蓝水盒），堆肥成土 50 秒 → **30 秒**。
+上一批：村民人偶 / 脑白金 / 糖水 + 浓缩蜂蜜汁 / 蜜蜂 / 蜂箱 / AE2 陨石粉（1.1.0）。
 **联动**：22 种材料（14 金属 + 8 矿物）；Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2
 全部可选，缺失即降级；核心门面 P1 与三路径（数据包 / KubeJS / CraftTweaker）已完成。
 **当前表尺**：筛子 7 输入 / 116 掉落（无科技模组；1.20.1 113，缺 3 条钴历史差异）；
@@ -17,7 +18,20 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 锤表 55 基础 / 79 全装；桶 18（装 Thermal）/ 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
 **下一步**：商店上传 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
 
-## 当前批次（2026-11-04 下午，村民 / 脑白金 / 蜂蜜 / 蜜蜂）
+## 当前批次（2026-11-04 晚，1.1.1 视觉修正）
+
+- **木桶堆肥**：`BarrelBlockEntity` 记录 `CompostItems`（物品 + 实际计入点数）；
+  客户端 `ItemTint` 采样物品图标平均色（树叶等灰度贴图乘 `ItemColors` 植被色），
+  `BarrelRenderer` 用原版泥土方块模型 + `TintVertexConsumer` 按点数加权混色；
+  腐熟计时中 tint 淡回纯白，成土后显示原版泥土色。
+- **坩埚熔料**：`CrucibleRenderer` 用 `renderSingleBlock` 画被熔方块的真实模型；
+  木坩埚（`isWooden()`）在固体未熔完时始终显示熔料，不再中途切成水盒。
+- **成土时间**：`COMPOST_TICKS` 1000 → 600（30 秒），JEI 提示同步。
+- **证据**：两条线 dev client 截图（[1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png)）：
+  腐肉红褐 / 树叶绿 / 50-50 黄褐 / 成土原版泥土色；木坩埚显示树叶方块。
+- **清理**：删除不再使用的 `textures/block/barrel_compost.png`。
+
+## 上一批（2026-11-04 下午，村民 / 脑白金 / 蜂蜜 / 蜜蜂）
 
 - **村民人偶**（`villager_doll`）：8 个绿宝石围一圈普通人偶；巫水满桶 + 右键 → 僵尸村民，
   和平模式掉腐肉，桶恢复空桶。是第 8 只人偶。
@@ -47,7 +61,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 
 ### 桶 / 堆肥 / 筛子
 
-- 十二种桶（11 种木材 + 石桶）共享一个 BE；木桶 ≤433 K，石桶不限温；堆肥 1000 分制、50 秒成土；
+- 十二种桶（11 种木材 + 石桶）共享一个 BE；木桶 ≤433 K，石桶不限温；堆肥 1000 分制、30 秒成土；
   接雨水、比较器、破坏返还、管道状态互斥都已实现。
 - 桶转化 18 条（缺 Thermal 时 16 条）：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、熔岩+荧石→末地石、
   水+尘土→粘土、水+牛奶→史莱姆；巫水+沙→灵魂沙、巫水+树苗→深色橡树苗；
@@ -204,9 +218,11 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | `./gradlew build` | ✅ | 2026-11-04 两版 `BUILD SUCCESSFUL`（`--offline`） |
 | 1.0.0 发布 | ✅ | 两版 `mod_version=1.0.0`；tag `v1.0.0` / `v1.0.0-1.20.1`；jar 版本与 sha 见 [release-1.0.0.md](release-1.0.0.md) |
 | 1.1.0 发布 | ✅ | 两版 `mod_version=1.1.0`；tag `v1.1.0` / `v1.1.0-1.20.1`；jar 版本与 sha 见 [release-1.1.0.md](release-1.1.0.md) |
+| 1.1.1 发布 | ✅ | 两版 `mod_version=1.1.1`；tag `v1.1.1` / `v1.1.1-1.20.1`；jar 版本与 sha 见 [release-1.1.1.md](release-1.1.1.md) |
+| 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
 | `check-textures.py` | ✅ | 主线 270 模型 / 104 blockstate / 159 纹理；分支 272 / 104 / 155；无 `minecraft:item/*` |
 | `check-data-paths.py` | ✅ | 1.21.1：263 recipes / 75 loot / 63 tags；1.20.1 分支没有该脚本 |
-| `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 68 JSON / 7 nav |
+| `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 74 JSON / 7 nav |
 | 数据表 JSON | ✅ | 7 输入筛表 116（基表）、55 锤、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
@@ -232,7 +248,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | supported mods：Create / IE | ✅ | Create 锌锭 + 12 条 crushing；IE 五锭候选与 `forge:ores` 标签；多方块未跑 |
 | supported mods：Tinkers / TiT | ✅ | 钴 → `tconstruct:cobalt_ingot`；阿迪特/叶绿素 22 entries、RCON 熔炉两条都通过 |
 | supported mods：AE2 | ✅ | 1.21.1 116→120 / 1.20.1 139→143（+4，含沙/砂砾各 1/16 陨石粉）；RCON sand/gravel 含 `sky_dust 0.0625`；缺 AE2 静默跳过、无 unknown |
-| 客户端画面 | ⚠️ | 最近一次客户端验收停在 2026-10-31；新物品/流体、热力人偶、TiT/AE2 物品与 JEI 页未进游戏看过 |
+| 客户端画面 | ⚠️ | **1.1.1 的堆肥混色 / 坩埚树叶已在两条线 dev client 目视**；其余（机器 GUI、自动输出抽屉、热力人偶、TiT/AE2 物品与 JEI 页）仍停在 2026-10-31 之后未看 |
 | 旧内容目视 | ⚠️ | 桶/筛比例、木桶竖棱、筛料层、Jade tooltip 等仍待作者确认 |
 
 ## 下一步（按价值排序）
@@ -240,7 +256,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 > 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 
-1. **1.1.0 商店收尾**：版本号/日期确认、tag `v1.1.0` / `v1.1.0-1.20.1` 已打；
+1. **1.1.1 商店收尾**：版本号/日期确认、tag `v1.1.1` / `v1.1.1-1.20.1` 已打；
    CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
 2. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器、村民人偶 / 脑白金 / 糖水链 / 蜜蜂 / 热力人偶；清单见「交接清单」。
@@ -254,6 +270,9 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 
 ## 已拍板的决策
 
+- **1.1.1 堆肥/坩埚视觉（2026-11-04，所有者指定）**：堆肥 = 原版泥土模型 + 投入物按点数
+  加权混色，成土后显示泥土本色；木坩埚在固体未熔完时显示被熔方块（树叶）模型，不中途
+  切成水盒；成土时间 30 秒。
 - **项目名 / 许可证**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；mod id `exnihilosatellitium`；
   MIT（Forge MDK 仍 LGPL-2.1），见 [THIRD-PARTY.md](../THIRD-PARTY.md)。
 - **材料表 + 自持矿物链**：注册只认 jar 内 `materials.json`；表内材料有完整自有链；表外材料不自动发现。
@@ -270,7 +289,8 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
   `drain` + `result`（部分抽取，不要求满桶）；JEI/Jade/`dump` 同步。
 - **AE2 陨石粉（2026-11-04）**：沙与砂砾各 1/16 `ae2:sky_dust`，走原 `mod` 门补丁。
 - **锤/钩**：6 锤 / 2 钩，左键唯一路径；粉粉尘→自身是安全兜底，不作为 JEI 配方展示。
-- **坩埚**：熔料与流体分开记，熔料 1:1 产出流体；固体 > 流体显示熔料，反之流体；
+- **坩埚**：熔料与流体分开记，熔料 1:1 产出流体；一般坩埚“固体 > 流体显示熔料，反之流体”，
+  **木坩埚例外**：只要还有固体就显示熔料（树叶/树苗），避免中途切成水盒（1.1.1）；
   容量/熔料/热源倍率走 config，热源与熔点走数据包。**流动熔岩与源方块都按 0.2**
   （2026-11-02 所有者决定；`crucible_heat` 只按方块 id 匹配，不加 `level` 范围）。
 - **坩埚被破坏时内容物一起消失**（只掉方块本体），不做返还：忠于 1.7.10 原版，
@@ -312,6 +332,13 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 - **直连 TLS 失败（libraries.minecraft.net / repo.maven）**：缓存已齐时用 `--offline`。
 - **NeoForge 21.1 `FluidTank` NBT 是嵌套 `{Fluid:{id,amount}}`**，不是 1.20.1 的顶层 `FluidName`/`Amount`。
 - **1.21.1 没有 `#forge:*` 物品标签**：用 `#c:*`；`#minecraft:crops/seeds` 也不是物品标签。
+- **树叶/草/藤等贴图是灰度的**：直接采样物品图标的平均色会得到灰白；必须再乘
+  `ItemColors#getColor(stack, 0)`（生物群系植被/草色），否则堆肥混色里树叶是白的。
+- **BER 里画真实方块模型**：`renderSingleBlock` 走自己的 `MultiBufferSource`，要染色得
+  包一层 `VertexConsumer` 乘顶点色；1.21.1 走 `setColor(int...)`，1.20.1 还要转发
+  `defaultColor` / `unsetDefaultColor`。
+- **1:1 熔料（树叶→水）不能只按“固体 > 流体”决定显示**：水量超过固体后就会切成水盒；
+  木坩埚要按 `isWooden()` 在 `solidVolume > 0` 时始终显示熔料。
 - **堆肥标签和 JSON 必须同步**：标签有、JSON 没有 = 按 1 点处理。
 - **`#minecraft:saplings` 包含杜鹃 / 盛开的杜鹃**（1.21.1 与 1.20.1 都是），它们会按
   树苗标签的 125 堆肥；别把它们当成标签外物品再补 100。菌岩孢子不在任何原版标签里，

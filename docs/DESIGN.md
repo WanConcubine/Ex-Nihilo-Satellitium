@@ -269,7 +269,7 @@ M10 落地时把这条真正兑现了：`SieveRolls` / `HammerRolls` 成为唯�
 
 - `BarrelBlock` + `BarrelBlockEntity`：1000 mB `FluidTank`、`IFluidHandler` capability、NBT 持久化、客户端同步。
 - 堆肥：`#exnihilosatellitium:compostable` 物品标签负责客户端交互预测；
-  `data/<namespace>/compost/*.json` 提供数值（默认 65 条）；满 1000 后 1000 tick 进入 DIRT 状态，
+  `data/<namespace>/compost/*.json` 提供数值（默认 65 条）；满 1000 后 600 tick（30 秒）进入 DIRT 状态，
   **木桶保留**；右键取出 1 个泥土并重置，桶可继续用。
 - 比较器输出：DIRT 状态固定 15；否则 `max(流体比例, 堆肥比例)` 映射到 0–15。
 - **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
@@ -283,11 +283,14 @@ M10 落地时把这条真正兑现了：`SieveRolls` / `HammerRolls` 成为唯�
 - **客户端 `BarrelRenderer`**：液面 + 堆肥/泥土内容 box，按 fill 高度上升；堆肥计时期间
   颜色向泥土过渡，完成时播放 `COMPOSTER_READY` + 堆肥粒子；流体走
   `IClientFluidTypeExtensions`，堆肥走 `barrel_compost.png`，DIRT 状态走原版泥土贴图。
+  **2026-11-04（1.1.1）改成原版泥土方块模型 + 按投入物加权混色**，`barrel_compost.png`
+  已删除，见 §49。
 - **物品栏**：block model 补了标准 `display` 变换（gui/ground/手持）；`models/item/barrel.json`
   直接继承开口 block model，物品栏/手持是**空心**的 3D 桶。
-- **贴图**：木桶不再有自有 PNG（直接引用 vanilla block 贴图）；只保留 `barrel_compost.png`
-  和 `porcelain.png` 两张自有 16×16。`scripts/check-textures.py` 禁止 vanilla **item**
-  贴图，允许 vanilla **block** 贴图。
+- **贴图**：木桶不再有自有 PNG（直接引用 vanilla block 贴图）；当时只保留
+  `barrel_compost.png` 和 `porcelain.png` 两张自有 16×16（1.1.1 起 `barrel_compost.png`
+  也不再使用，堆肥表面直接用 `minecraft:block/dirt`）。
+  `scripts/check-textures.py` 禁止 vanilla **item** 贴图，允许 vanilla **block** 贴图。
 - **许可证**：ARR → **MIT**；`gradle.properties`、`LICENSE`、`THIRD-PARTY.md` 同步。
 
 **验证**
@@ -412,7 +415,7 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 
 **落地**
 
-- `COMPOST_MAX = 1000`、`COMPOST_TICKS = 1000`（50 秒，对齐原版 `MAX_COMPOSTING_TIME`）。
+- `COMPOST_MAX = 1000`、`COMPOST_TICKS = 600`（30 秒；1.1.1 从原版的 50 秒缩短，见 §49）。
 - `default.json` 改为 **65 条**（12 个标签 + 53 个具体物品），`compostable.json` 同步；
   肉类按 1.20.1 的十种生/熟肉显式列出，鱼用 `#minecraft:fishes`，种子/作物/蛋/线用
   `#c:*` 标签（2026-10-30 从 `#forge:*` 修正：1.21.1 的 NeoForge 只提供 `c:` 命名空间，
@@ -1730,3 +1733,39 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
   `/summon` 两个新物品正常；沙/砂砾 dump 各含 `sky_dust 0.0625`。
 - 两版 `build` + `runData` 通过，生成 5 个新资源（2 模型 + 3 配方）。
 - **未验**：玩家实际右键糖/蒲公英黄/玻璃瓶/人偶、脑白金对傻子村民、JEI 页面与流体亮度。
+
+## 49. 1.1.1 视觉修正：堆肥混色 + 木坩埚树叶模型（2026-11-04）
+
+**问题**
+
+- **木桶堆肥**：整块内容只有一个 `barrel_compost.png` 固定贴图，投入腐肉/树叶后颜色不变，
+  远看就是一个纯色方块；玩家要求“泥土模型 + 按投入物比例混色”。
+- **木坩埚堆水**：木坩埚只熔树叶/树苗（100/250 mB → 水）。熔到一半后 `solidVolume` 小于
+  水量，渲染器按经典的“固体 > 流体”规则切到流体，木坩埚里只剩一个蓝色水盒；玩家要求
+  “应该是树叶模型”。
+
+**实现**
+
+- `BarrelBlockEntity` 新增 `CompostIngredient(item, points)` 列表：每次右键堆肥记录
+  本次实际计入的点数（部分填满时只记剩余空间，保证权重和 = 1000），NBT 键
+  `CompostItems`（`[{id, points}]`，`getUpdateTag` 同步到客户端）。
+- `client/ItemTint`：对每个物品取图标 sprite（方块物品走 block particle icon，普通物品走
+  baked item model），按 alpha 加权求平均色，再乘 `ItemColors` 的 tint（**树叶/草贴图是
+  灰度的，必须用生物群系植被色染色**，否则树叶会被算成灰白）；按 sprite 实例缓存，
+  资源重载自动失效。
+- `client/BarrelRenderer`：用 `BlockRenderDispatcher.renderSingleBlock` 画**原版泥土方块
+  模型**，只缩放 Y 让土堆随 fill 升高；`TintVertexConsumer` 把方块模型的顶点色乘上
+  加权混色。混色 = 各物品归一化颜色按点数加权，再向白色混 35%（保留泥土底色）；
+  腐熟计时期间 tint 线性淡回纯白，`DIRT` 状态直接显示原版泥土颜色。
+- `client/CrucibleRenderer`：熔料改成**被熔方块的真正模型**（0.70 缩放居中），石类/
+  树叶/树苗各自保留外观；木坩埚在**还有固体**时始终显示熔料（`isWooden()` 分支），
+  不再因为水量超过固体而切成水盒；固体全部熔完后才显示水。
+- **时间**：`COMPOST_TICKS` 从 1000（50 秒）缩短为 **600（30 秒）**，两版同步。
+
+**验证**
+
+- 1.21.1 dev client（临时截图脚本，已删除）：腐肉 = 红褐、树叶 = 绿、两者 50/50 = 黄褐、
+  `DirtReady` = 原版泥土色；木坩埚（solid 60 / water 50 mB）显示绿色树叶方块。
+  截图 [docs/images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png)。
+- 1.20.1 dev client 同一场景复验通过（顶点 tint 走 Forge 的 `defaultColor`/`color` 路径）。
+- 两版 `build` + `check-textures` / `check-core-imports` / `check-data-paths` 通过。

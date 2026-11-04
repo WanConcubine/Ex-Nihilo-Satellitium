@@ -28,7 +28,7 @@
 - value 是**正整数**；小于等于 0 的条目会被忽略。
 - 同一个 stack 命中多条时，取**最大值**（不是相加）。
 - 总和到 `1000` 填满；`COMPOST_MAX = 1000`。
-- 填满后计时 `COMPOST_TICKS = 1000`（50 秒），然后进入 DIRT。
+- 填满后计时 `COMPOST_TICKS = 600`（30 秒），然后进入 DIRT。
 - 服务端在资源重载时读取；改完执行 `/reload`（或重启）生效。
 - **客户端不读这个 JSON**；客户端只用物品标签做交互预测。
 
@@ -92,13 +92,15 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 | `Fluid` | compound | `{id:"minecraft:water", amount:1000}`；空桶没有这个键 |
 | `Compost` | int | 堆肥进度，0–1000 |
 | `CompostTicks` | int | 剩余计时 tick；>0 表示正在腐熟 |
+| `CompostItems` | list | 堆肥投入物 `[{id:"minecraft:rotten_flesh", points:500}, ...]`，按点数加权给客户端混色；旧存档没有该键 |
 | `DirtReady` | boolean | `1b` 表示泥土已就绪，右键可取 |
 | `CompostScale` | int | 进度刻度；新存档固定 `1000`，老存档没有这个键 |
 | `Solid` | compound | 凝固/掺料产物（`ItemStack`，如圆石/黑曜石/下界岩/末地石）；空时没有这个键 |
 | `Spore` | int | 巫水发酵进度（0 = 未开始）；满 `1000` 时整桶水变巫水 |
 
 - 容量固定 `CAPACITY = 1000` mB，不依赖 NBT。
-- **老存档迁移**：没有 `CompostScale` 的桶按 0..100 旧刻度读取，进度 ×10、计时按 600→1000 缩放；新存档写入 `CompostScale:1000`。
+- **老存档迁移**：没有 `CompostScale` 的桶按 0..100 旧刻度读取，进度 ×10、计时按 600→`COMPOST_TICKS` 缩放；新存档写入 `CompostScale:1000`。
+- `CompostItems` 的 `points` 之和等于 `Compost`（部分填满时只记剩余空间，避免比例失真）；它只影响渲染，不影响成土判定。
 - 桶里有流体时不能堆肥；堆肥进度 > 0 时不能灌流体（互斥）。
 - DIRT / `Solid` 状态下右键**任意手持物**都会取出产物并重置（原版 `ExtractMode.Always` 风格）。
 

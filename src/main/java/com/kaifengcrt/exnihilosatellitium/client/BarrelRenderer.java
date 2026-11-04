@@ -10,11 +10,13 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -23,10 +25,12 @@ import org.joml.Matrix4f;
 /**
  * Draws the barrel contents.
  *
- * <p>The barrel is an inset open-top body (14x16x14). Compost and dirt are
- * drawn as a small textured box so the fill reads as volume, not a flat colour
- * plane. During the composting timer the compost tint blends towards dirt; the
- * DIRT state draws the vanilla dirt sprite and waits for extraction.</p>
+ * <p>The barrel is an inset open-top body (14x16x14). Compost is drawn as a
+ * vanilla dirt block model that grows with the fill; its vertices are tinted by
+ * the weighted average colour of the items put in (rotten flesh pulls it
+ * reddish-brown, leaves push it green). Over the composting timer the tint
+ * fades back to plain dirt, and the DIRT state shows the untinted dirt model
+ * waiting for extraction.</p>
  */
 public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
 
@@ -37,10 +41,13 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
     private static final float BOTTOM = 1.0F / 16.0F;
     private static final float HEIGHT = 15.0F / 16.0F;
 
-    private static final ResourceLocation COMPOST_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(ExNihiloSatellitium.MOD_ID, "block/barrel_compost");
-    private static final ResourceLocation DIRT_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/dirt");
+    /** Dirt model footprint inside the 2..14 cavity, with a little clearance. */
+    private static final float DIRT_MIN = 0.15F;
+    private static final float DIRT_WIDTH = 0.70F;
+    /** A full barrel is filled up to just below the rim. */
+    private static final float DIRT_HEIGHT = 0.90F;
+    /** Keep some of the dirt colour readable under the item tint. */
+    private static final float TINT_STRENGTH = 0.65F;
 
     public BarrelRenderer(final BlockEntityRendererProvider.Context context) {
     }
@@ -113,19 +120,39 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
             return;
         }
 
-        final TextureAtlasSprite sprite = Minecraft.getInstance()
-                .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                .apply(COMPOST_TEXTURE);
-
-        // Blend the compost towards a dirt-brown tint while the timer runs.
+        final ItemTint.Tint tint = compostTint(barrel);
+        // Fade the item colours back to plain dirt over the composting timer.
         final float t = barrel.getCompostTransition();
-        final float red = 1.0F + (0.82F - 1.0F) * t;
-        final float green = 0.97F + (0.68F - 0.97F) * t;
-        final float blue = 0.88F + (0.52F - 0.88F) * t;
+        final float red = tint.red() + (1.0F - tint.red()) * t;
+        final float green = tint.green() + (1.0F - tint.green()) * t;
+        final float blue = tint.blue() + (1.0F - tint.blue()) * t;
+        this.renderDirt(poseStack, bufferSource, light, red, green, blue, fill);
+    }
 
-        final VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-        contentBox(consumer, poseStack.last().pose(), sprite,
-                BOTTOM + HEIGHT * fill, light, red, green, blue);
+    /**
+     * Weighted average of the item colours: one entry per ingredient, weighted
+     * by the compost points it contributed.
+     */
+    private static ItemTint.Tint compostTint(final BarrelBlockEntity barrel) {
+        double red = 0.0D;
+        double green = 0.0D;
+        double blue = 0.0D;
+        double weight = 0.0D;
+        for (final BarrelBlockEntity.CompostIngredient ingredient : barrel.getCompostIngredients()) {
+            final ItemTint.Tint tint = ItemTint.of(ingredient.item());
+            final double points = ingredient.points();
+            red += tint.red() * points;
+            green += tint.green() * points;
+            blue += tint.blue() * points;
+            weight += points;
+        }
+        if (weight <= 0.0D) {
+            return ItemTint.Tint.WHITE;
+        }
+        final float r = 1.0F - (1.0F - (float) (red / weight)) * TINT_STRENGTH;
+        final float g = 1.0F - (1.0F - (float) (green / weight)) * TINT_STRENGTH;
+        final float b = 1.0F - (1.0F - (float) (blue / weight)) * TINT_STRENGTH;
+        return new ItemTint.Tint(r, g, b);
     }
 
     private void renderSolid(final BarrelBlockEntity barrel, final PoseStack poseStack,
@@ -143,12 +170,27 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
     }
 
     private void renderDirt(final PoseStack poseStack, final MultiBufferSource bufferSource, final int light) {
-        final TextureAtlasSprite sprite = Minecraft.getInstance()
-                .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                .apply(DIRT_TEXTURE);
+        this.renderDirt(poseStack, bufferSource, light, 1.0F, 1.0F, 1.0F, 1.0F);
+    }
 
-        final VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-        contentBox(consumer, poseStack.last().pose(), sprite, BOTTOM + HEIGHT, light, 1.0F, 1.0F, 1.0F);
+    /**
+     * Draws the vanilla dirt model inside the cavity. Scaling only Y keeps the
+     * top texture square while the pile grows from a thin layer to a full barrel.
+     */
+    private void renderDirt(final PoseStack poseStack, final MultiBufferSource bufferSource,
+                            final int light, final float red, final float green, final float blue,
+                            final float fill) {
+        if (fill <= 0.0F) {
+            return;
+        }
+        poseStack.pushPose();
+        poseStack.translate(DIRT_MIN, BOTTOM, DIRT_MIN);
+        poseStack.scale(DIRT_WIDTH, DIRT_HEIGHT * fill, DIRT_WIDTH);
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
+                Blocks.DIRT.defaultBlockState(), poseStack,
+                TintVertexConsumer.buffer(bufferSource, red, green, blue),
+                light, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
     }
 
     private static void contentBox(final VertexConsumer consumer, final Matrix4f matrix,

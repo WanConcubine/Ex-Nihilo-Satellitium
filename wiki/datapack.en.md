@@ -255,7 +255,7 @@ The crook only **appends** drops; vanilla leaves drops are unaffected.
 
 - The key is an item id or `#item tag`; the value is a positive integer.
 - When one stack matches several entries, the **maximum** is used, not the sum.
-- The total reaching `1000` fills it, then it turns into dirt in 50 seconds.
+- The total reaching `1000` fills it, then it turns into dirt in 30 seconds.
 - **You must also edit the item tag** `#exnihilosatellitium:compostable`, otherwise it cannot be composted;
   present in the tag but missing from the JSON → only 1 point.
 

@@ -321,7 +321,7 @@
   "jei.exnihilosatellitium.barrel.result": "右键取出",
   "jei.exnihilosatellitium.barrel.result_fluid": "转化为流体",
   "jei.exnihilosatellitium.barrel_compost": "桶：堆肥",
-  "jei.exnihilosatellitium.barrel_compost.hint": "满 1000 点后约 50 秒变成泥土",
+  "jei.exnihilosatellitium.barrel_compost.hint": "满 1000 点后约 30 秒变成泥土",
   "jei.exnihilosatellitium.barrel_compost.value": "堆肥值：+%s / 1000",
   "jei.exnihilosatellitium.crook": "钩子",
   "jei.exnihilosatellitium.crook.bone": "骨钩：概率 ×1.5",
