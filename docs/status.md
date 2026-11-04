@@ -7,8 +7,8 @@
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
 （`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**0.1.0 已发布**（两条线都有 tag）；**0.2.0 内容已增加 TiT/AE2，旧 jar 需重打**，
- tag / 商店上传待所有者确认。
+**1.0.0 已发布**（两条线 tag：`v1.0.0` / `v1.0.0-1.20.1`）；0.2.0 准备线并入 1.0.0，
+ 商店上传待所有者。
 **最新一批（2026-11-03 晚）**：工匠巧思（TiT）阿迪特 / 叶绿素 + 应用能源 2（AE2）赛特斯石英，
 两版数据与 dev 环境都已接好，已提交并推送（main `1417924` / 1.20.1 `10454db`）。
 **联动**：22 种材料（14 金属 + 8 矿物）；Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2
@@ -16,7 +16,7 @@
 **当前表尺**：筛子 7 输入 / 116 掉落（无科技模组；1.20.1 113，缺 3 条钴历史差异）；
 +AE2 118 / 115；1.20.1 全装 +TiT 139、再加 AE2 141；主线 Mek+Thermal 137、+AE2 139。
 锤表 55 基础 / 79 全装；桶 12、堆肥 67、坩埚 39 熔点 / 9 热源。
-**下一步**：0.2.0 发布 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
+**下一步**：商店上传 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
 
 ## 当前批次（2026-11-03 晚，TiT 两种矿 + AE2 赛特斯石英）
 
@@ -202,6 +202,7 @@
 | P1 生命周期/失败隔离 | ✅ | 重复提交去重、空 payload 拒绝、server stop 清 overlay；坏 overlay 只 warning、坏数据包保留旧快照 |
 | P1 core 守卫 | ✅ | `check-core-imports.py` → `0 known leak(s)`，`common/table` 已纳入扫描 |
 | `./gradlew build` | ✅ | 2026-11-03 提交后两版 `BUILD SUCCESSFUL`（`--offline --no-daemon`） |
+| 1.0.0 发布 | ✅ | 两版 `mod_version=1.0.0`；tag `v1.0.0` / `v1.0.0-1.20.1`；jar 版本与 sha 见 [release-1.0.0.md](release-1.0.0.md) |
 | `check-textures.py` | ✅ | 主线 264 模型 / 102 blockstate / 153 纹理；分支 266 / 102 / 149；无 `minecraft:item/*` |
 | `check-data-paths.py` | ✅ | 1.21.1：258 recipes / 75 loot / 63 tags；1.20.1 分支未见报错 |
 | `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 68 JSON / 7 nav |
@@ -234,7 +235,7 @@
 > 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 
-1. **0.2.0 发布收尾**：版本号/日期确认、tag（`v0.2.0` / `v0.2.0-1.20.1`）、
+1. **1.0.0 商店收尾**：版本号/日期确认、tag `v1.0.0` / `v1.0.0-1.20.1` 已打；
    CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
 2. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器；清单见「交接清单」。
