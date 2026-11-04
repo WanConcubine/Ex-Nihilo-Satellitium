@@ -271,7 +271,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。**当前只支持整数**；对象写法未实现（读 `gravel` 并打警告） |
 | `ingot` | ❌ | 无条件复用：写**具体物品 id**（`minecraft:iron_ingot`），熔炼总是产出它，不注册自有锭。**暂不支持标签**（`#c:ingots/tin`），写标签会打警告并按自有锭处理 |
 | `ingots` | ❌ | **受支持模组的候选锭**（有序数组）：`[{"item": "mekanism:ingot_tin", "mod": "mekanism"}]`。启动时取第一个 `mod` 已加载（或没写 `mod`）的候选；都不匹配时注册自有 `exnihilosatellitium:<id>_ingot`。datagen 会给 base 配方加 `neoforge:not(...)` 兜底；每个候选的 `*_smelting_<mod>.json` 仍是手写（datagen 引用不了未注册的物品），见下 |
-| `gems` | ❌ | **受支持模组的候选矿物**（与 `ingots` 同构，有序数组）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石这类没有“锭”的矿物用它。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `c:gems` / `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 之一已加载时注册**：没装时物品、方块、筛出物、锤表、配方和标签都不出现。装模组时矿砾/矿砂/矿尘熔成对方物品。**不能与 `ingot`/`ingots` 同时出现**，混用会整条跳过 |
+| `gems` | ❌ | **受支持模组的候选矿物/模组专属材料**（与 `ingots` 同构，有序数组）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石这类没有“锭”的矿物用它；也用于只在模组在场时注册的锭类材料（ER 的 `yellorium`）——共同点是**产物由对方提供、我们没有自有兜底**。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `c:gems` / `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 之一已加载时注册**：没装时物品、方块、筛出物、锤表、配方和标签都不出现。装模组时矿砾/矿砂/矿尘熔成对方物品。**不能与 `ingot`/`ingots` 同时出现**，混用会整条跳过 |
 | `owner_mod` | ❌ | 主要来源模组；当前不解析，仅保留字段 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；设为 `false` 时该条跳过（当前没有自动骨架行） |
@@ -340,6 +340,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   | platinum | 无候选（永远自有锭） |
   | fluorite | `mekanism`（`mekanism:fluorite_gem`；`gems` 材料，无自有兜底） |
   | apatite / cinnabar / niter / sulfur / ruby / sapphire | `thermal_foundation`（`thermal:apatite` / `thermal:ruby` 等；`gems` 材料，无自有兜底） |
+  | yellorium | `bigreactors`（`bigreactors:yellorium_ingot`；`gems` 门控，无自有兜底） |
+  | anglesite / benitoite | `bigreactors`（`bigreactors:anglesite_crystal` / `benitoite_crystal`；`gems` 门控） |
 
   - **mod id ≠ 物品命名空间**：Thermal 的模组 id 是 `thermal_foundation`，锭却注册在
     `thermal:` 里；IE 的模组 id 是 `immersiveengineering`，锭 id 是 `ingot_aluminum`
@@ -351,14 +353,15 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
     安全地指向不存在的物品。
   - **Thermal / Create / IE / Tinkers 只在 1.20.1 有对应版本**：主线的材料表同样带着它们的候选
     （两条线共用一个 `materials.json`），在 1.21.1 上这些候选永远不命中，对应的 51 条变体配方
-    也不会加载。
+    也不会加载。**Extreme Reactors 两版都有**（1.20.1 2.0.84 / 1.21.1 2.4.9，mod id 与命名空间
+    都是 `bigreactors`），三条 `gems` 材料在两条线都会注册。
   - 加一个模组 = 在材料里加一行候选 + 手写 `<m>_ore_<kind>_smelting_<mod>.json` +
     重跑 `./gradlew runData`（base 配方会自动重算条件）；id 必须按对方 jar 核对。
   - **换模组会改变物品存在性**：已有存档里拿到的自有锭/矿物，装上受支持模组后会变成未知物品
     （日志报错并消失）。开世界前定好模组列表。
-- 铁/金/铜的 `ingot` 指向原版锭，所以 39 条 base 熔炼里它们熔到 `minecraft:*_ingot`；
-  其余金属熔到自有或候选产物，7 种 `gems` 矿物**没有 base**，只有 21 条手写变体
-  （39 条 base + 66 条候选变体 = 105 条熔炼配方）。
+- 铁/金/铜的 `ingot` 指向原版锭，所以 42 条 base 熔炼里它们熔到 `minecraft:*_ingot`；
+  其余金属熔到自有或候选产物，11 种 `gems` 材料（含 ER 的 yellorium / anglesite / benitoite）
+  **没有 base**，只有 81 条手写变体（42 条 base + 81 条候选变体 = 123 条熔炼配方）。
 - 锭贴图由 `art/items/ingots/generate.py` 生成；`gems` 材料没有自有图标（产物是对方模组的物品）。
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
 - 粉碎/粉末现在有两条通路：4 块合成 + M3 锤子降档（矿砾→粉碎、矿砂→粉末）。
@@ -445,7 +448,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
 - 当前有 **7 个输入、141 掉落**（1.20.1 全装 Mek+Thermal+Create+IE+Tinkers+工匠巧思；1.21.1 装
-  Mek+Thermal 时约 139，两版无科技模组分别 118 / 115；**装 AE2 时两版各 +4**）：`gravel` / `sand` / `dirt` / `dust` /
+  Mek+Thermal 时约 139，两版无科技模组分别 118 / 115；**装 AE2 时两版各 +4**，
+  **装 Extreme Reactors 时两版各 +9**）：`gravel` / `sand` / `dirt` / `dust` /
   `grass_block`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
   `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **9 种树苗**（橡木 8% / 白桦 4% /

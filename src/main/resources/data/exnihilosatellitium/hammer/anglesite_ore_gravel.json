@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:anglesite_ore_gravel",
+  "result": "exnihilosatellitium:anglesite_crushed",
+  "min": 4,
+  "max": 6,
+  "mod": "bigreactors"
+}
