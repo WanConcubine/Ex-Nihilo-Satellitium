@@ -74,6 +74,46 @@
       "chance": 0.05
     },
     {
+      "item": "bamboomod:ginkgo_sapling",
+      "chance": 0.02,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:maple_sapling",
+      "chance": 0.02,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:sakura_sapling",
+      "chance": 0.02,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:hinoki_sapling",
+      "chance": 0.02,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:bamboo_shoot",
+      "chance": 0.04,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:riceseed",
+      "chance": 0.05,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:bean",
+      "chance": 0.04,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:tomato",
+      "chance": 0.04,
+      "mod": "bamboomod"
+    },
+    {
       "item": "exnihilosatellitium:sky_slime_grass_seeds",
       "chance": 0.02,
       "mod": "tconstruct"

@@ -268,6 +268,10 @@ dependencies {
         // Extreme Reactors 2.0.x: yellorium / anglesite / benitoite source for the skyblock.
         runtimeOnly fg.deobf("libs:ExtremeReactors2-1.20.1:2.0.84")
     }
+    if (project.hasProperty("techMods") && file("libs/bamboomod-1.20.1-0.6.2.jar").exists()) {
+        // BambooMod 0.6.x (1.20.1 Forge): saplings / bamboo shoot / crops / gems for the skyblock.
+        runtimeOnly fg.deobf("libs:bamboomod-1.20.1:0.6.2")
+    }
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

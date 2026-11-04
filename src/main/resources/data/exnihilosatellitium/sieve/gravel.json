@@ -68,6 +68,21 @@
     {
       "item": "minecraft:emerald",
       "chance": 0.00667
+    },
+    {
+      "item": "bamboomod:ginkgo_gem",
+      "chance": 0.01562,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:maple_gem",
+      "chance": 0.01562,
+      "mod": "bamboomod"
+    },
+    {
+      "item": "bamboomod:sakura_gem",
+      "chance": 0.01562,
+      "mod": "bamboomod"
     }
   ]
 }
