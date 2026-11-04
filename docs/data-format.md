@@ -323,6 +323,8 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   ```
 - **物品规则优先于流体容器路径**：牛奶桶同时是物品和流体容器，先匹配 `added.item`；
   消耗后把 `getCraftingRemainingItem()`（牛奶桶 → 空桶）还给玩家。
+- 糖水/浓缩蜂蜜汁都有 source block 与桶（`sugar_water_bucket` / `concentrated_honey_bucket`），
+  可放置/舀取；桶内规则不变。
 - 当前 18 条（缺 Thermal 时 16 条）：基础 5、牛奶 1、巫水 2、人偶 7（含村民人偶；
   热力 2 条：熔岩+狂风人偶→`thermal:blitz`、水+暴雪人偶→`thermal:blizz`，根级
   `"mod": "thermal_foundation"`，和平掉 `thermal:*_rod`）、糖水/蜂蜜 3。

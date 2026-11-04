@@ -7,9 +7,9 @@ import net.minecraftforge.fluids.FluidType;
 import java.util.function.Consumer;
 
 /**
- * Barrel-only fluid type (sugar water / concentrated honey): water-like
- * handling with a per-fluid client tint. No block and no bucket are attached in
- * {@code ModFluids}, so the only way to hold it is a barrel tank.
+ * Barrel-chain fluid type (sugar water / concentrated honey): water-like
+ * handling with a per-fluid client tint. {@code ModFluids} attaches a source
+ * block and a bucket, so the fluids can also be placed/collected.
  */
 public final class TintedWaterFluidType extends FluidType {
 

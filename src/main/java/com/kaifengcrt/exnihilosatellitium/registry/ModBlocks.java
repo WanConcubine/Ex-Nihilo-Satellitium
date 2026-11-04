@@ -133,6 +133,14 @@ public final class ModBlocks {
             BLOCKS.register("witch_water", () -> new LiquidBlock(ModFluids.WITCH_WATER,
                     BlockBehaviour.Properties.copy(Blocks.WATER)));
 
+    public static final RegistryObject<LiquidBlock> SUGAR_WATER =
+            BLOCKS.register("sugar_water", () -> new LiquidBlock(ModFluids.SUGAR_WATER,
+                    BlockBehaviour.Properties.copy(Blocks.WATER)));
+    public static final RegistryObject<LiquidBlock> CONCENTRATED_HONEY =
+            BLOCKS.register("concentrated_honey", () -> new LiquidBlock(
+                    ModFluids.CONCENTRATED_HONEY,
+                    BlockBehaviour.Properties.copy(Blocks.WATER)));
+
     public static final RegistryObject<Block> SIEVE =
             BLOCKS.register("sieve", () -> new SieveBlock(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
                     .noOcclusion()

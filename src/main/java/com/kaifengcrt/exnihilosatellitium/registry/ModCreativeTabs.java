@@ -46,6 +46,8 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.UNFIRED_PORCELAIN_BUCKET.get());
                 output.accept(ModItems.PORCELAIN_BUCKET.get());
                 output.accept(ModItems.WITCH_WATER_BUCKET.get());
+                output.accept(ModItems.SUGAR_WATER_BUCKET.get());
+                output.accept(ModItems.CONCENTRATED_HONEY_BUCKET.get());
                 output.accept(ModItems.GRASS_SEEDS.get());
                 ModItems.PEBBLES.forEach(pebble -> output.accept(pebble.get()));
                 output.accept(ModItems.CRUSHED_NETHERRACK.get());
