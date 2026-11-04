@@ -39,7 +39,7 @@ public final class ModFluids {
     public static final RegistryObject<FluidType> SUGAR_WATER_TYPE =
             FLUID_TYPES.register("sugar_water", () -> new TintedWaterFluidType(
                     "fluid_type.exnihilosatellitium.sugar_water",
-                    1050, 1200, 300, true, true, 0xFFE8C97A));
+                    1050, 1200, 300, true, true));
 
     public static final RegistryObject<ForgeFlowingFluid.Source> SUGAR_WATER =
             FLUIDS.register("sugar_water", () -> new ForgeFlowingFluid.Source(sugarWaterProperties()));
@@ -49,7 +49,7 @@ public final class ModFluids {
     public static final RegistryObject<FluidType> CONCENTRATED_HONEY_TYPE =
             FLUID_TYPES.register("concentrated_honey", () -> new TintedWaterFluidType(
                     "fluid_type.exnihilosatellitium.concentrated_honey",
-                    1400, 6000, 320, false, false, 0xFFD98A2B));
+                    1400, 6000, 320, false, false));
 
     public static final RegistryObject<ForgeFlowingFluid.Source> CONCENTRATED_HONEY =
             FLUIDS.register("concentrated_honey",

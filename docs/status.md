@@ -176,6 +176,8 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
   分支的木桶插件 uid 是 `barrel`，`config.jade.plugin_exnihilosatellitium.barrel` 已补。
 - **AE2 生产 jar 不能直丢 `run/mods`**：ForgeGradle dev 会因 SRG mixin
   `@Shadow field f_129762_ was not located` 崩服；必须放 `libs/` 并由 `-PtechMods` 走 `fg.deobf`。
+- **1.20.1 `FluidType.initializeClient` 在构造器里调用，早于子类字段赋值**：tint 不能存实例字段，
+  否则客户端拿到 0（黑色/透明）；按 `descriptionId` 映射常量。
 - **条件物品的模型不能交给 datagen**：热力人偶只在 Thermal 在场时注册，模型手写；
   `ModItemModels.HAND_FLAT_MODELS` 按名字跳过，否则 datagen 一旦看到 Thermal 就会写出同名
   模型和手写文件撞路径。字段是 `@Nullable`，用它的地方（创造栏等）必须 null 检查。
