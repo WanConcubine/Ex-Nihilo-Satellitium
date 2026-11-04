@@ -90,7 +90,8 @@
 | 叶绿素（草方块过筛） | 工匠巧思 | `chlorophyll` 是 `gems`（仅 TiT 在场注册）：草方块 1% → `chlorophyll_broken`（只此一处）；矿块熔成 `tinkers_thinking:chlorophyte_compound`（原矿 1A+1B 的等价物） | ✅（1.20.1 真装；手筛待实测） |
 | 赛特斯石英（沙子过筛） | 应用能源 2（两版） | 沙 1/6 出 `ae2:certus_quartz_crystal`、1/12 出 `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json`（根级 `mod` + patch），没装时整文件跳过；充能赛特斯 / 天石粉不做 | ✅（两版真装；手筛待实测） |
 | 碧空 / 末影黏液草种子 | 匠魂 3 | 条件物品（无匠魂不注册）；右键草方块 / 泥土 → `*_vanilla_slime_grass`；泥土筛 2% / 1% | ✅（右键待实测） |
-| 矿砾 / 矿砂 / 矿尘、破碎矿 / 粉碎矿 / 矿粉 | 匠魂 / 龙之进化 | 部分存在 | ❓ |
+| 矿砾 / 矿砂 / 矿尘、破碎矿 / 粉碎矿 / 矿粉 | 匠魂 / 龙之进化 | 匠魂矿砾链已存在；龙之进化见下一行 | ✅（匠魂）；龙之进化见下 |
+| 龙尘 / 龙锭（末地石过筛） | 龙之进化 Draconic Evolution（两版） | `draconium` 是 `gems`（仅 DE 在场注册）：**粉碎末地石 1/8** → `draconium_broken`（唯一入口，`sieve/crushed_end_stone_draconicevolution.json` 根级 `mod` 门控）；4 碎 → 矿砾 → 熔炼走 DE 自己的 `c:ores/draconium` / `forge:ores/draconium` 配方，熔成 `draconicevolution:draconium_ingot`；不碰觉醒龙 / 混沌碎片（仍按 DE 原流程） | ✅（两版真装；手筛待实测） |
 | 锭联动（tin / lead / osmium / uranium） | Mekanism 1.21.1 | 已接入：装了 Mek 熔成 `mekanism:ingot_*`，没装用自有锭（`ingots` 候选 + 配方条件） | ✅ |
 | Thermal 系列锭联动 | Thermal 1.20.1 | 1.20.1 已真装验证（tin/silver/lead/nickel 按 `thermal_foundation` 优先）；主线等 1.21.1 版 | ✅（1.20.1） |
 | Mekanism 氟石（矿物链） | Mekanism 1.21.1 / 1.20.1 | 新增 `fluorite` 材料：筛三档 → 矿块 → 熔成 `mekanism:fluorite_gem`；无自有兜底物品 | ✅ |

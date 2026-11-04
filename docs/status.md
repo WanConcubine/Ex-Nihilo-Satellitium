@@ -8,19 +8,43 @@
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
 （`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.2.0 已发布**（两条线 tag：`v1.2.0` / `v1.2.0-1.20.1`）；1.0.0–1.2.0 的商店上传待所有者。
-**最新一批（2026-11-04 夜，1.2.0）**：**内容更新**——Extreme Reactors（两版）、BambooMod（仅 1.20.1）、
+**当前批次（2026-11-04 深夜）**：**龙之进化（DE）联动**——`draconium` 龙尘材料（两版），
+粉碎末地石 1/8 单源 → 破碎龙矿 → 矿块 → 靠 DE 的 `c:ores/draconium` 熔成龙锭；
+不碰觉醒龙 / 混沌碎片。
+上一批（1.2.0）：**内容更新**——Extreme Reactors（两版）、BambooMod（仅 1.20.1）、
 骨粉 / 烈焰粉筛出物、ER 矿块标签与匠魂 yellorium 熔炼/铸造。
 上一批（1.1.1）：木桶堆肥“原版泥土模型 + 投入物加权混色”、坩埚熔料真实方块模型、
 成土时间 50 秒 → 30 秒。
-**联动**：25 种材料（14 金属 + 11 矿物；ER 的 yellorium 走 `gems` 门控）；
-Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / BambooMod（仅 1.20.1）
-全部可选，缺失即降级；核心门面 P1 与三路径（数据包 / KubeJS / CraftTweaker）已完成。
+**联动**：26 种材料（14 金属 + 12 矿物；ER 三条与 DE 的 draconium 走 `gems` 门控）；
+Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 /
+BambooMod（仅 1.20.1）全部可选，缺失即降级；核心门面 P1 与三路径（数据包 / KubeJS /
+CraftTweaker）已完成。
 **当前表尺**：筛子 7 输入 / 118 掉落（无科技模组；1.20.1 115，缺 3 条钴历史差异）；
 +AE2 122 / 119；1.20.1 全装 +TiT 141、再加 AE2 145；主线 Mek+Thermal 139、+AE2 143；
 装 Extreme Reactors 各 **+9**（150 / 154，主线 Mek+Thermal+AE2 152）；
-1.20.1 装 BambooMod **+19**（全装 173）。
-锤表 55 基础 / 79 全装（装 ER 88）；桶 18（装 Thermal）/ 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
+1.20.1 装 BambooMod **+19**（全装 173）；装龙之进化各 **+1**（主线 AE2+ER+DE 132，
+1.20.1 全装 + Bamboo 174）。
+锤表 55 基础 / 79 全装（装 ER 88）；装 DE **+3**（58 / 82 / 91）；桶 18（装 Thermal）/
+16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
 **下一步**：商店上传 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
+
+## 当前批次（2026-11-04 深夜，龙之进化）
+
+- **材料**：`materials.json` 新增 `draconium`（`gems`，`draconicevolution` 门控，tier `rare`、
+  rarity 64、颜色 `8A5CF5`）；DE 不在场时整条不注册，基表 118 / 115 不变。
+- **入口**：`sieve/crushed_end_stone_draconicevolution.json`（根级 `mod` + `patch`）——
+  **粉碎末地石 1/8** 出 `draconium_broken`；`generate_sieve_assets.py` 把它加进 `SINGLE_SOURCE`，
+  重跑不会漏进砂砾 / 沙 / 尘土三张常规表。
+- **链条**：4 破碎 → `draconium_ore_gravel` → DE 的 `c:ores/draconium`
+  （1.20.1 `forge:ores/draconium`）熔成 `draconicevolution:draconium_ingot`；
+  锤表 3 条（矿砾→粉碎 4–6、矿砂→粉末 4–6、矿尘→自身）全带 `mod` 门。
+  **不写** `*_smelting_draconicevolution.json`，避免同一输入在 JEI 里出现两条相同配方。
+- **不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心）与混沌碎片（混沌守卫）保持 DE 原样。
+- **数字**：主线 AE2+ER+DE `[sieve] 132`（+1）、`[hammer] 67`（+3）、`[materials] 18`；
+  1.20.1 全装 + Bamboo + DE `[sieve] 174`（+1）、`[hammer] 91`（+3）、`[materials] 26`。
+- **验证**：两版真装 DE + Brandons Core + CodeChicken Lib；RCON 熔炉把
+  `draconium_ore_sand` 熔成 `draconicevolution:draconium_ingot`（主线两轮、分支一轮）；
+  手筛与 JEI 未目视。
 
 ## 1.2.0（2026-11-04）
 
@@ -129,8 +153,10 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
   糖水 / 蜂蜜 3 条（水+糖→糖水、糖水+蒲公英黄 30 秒→浓缩蜂蜜汁、玻璃瓶抽 250 mB→蜂蜜瓶）。
 - 筛子 7 输入 / 118 掉落（无科技模组：砂砾 / 沙 / 泥土 / 尘土 / 草方块 / 粉碎下界岩 / 粉碎末地石）；
   +AE2 122 / 119（沙、砂砾各 1/16 陨石粉）；1.20.1 全装 +TiT 141、再加 AE2 145；
-  主线 Mek+Thermal 139、+AE2 143。三档筛网只影响耐久。
-- 矿物链：25 种材料（14 金属 + 11 矿物；ER 三条走 `gems` 门控）；4 碎块 → 矿方块 → 熔炼成锭/对方矿物；
+  主线 Mek+Thermal 139、+AE2 143；**装龙之进化 +1**（粉碎末地石 1/8 破碎龙矿）。
+  三档筛网只影响耐久。
+- 矿物链：26 种材料（14 金属 + 12 矿物；ER 三条与 DE 的 draconium 走 `gems` 门控）；
+  4 碎块 → 矿方块 → 熔炼成锭/对方矿物；
   锤矿砾/矿砂掉 4–6、粉尘掉自身。`gems` 材料只在对应模组在场时注册。
 - **泥土的石头来源**：四种石子（圆石/安山岩/花岗岩/闪长岩）每次 4-6 个、100% 出，
   四个合成一块对应石头。
@@ -207,11 +233,14 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 ### 联动（supported mods）
 
 - 材料表 `materials.json`：14 金属（铁/金/铜/锡/银/铅/镍/铂/铝/锇/锌/钴/铀/阿迪特）
-  + 8 矿物（`gems`：氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石/叶绿素）。
+  + 12 矿物（`gems`：氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石/叶绿素/黄铀/铅矾/蓝锥矿/龙尘）。
 - 锭候选按数组顺序取第一个已加载模组：Mekanism / Thermal / Create / IE / Tinkers / TiT；
   没有候选时回退自有锭。`gems` 没有自有兜底，模组不在就整条不注册。
 - 直接掉落：TiT 阿迪特（碎下界岩 1%）、TiT 叶绿素（草方块 1%）、AE2 赛特斯石英
   （沙 1/6 水晶 + 1/12 粉）。三条都带 `mod` 门，缺失时在查物品之前跳过。
+- **龙之进化（两版）**：`draconium` 走 `gems` 门控；粉碎末地石 1/8 出 `draconium_broken` →
+  4 合 1 矿块 → 熔成 `draconicevolution:draconium_ingot`；矿块进 `c:ores/draconium`
+  （1.20.1 `forge:ores/draconium`），DE 自己的标签熔炼直接吃。觉醒龙 / 混沌碎片不补。
 - 所有联动都是可选的；`mods.toml` 不声明硬依赖，发布 jar 不打包对方代码/资源。
 
 ### 自动化（M10，2026-11-01）
@@ -245,9 +274,12 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
   `python3 scripts/check-wiki.py`。分支没有后三个脚本，只跑 `build` + 纹理。
 - **datagen 自检**：`./gradlew runData --offline` 后 `git status` 应为空；配方比对用
   `python3 scripts/compare-recipes.py`，模型比对用 `python3 scripts/compare-models.py`。
-- **dev 环境**：主线 `run/mods` 有 AE2 + GuideME + ER/ZeroCore（默认 131 drops）；分支 `libs/` 有
-  Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME，用 `-PtechMods` 启动。删掉即回基表。
-  热力人偶只在 `-PtechMods`（Thermal 在场）时出现；不带 `-PtechMods` 时桶只有 16 条。
+- **dev 环境**：主线 `run/mods` 有 AE2 + GuideME + ER/ZeroCore（默认 131 drops）；DE 三个 jar 放在
+  `libs/de/`（gitignored），测 DE 时 `cp libs/de/*.jar run/mods/` 再 `runServer`（132），
+  **测完移回**——`runData` 会加载 `run/mods` 里的 DE，而 DE 的 datagen 需要 Curios，缺了直接崩。
+  分支 `libs/` 有 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME，
+  用 `-PtechMods` 启动；DE 三个 jar 也在 `libs/`，用 `-PdeMods` 单独加载（两个 flag 可叠加）。
+  删掉即回基表。热力人偶只在 `-PtechMods`（Thermal 在场）时出现；不带 `-PtechMods` 时桶只有 16 条。
 - **已知不一致**：1.20.1 分支筛表少 3 条钴（沙/砂砾/尘土各 1/64），基表 115 vs 主线 118；
   分支生成器缺失（没有 `generate_sieve_assets.py`），下次要么补脚本要么手工对齐。
 - **进游戏验收（剩余）**：M1.5–M10 的画面/右键手感（机器 GUI/自动输出抽屉/BER/筛料渲染/
@@ -286,10 +318,10 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | 木/骨钩耐久（1.21.1） | ✅ | 同一路径实测 `damage=1`；该线未改代码 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
-| `check-textures.py` | ✅ | 主线 288 模型 / 113 blockstate / 167 纹理；分支 290 / 113 / 163；无 `minecraft:item/*` |
-| `check-data-paths.py` | ✅ | 1.21.1：281 recipes / 75 loot / 73 tags；1.20.1 用 `--target 1.20.1` 验过（190 / 75 / 73） |
+| `check-textures.py` | ✅ | 主线 294 模型 / 116 blockstate / 170 纹理；分支 296 / 116 / 166；无 `minecraft:item/*` |
+| `check-data-paths.py` | ✅ | 1.21.1：284 recipes / 75 loot / 75 tags；1.20.1 用 `--target 1.20.1` 验过（190 / 75 / 75） |
 | `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 74 JSON / 7 nav |
-| 数据表 JSON | ✅ | 7 输入筛表 118（基表；装 ER +9）、55 锤（装 ER +9）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
+| 数据表 JSON | ✅ | 7 输入筛表 118（基表；装 ER +9、装 DE +1）、55 锤（装 ER +9、装 DE +3）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
 | 热力人偶：注册 / 桶规则 | ✅ | 1.20.1 `-PtechMods`：`[barrel] 18`、dump = 熔岩+`blitz_doll`→`thermal:blitz`（和平 `thermal:blitz_rod`）、水+`blizz_doll`→`thermal:blizz`（和平 `thermal:blizz_rod`）；物品 `/summon` 出 Gale / Blizzard Doll；主线无 Thermal 时桶 16、物品不存在 |
@@ -315,6 +347,7 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 | supported mods：Tinkers / TiT | ✅ | 钴 → `tconstruct:cobalt_ingot`；阿迪特/叶绿素 22 entries、RCON 熔炉两条都通过 |
 | supported mods：AE2 | ✅ | 1.21.1 118→122 / 1.20.1 141→145（+4，含沙/砂砾各 1/16 陨石粉）；RCON sand/gravel 含 `sky_dust 0.0625`；缺 AE2 静默跳过、无 unknown |
 | supported mods：Extreme Reactors | ✅ | 1.20.1 ER 2.0.84 / 1.21.1 ER 2.4.9（+ ZeroCore）；yellorium 1/8、anglesite/benitoite 各 1/64 走 `gems` 门控；三档矿链熔成 ER 锭/晶体；RCON 熔炉三种产物 + `RecipesUsed` 验证；手筛/JEI 未目视 |
+| supported mods：龙之进化 | ✅ / ⚠️ | 两版真装 DE 3.1.4.633（1.21.1）+ 3.1.2.621（1.20.1），带 Brandons Core / CodeChicken Lib；主线 AE2+ER+DE `[materials] 18`、`[sieve] 132`、`[hammer] 67`；1.20.1 全装+Bamboo+DE `[materials] 26`、`[sieve] 174`、`[hammer] 91`；RCON 熔炉两版都把 `draconium_ore_sand` / `draconium_ore_dust` 熔成 `draconicevolution:draconium_ingot`；手筛/JEI 未目视 |
 | supported mods：BambooMod（仅 1.20.1） | ✅ | 0.6.2 真装：泥土/草各 +8（树苗/竹笋/作物）、砂砾 +3 宝石，全带 `mod` 门；`[sieve] 173`（+19）；RCON 泥土 32 / 砂砾 31；堆肥靠现有 leaves/saplings 标签；手筛/生长/JEI 未测 |
 | 客户端画面 | ⚠️ | **1.1.1 的堆肥混色 / 坩埚树叶已在两条线 dev client 目视**；其余（机器 GUI、自动输出抽屉、热力人偶、TiT/AE2 物品与 JEI 页）仍停在 2026-10-31 之后未看 |
 | 旧内容目视 | ⚠️ | 桶/筛比例、木桶竖棱、筛料层、Jade tooltip 等仍待作者确认 |
@@ -338,6 +371,9 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 
 ## 已拍板的决策
 
+- **龙之进化（2026-11-04，所有者拍板）**：两版都做；完整矿链（破碎 → 矿块 → 熔炼）；
+  唯一来源是**粉碎末地石 1/8**；不碰觉醒龙 / 混沌碎片。靠 DE 自己的 `c:ores/draconium`
+  标签熔炼，不写自有熔炼变体。
 - **1.1.1 堆肥/坩埚视觉（2026-11-04，所有者指定）**：堆肥 = 原版泥土模型 + 投入物按点数
   加权混色，成土后显示泥土本色；木坩埚在固体未熔完时显示被熔方块（树叶）模型，不中途
   切成水盒；成土时间 30 秒。
@@ -511,7 +547,18 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
   在查物品之前整文件跳过。发布 jar 不带 AE2 / GuideME。
 - **TiT 阿迪特 / 叶绿素是单源**：`scripts/generate_sieve_assets.py` 的 `SINGLE_SOURCE`
   把两种材料从砂砾/沙子/尘土（以及 gems 的 patch 文件）排除，只保留碎下界岩 / 草方块入口；
-  重跑生成器不会把旧的多源条目加回来。
+  重跑生成器不会把旧的多源条目加回来。龙尘同理（粉碎末地石），已加入 `SINGLE_SOURCE`。
+- **DE 的熔炼按标签吃矿**：`draconium_ingot_from_ore` 用 `c:ores/draconium`
+  （1.20.1 `forge:ores/draconium`），我们 datagen 的同名标签已经包含三个矿块
+  （`required: false`），所以**不要手写** `*_smelting_draconicevolution.json`——同一输入会匹配
+  两条配方，JEI 里出现两个相同条目；标签合并已经足够。
+- **1.20.1 的锤表是手写的**：分支没有 `generate_sieve_assets.py`，`generate_ore_variants.py`
+  也不写锤表；新增 gems 材料要同时手补 `data/exnihilosatellitium/hammer/<m>_ore_{gravel,sand,dust}.json`
+  （带 `mod` 门），否则 `[hammer]` 计数不会涨。
+- **DE 放 `run/mods` 会让 `runData` 崩**：`runData` 也会加载 `run/mods`；DE 的
+  `DataGenEventHandler` 引用 `top.theillusivec4.curios.api.CuriosDataProvider`，没装 Curios 就
+  `NoClassDefFoundError`。测 DE 时临时把三个 jar 放进 `run/mods`，**测完移回 `libs/de/`**；
+  不要常驻。
 ## 常用命令
 
 ```bash

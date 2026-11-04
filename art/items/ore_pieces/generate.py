@@ -126,6 +126,7 @@ PALETTES = {
     "yellorium": ("#3A3A0E", "#8A8424", "#D0C44A", "#E8DE8A", "#FFF8C0"),
     "anglesite": ("#4A3608", "#9A7610", "#E0A800", "#F2C83C", "#FFF0A0"),
     "benitoite": ("#0E3444", "#1E6A8A", "#3AA8D0", "#7AD8F0", "#C8F8FF"),
+    "draconium": ("#2A0E4A", "#5A2A9A", "#8A5CF5", "#B08CFF", "#E0D0FF"),
 }
 
 

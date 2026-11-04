@@ -1864,3 +1864,30 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 **验证**：1.20.1 分支真装 0.6.2：`[sieve] 173`（+19：泥土 8 / 草 8 / 砂砾 3）、
 `[hammer] 88`；RCON 泥土 32 / 砂砾 31 条含新条目；`/setblock` 树苗与竹笋成功；
 手筛、树苗生长与 JEI 未测。
+
+## 53. 龙之进化：龙尘 / 龙锭（2026-11-04，两版）
+
+**为什么**：Draconic Evolution（`draconicevolution`，两版都有：1.21.1 3.1.4.633 beta /
+1.20.1 3.1.2.621 release）的龙矿只从主世界 / 深板岩 / 下界 / 末地生成，空岛拿不到。
+它的矿脉掉 2–4 龙尘，龙尘 1:1 熔成龙锭；DE 的熔炼配方按 `c:ores/draconium`
+（1.20.1 为 `forge:ores/draconium`）取矿，**这正好是我们已经生成的同名矿石标签**。
+
+**入口**：`draconium` 是 `gems` 材料（DE 不在场时整条不注册），唯一来源是
+`sieve/crushed_end_stone_draconicevolution.json`：**粉碎末地石 1/8 → `draconium_broken`**，
+文件根级 `"mod": "draconicevolution"` + `patch: true`，没装 DE 时整文件跳过，基表不变。
+末地石本身来自熔岩 + 荧石，所以这是可再生的末地主题入口。
+
+**链条与终点**：4 个破碎龙矿 → `draconium_ore_gravel`（矿砾）→ DE 的
+`c:ores/draconium` 熔炼直接吃，出 `draconicevolution:draconium_ingot`；锤矿砾/矿砂
+仍降到粉碎/粉末（各 4–6），三条锤表都带 `mod` 门。**不写**手写
+`*_smelting_draconicevolution.json`：DE 的标签配方已经是终点，再写一条会让 JEI 同一输入
+显示两条相同配方。
+
+**不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心，两版一致）和混沌碎片（混沌守卫）保持 DE
+原样；空岛是否打得到末影龙 / 混沌守卫由整合包决定，不在本模组补。所有者 2026-11-04 拍板。
+
+**验证**：主线真装 DE 3.1.4.633 + Brandons Core 3.2.1.309 + CodeChicken Lib 4.6.1.529：
+`[materials] loaded 18`、`[sieve] 132`（AE2+ER+DE，+1）、`[hammer] 67`（+3）；
+RCON 熔炉把 `draconium_ore_sand` 熔成 `draconicevolution:draconium_ingot`。
+1.20.1 分支真装 DE 3.1.2.621 + Brandons Core 3.2.1.302 + CodeChicken Lib 4.4.0.528：
+见 status 验证表。手筛与 JEI 未目视。

@@ -271,7 +271,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。**当前只支持整数**；对象写法未实现（读 `gravel` 并打警告） |
 | `ingot` | ❌ | 无条件复用：写**具体物品 id**（`minecraft:iron_ingot`），熔炼总是产出它，不注册自有锭。**暂不支持标签**（`#c:ingots/tin`），写标签会打警告并按自有锭处理 |
 | `ingots` | ❌ | **受支持模组的候选锭**（有序数组）：`[{"item": "mekanism:ingot_tin", "mod": "mekanism"}]`。启动时取第一个 `mod` 已加载（或没写 `mod`）的候选；都不匹配时注册自有 `exnihilosatellitium:<id>_ingot`。datagen 会给 base 配方加 `neoforge:not(...)` 兜底；每个候选的 `*_smelting_<mod>.json` 仍是手写（datagen 引用不了未注册的物品），见下 |
-| `gems` | ❌ | **受支持模组的候选矿物/模组专属材料**（与 `ingots` 同构，有序数组）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石这类没有“锭”的矿物用它；也用于只在模组在场时注册的锭类材料（ER 的 `yellorium`）——共同点是**产物由对方提供、我们没有自有兜底**。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `c:gems` / `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 之一已加载时注册**：没装时物品、方块、筛出物、锤表、配方和标签都不出现。装模组时矿砾/矿砂/矿尘熔成对方物品。**不能与 `ingot`/`ingots` 同时出现**，混用会整条跳过 |
+| `gems` | ❌ | **受支持模组的候选矿物/模组专属材料**（与 `ingots` 同构，有序数组）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石这类没有“锭”的矿物用它；也用于只在模组在场时注册的锭类材料（ER 的 `yellorium`、龙之进化的 `draconium`）——共同点是**产物由对方提供、我们没有自有兜底**。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `c:gems` / `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 之一已加载时注册**：没装时物品、方块、筛出物、锤表、配方和标签都不出现。装模组时矿砾/矿砂/矿尘熔成对方物品。**不能与 `ingot`/`ingots` 同时出现**，混用会整条跳过 |
 | `owner_mod` | ❌ | 主要来源模组；当前不解析，仅保留字段 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；设为 `false` 时该条跳过（当前没有自动骨架行） |
@@ -299,6 +299,16 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   而不是直接掉对方成品。这类材料**没有自有兜底物品**：无模组时链条没有熔炼终点，
   这是有意的，避免注册一个假的“磷灰石/氟石”物品；`gems` 条目**只在候选 mod 已加载时注册**，
   所以无模组包里连矿砾/矿砂/矿尘和三档碎料都不会出现。
+- **单源材料只从一张表出**：阿迪特（碎下界岩）、叶绿素（草方块）、龙尘（粉碎末地石）不进
+  砂砾/沙/尘土三张常规表，而由手写表提供唯一入口（`sieve/crushed_netherrack.json`、
+  `sieve/grass_block.json`、`sieve/crushed_end_stone_draconicevolution.json`）；
+  `generate_sieve_assets.py` 的 `SINGLE_SOURCE` 保证重跑生成器不会把它们加回三张常规表。
+  龙尘的补丁文件带根级 `"mod": "draconicevolution"`，没装 DE 时整文件跳过（`patch: true` 合并进
+  粉碎末地石表，不改原表）。
+- **龙尘不写手写熔炼变体**：DE 自己的 `c:ores/draconium`（1.20.1 为 `forge:ores/draconium`）
+  熔炼配方就是链条终点——datagen 把我们的矿砾/矿砂/矿尘方块写进同名标签的 `required: false`
+  条目，DE 在场时两个标签文件合并，矿块直接熔成 `draconicevolution:draconium_ingot`。
+  再手写 `<m>_ore_<kind>_smelting_draconicevolution.json` 只会让同一输入在 JEI 里出现两条相同配方。
 - **维度变体暂缺**：1.7.10 有 overworld / nether / end 三套矿砾（碎下界岩、末地砾）。
   当前 schema 只有一件事（筛砂砾/沙子/尘土），下界与末地变体留到 M2 实现时再扩字段，
   现在不要在表里硬塞。
@@ -306,7 +316,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 ### 生成的配方与标签
 
 以下文件都由 `./gradlew runData` 从材料表生成（`ModRecipes` / `ModItemTags` / `ModBlockTags` /
-`ModLootTables` / `ModBlockStates` / `ModItemModels`）；只有 `*_smelting_<mod>.json` 是手写：
+`ModLootTables` / `ModBlockStates` / `ModItemModels`）；只有 `*_smelting_<mod>.json` 是手写
+（龙之进化的矿块例外：它靠 DE 自己的 `c:ores/draconium` 标签熔炼，没有手写变体）：
 
 | 文件 | 内容 |
 |---|---|
@@ -342,6 +353,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   | apatite / cinnabar / niter / sulfur / ruby / sapphire | `thermal_foundation`（`thermal:apatite` / `thermal:ruby` 等；`gems` 材料，无自有兜底） |
   | yellorium | `bigreactors`（`bigreactors:yellorium_ingot`；`gems` 门控，无自有兜底） |
   | anglesite / benitoite | `bigreactors`（`bigreactors:anglesite_crystal` / `benitoite_crystal`；`gems` 门控） |
+  | draconium | `draconicevolution`（`draconicevolution:draconium_ingot`；`gems` 门控，单源粉碎末地石 1/8） |
 
   - **mod id ≠ 物品命名空间**：Thermal 的模组 id 是 `thermal_foundation`，锭却注册在
     `thermal:` 里；IE 的模组 id 是 `immersiveengineering`，锭 id 是 `ingot_aluminum`
@@ -357,11 +369,14 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
     都是 `bigreactors`），三条 `gems` 材料在两条线都会注册。
   - 加一个模组 = 在材料里加一行候选 + 手写 `<m>_ore_<kind>_smelting_<mod>.json` +
     重跑 `./gradlew runData`（base 配方会自动重算条件）；id 必须按对方 jar 核对。
+    **例外**：对方自己按 `c:ores/<id>` / `forge:ores/<id>` 标签熔炼时（龙之进化），
+    不写变体，直接靠标签合并。
   - **换模组会改变物品存在性**：已有存档里拿到的自有锭/矿物，装上受支持模组后会变成未知物品
     （日志报错并消失）。开世界前定好模组列表。
 - 铁/金/铜的 `ingot` 指向原版锭，所以 42 条 base 熔炼里它们熔到 `minecraft:*_ingot`；
-  其余金属熔到自有或候选产物，11 种 `gems` 材料（含 ER 的 yellorium / anglesite / benitoite）
-  **没有 base**，只有 81 条手写变体（42 条 base + 81 条候选变体 = 123 条熔炼配方）。
+  其余金属熔到自有或候选产物，12 种 `gems` 材料（含 ER 的 yellorium / anglesite / benitoite，
+  以及按标签熔炼、没有自有变体的 draconium）**没有 base**，只有 81 条手写变体
+  （42 条 base + 81 条候选变体 = 123 条熔炼配方）。
 - 锭贴图由 `art/items/ingots/generate.py` 生成；`gems` 材料没有自有图标（产物是对方模组的物品）。
 - **改了材料表就要重跑生成脚本**；否则会出现「注册了自有锭但没有熔炼配方」的错位。
 - 粉碎/粉末现在有两条通路：4 块合成 + M3 锤子降档（矿砾→粉碎、矿砂→粉末）。
