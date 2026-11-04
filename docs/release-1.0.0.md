@@ -68,7 +68,7 @@ Applied Energistics 2. No GPL assets copied.
 - [x] 所有者确认版本号（0.2.0 准备线直接发 1.0.0）与发布日期
 - [x] 最终构建后回填两份 jar 的大小 / sha256
 - [x] 打 tag：`v1.0.0`（main）、`v1.0.0-1.20.1`（1.20.1-forge）
-- [ ] 推送 tag 到 origin
+- [x] 推送 tag 到 origin（2026-11-04，`ssh.github.com:443`）
 - [ ] CurseForge 上传 1.21.1 / 1.20.1 两个文件
 - [ ] Modrinth 上传对应两个版本
 - [ ] 把商店下载链接补进 README
