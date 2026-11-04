@@ -308,7 +308,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   非和平在桶上方生成实体，和平掉 `peaceful_drop`；`peaceful_drop` 可为数组。
 - **物品规则优先于流体容器路径**：牛奶桶同时是物品和流体容器，先匹配 `added.item`；
   消耗后把 `getCraftingRemainingItem()`（牛奶桶 → 空桶）还给玩家。
-- 当前 14 条：基础 5（水+熔岩、熔岩+水、熔岩+红石、熔岩+荧石、水+尘土）、
+- 当前 14 条（缺 Thermal 时 12 条）：基础 5（水+熔岩、熔岩+水、熔岩+红石、熔岩+荧石、水+尘土）、
   牛奶 1、巫水 2、人偶 6（含热力 2 条：熔岩+狂风人偶→`thermal:blitz`、水+暴雪人偶→`thermal:blizz`，
   根级 `"mod": "thermal_foundation"`，和平掉 `thermal:blitz_rod` / `thermal:blizz_rod`）。
 - 未知 base/added/result/entity 只跳过该条并打 `[barrel]` 警告；删掉 JSON 就不反应。

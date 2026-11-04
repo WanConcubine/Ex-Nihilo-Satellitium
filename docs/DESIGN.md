@@ -514,4 +514,6 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
   `/exnihilo dump barrel` 两条规则带 `entity:thermal:blitz` / `thermal:blizz` 与
   `peaceful:[thermal:blitz_rod]` / `[thermal:blizz_rod]`；`/summon item` 两物品显示
   Gale / Blizzard Doll；不带 `-PtechMods` 时桶 12、物品不存在；配方经 `/reload` 解析探测。
+  条件物品的模型手写，`ModItemModels.HAND_FLAT_MODELS` 按名字跳过（临时强制注册后 datagen
+  不会写出同名模型）；字段 `@Nullable`，创造栏 null 检查。
   **未验**：工作台摆放、右键桶、JEI、贴图亮度。

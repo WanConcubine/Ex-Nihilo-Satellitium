@@ -30,6 +30,8 @@ Thermal Foundation 在场时注册；工作台配方用硝石粉 / 雪球，桶�
 - **验证**：`-PtechMods` 下 `[barrel] 14 transforms (2 fluid, 12 item)`；dump 两条新规则；
   `/summon item` 出 Gale / Blizzard Doll；配方经 `/reload` 解析探测（坏 JSON 会报
   `Couldn't parse`）。**未验**：工作台摆放、右键桶、JEI、贴图亮度。
+- **datagen 防撞**：`ModItemModels.HAND_FLAT_MODELS` 按名字跳过这两个手写模型；字段标
+  `@Nullable`，创造栏 null 检查。临时把门控改成恒真跑 `runData`，确认不会写出同名生成模型。
 
 ## 历史批次（详细见 [history.md](history.md)）
 
@@ -173,6 +175,9 @@ Thermal Foundation 在场时注册；工作台配方用硝石粉 / 雪球，桶�
   分支的木桶插件 uid 是 `barrel`，`config.jade.plugin_exnihilosatellitium.barrel` 已补。
 - **AE2 生产 jar 不能直丢 `run/mods`**：ForgeGradle dev 会因 SRG mixin
   `@Shadow field f_129762_ was not located` 崩服；必须放 `libs/` 并由 `-PtechMods` 走 `fg.deobf`。
+- **条件物品的模型不能交给 datagen**：热力人偶只在 Thermal 在场时注册，模型手写；
+  `ModItemModels.HAND_FLAT_MODELS` 按名字跳过，否则 datagen 一旦看到 Thermal 就会写出同名
+  模型和手写文件撞路径。字段是 `@Nullable`，用它的地方（创造栏等）必须 null 检查。
 - **TiT 阿迪特/叶绿素是单源**：只从碎下界岩 / 草方块出，不再扩散到砂砾/沙子/尘土；
   改筛表前先看 `scripts/generate_sieve_assets.py`（分支没有这个脚本，需手工对齐）。
 ## 常用命令
