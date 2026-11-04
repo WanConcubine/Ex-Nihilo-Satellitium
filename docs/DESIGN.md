@@ -1647,3 +1647,41 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
    不装时 139。手筛的实际手感与 JEI 页面还没进游戏看。
 6. **1.20.1 dev 坑**：AE2 生产 jar 走 FG dev 时 SRG mixin 找不到 `f_129762_`，必须放 `libs/`
    由 `-PtechMods` 做 `fg.deobf`；1.21.1 的 NeoForge dev 用官方名，生产 jar 可直接进 `run/mods`。
+
+## 47. 热力人偶：狂风 / 暴雪（2026-11-04）
+
+**来源**
+
+- 所有者给的两张 JEI 合成图：4 × 硝石粉 / 雪球 + 红石 + 2 × 荧石粉 + 珍贵人偶 + 下界疣。
+  参考对象是 Ex Nihilo: Sequentia 的 Thermal 附属（`doll_blitz` / `doll_blizz`）：
+  熔岩 → 狂风人（`thermal:blitz`）、水 → 暴雪人（`thermal:blizz`）。
+  本项目只借玩法数值，不复制其代码或资源。
+- 中文名按所有者指定用「狂风人偶 / 暴雪人偶」；参考图的「劲风 / 冻结」不用。
+
+**实现**
+
+- 物品 `blitz_doll` / `blizz_doll`（`stacksTo(16)`），模型 `item/generated`，贴图 64×64：
+  `art/items/dolls/restyle.py` 新增金黄 / 冰蓝两个色板，和现有 5 只人偶同一轮廓。
+- 两张 shaped 配方 `xyx / zwz / xvx`：`x` = `thermal:niter_dust` / `minecraft:snowball`，
+  `y` = 红石，`z` = 荧石粉，`w` = `exnihilosatellitium:doll`，`v` = 下界疣。手写 JSON。
+- 桶规则 `lava_blitz_doll_blitz.json` / `water_blizz_doll_blizz.json`：`entity` + `peaceful_drop`
+  （`thermal:blitz_rod` / `thermal:blizz_rod`），照现有「右键立即生效」路径，不写 `cook_ticks`。
+- 条件注册：`ModItems` 的 `thermalDoll` 在 `Platform.isModLoaded("thermal_foundation")` 为假时
+  返回 `null`（1.20.1 分支用 `ModList`），创造栏做 null 检查。配方条件（1.21.1
+  `neoforge:conditions` / 1.20.1 根级 `conditions`）与桶规则根级 `"mod"` 用同一个 mod id。
+- 为什么不交给 datagen：datagen JVM 里没有 Thermal，条件物品不注册，`thermal:niter_dust` /
+  `thermal:blitz_rod` 也不在 classpath；模型、配方、桶规则因此都是手写文件，和现有
+  `*_smelting_thermal_foundation` 的形态一致。
+- 1.21.1 主线：本地没有 Thermal 发行版可测（`libs` 只有 1.20.1 的 11.0.6），代码 / 数据保留但
+  整条不注册；测试在 1.20.1 `-PtechMods` 下做。
+
+**验证**
+
+- 1.20.1 全装：`[barrel] loaded 14 transforms (2 fluid, 12 item)`；
+  `/exnihilo dump barrel` 两条新规则分别带 `entity:thermal:blitz` / `entity:thermal:blizz` 与
+  `peaceful:[thermal:blitz_rod]` / `peaceful:[thermal:blizz_rod]`；`/summon item` 两个物品都能
+  生成（显示名 Gale Doll / Blizzard Doll）。
+- 主线不装 Thermal：`[barrel] 12`，两个物品不存在，无 unknown item / 配方解析错误。
+- 配方文件通过 `/reload` 解析探测：临时写坏 JSON 会报 `Couldn't parse data file
+  exnihilosatellitium:blitz_doll`，恢复后无错。
+- **未验**：工作台实际摆放、右键桶生成 / 和平掉落、JEI 页、游戏内贴图亮度。

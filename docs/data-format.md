@@ -527,12 +527,21 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
-- 当前 12 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
+- 当前 14 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
   熔岩+荧石粉→末地石、水+尘土→粘土块（`water_dust_clay.json`）、
   水+牛奶桶→史莱姆/粘液球（`water_milk_slime.json`）；
   巫水+沙子→灵魂沙（`witch_water_sand_soul_sand.json`）、
   巫水+橡树苗→深色橡树苗（`witch_water_sapling_dark_oak.json`）；
-  人偶 4 条：熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者。
+  人偶 6 条：熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者、
+  **熔岩+狂风→`thermal:blitz`、水+暴雪→`thermal:blizz`**（后两条是条件文件，根级
+  `"mod": "thermal_foundation"`，和平掉落分别是 `thermal:blitz_rod` / `thermal:blizz_rod`）。
+- **新增条件人偶示例**（完整文件见 `barrel/lava_blitz_doll_blitz.json`）：
+  ```json
+  { "mod": "thermal_foundation", "base": "minecraft:lava",
+    "added": { "item": "exnihilosatellitium:blitz_doll" },
+    "entity": "thermal:blitz", "peaceful_drop": "thermal:blitz_rod" }
+  ```
+  对应的物品只在 Thermal Foundation 加载时注册；没有 Thermal 时这一段整文件在查物品之前跳过。
 - **删掉 JSON 桶就不反应**：不会退回硬编码。
 
 ## 11. JEI 分类

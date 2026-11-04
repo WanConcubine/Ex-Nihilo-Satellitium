@@ -1,6 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.GrassSeedsItem;
@@ -120,6 +121,15 @@ public final class ModItems {
             ITEMS.register("shulker_doll", () -> new Item(new Item.Properties().stacksTo(16)));
     public static final DeferredHolder<Item, Item> GUARDIAN_DOLL =
             ITEMS.register("guardian_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+
+    /**
+     * Thermal dolls: the crafting catalyst (niter dust) and the summoned mobs
+     * both come from Thermal, so the items only exist while Thermal Foundation
+     * is loaded. Both fields stay {@code null} otherwise, and the hand-written
+     * recipe / barrel JSON is gated on the same mod id.
+     */
+    public static final DeferredHolder<Item, Item> BLITZ_DOLL = thermalDoll("blitz_doll");
+    public static final DeferredHolder<Item, Item> BLIZZ_DOLL = thermalDoll("blizz_doll");
 
     /** M6: infested leaves item; the infestation component picks 0 % or mature. */
     public static final DeferredHolder<Item, Item> INFESTED_LEAVES =
@@ -297,6 +307,20 @@ public final class ModItems {
                                                               final UpgradeType type, final int tier) {
         return ITEMS.register(name, () -> new UpgradeItem(
                 new Item.Properties().stacksTo(8), type, tier));
+    }
+
+    /**
+     * Conditional doll: absent unless Thermal Foundation is on the mod list.
+     *
+     * <p>The recipe uses {@code thermal:niter_dust} and the barrel spawns
+     * {@code thermal:blitz} / {@code thermal:blizz}; registering the doll in a
+     * profile without Thermal would leave an item with no source and no use.</p>
+     */
+    private static DeferredHolder<Item, Item> thermalDoll(final String name) {
+        if (!Platform.isModLoaded("thermal_foundation")) {
+            return null;
+        }
+        return ITEMS.register(name, () -> new Item(new Item.Properties().stacksTo(16)));
     }
 
     public static void register(final IEventBus modBus) {

@@ -1,0 +1,9 @@
+{
+  "mod": "thermal_foundation",
+  "base": "minecraft:lava",
+  "added": {
+    "item": "exnihilosatellitium:blitz_doll"
+  },
+  "entity": "thermal:blitz",
+  "peaceful_drop": "thermal:blitz_rod"
+}

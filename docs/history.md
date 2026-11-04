@@ -3,6 +3,30 @@
 > 从 [status.md](status.md) 搬出来的批次叙事：只记「当时做了什么、怎么验的」。
 > **当前状态、验证表、下一步只看 status.md**；这里的内容不再维护，只作追溯用。
 
+## 2026-11-03 晚（工匠巧思 + AE2 赛特斯石英）
+
+- **对象**：工匠巧思（`tinkers_thinking` 0.2.4，只有 1.20.1）与 AE2（1.21.1 `19.2.18` /
+  1.20.1 `15.4.12`，前置 GuideME `21.1.22` / `20.1.15`）。两者都是可选依赖，不写 `mods.toml`。
+- **TiT 阿迪特（`ardite`，金属）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装时回退
+  自有 `ardite_ingot`。**单源**：碎下界岩 1% → `ardite_broken`，再走三档链（碎矿 ×4 → 矿块 →
+  熔炼）；砂砾/沙子/尘土不出。1.20.1 另有 6 条 `tconstruct:melting`（碎矿 45 mB / 矿块 180 mB，
+  950°C，`forge:molten_ardite`）。
+- **TiT 叶绿素（`chlorophyll`，`gems`）**：只在 TiT 在场时注册；**单源**：草方块 1% →
+  `chlorophyll_broken`（草方块表 = 泥土 24 条 + 这一条，由生成器从 `dirt.json` 生成），
+  矿块熔成 `tinkers_thinking:chlorophyte_compound`（原矿 1A+1B 的等价物）。没装 TiT 时整条
+  （物品/方块/碎料/筛出/锤表/配方/标签）都不出现。
+- **AE2 赛特斯**：独立补丁 `sieve/sand_ae2.json`（根级 `"mod": "ae2"` + `"patch": true`），
+  沙 → `ae2:certus_quartz_crystal` **1/6**、`ae2:certus_quartz_dust` **1/12**。
+  不注册自有物品；充能赛特斯走 AE2 自己的 `ae2:charger`（配方只要铁/铜/赛特斯），
+  天石粉/陨石不做。缺 AE2 时整文件在查物品之前跳过。
+- **为什么形态不同**：TiT 的两种矿本身没有「空岛可得的成品链」，所以走本模组三档材料链；
+  AE2 的赛特斯是基础资源且 AE2 自带种子/充能/氟石/ME 全链，直接掉成品不会多出对不上的中间物。
+- **验证**：`./gradlew build`（主线 21 / 分支 17）+ 五个守卫脚本全绿；1.21.1（AE2）`[materials]
+  14 entries`、`116 → 118 drops`；1.20.1（全装）`22 entries`、`141 drops`；RCON 熔炉阿迪特 /
+  叶绿素两条通过；未验手筛 / JEI / 匠魂炉实际熔化。
+- **坑**：TiT 的两种原矿都要钻石镐，阿迪特没有熔炉配方；AE2 的 1.20.1 生产 jar 不能在 FG dev
+  直丢 `run/mods`（SRG mixin 崩服）。
+
 ## 2026-11-03（数据包 v2 / 末影蛋糕 / 三路径 / 科技矿物链）
 
 ### 数据包 v2：标签 / mod 门 / 补丁
