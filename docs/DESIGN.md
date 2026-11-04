@@ -1822,6 +1822,15 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
   1.20.1 用裸 `conditions` + `forge:mod_loaded`。
 - 验收环境：1.20.1 ER 2.0.84 + ZeroCore 2.1.45；1.21.1 ER 2.4.9 + ZeroCore 2.4.9。
 
+**矿石识别**
+
+- ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和 `c:ores/uranium`；这解释了为什么
+  Mekanism `enriching` / IE crusher / Create crushing 能磨它。我们的 yellorium 矿块原先只在 `c:ores/yellorium`，
+  所以任何按 `c:ores/uranium` 取矿的机器都看不到它。
+- 现在 yellorium 矿块（块 + 物品）同时进 `c:ores/yellorite` 与 `c:ores/uranium`；
+  `yellorium_broken` 进 `c:raw_materials/yellorium`（及根 tag）。这是「碎料不进 raw_materials」
+  规则的唯一例外，目的是和 ER 原矿保持同样的机器兼容性（输出对方的铀粉，不是 yellorium）。
+
 **验证**
 
 - 全装 `[materials] loaded 25`、`[sieve] 154`（1.20.1 全装）/ `131`（1.21.1 AE2+ER）、

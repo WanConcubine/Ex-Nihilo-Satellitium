@@ -41,6 +41,11 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 - **获取**：三档矿链（碎/粉/砂 → 4 合 1 矿块 → 熔炉）熔成 `bigreactors:yellorium_ingot` /
   `anglesite_crystal` / `benitoite_crystal`；石墨仍由煤烧，cyanite/blutonium 等继续由反应堆产出，
   不做筛源。
+- **矿石识别（补齐）**：ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和 `c:ores/uranium`；
+  我们的 yellorium 矿块现在同样进这两个 tag（块 + 物品），`yellorium_broken` 进
+  `c:raw_materials/yellorium`（及根 tag）。Mekanism 的 `enriching`、IE 的 crusher 等按
+  `c:ores/uranium`（1.21.1）/ `forge:ores/uranium`（1.20.1）取矿的机器因此能磨我们的矿，
+  输出与 ER 原矿一致（对方的铀粉，不是 yellorium）。
 - **验证**：两版真装 ER + ZeroCore；1.20.1 全装 `[materials] loaded 25`、`[sieve] 154 drops`，
   主线 AE2+ER `[sieve] 131 drops`；RCON 熔炉三种产物均出，
   `RecipesUsed` 指向 `*_ore_*_smelting_bigreactors`；手筛与 JEI 未目视。
@@ -277,7 +282,7 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 | 木/骨钩耐久（1.21.1） | ✅ | 同一路径实测 `damage=1`；该线未改代码 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
 | `check-textures.py` | ✅ | 主线 288 模型 / 113 blockstate / 167 纹理；分支 290 / 113 / 163；无 `minecraft:item/*` |
-| `check-data-paths.py` | ✅ | 1.21.1：281 recipes / 75 loot / 69 tags；1.20.1 用 `--target 1.20.1` 验过（185 / 75 / 69） |
+| `check-data-paths.py` | ✅ | 1.21.1：281 recipes / 75 loot / 73 tags；1.20.1 用 `--target 1.20.1` 验过（185 / 75 / 73） |
 | `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 74 JSON / 7 nav |
 | 数据表 JSON | ✅ | 7 输入筛表 118（基表；装 ER +9）、55 锤（装 ER +9）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
