@@ -7,9 +7,9 @@
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
 （`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.1.2 已发布**（两条线 tag：`v1.1.2` / `v1.1.2-1.20.1`）；1.0.0–1.1.2 的商店上传待所有者。
-**最新一批（2026-11-04 晚，1.1.2）**：**Bug 修复版**——1.20.1 的木钩/骨钩破坏树叶不掉耐久；
-补上 `ToolEvents#onBreak` 的 crook 磨损逻辑，1.21.1 本来就是对的，仅同步版本号。
+**1.2.0 已发布**（两条线 tag：`v1.2.0` / `v1.2.0-1.20.1`）；1.0.0–1.2.0 的商店上传待所有者。
+**最新一批（2026-11-04 夜，1.2.0）**：**内容更新**——Extreme Reactors（两版）、BambooMod（仅 1.20.1）、
+骨粉 / 烈焰粉筛出物、ER 矿块标签与匠魂 yellorium 熔炼/铸造。
 上一批（1.1.1）：木桶堆肥“原版泥土模型 + 投入物加权混色”、坩埚熔料真实方块模型、
 成土时间 50 秒 → 30 秒。
 **联动**：25 种材料（14 金属 + 11 矿物；ER 的 yellorium 走 `gems` 门控）；
@@ -22,7 +22,9 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 锤表 55 基础 / 79 全装（装 ER 88）；桶 18（装 Thermal）/ 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
 **下一步**：商店上传 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
 
-## 未发布（2026-11-04 晚，筛表补骨粉 / 烈焰粉）
+## 1.2.0（2026-11-04）
+
+### 骨粉 / 烈焰粉
 
 - **骨粉**：`dust` 新增 `minecraft:bone_meal` 20%（经典 Ex Nihilo 尘土 1/5），
   瓷土与菌岩催菌不再只靠骷髅掉落。
@@ -33,7 +35,7 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 - **验证**：两版 JSON 解析 / `build` / 纹理守卫通过，分支数据用主线
   `check-data-paths.py --target 1.20.1` 验过；未进游戏手筛，JEI 未目视。
 
-## 未发布（2026-11-04 深夜，Extreme Reactors）
+### Extreme Reactors（两版）
 
 - **三条材料**：`yellorium`（1/8，common）、`anglesite` / `benitoite`（各 1/64，rare）。
   三条都走 `gems` 门控：只在 `bigreactors` 在场时注册，没装 ER 时基表/物品/方块完全不出现；
@@ -53,7 +55,7 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
   `RecipesUsed` 指向 `*_ore_*_smelting_bigreactors`；手筛与 JEI 未目视。
 - **版本**：1.20.1 用 ER 2.0.84 + ZeroCore 2.1.45；1.21.1 用 ER 2.4.9 + ZeroCore 2.4.9。
 
-## 未发布（2026-11-04 夜，BambooMod，仅 1.20.1）
+### BambooMod（仅 1.20.1）
 
 - BambooMod 0.6.2 只有 1.20.1 Forge 构建，接在 `1.20.1-forge` 分支；主线不加载。
 - `sieve/dirt.json` / `grass_block.json` 各 +8（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），
@@ -280,11 +282,12 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 | 1.1.0 发布 | ✅ | 两版 `mod_version=1.1.0`；tag `v1.1.0` / `v1.1.0-1.20.1`；jar 版本与 sha 见 [release-1.1.0.md](release-1.1.0.md) |
 | 1.1.1 发布 | ✅ | 两版 `mod_version=1.1.1`；tag `v1.1.1` / `v1.1.1-1.20.1`；jar 版本与 sha 见 [release-1.1.1.md](release-1.1.1.md) |
 | 1.1.2 发布 | ✅ | 两版 `mod_version=1.1.2`；tag `v1.1.2` / `v1.1.2-1.20.1`；jar 版本与 sha 见 [release-1.1.2.md](release-1.1.2.md) |
+| 1.2.0 发布 | ✅ | 两版 `mod_version=1.2.0`；tag `v1.2.0` / `v1.2.0-1.20.1`；jar 版本与 sha 见 [release-1.2.0.md](release-1.2.0.md) |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | 木/骨钩耐久（1.21.1） | ✅ | 同一路径实测 `damage=1`；该线未改代码 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
 | `check-textures.py` | ✅ | 主线 288 模型 / 113 blockstate / 167 纹理；分支 290 / 113 / 163；无 `minecraft:item/*` |
-| `check-data-paths.py` | ✅ | 1.21.1：281 recipes / 75 loot / 73 tags；1.20.1 用 `--target 1.20.1` 验过（185 / 75 / 73） |
+| `check-data-paths.py` | ✅ | 1.21.1：281 recipes / 75 loot / 73 tags；1.20.1 用 `--target 1.20.1` 验过（190 / 75 / 73） |
 | `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 74 JSON / 7 nav |
 | 数据表 JSON | ✅ | 7 输入筛表 118（基表；装 ER +9）、55 锤（装 ER +9）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
@@ -321,7 +324,7 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 > 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 
-1. **1.1.2 商店收尾**：版本号/日期确认、tag `v1.1.2` / `v1.1.2-1.20.1` 已打；
+1. **1.2.0 商店收尾**：版本号/日期确认、tag `v1.2.0` / `v1.2.0-1.20.1` 已打；
    CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
 2. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器、村民人偶 / 脑白金 / 糖水链 / 蜜蜂 / 热力人偶；清单见「交接清单」。
