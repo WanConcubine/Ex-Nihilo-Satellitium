@@ -43,6 +43,14 @@ public final class ModItemModels extends ItemModelProvider {
     /** Hand-built item geometry/icons: these keep their JSON files. */
     private static final Set<String> HAND_MODELS = Set.of("electric_hammer", "fuel_hammer", "end_cake");
 
+    /**
+     * Flat items whose models are hand-written because the item is conditional.
+     * If a future datagen JVM has Thermal on its classpath the doll gets
+     * registered, and generating it here would collide with the hand-written
+     * {@code models/item/blitz_doll.json}; skip by name instead.
+     */
+    private static final Set<String> HAND_FLAT_MODELS = Set.of("blitz_doll", "blizz_doll");
+
     public ModItemModels(final PackOutput output, final ExistingFileHelper helper) {
         super(output, ExNihiloSatellitium.MOD_ID, helper);
     }
@@ -135,6 +143,9 @@ public final class ModItemModels extends ItemModelProvider {
 
     private void flat(final Item item, final Set<Item> special) {
         if (special.contains(item) || item instanceof BlockItem) {
+            return;
+        }
+        if (HAND_FLAT_MODELS.contains(key(item))) {
             return;
         }
         basicItem(item);
