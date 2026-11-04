@@ -36,7 +36,7 @@
 ## 2026-11-02（发布 / datagen 移植 / Tinkers / IE / 树起点）
 
 - **0.1.0 发布**：tag `v0.1.0-1.20.1`（`35d98d4`），jar 587 KB；已推 origin，商店上传待所有者。
-- **0.2.0 准备**：`mod_version=0.2.0`，jar 663 KB；tag / 商店待确认。
+- **0.2.0 准备 → 1.0.0 发布**：原定 0.2.0，验收后直接定为 **1.0.0**；tag `v1.0.0-1.20.1`（2026-11-04）。
 - **datagen 第二/三批移植**：配方 143 条（133 base + 4 石子→石头 + 6 钴）、71 blockstate +
   29 方块模型 + 157 物品模型；`compare-models.py` 248 identical；`written: 0` 幂等。
 - **Tinkers 3**：两个黏液草种子条件注册；钴 → `tconstruct:cobalt_ingot`；78 条匠魂熔炼；

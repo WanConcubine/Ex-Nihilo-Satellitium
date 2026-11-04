@@ -1,9 +1,9 @@
 # 更新记录
 
-## 0.2.0 — 2026-11-02（发布准备）
+## 1.0.0 — 2026-11-04（首个正式版）
 
 面向 **Minecraft 1.20.1 / Forge 47.4.x** 的空岛资源获取模组；与 1.21.1 / NeoForge 主线
-玩法内容相同。本次是 0.1.0 之后的第一个内容版本。
+玩法内容相同。这是继 0.1.0 之后的首个正式版（原 0.2.0 准备线直接定为 1.0.0）。
 
 ### 新增内容
 
@@ -56,8 +56,8 @@
 
 ### 安装
 
-1. 安装 **NeoForge 21.1.x**（1.20.1 版用 **Forge 47.4.x**）。
-2. 把 `exnihilosatellitium-0.2.0.jar` 放进 `mods/`。
+1. 安装 **Forge 47.4.x**（Java 17）。
+2. 把 `exnihilosatellitium-1.0.0.jar` 放进 `mods/`。
 3. 可选：JEI（配方查询）、Jade（方块信息）、Create / Mekanism / Thermal / IE / Tinkers /
    TiT / AE2（资源与机器互通；IE / Tinkers / TiT 仅 1.20.1）。
 
