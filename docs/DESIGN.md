@@ -1791,3 +1791,41 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 - 基表 116 → 118（1.20.1 113 → 115）；JEI 筛子页按表自动多出两条。
 - 两版 `build`、`check-textures.py`、`check-data-paths.py`（主线 + `--target 1.20.1`）通过。
 - 未进游戏手筛，JEI 页面未目视。
+
+## 51. Extreme Reactors：yellorium / anglesite / benitoite（2026-11-04，两版）
+
+**为什么**
+
+- 空岛缺的只有 ER 的矿源：反应堆燃料棒/控制器吃 `c:ingots/yellorium`，石墨是熔炉烧煤，
+  铁/红石/玻璃都有；cyanite / blutonium / ludicrite 是反应堆与再处理器产物，做成筛源会绕开反应堆链。
+- `anglesite` / `benitoite` 是 ER 2.x 的后期晶体（充能器、再处理器的 insanite），
+  属于“基础资源”，不做的话后期内容仍然断头。
+- 目标只是补矿源，不写 ER 的机器/多方块配方。
+
+**为什么用 `gems` 门控**
+
+- yellorium 是锭，但没装 ER 时没有任何用途。`gems` 的语义是“产物由对方提供、没有自有兜底、
+  只在候选模组在场时注册”，正好符合；没装 ER 时物品、方块、筛表补丁都不出现，基表 118 不变。
+- 代价是文档里 `gems` 不再只等于“没有锭的矿物”，改为“产物由对方提供、无自有兜底”的材料。
+
+**数值**
+
+- `yellorium` **1/8**（common）：约 32 砂砾/锭。ER 反应堆是持续烧燃料的，不能按铀的 1/90 定。
+- `anglesite` / `benitoite` **1/64**（rare）：后期晶体，4 碎块 → 矿块 → 熔炉。
+- 三档矿链全进；锤表/筛表/2×2 合成沿用现有生成器，`merge_table` 会保留手写条目。
+
+**实现**
+
+- `materials.json` 三条 `gems`；`generate_ore_variants.py` / `generate_sieve_assets.py` 生成碎料贴图、
+  锤表与 `sieve/<kind>_bigreactors.json`（根级 `mod` + `patch`）。
+- 每版 9 条手写 `<m>_ore_<kind>_smelting_bigreactors.json`：1.21.1 用 `neoforge:conditions`，
+  1.20.1 用裸 `conditions` + `forge:mod_loaded`。
+- 验收环境：1.20.1 ER 2.0.84 + ZeroCore 2.1.45；1.21.1 ER 2.4.9 + ZeroCore 2.4.9。
+
+**验证**
+
+- 全装 `[materials] loaded 25`、`[sieve] 154`（1.20.1 全装）/ `131`（1.21.1 AE2+ER）、
+  `[hammer] 88 / 64`。
+- RCON `/exnihilo sieve` 三档都含新条目；熔炉三种矿块分别出 `yellorium_ingot` /
+  `anglesite_crystal` / `benitoite_crystal`，`RecipesUsed` 指向我们的变体。
+- 未进游戏手筛，JEI 页面未目视。

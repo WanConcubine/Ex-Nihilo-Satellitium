@@ -123,6 +123,9 @@ PALETTES = {
     "sapphire": ("#0A1A3A", "#1A3A8A", "#3A6FD9", "#6FA0E8", "#B0D0FF"),
     "ardite": ("#2B0F0A", "#5E1F16", "#8E3B2E", "#B85C48", "#E39A85"),
     "chlorophyll": ("#14300E", "#2E6A22", "#4FA83A", "#7CD05C", "#C0F09A"),
+    "yellorium": ("#3A3A0E", "#8A8424", "#D0C44A", "#E8DE8A", "#FFF8C0"),
+    "anglesite": ("#4A3608", "#9A7610", "#E0A800", "#F2C83C", "#FFF0A0"),
+    "benitoite": ("#0E3444", "#1E6A8A", "#3AA8D0", "#7AD8F0", "#C8F8FF"),
 }
 
 

@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:anglesite_ore_sand",
+  "result": "exnihilosatellitium:anglesite_powdered",
+  "min": 4,
+  "max": 6,
+  "mod": "bigreactors"
+}

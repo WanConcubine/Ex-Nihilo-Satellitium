@@ -1,0 +1,19 @@
+{
+  "mod": "bigreactors",
+  "patch": true,
+  "input": "minecraft:sand",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:yellorium_crushed",
+      "chance": 0.125
+    },
+    {
+      "item": "exnihilosatellitium:anglesite_crushed",
+      "chance": 0.01562
+    },
+    {
+      "item": "exnihilosatellitium:benitoite_crushed",
+      "chance": 0.01562
+    }
+  ]
+}

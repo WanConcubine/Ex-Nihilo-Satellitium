@@ -1,0 +1,19 @@
+{
+  "mod": "bigreactors",
+  "patch": true,
+  "input": "exnihilosatellitium:dust",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:yellorium_powdered",
+      "chance": 0.125
+    },
+    {
+      "item": "exnihilosatellitium:anglesite_powdered",
+      "chance": 0.01562
+    },
+    {
+      "item": "exnihilosatellitium:benitoite_powdered",
+      "chance": 0.01562
+    }
+  ]
+}

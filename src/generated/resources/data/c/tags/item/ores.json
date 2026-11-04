@@ -21,6 +21,9 @@
     "#c:ores/sulfur",
     "#c:ores/ruby",
     "#c:ores/sapphire",
-    "#c:ores/chlorophyll"
+    "#c:ores/chlorophyll",
+    "#c:ores/yellorium",
+    "#c:ores/anglesite",
+    "#c:ores/benitoite"
   ]
 }
