@@ -1886,6 +1886,10 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 **不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心，两版一致）和混沌碎片（混沌守卫）保持 DE
 原样；空岛是否打得到末影龙 / 混沌守卫由整合包决定，不在本模组补。所有者 2026-11-04 拍板。
 
+**贴图**：`broken` 的石壳必须跟来源方块——龙尘来自粉碎末地石，所以
+`STONE_PALETTES["draconium"] = END_STONE`（末地石淡黄），不能落回默认灰石。
+`crushed` / `powdered` 仍是纯金属色阶。新增单源材料时要同时补这一行。
+
 **验证**：主线真装 DE 3.1.4.633 + Brandons Core 3.2.1.309 + CodeChicken Lib 4.6.1.529：
 `[materials] loaded 18`、`[sieve] 132`（AE2+ER+DE，+1）、`[hammer] 67`（+3）；
 RCON 熔炉把 `draconium_ore_sand` 熔成 `draconicevolution:draconium_ingot`。

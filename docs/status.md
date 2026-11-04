@@ -40,6 +40,8 @@ CraftTweaker）已完成。
   锤表 3 条（矿砾→粉碎 4–6、矿砂→粉末 4–6、矿尘→自身）全带 `mod` 门。
   **不写** `*_smelting_draconicevolution.json`，避免同一输入在 JEI 里出现两条相同配方。
 - **不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心）与混沌碎片（混沌守卫）保持 DE 原样。
+- **贴图基底**：破碎龙矿的石壳走 `STONE_PALETTES["draconium"] = END_STONE`（末地石淡黄），
+  不是默认灰石——单源材料必须按来源方块换基底。
 - **数字**：主线 AE2+ER+DE `[sieve] 132`（+1）、`[hammer] 67`（+3）、`[materials] 18`；
   1.20.1 全装 + Bamboo + DE `[sieve] 174`（+1）、`[hammer] 91`（+3）、`[materials] 26`。
 - **验证**：两版真装 DE + Brandons Core + CodeChicken Lib；RCON 熔炉把
