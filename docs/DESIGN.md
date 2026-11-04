@@ -528,9 +528,9 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
   `result`/`entity` 互斥，`drain` 只配 `added.item` 且不要求满桶。
 - **BE**：`PendingFluidFrom/To/Ticks` 保存 30 秒换液；到点且仍是原流体才替换，每 20 tick 同步；
   玻璃瓶抽取 250 mB → 蜂蜜瓶；浓缩蜂蜜桶每 100 tick 1/6 概率在 6 格内生成 1 只蜜蜂（上限 5）。
-- **流体**：`sugar_water` / `concentrated_honey`（+ flowing）只注册 still/flowing 与
-  `TintedWaterFluidType`（`initializeClient` 挂 `TintedWaterClientExtensions`，复用原版水贴图 + tint）；
-  **不注册方块和桶**。
+- **流体**：`sugar_water` / `concentrated_honey`（+ flowing）注册 still/flowing、`TintedWaterFluidType`
+  （`initializeClient` 挂 `TintedWaterClientExtensions`，复用原版水贴图 + tint）、source block 和桶；
+  桶内规则不变，桶只是运输/放置途径。
 - **JEI / Jade / dump**：JEI 流体结果槽 + 延迟/抽取提示；Jade「转化中」；dump 输出
   `fluid:` / `delay:` / `drain:`。
 - **AE2**：沙、砂砾各 1/16 `ae2:sky_dust`；**蜂箱**：3 木板 + 3 蜂蜜瓶 + 3 木板 → 原版蜂箱。

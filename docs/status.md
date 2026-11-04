@@ -18,7 +18,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 
 - **村民人偶**（`villager_doll`）：8 绿宝石围一圈普通人偶；巫水满桶 + 右键 → 僵尸村民，
   和平掉腐肉。**脑白金**（`brain_platinum`）：蛋 4 + 糖 4 + 绿宝石，右键傻子村民 → 普通村民。
-- **糖水 → 浓缩蜂蜜汁**：两个桶专用流体（无方块、无桶）；满水 + 糖 → 糖水，
+- **糖水 → 浓缩蜂蜜汁**：两个可放置流体（source block + 桶）；满水 + 糖 → 糖水，
   满糖水 + 蒲公英黄 30 秒 → 浓缩蜂蜜汁；玻璃瓶扣 250 mB → 蜂蜜瓶；浓缩蜂蜜桶每 100 tick
   1/6 概率在 6 格内养 1 只蜜蜂（上限 5）。
 - **蜂箱**：3 木板 + 3 蜂蜜瓶 + 3 木板 → 原版蜂箱。
@@ -58,7 +58,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 
 - 核心循环与主线一致：12 桶、7 输入筛表、6 锤 / 2 钩、39 熔点 + 9 热源、巫水/瓷桶/11 木坩埚/
   蚕/8 人偶（含 2 只热力条件人偶、村民人偶）、四台机器 + 自动输出。
-- 村民/蜂蜜：村民人偶、脑白金、桶专用糖水/浓缩蜂蜜汁（无方块无桶）、养蜂、蜂箱配方。
+- 村民/蜂蜜：村民人偶、脑白金、糖水/浓缩蜂蜜汁（source block + 桶）、养蜂、蜂箱配方。
 - 数据布局：`recipes/`、`loot_tables/`、`tags/blocks|items/`，标签命名空间 `forge:`；
   JSON 字段是 1.20.1 形态（裸 `conditions`）。
 - 22 种材料（14 金属 + 8 矿物）；`gems` 只在对应模组在场时注册；锭候选顺序与主线相同。
@@ -103,7 +103,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
 | `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
-| `check-textures.py` | ✅ | 270 模型 / 102 blockstate / 153 纹理；七个子模型只引用 vanilla block 贴图 |
+| `check-textures.py` | ✅ | 272 模型 / 104 blockstate / 155 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装：`[materials] 22`、`[sieve] 7 inputs / 143 drops`、`[hammer] 79`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |
@@ -117,7 +117,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | 坩埚 / 巫水 / 瓷桶 | ✅ | 39+9 表、篝火/熔炉速率、巫水发酵与转化、瓷桶 capability |
 | 蚕 / 人偶 | ✅ | 侵染进度/扩散、8 种人偶（含热力 2 只、村民）生成与和平掉落 RCON 验过 |
 | 热力人偶 | ✅ / ⚠️ | `[barrel] 18`、dump 两条规则（`thermal:blitz` / `thermal:blizz`，和平 `thermal:*_rod`）、`/summon` 两物品通过；配方经 `/reload` 解析探测；合成 / 右键 / JEI 未实测 |
-| 村民 / 蜂蜜 | ✅ / ⚠️ | 两个新物品 `/summon` 正常、配方由 datagen 生成；data merge 验证 30 秒换液、蜜蜂生成（`PersistenceRequired`）；脑白金已改为 `EntityInteract` 抢先于交易界面（免 Shift）；真实右键 / 玻璃瓶抽取 / JEI 未测 |
+| 村民 / 蜂蜜 | ✅ / ⚠️ | 两个新物品 `/summon` 正常、配方由 datagen 生成；data merge 验证 30 秒换液、蜜蜂生成（`PersistenceRequired`）；流体有 source block + 桶，桶内改四面盒渲染；脑白金已改为 `EntityInteract`（免 Shift）；真实右键 / 玻璃瓶抽取 / JEI 未测 |
 | 客户端画面 | ⚠️ | 最近一次客户端冒烟停在 2026-11-02；新物品/流体、热力人偶、TiT/AE2 物品、JEI 页未目视 |
 | 合成 / 右键手感 | ⚠️ | 全部配方 JSON 已加载，但没有玩家逐项实测 |
 

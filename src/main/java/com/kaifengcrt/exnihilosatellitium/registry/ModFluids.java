@@ -32,9 +32,9 @@ public final class ModFluids {
             FLUIDS.register("flowing_witch_water", () -> new ForgeFlowingFluid.Flowing(witchWaterProperties()));
 
     /**
-     * Sugar water and concentrated honey are barrel-only fluids: no block and
-     * no bucket, so they can only be produced, stored and drawn from a barrel.
-     * The still/flowing pair is still needed for the tank and JEI.
+     * Sugar water and concentrated honey are barrel-chain fluids. Both have a
+     * source block and a bucket so they can be transported; the barrel-specific
+     * effects (delayed conversion, bee spawning) live in the block entity.
      */
     public static final RegistryObject<FluidType> SUGAR_WATER_TYPE =
             FLUID_TYPES.register("sugar_water", () -> new TintedWaterFluidType(
@@ -62,12 +62,16 @@ public final class ModFluids {
     }
 
     private static ForgeFlowingFluid.Properties sugarWaterProperties() {
-        return barrelFluidProperties(SUGAR_WATER_TYPE, SUGAR_WATER, FLOWING_SUGAR_WATER);
+        return barrelFluidProperties(SUGAR_WATER_TYPE, SUGAR_WATER, FLOWING_SUGAR_WATER)
+                .block(ModBlocks.SUGAR_WATER)
+                .bucket(ModItems.SUGAR_WATER_BUCKET);
     }
 
     private static ForgeFlowingFluid.Properties concentratedHoneyProperties() {
         return barrelFluidProperties(CONCENTRATED_HONEY_TYPE, CONCENTRATED_HONEY,
-                FLOWING_CONCENTRATED_HONEY);
+                FLOWING_CONCENTRATED_HONEY)
+                .block(ModBlocks.CONCENTRATED_HONEY)
+                .bucket(ModItems.CONCENTRATED_HONEY_BUCKET);
     }
 
     private static ForgeFlowingFluid.Properties barrelFluidProperties(

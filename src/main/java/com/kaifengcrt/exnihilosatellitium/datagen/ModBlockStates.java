@@ -52,7 +52,7 @@ public final class ModBlockStates extends BlockStateProvider {
         sieve();
         machines();
         oreBlocks();
-        witchWater();
+        fluids();
     }
 
     // -------------------------------------------------------------- barrels
@@ -172,9 +172,13 @@ public final class ModBlockStates extends BlockStateProvider {
         }
     }
 
-    /** The witch-water source block renders as water; its colour comes from the FluidType. */
-    private void witchWater() {
+    /** Fluid source blocks render as water; their colour comes from the FluidType. */
+    private void fluids() {
         simpleBlock(ModBlocks.WITCH_WATER.get(),
+                new ModelFile.UncheckedModelFile(mcLoc("block/water")));
+        simpleBlock(ModBlocks.SUGAR_WATER.get(),
+                new ModelFile.UncheckedModelFile(mcLoc("block/water")));
+        simpleBlock(ModBlocks.CONCENTRATED_HONEY.get(),
                 new ModelFile.UncheckedModelFile(mcLoc("block/water")));
     }
 
