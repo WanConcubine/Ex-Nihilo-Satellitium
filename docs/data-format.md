@@ -399,6 +399,10 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 **路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
 14 种金属材料 × 6 形态 = **84 条**（含阿迪特）。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）**不写匠魂熔炼**，
 因为 Tinkers 没有它们对应的熔融液体；这是有意的边界，不是漏生成。
+**例外：ER 的 yellorium** 用 ER 自带的 `forge:yellorium` 流体（不新增流体）：
+碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 mB、ER 块 810 mB（8 条熔炼），再加锭/块 2 条铸造
+（结果指向 `forge:ingots/yellorium` / `forge:storage_blocks/yellorium`）。10 条都带
+`tconstruct` + `bigreactors` 条件；anglesite / benitoite 仍不写（没有对应流体）。合计 92 条熔炼 + 2 条铸造（94 条匠魂配方）。
 
 ```json
 {
