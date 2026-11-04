@@ -41,6 +41,8 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / Bamb
 - **获取**：三档矿链（碎/粉/砂 → 4 合 1 矿块 → 熔炉）熔成 `bigreactors:yellorium_ingot` /
   `anglesite_crystal` / `benitoite_crystal`；石墨仍由煤烧，cyanite/blutonium 等继续由反应堆产出，
   不做筛源。
+- **匠魂（1.20.1）**：yellorium 碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 / 块 810，
+  铸造回 ER 锭/块；用 ER 自带的 `forge:yellorium` 流体，共 10 条，不新增流体。
 - **矿石识别（补齐）**：ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和 `c:ores/uranium`；
   我们的 yellorium 矿块现在同样进这两个 tag（块 + 物品），`yellorium_broken` 进
   `c:raw_materials/yellorium`（及根 tag）。Mekanism 的 `enriching`、IE 的 crusher 等按

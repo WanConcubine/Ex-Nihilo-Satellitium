@@ -1822,6 +1822,13 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
   1.20.1 用裸 `conditions` + `forge:mod_loaded`。
 - 验收环境：1.20.1 ER 2.0.84 + ZeroCore 2.1.45；1.21.1 ER 2.4.9 + ZeroCore 2.4.9。
 
+**匠魂（1.20.1）**
+
+- yellorium 碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 / 块 810；再加锭/块 2 条铸造回
+  `forge:ingots/yellorium` / `forge:storage_blocks/yellorium`。用 ER 自带的
+  `forge:yellorium` 流体，不新增流体；10 条都带 `tconstruct` + `bigreactors` 条件。
+- 这是「gems 不写匠魂熔炼」的例外：不是所有 gems 都能熔，只有 ER 提供流体标签的 yellorium 能。
+
 **矿石识别**
 
 - ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和 `c:ores/uranium`；这解释了为什么
