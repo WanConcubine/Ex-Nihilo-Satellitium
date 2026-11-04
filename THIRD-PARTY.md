@@ -49,6 +49,14 @@ GPLv3。本项目只把它们当作**玩法数值/行为**的只读参考，没�
 混入 GPLv3 代码，再整体只标 MIT”是走不通的。只有将来真的引入 GPLv3 组件或决定转协议时，
 才需要把 GPLv3 全文放进仓库并逐项满足这些条件。
 
+
+## BambooMod（兼容目标，不含代码/资源）
+
+1.20.1 的 **BambooMod**（`bamboomod`，作者 Ruby，0.6.2）只作为**兼容目标**：
+本项目的数据表里引用它的物品 id（树苗 / 竹笋 / 作物 / 宝石），不复制它的代码、贴图、模型、
+语言文件或配方。BambooMod 的代码按 **MMPL-1.0.1**、资源按 **CC BY-NC-SA 4.0** 授权，
+不随本项目分发；本项目仍按 MIT 发布。
+
 ## 美术
 
 `src/main/resources/assets/exnihilosatellitium/textures/` 下的贴图由本项目的

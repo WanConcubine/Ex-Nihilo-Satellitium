@@ -610,3 +610,22 @@ anglesite/benitoite 是 2.x 后期晶体（充能器、insanite），一并补�
 **验证**：`[materials] 25`、`[sieve] 154`、`[hammer] 88`；RCON 熔炉三种矿块分别出
 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`，`RecipesUsed` 指向
 `*_smelting_bigreactors`；手筛/JEI 未目视。
+
+## 53. BambooMod 资源入口（2026-11-04，仅 1.20.1）
+
+**为什么**：BambooMod 0.6.2 只有 1.20.1 Forge；它把原版竹子也放进 `forge:bamboo`，所以普通
+竹子配方本来就通，但空岛缺**第一棵**：4 种树苗、竹笋、米种/豆/番茄、3 种宝石都只在世界生成
+或村庄箱子里。只补这些起步资源，不写它的机器/食物/村庄配方。
+
+**入口**：`sieve/dirt.json` / `grass_block.json` 各 +8（4 树苗 2%、竹笋 4%、米种 5%、
+豆 4%、番茄 4%），`sieve/gravel.json` +3 宝石（银杏/枫/樱各 1/64）。全部
+`"mod": "bamboomod"`，没装时在查物品前跳过，基表 115 不变；草方块由泥土生成，自动同款。
+宝石没有配方用途（全 data 只在 loot 里出现），作为收藏补 1/64。
+
+**堆肥**：它的树叶/树苗/竹笋已进 `#minecraft:leaves` / `#minecraft:saplings`，
+现有 `#exnihilosatellitium:compostable` + `compost/default.json` 的 125 分直接覆盖，
+不新增 JSON。
+
+**验证**：BambooMod 0.6.2 真装（`libs/` + `-PtechMods`）：`[sieve] 173`（+19：泥土 8 /
+草 8 / 砂砾 3）、`[hammer] 88`；RCON 泥土 32 / 砂砾 31 条含新条目；`/setblock` 树苗与竹笋成功；
+未进游戏手筛、树苗生长与 JEI 未测。

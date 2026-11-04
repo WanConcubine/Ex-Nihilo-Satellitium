@@ -294,6 +294,10 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   （根级 `"mod": "ae2"` + `"patch": true`）：`ae2:certus_quartz_crystal` **1/6**、
   `ae2:certus_quartz_dust` **1/12**；没装 AE2 时整文件跳过，基表仍是 115 条。
   充能赛特斯 / 天石粉不做：前者用 AE2 自己的 `ae2:charger` 充能，后者来自陨石天石。
+- BambooMod（`bamboomod`，仅 1.20.1）：不新增材料。`sieve/dirt.json` / `sieve/grass_block.json`
+  各加 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），`sieve/gravel.json` 加 3 条宝石
+  （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过。
+  它的树叶/树苗/竹笋已进 `#minecraft:leaves` / `#minecraft:saplings`，堆肥由现有标签覆盖。
 
 ## 9. 桶转化 JSON（M1.5/M6）
 
