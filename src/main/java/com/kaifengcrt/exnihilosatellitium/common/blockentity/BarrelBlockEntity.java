@@ -21,6 +21,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.core.HolderLookup;
@@ -132,6 +134,16 @@ public class BarrelBlockEntity extends BlockEntity {
     private ResourceLocation pendingEntity;
     private final java.util.List<Item> peacefulDrops = new java.util.ArrayList<>();
     private int cookTicks;
+    /**
+     * Delayed fluid conversion (sugar water + dye -> concentrated honey). The
+     * source fluid is kept in the tank while the timer runs; the conversion is
+     * skipped if the tank changed in the meantime.
+     */
+    @Nullable
+    private Fluid pendingFluidFrom;
+    @Nullable
+    private Fluid pendingFluidTo;
+    private int pendingFluidTicks;
 
     public BarrelBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.BARREL.get(), pos, state);
@@ -196,6 +208,21 @@ public class BarrelBlockEntity extends BlockEntity {
         return BarrelRecipes.ruleForItem(this.tank.getFluid().getFluid(), held);
     }
 
+    /**
+     * A drain rule works on a partial barrel (at least {@code drain} mB), unlike
+     * the normal "tank must be full" item rules.
+     */
+    @Nullable
+    private BarrelRecipes.Recipe drainRule(final ItemStack held) {
+        if (this.tank.getFluidAmount() <= 0 || this.tank.getFluid().isEmpty()) {
+            return null;
+        }
+        final BarrelRecipes.Recipe rule =
+                BarrelRecipes.ruleForItem(this.tank.getFluid().getFluid(), held);
+        return rule != null && rule.drainsFluid() && this.tank.getFluidAmount() >= rule.drain()
+                ? rule : null;
+    }
+
     private boolean wouldSolidify(final FluidStack incoming) {
         return this.tank.getFluidAmount() >= CAPACITY
                 && !this.tank.getFluid().isEmpty()
@@ -214,6 +241,9 @@ public class BarrelBlockEntity extends BlockEntity {
         }
         if (isFluidContainer(stack)) {
             return this.compostProgress == 0;
+        }
+        if (this.drainRule(stack) != null) {
+            return true;
         }
         if (this.itemMixRule(stack) != null) {
             return true;
@@ -239,6 +269,12 @@ public class BarrelBlockEntity extends BlockEntity {
 
         final ItemStack stack = player.getItemInHand(hand);
 
+        // Drain rules work on partial barrels (glass bottle + concentrated honey).
+        final BarrelRecipes.Recipe drainRule = this.drainRule(stack);
+        if (drainRule != null) {
+            return this.drainFluid(player, stack, drainRule);
+        }
+
         // Item rules win over the generic fluid-container path. A milk bucket is
         // both an item and (when Forge's milk fluid is enabled) a fluid handler,
         // but the classic rule is "milk poured into a full water barrel".
@@ -249,7 +285,13 @@ public class BarrelBlockEntity extends BlockEntity {
                 stack.shrink(1);
                 giveRemainder(player, remainder);
             }
-            if (rule.spawnsEntity()) {
+            if (rule.producesFluid()) {
+                if (rule.delayTicks() > 0) {
+                    this.startFluidConversion(rule);
+                } else {
+                    this.replaceFluid(rule.resultFluid());
+                }
+            } else if (rule.spawnsEntity()) {
                 this.startCooking(rule);
             } else {
                 this.setSolid(rule.result().copy());
@@ -453,12 +495,143 @@ public class BarrelBlockEntity extends BlockEntity {
             }
         }
 
+        barrel.tickConcentratedHoney(level, pos);
         barrel.tickRain(level, pos);
+    }
+
+    /**
+     * Concentrated honey attracts bees: every 100 ticks (5 s) there is a 1/6
+     * chance to add one bee, capped at 5 within a 6-block radius. The barrel
+     * does not need to be full; any amount of concentrated honey works.
+     */
+    private void tickConcentratedHoney(final Level level, final BlockPos pos) {
+        if (level.isClientSide || this.tank.getFluidAmount() <= 0
+                || this.tank.getFluid().getFluid() != ModFluids.CONCENTRATED_HONEY.get()) {
+            return;
+        }
+        if (level.getGameTime() % 100L != 0L || level.random.nextInt(6) != 0) {
+            return;
+        }
+        final AABB area = new AABB(pos).inflate(6.0D);
+        if (level.getEntitiesOfClass(Bee.class, area).size() >= 5) {
+            return;
+        }
+        final Bee bee = EntityType.BEE.create(level);
+        if (bee == null) {
+            return;
+        }
+        final double x = pos.getX() + 0.5D + (level.random.nextDouble() - 0.5D) * 3.0D;
+        final double y = pos.getY() + 1.0D + level.random.nextDouble() * 1.5D;
+        final double z = pos.getZ() + 0.5D + (level.random.nextDouble() - 0.5D) * 3.0D;
+        bee.moveTo(x, y, z, level.random.nextFloat() * 360.0F, 0.0F);
+        bee.setPersistenceRequired();
+        if (level.noCollision(bee)) {
+            level.addFreshEntity(bee);
+        }
     }
 
     /** Flowing water/lava map to their source fluid so the recipe table matches. */
     private static Fluid normalizeFluid(final Fluid fluid) {
         return fluid instanceof FlowingFluid flowing ? flowing.getSource() : fluid;
+    }
+
+    /** Glass bottle + concentrated honey: drain 250 mB and hand back a honey bottle. */
+    private InteractionResult drainFluid(final Player player, final ItemStack stack,
+                                         final BarrelRecipes.Recipe rule) {
+        if (player.level().isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+        if (!player.isCreative()) {
+            stack.shrink(1);
+        }
+        this.tank.drain(rule.drain(), FluidAction.EXECUTE);
+        final ItemStack out = rule.result().copy();
+        if (!player.getInventory().add(out)) {
+            player.drop(out, false);
+        }
+        this.setChanged();
+        this.sync();
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.BOTTLE_FILL,
+                    SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    /** Immediate fluid replacement (sugar + water -> sugar water). */
+    private void replaceFluid(@Nullable final Fluid to) {
+        if (to == null) {
+            return;
+        }
+        final int amount = this.tank.getFluidAmount();
+        if (amount <= 0) {
+            return;
+        }
+        this.tank.setFluid(new FluidStack(to, amount));
+        this.setChanged();
+        this.sync();
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                    SoundSource.BLOCKS, 0.8F, 1.2F);
+        }
+    }
+
+    /** Delayed fluid replacement (sugar water + dye -> concentrated honey). */
+    private void startFluidConversion(final BarrelRecipes.Recipe rule) {
+        if (rule.resultFluid() == null || this.tank.getFluid().isEmpty()) {
+            return;
+        }
+        this.pendingFluidFrom = this.tank.getFluid().getFluid();
+        this.pendingFluidTo = rule.resultFluid();
+        this.pendingFluidTicks = Math.max(1, rule.delayTicks());
+        this.setChanged();
+        this.sync();
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.BREWING_STAND_BREW,
+                    SoundSource.BLOCKS, 0.8F, 1.4F);
+        }
+    }
+
+    /** @return true while a fluid conversion timer is running */
+    private boolean tickPendingFluid(final Level level, final BlockPos pos) {
+        if (this.pendingFluidTo == null) {
+            return false;
+        }
+        if (this.pendingFluidTicks > 0) {
+            this.pendingFluidTicks--;
+            if (this.pendingFluidTicks % 20 == 0) {
+                this.setChanged();
+                this.sync();
+                if (level instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.FALLING_HONEY,
+                            pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D,
+                            3, 0.25D, 0.1D, 0.25D, 0.0D);
+                }
+            }
+            if (this.pendingFluidTicks == 0) {
+                this.finishFluidConversion(level);
+            }
+            return true;
+        }
+        this.finishFluidConversion(level);
+        return true;
+    }
+
+    private void finishFluidConversion(final Level level) {
+        if (!level.isClientSide && this.pendingFluidTo != null) {
+            final int amount = this.tank.getFluidAmount();
+            if (amount > 0 && this.pendingFluidFrom != null
+                    && this.tank.getFluid().getFluid() == this.pendingFluidFrom) {
+                this.tank.setFluid(new FluidStack(this.pendingFluidTo, amount));
+                level.playSound(null, this.worldPosition, SoundEvents.BOTTLE_FILL,
+                        SoundSource.BLOCKS, 1.0F, 0.8F);
+            }
+        }
+        this.pendingFluidFrom = null;
+        this.pendingFluidTo = null;
+        this.pendingFluidTicks = 0;
+        this.setChanged();
+        this.sync();
     }
 
     /** Dolls: consume the fluid and start a cooking timer that spawns an entity. */
@@ -487,6 +660,9 @@ public class BarrelBlockEntity extends BlockEntity {
 
     /** @return true while cooking (the normal barrel tick must not run) */
     private boolean tickCooking(final Level level, final BlockPos pos) {
+        if (this.tickPendingFluid(level, pos)) {
+            return true;
+        }
         if (this.pendingEntity == null) {
             return false;
         }
@@ -535,11 +711,19 @@ public class BarrelBlockEntity extends BlockEntity {
 
     /** True while a doll is cooking in this barrel (synced to the client). */
     public boolean isCooking() {
-        return this.pendingEntity != null;
+        return this.pendingEntity != null || this.pendingFluidTo != null;
     }
 
-    /** Seconds left before the entity spawns, for Jade. */
+    /** True while the barrel is converting one fluid into another (honey chain). */
+    public boolean isConvertingFluid() {
+        return this.pendingFluidTo != null;
+    }
+
+    /** Seconds left before the entity spawns / the fluid conversion finishes, for Jade. */
     public int getCookSeconds() {
+        if (this.pendingFluidTo != null) {
+            return (this.pendingFluidTicks + 19) / 20;
+        }
         return (this.cookTicks + 19) / 20;
     }
 
@@ -649,7 +833,8 @@ public class BarrelBlockEntity extends BlockEntity {
     }
 
     public int getComparatorOutput() {
-        if (this.dirtReady || this.hasSolid() || this.pendingEntity != null) {
+        if (this.dirtReady || this.hasSolid() || this.pendingEntity != null
+                || this.pendingFluidTo != null) {
             return 15;
         }
         final int fluid = this.tank.getFluidAmount() * 15 / this.tank.getCapacity();
@@ -662,6 +847,15 @@ public class BarrelBlockEntity extends BlockEntity {
             this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_ALL);
             this.level.updateNeighbourForOutputSignal(this.worldPosition, this.getBlockState().getBlock());
         }
+    }
+
+    @Nullable
+    private static Fluid readFluid(final CompoundTag tag, final String key) {
+        if (!tag.contains(key)) {
+            return null;
+        }
+        final ResourceLocation id = ResourceLocation.tryParse(tag.getString(key));
+        return id == null ? null : BuiltInRegistries.FLUID.getOptional(id).orElse(null);
     }
 
     @Override
@@ -684,6 +878,15 @@ public class BarrelBlockEntity extends BlockEntity {
             tag.put("PeacefulDrops", drops);
         }
         tag.putInt("CookTicks", this.cookTicks);
+        if (this.pendingFluidFrom != null) {
+            tag.putString("PendingFluidFrom",
+                    BuiltInRegistries.FLUID.getKey(this.pendingFluidFrom).toString());
+        }
+        if (this.pendingFluidTo != null) {
+            tag.putString("PendingFluidTo",
+                    BuiltInRegistries.FLUID.getKey(this.pendingFluidTo).toString());
+        }
+        tag.putInt("PendingFluidTicks", this.pendingFluidTicks);
         if (this.hasSolid()) {
             tag.put("Solid", this.solid.save(registries));
         }
@@ -710,6 +913,13 @@ public class BarrelBlockEntity extends BlockEntity {
             }
         }
         this.cookTicks = tag.getInt("CookTicks");
+        this.pendingFluidFrom = readFluid(tag, "PendingFluidFrom");
+        this.pendingFluidTo = readFluid(tag, "PendingFluidTo");
+        this.pendingFluidTicks = tag.getInt("PendingFluidTicks");
+        if (this.pendingFluidTo == null) {
+            this.pendingFluidFrom = null;
+            this.pendingFluidTicks = 0;
+        }
         this.solid = tag.contains("Solid")
                 ? ItemStack.parseOptional(registries, tag.getCompound("Solid"))
                 : ItemStack.EMPTY;

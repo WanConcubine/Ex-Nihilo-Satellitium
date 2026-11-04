@@ -48,9 +48,16 @@ public final class BarrelRecipes {
      * (dolls) cook for {@code cookTicks} and then spawn that entity; in peaceful
      * mode they drop {@code peacefulDrop} instead, and {@code result} mirrors that
      * drop so JEI still has something to show.</p>
+     *
+     * <p>Rules with {@code resultFluid} replace the tank contents with that fluid
+     * instead of producing a block; {@code delayTicks} postpones the replacement
+     * (sugar water + dye). Rules with {@code drain > 0} take that many mB out of
+     * the tank, give {@code result}, and do not require a full barrel (glass
+     * bottle from concentrated honey).</p>
      */
     public record Recipe(Fluid base, @Nullable Fluid addedFluid, @Nullable Item addedItem, ItemStack result,
-                         @Nullable ResourceLocation entity, List<Item> peacefulDrops, int cookTicks) {
+                         @Nullable Fluid resultFluid, @Nullable ResourceLocation entity,
+                         List<Item> peacefulDrops, int cookTicks, int delayTicks, int drain) {
 
         public boolean isFluidReaction() {
             return this.addedFluid != null;
@@ -63,10 +70,21 @@ public final class BarrelRecipes {
         public boolean spawnsEntity() {
             return this.entity != null;
         }
+
+        /** Replaces the tank contents instead of producing a block/entity. */
+        public boolean producesFluid() {
+            return this.resultFluid != null;
+        }
+
+        /** Takes {@link #drain()} mB out of the tank and gives {@link #result()}. */
+        public boolean drainsFluid() {
+            return this.drain > 0;
+        }
     }
 
-    private record Template(ItemStack result, @Nullable ResourceLocation entity,
-                            List<Item> peacefulDrops, int cookTicks) {
+    private record Template(ItemStack result, @Nullable Fluid resultFluid,
+                            @Nullable ResourceLocation entity, List<Item> peacefulDrops,
+                            int cookTicks, int delayTicks, int drain) {
     }
 
     private record Added(boolean fluid, String raw) {
@@ -121,7 +139,8 @@ public final class BarrelRecipes {
     /** The block produced by right-clicking a full barrel of {@code base} with {@code held}. */
     public static ItemStack resultForItem(final Fluid base, final ItemStack held) {
         final Recipe recipe = ruleForItem(base, held);
-        return recipe == null || recipe.spawnsEntity() ? ItemStack.EMPTY : recipe.result().copy();
+        return recipe == null || recipe.spawnsEntity() || recipe.producesFluid() || recipe.drainsFluid()
+                ? ItemStack.EMPTY : recipe.result().copy();
     }
 
     /** The full rule matched by right-clicking {@code held} (may cook/spawn an entity). */
@@ -225,20 +244,22 @@ public final class BarrelRecipes {
             return;
         }
         final Template template = parseTemplate(source.root(), source.id());
-        if (template == null) {
+        if (template == null || !validDrain(keys, template, source.id())) {
             return;
         }
         for (final Fluid base : keys.bases()) {
             if (keys.fluid()) {
                 for (final Fluid fluid : keys.addedFluids()) {
                     addRecipe(builder, new Recipe(base, fluid, null, template.result().copy(),
-                            template.entity(), template.peacefulDrops(), template.cookTicks()),
+                            template.resultFluid(), template.entity(), template.peacefulDrops(),
+                            template.cookTicks(), template.delayTicks(), template.drain()),
                             source, warnDuplicate);
                 }
             } else {
                 for (final Item item : keys.addedItems()) {
                     addRecipe(builder, new Recipe(base, null, item, template.result().copy(),
-                            template.entity(), template.peacefulDrops(), template.cookTicks()),
+                            template.resultFluid(), template.entity(), template.peacefulDrops(),
+                            template.cookTicks(), template.delayTicks(), template.drain()),
                             source, warnDuplicate);
                 }
             }
@@ -255,7 +276,7 @@ public final class BarrelRecipes {
         // Parse the replacement before touching the table: a malformed patch must
         // not delete the rule it failed to replace.
         final Template template = removeAll ? null : parseTemplate(source.root(), source.id());
-        if (!removeAll && template == null) {
+        if (!removeAll && (template == null || !validDrain(keys, template, source.id()))) {
             return;
         }
         if (removeAll) {
@@ -268,12 +289,14 @@ public final class BarrelRecipes {
             if (keys.fluid()) {
                 for (final Fluid fluid : keys.addedFluids()) {
                     putRecipe(builder, new Recipe(base, fluid, null, template.result().copy(),
-                            template.entity(), template.peacefulDrops(), template.cookTicks()), source);
+                            template.resultFluid(), template.entity(), template.peacefulDrops(),
+                            template.cookTicks(), template.delayTicks(), template.drain()), source);
                 }
             } else {
                 for (final Item item : keys.addedItems()) {
                     putRecipe(builder, new Recipe(base, null, item, template.result().copy(),
-                            template.entity(), template.peacefulDrops(), template.cookTicks()), source);
+                            template.resultFluid(), template.entity(), template.peacefulDrops(),
+                            template.cookTicks(), template.delayTicks(), template.drain()), source);
                 }
             }
         }
@@ -405,8 +428,44 @@ public final class BarrelRecipes {
         return new Added(hasFluid, raw);
     }
 
+    private static boolean validDrain(final Keys keys, final Template template,
+                                      final ResourceLocation file) {
+        if (template.drain() > 0 && keys.fluid()) {
+            ExNihiloSatellitium.LOGGER.warn(
+                    "[barrel] {}: `drain` needs added.item, not added.fluid", file);
+            return false;
+        }
+        return true;
+    }
+
     @Nullable
     private static Template parseTemplate(final JsonObject root, final ResourceLocation file) {
+        if (root.has("result_fluid")) {
+            if (root.has("entity") || root.has("result")) {
+                ExNihiloSatellitium.LOGGER.warn(
+                        "[barrel] {} has both result_fluid and result/entity", file);
+                return null;
+            }
+            if (root.has("drain")) {
+                ExNihiloSatellitium.LOGGER.warn(
+                        "[barrel] {}: result_fluid cannot also drain", file);
+                return null;
+            }
+            final String rawFluid = DataPackJson.string(root, "result_fluid");
+            final ResourceLocation fluidId = rawFluid == null
+                    ? null : DataPackJson.id(rawFluid, "barrel", file);
+            final Fluid fluid = fluidId == null
+                    ? null : BuiltInRegistries.FLUID.getOptional(fluidId).orElse(null);
+            if (fluid == null) {
+                ExNihiloSatellitium.LOGGER.warn(
+                        "[barrel] unknown result_fluid {} in {}", rawFluid, file);
+                return null;
+            }
+            final int delay = root.has("delay_ticks")
+                    ? Math.max(0, root.get("delay_ticks").getAsInt()) : 0;
+            return new Template(ItemStack.EMPTY, fluid, null, List.of(), 0, delay, 0);
+        }
+
         ResourceLocation entityId = null;
         final List<Item> peacefulDrops = new ArrayList<>();
         int cookTicks = 600;
@@ -469,7 +528,20 @@ public final class BarrelRecipes {
             }
             resultStack = new ItemStack(result);
         }
-        return new Template(resultStack, entityId, List.copyOf(peacefulDrops), cookTicks);
+        int drain = 0;
+        if (root.has("drain")) {
+            drain = root.get("drain").getAsInt();
+            if (drain < 0) {
+                ExNihiloSatellitium.LOGGER.warn("[barrel] negative drain in {}", file);
+                return null;
+            }
+            if (entityId != null) {
+                ExNihiloSatellitium.LOGGER.warn("[barrel] entity rule {} cannot drain", file);
+                return null;
+            }
+        }
+        return new Template(resultStack, null, entityId, List.copyOf(peacefulDrops),
+                cookTicks, 0, drain);
     }
 
     private static ResourceLocation overlayLabel(final CustomizationOverlay.Customization customization) {

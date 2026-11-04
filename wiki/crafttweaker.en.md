@@ -78,6 +78,7 @@ mods.exnihilosatellitium.Barrel.addJson('{"base":"minecraft:witch_water","added"
 
 All seven tables have `addJson` / `removeJson` / `replaceJson`; the fields match the
 [datapack page](datapack.md).
+The new barrel fields `result_fluid` / `delay_ticks` / `drain` also work through `addJson` (see §6 there).
 
 ### Common pitfalls
 

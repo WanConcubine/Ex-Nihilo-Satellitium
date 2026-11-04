@@ -42,7 +42,73 @@ public final class ModFluids {
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_WITCH_WATER =
             FLUIDS.register("flowing_witch_water", () -> new BaseFlowingFluid.Flowing(witchWaterProperties()));
 
+    /**
+     * Sugar water and concentrated honey are barrel-only fluids: they have no
+     * block or bucket, so they can only be produced, stored and drawn from a
+     * barrel. A still/flowing pair is still registered because the barrel tank
+     * and JEI store a {@link net.minecraft.world.level.material.Fluid}.
+     */
+    public static final DeferredHolder<FluidType, FluidType> SUGAR_WATER_TYPE =
+            FLUID_TYPES.register("sugar_water", () -> new FluidType(FluidType.Properties.create()
+                    .descriptionId("fluid_type.exnihilosatellitium.sugar_water")
+                    .density(1050)
+                    .viscosity(1200)
+                    .temperature(300)
+                    .canDrown(true)
+                    .canSwim(true)
+                    .canExtinguish(true)
+                    .canConvertToSource(false)
+                    .supportsBoating(false)));
+
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> SUGAR_WATER =
+            FLUIDS.register("sugar_water", () -> new BaseFlowingFluid.Source(sugarWaterProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_SUGAR_WATER =
+            FLUIDS.register("flowing_sugar_water", () -> new BaseFlowingFluid.Flowing(sugarWaterProperties()));
+
+    public static final DeferredHolder<FluidType, FluidType> CONCENTRATED_HONEY_TYPE =
+            FLUID_TYPES.register("concentrated_honey", () -> new FluidType(FluidType.Properties.create()
+                    .descriptionId("fluid_type.exnihilosatellitium.concentrated_honey")
+                    .density(1400)
+                    .viscosity(6000)
+                    .temperature(320)
+                    .canDrown(true)
+                    .canSwim(false)
+                    .canExtinguish(false)
+                    .canConvertToSource(false)
+                    .supportsBoating(false)));
+
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> CONCENTRATED_HONEY =
+            FLUIDS.register("concentrated_honey", () -> new BaseFlowingFluid.Source(
+                    concentratedHoneyProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_CONCENTRATED_HONEY =
+            FLUIDS.register("flowing_concentrated_honey", () -> new BaseFlowingFluid.Flowing(
+                    concentratedHoneyProperties()));
+
     private ModFluids() {
+    }
+
+    /**
+     * Properties for the two barrel-only fluids: no block and no bucket, so
+     * there is no world placement path. They still need the still/flowing pair
+     * and the fluid type for tank storage and JEI rendering.
+     */
+    private static BaseFlowingFluid.Properties sugarWaterProperties() {
+        return barrelFluidProperties(SUGAR_WATER_TYPE, SUGAR_WATER, FLOWING_SUGAR_WATER);
+    }
+
+    private static BaseFlowingFluid.Properties concentratedHoneyProperties() {
+        return barrelFluidProperties(CONCENTRATED_HONEY_TYPE, CONCENTRATED_HONEY,
+                FLOWING_CONCENTRATED_HONEY);
+    }
+
+    private static BaseFlowingFluid.Properties barrelFluidProperties(
+            final DeferredHolder<FluidType, FluidType> type,
+            final DeferredHolder<Fluid, BaseFlowingFluid.Source> still,
+            final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> flowing) {
+        return new BaseFlowingFluid.Properties(type, still, flowing)
+                .slopeFindDistance(2)
+                .levelDecreasePerBlock(3)
+                .tickRate(20);
     }
 
     /**

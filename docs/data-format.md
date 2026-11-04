@@ -524,17 +524,39 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   { "base": "minecraft:water", "added": { "item": "minecraft:milk_bucket" },
     "entity": "minecraft:slime", "peaceful_drop": "minecraft:slime_ball" }
   ```
+- **流体产出规则**（糖水 / 浓缩蜂蜜汁）：用 `result_fluid` 代替 `result` / `entity`，可选 `delay_ticks`：
+  ```json
+  { "base": "minecraft:water", "added": { "item": "minecraft:sugar" },
+    "result_fluid": "exnihilosatellitium:sugar_water" }
+  ```
+  ```json
+  { "base": "exnihilosatellitium:sugar_water", "added": { "item": "minecraft:yellow_dye" },
+    "result_fluid": "exnihilosatellitium:concentrated_honey", "delay_ticks": 600 }
+  ```
+  桶必须满；`delay_ticks` 是等待 tick（20 = 1 秒，600 = 30 秒），期间保留原流体并每秒同步，
+  到点后整桶换成 `result_fluid`。JEI 用流体槽显示结果。`result_fluid` 不能与 `result` / `entity` 同用。
+- **部分抽取规则**（玻璃瓶装浓缩蜂蜜汁）：`drain` + `result`，不要求满桶：
+  ```json
+  { "base": "exnihilosatellitium:concentrated_honey",
+    "added": { "item": "minecraft:glass_bottle" }, "drain": 250, "result": "minecraft:honey_bottle" }
+  ```
+  桶内至少 `drain` mB 就能右键；消耗物品、扣 `drain` mB、把 `result` 放进背包（满了掉在脚边）。
+  `drain` 只能配 `added.item`（配 `added.fluid` 会跳过并打警告），也不能和 `entity` / `result_fluid` 同用。
+- **浓缩蜂蜜汁养蜂**：桶里有任意数量 `exnihilosatellitium:concentrated_honey` 时，每 100 tick 有
+  1/6 概率在 6 格内生成 1 只蜜蜂，附近上限 5 只（不需要满桶）。
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
-- 当前 14 条（缺 Thermal 时 12 条）：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
+- 当前 18 条（缺 Thermal 时 16 条）：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
   熔岩+荧石粉→末地石、水+尘土→粘土块（`water_dust_clay.json`）、
   水+牛奶桶→史莱姆/粘液球（`water_milk_slime.json`）；
   巫水+沙子→灵魂沙（`witch_water_sand_soul_sand.json`）、
   巫水+橡树苗→深色橡树苗（`witch_water_sapling_dark_oak.json`）；
   人偶 6 条：熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者、
   **熔岩+狂风→`thermal:blitz`、水+暴雪→`thermal:blizz`**（后两条是条件文件，根级
-  `"mod": "thermal_foundation"`，和平掉落分别是 `thermal:blitz_rod` / `thermal:blizz_rod`）。
+  `"mod": "thermal_foundation"`，和平掉落分别是 `thermal:blitz_rod` / `thermal:blizz_rod`）；
+  **巫水+村民人偶→僵尸村民**（和平掉腐肉）；
+  糖水 1 条（水+糖→糖水）、浓缩蜂蜜 2 条（糖水+蒲公英黄 30 秒→浓缩蜂蜜汁、玻璃瓶抽取 250 mB→蜂蜜瓶）。
 - **新增条件人偶示例**（完整文件见 `barrel/lava_blitz_doll_blitz.json`）：
   ```json
   { "mod": "thermal_foundation", "base": "minecraft:lava",

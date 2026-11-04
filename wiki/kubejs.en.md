@@ -73,6 +73,7 @@ BarrelEvents.addJson('{"base":"minecraft:witch_water","added":{"item":"exnihilos
 ```
 
 All seven tables have `addJson` / `removeJson` / `replaceJson`. The JSON fields are exactly the same as the [datapack page](datapack.md);
+the new barrel fields `result_fluid` / `delay_ticks` / `drain` also work through `addJson` (see §6 there).
 `dump` output can also be used directly as a fixture.
 
 ### Common pitfalls

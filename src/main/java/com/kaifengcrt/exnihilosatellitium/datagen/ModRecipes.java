@@ -89,6 +89,7 @@ public final class ModRecipes extends RecipeProvider {
         machines(out);
         upgrades(out);
         dolls(out);
+        villageExtras(out);
         porcelain(out);
         silkwormCooking(out);
     }
@@ -483,6 +484,37 @@ public final class ModRecipes extends RecipeProvider {
                 .define('w', ModItems.DOLL.get())
                 .unlockedBy("has_doll", has(ModItems.DOLL.get()))
                 .save(out, id("guardian_doll"));
+
+        ShapedRecipeBuilder.shaped(MISC, ModItems.VILLAGER_DOLL.get())
+                .pattern("eee")
+                .pattern("eDe")
+                .pattern("eee")
+                .define('e', Items.EMERALD)
+                .define('D', ModItems.DOLL.get())
+                .unlockedBy("has_doll", has(ModItems.DOLL.get()))
+                .save(out, id("villager_doll"));
+    }
+
+    /** Brain Platinum, and the honey-bottle beehive alternative. */
+    private static void villageExtras(final RecipeOutput out) {
+        ShapedRecipeBuilder.shaped(MISC, ModItems.BRAIN_PLATINUM.get())
+                .pattern("ese")
+                .pattern("sMs")
+                .pattern("ese")
+                .define('e', Items.EGG)
+                .define('s', Items.SUGAR)
+                .define('M', Items.EMERALD)
+                .unlockedBy("has_emerald", has(Items.EMERALD))
+                .save(out, id("brain_platinum"));
+
+        ShapedRecipeBuilder.shaped(MISC, Items.BEEHIVE)
+                .pattern("ppp")
+                .pattern("hhh")
+                .pattern("ppp")
+                .define('p', ItemTags.PLANKS)
+                .define('h', Items.HONEY_BOTTLE)
+                .unlockedBy("has_honey_bottle", has(Items.HONEY_BOTTLE))
+                .save(out, id("beehive_honey_bottles"));
     }
 
     private static void doll(final RecipeOutput out, final String name, final ItemLike centre) {

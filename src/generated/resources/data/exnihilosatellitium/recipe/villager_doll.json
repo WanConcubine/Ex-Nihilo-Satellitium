@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "exnihilosatellitium:doll"
+    },
+    "e": {
+      "item": "minecraft:emerald"
+    }
+  },
+  "pattern": [
+    "eee",
+    "eDe",
+    "eee"
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:villager_doll"
+  }
+}

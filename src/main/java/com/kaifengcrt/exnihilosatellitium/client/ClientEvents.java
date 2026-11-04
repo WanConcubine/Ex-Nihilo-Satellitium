@@ -86,10 +86,13 @@ public final class ClientEvents {
         }, ModItems.PORCELAIN_BUCKET.get());
     }
 
-    /** Witch water needs explicit still/flowing textures on the client. */
+    /** Witch water / sugar water / concentrated honey need explicit still/flowing textures. */
     @SubscribeEvent
     public static void registerClientExtensions(final RegisterClientExtensionsEvent event) {
         event.registerFluidType(new WitchWaterClientExtensions(), ModFluids.WITCH_WATER_TYPE);
+        event.registerFluidType(new TintedWaterClientExtensions(0xFFE8C97A), ModFluids.SUGAR_WATER_TYPE);
+        event.registerFluidType(new TintedWaterClientExtensions(0xFFD98A2B),
+                ModFluids.CONCENTRATED_HONEY_TYPE);
     }
 
     /**

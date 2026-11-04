@@ -200,10 +200,13 @@ saves/<世界名>/datapacks/my_pack/
 
 | 字段 | 必填 | 说明 |
 |---|---|---|
-| `base` | ✅ | 桶内必须**装满 1000 mB** 的流体；可写 `#流体标签` |
+| `base` | ✅ | 桶内必须**装满 1000 mB** 的流体（`drain` 规则除外）；可写 `#流体标签` |
 | `added` | ✅ | 恰好一个 `fluid` 或 `item`；都可写标签 |
-| `result` | ✅* | 方块/物品 id（写方块物品的 id） |
-| `entity` | ✅* | 生成实体 id；与 `result` 二选一 |
+| `result` | ✅* | 方块/物品 id（写方块物品的 id）；与 `entity` / `result_fluid` 三选一 |
+| `entity` | ✅* | 生成实体 id；与 `result` / `result_fluid` 三选一 |
+| `result_fluid` | ✅* | 把整桶换成该流体；与 `result` / `entity` 三选一 |
+| `delay_ticks` | ❌ | 仅 `result_fluid`：等待 tick（600 = 30 秒） |
+| `drain` | ❌ | 仅 `added.item` + `result`：桶内至少这么多 mB 就能右键，扣流体给物品 |
 | `peaceful_drop` | 实体规则必填 | 和平模式掉落，字符串或数组 |
 | `cook_ticks` | ❌ | 旧字段，仅为旧存档兼容保留；新规则右键立即生效 |
 
@@ -216,6 +219,20 @@ saves/<世界名>/datapacks/my_pack/
   ```json
   { "base": "minecraft:lava", "added": { "item": "exnihilosatellitium:angry_doll" },
     "entity": "minecraft:blaze", "peaceful_drop": "minecraft:blaze_rod" }
+  ```
+- 流体产出规则（糖水 / 浓缩蜂蜜汁）：
+  ```json
+  { "base": "minecraft:water", "added": { "item": "minecraft:sugar" },
+    "result_fluid": "exnihilosatellitium:sugar_water" }
+  ```
+  ```json
+  { "base": "exnihilosatellitium:sugar_water", "added": { "item": "minecraft:yellow_dye" },
+    "result_fluid": "exnihilosatellitium:concentrated_honey", "delay_ticks": 600 }
+  ```
+- 部分抽取规则（玻璃瓶装浓缩蜂蜜汁）：
+  ```json
+  { "base": "exnihilosatellitium:concentrated_honey",
+    "added": { "item": "minecraft:glass_bottle" }, "drain": 250, "result": "minecraft:honey_bottle" }
   ```
 
 **删除内置规则：**

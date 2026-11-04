@@ -199,10 +199,13 @@ The crook only **appends** drops; vanilla leaves drops are unaffected.
 
 | Field | Required | Description |
 |---|---|---|
-| `base` | ✅ | Fluid the barrel must be **filled with 1000 mB** of; `#fluid tag` allowed |
+| `base` | ✅ | Fluid the barrel must be **filled with 1000 mB** of (except `drain` rules); `#fluid tag` allowed |
 | `added` | ✅ | Exactly one `fluid` or `item`; both accept tags |
-| `result` | ✅* | Block/item id (use the id of the block's item) |
-| `entity` | ✅* | Entity id to spawn; mutually exclusive with `result` |
+| `result` | ✅* | Block/item id (use the id of the block's item); one of `result` / `entity` / `result_fluid` |
+| `entity` | ✅* | Entity id to spawn; one of `result` / `entity` / `result_fluid` |
+| `result_fluid` | ✅* | Replaces the whole tank with that fluid; one of `result` / `entity` / `result_fluid` |
+| `delay_ticks` | ❌ | `result_fluid` only: delay in ticks (600 = 30 s) |
+| `drain` | ❌ | `added.item` + `result` only: right-click works with at least this many mB, drains it and gives the item |
 | `peaceful_drop` | Required for entity rules | Peaceful-mode drop, a string or an array |
 | `cook_ticks` | ❌ | Legacy field kept only for old-save compatibility; new rules take effect immediately on right-click |
 
@@ -215,6 +218,20 @@ The crook only **appends** drops; vanilla leaves drops are unaffected.
   ```json
   { "base": "minecraft:lava", "added": { "item": "exnihilosatellitium:angry_doll" },
     "entity": "minecraft:blaze", "peaceful_drop": "minecraft:blaze_rod" }
+  ```
+- Fluid-result rules (sugar water / concentrated honey):
+  ```json
+  { "base": "minecraft:water", "added": { "item": "minecraft:sugar" },
+    "result_fluid": "exnihilosatellitium:sugar_water" }
+  ```
+  ```json
+  { "base": "exnihilosatellitium:sugar_water", "added": { "item": "minecraft:yellow_dye" },
+    "result_fluid": "exnihilosatellitium:concentrated_honey", "delay_ticks": 600 }
+  ```
+- Partial-drain rules (glass bottle of concentrated honey):
+  ```json
+  { "base": "exnihilosatellitium:concentrated_honey",
+    "added": { "item": "minecraft:glass_bottle" }, "drain": 250, "result": "minecraft:honey_bottle" }
   ```
 
 **Deleting a built-in rule:**

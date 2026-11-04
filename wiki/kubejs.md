@@ -73,6 +73,7 @@ BarrelEvents.addJson('{"base":"minecraft:witch_water","added":{"item":"exnihilos
 ```
 
 七张表都有 `addJson` / `removeJson` / `replaceJson`。JSON 字段与[数据包页面](datapack.md)完全一致；
+桶的新字段 `result_fluid` / `delay_ticks` / `drain` 同样通过 `addJson` 生效（见数据包页 §6）。
 `dump` 输出也可以直接拿来当 fixture。
 
 ### 容易踩的坑
