@@ -7,7 +7,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    // 产物名带 MC 版本：exnihilosatellitium-1.21.1-1.0.0.jar（和 1.20.1 线区分）
+    // 产物名带 MC 版本：exnihilosatellitium-1.21.1-1.1.0.jar（和 1.20.1 线区分）
     archivesName = "${mod_id}-${minecraft_version}"
 }
 
