@@ -1769,3 +1769,25 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
   截图 [docs/images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png)。
 - 1.20.1 dev client 同一场景复验通过（顶点 tint 走 Forge 的 `defaultColor`/`color` 路径）。
 - 两版 `build` + `check-textures` / `check-core-imports` / `check-data-paths` 通过。
+
+## 50. 筛表补骨粉 / 烈焰粉（2026-11-04，两版）
+
+**为什么**
+
+- 骨粉同时卡着瓷土（粘土球 + 骨粉 → 坩埚前置）和菌岩催菌（下界树链），但筛表里一直没有它，
+  唯一来源是骷髅掉骨头。经典 Ex Nihilo 的尘土筛本来就有骨粉（`dust → dye:15`，rarity 5 = 1/5）。
+- 烈焰粉此前只从粉碎下界岩 6% 出，而碎下界岩要熔岩 + 红石，酿造 / 末影之眼 / 愤怒人偶全被
+  卡在中后期。所有者要求沙子也能筛出来。
+
+**数值**
+
+- `sieve/dust.json`：`minecraft:bone_meal` **20%**（对齐经典的 1/5）。
+- `sieve/sand.json`：`minecraft:blaze_powder` **3%**；碎下界岩的 6% 保留，作为更高产的第二来源。
+- 两版同步。`scripts/generate_sieve_assets.py` 的 `merge_table` 会原样保留手写条目，
+  重跑生成器不会冲掉这两条。
+
+**验证**
+
+- 基表 116 → 118（1.20.1 113 → 115）；JEI 筛子页按表自动多出两条。
+- 两版 `build`、`check-textures.py`、`check-data-paths.py`（主线 + `--target 1.20.1`）通过。
+- 未进游戏手筛，JEI 页面未目视。

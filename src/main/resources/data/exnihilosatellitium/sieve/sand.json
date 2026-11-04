@@ -98,6 +98,10 @@
       "chance": 0.02
     },
     {
+      "item": "minecraft:blaze_powder",
+      "chance": 0.03
+    },
+    {
       "item": "exnihilosatellitium:cobalt_crushed",
       "chance": 0.01562
     }
