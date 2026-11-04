@@ -496,3 +496,22 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 6. **验证**：`-PtechMods` 全装 + AE2 15.4.12 + GuideME 20.1.15：`[sieve] 7 inputs, 141 drops`
    （基表 139 + 2），RCON sand 含 `certus_quartz_crystal 0.16667` / `dust 0.08333`；
    去掉 AE2 时 139、无 unknown item。手筛与 JEI 页面未目视。
+
+## 47. 热力人偶：狂风 / 暴雪（2026-11-04）
+
+- **来源**：所有者给的两张 JEI 合成图（4 × 硝石粉 / 雪球 + 红石 + 2 × 荧石粉 + 人偶 + 下界疣），
+  参考 Ex Nihilo: Sequentia 的 Thermal 附属玩法：熔岩 → 狂风人、水 → 暴雪人。只借数值，不复制代码 / 资源。
+  中文名按所有者指定用「狂风人偶 / 暴雪人偶」，不用参考图的「劲风 / 冻结」。
+- **物品**：`blitz_doll` / `blizz_doll`，`stacksTo(16)`，模型 `item/generated`，64×64 贴图
+  （金黄 / 冰蓝）。`registerThermalDoll` 在 `ModList` 没有 `thermal_foundation` 时返回 `null`，
+  创造栏 null 检查——条件物品的既有做法（同 `registerTinkersGrassSeeds`）。
+- **配方**：两张手写 shaped JSON（`xyx / zwz / xvx`），根级 `conditions` =
+  `forge:mod_loaded` + `thermal_foundation`。不能交给 datagen：datagen 里物品不注册，
+  `thermal:niter_dust` / `thermal:blitz_rod` 也不在 classpath。
+- **桶规则**：`lava_blitz_doll_blitz.json` / `water_blizz_doll_blizz.json`，根级
+  `"mod": "thermal_foundation"` + `entity` + `peaceful_drop`；右键立即生效，和平掉 `thermal:*_rod`。
+- **验证**：`-PtechMods` 下 `[barrel] 14 transforms (2 fluid, 12 item)`；
+  `/exnihilo dump barrel` 两条规则带 `entity:thermal:blitz` / `thermal:blizz` 与
+  `peaceful:[thermal:blitz_rod]` / `[thermal:blizz_rod]`；`/summon item` 两物品显示
+  Gale / Blizzard Doll；不带 `-PtechMods` 时桶 12、物品不存在；配方经 `/reload` 解析探测。
+  **未验**：工作台摆放、右键桶、JEI、贴图亮度。

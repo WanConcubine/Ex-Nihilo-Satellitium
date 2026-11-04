@@ -7,36 +7,33 @@
 
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.0.0 已发**（tag `v1.0.0-1.20.1`）；0.2.0 准备线并入 1.0.0，商店上传待所有者。
-**最新一批（2026-11-03 晚）**：工匠巧思（TiT）阿迪特 / 叶绿素 + AE2 赛特斯石英；与主线同一份
-筛表 JSON，AE2 走 `sieve/sand_ae2.json`（根级 `mod` 门 + patch）。
+**最新一批（2026-11-04 上午）**：热力（Thermal）狂风人偶 / 暴雪人偶。两个**条件物品**只在
+Thermal Foundation 在场时注册；工作台配方用硝石粉 / 雪球，桶规则熔岩 + 狂风 → `thermal:blitz`、
+水 + 暴雪 → `thermal:blizz`。没装 Thermal 时物品 / 配方 / 桶规则一起消失。
 **联动**：22 种材料（14 金属 + 8 矿物）；Mek / Thermal / Create / IE / Tinkers / TiT / AE2 全部可选。
 **当前表尺**：筛子 7 输入 / 113 掉落（无科技模组；沙/砂砾/尘土比主线少 3 条钴，历史差异）；
-+AE2 115；全装 +TiT 139、再加 AE2 141；锤表 79（全装）/ 55（无模组）。
++AE2 115；全装 +TiT 139、再加 AE2 141；锤表 79（全装）/ 55（无模组）；桶 14（全装）/ 12（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
 
-## 当前批次（2026-11-03 晚，TiT 两种矿 + AE2 赛特斯石英）
+## 当前批次（2026-11-04，热力人偶：狂风 / 暴雪）
 
-- **对象**：TiT `0.2.4`（只有 1.20.1）+ AE2 `15.4.12`（前置 GuideME `20.1.15`）。两者都可选，
-  不写 `mods.toml`；AE2/GuideME 的生产 jar 放 `libs/`，由 `-PtechMods` 走 `fg.deobf`。
-- **TiT 阿迪特（`ardite`，金属）**：`ingots` 候选 `tinkers_thinking:ardite_ingot`，没装时回退
-  自有 `ardite_ingot`；**单源**碎下界岩 1% → `ardite_broken`，走三档链 → 矿块 → 熔炼；
-  6 条 `tconstruct:melting`（碎矿 45 mB / 矿块 180 mB，950°C，`forge:molten_ardite`）。
-- **TiT 叶绿素（`chlorophyll`，`gems`）**：只在 TiT 在场时注册；**单源**草方块 1% →
-  `chlorophyll_broken`（草方块表 = 泥土 24 条 + 这一条），矿块熔成
-  `tinkers_thinking:chlorophyte_compound`。没装 TiT 时整条不出现。
-- **AE2 赛特斯**：`sieve/sand_ae2.json` 对沙追加 `ae2:certus_quartz_crystal` **1/6**、
-  `ae2:certus_quartz_dust` **1/12**；不注册自有物品；充能赛特斯走 AE2 自己的充电器，
-  天石粉/陨石不做；缺 AE2 时整文件跳过。
-- **验证（2026-11-04 审计，Forge 47.4.28 / Java 17）**：
-  - `-PtechMods` 全装：`[materials] 22 entries`、`[sieve] 7 inputs, 141 drops`（基表 139 + AE2 2）、
-    `[hammer] 79`；RCON `ardite_ore_gravel → tinkers_thinking:ardite_ingot`、
-    `chlorophyll_ore_gravel → tinkers_thinking:chlorophyte_compound`；sand 含两条 AE2。
-  - 去掉 AE2 / GuideME：`[sieve] 7 inputs, 139 drops`，sand 无 AE2 条目，无 unknown item。
-  - `./gradlew build` + `check-textures.py` 通过；分支没有 `check-data-paths.py` / `check-core-imports.py`。
-  - **未验**：手筛 / 机器筛实际出货、JEI 页、匠魂炉真实熔化。
+- **对象**：Thermal Foundation 11.0.6 + Thermal Core（`libs/`，`-PtechMods` 加载）。
+  新增两个条件物品 `blitz_doll`（狂风人偶）/ `blizz_doll`（暴雪人偶），中文名按所有者指定，
+  不用参考图的「劲风 / 冻结」。
+- **配方**：`xyx / zwz / xvx`；四角 4 `thermal:niter_dust`（硝石粉）或 `minecraft:snowball`，
+  上中红石、两侧荧石粉、中心 `exnihilosatellitium:doll`、下中下界疣。两张工作台配方，手写 JSON。
+- **桶规则**：满熔岩 + `blitz_doll` → `thermal:blitz`（狂风人），和平掉 `thermal:blitz_rod`；
+  满水 + `blizz_doll` → `thermal:blizz`（暴雪人），和平掉 `thermal:blizz_rod`。右键立即生效。
+- **门控**：`registerThermalDoll` 在 `ModList` 没有 `thermal_foundation` 时返回 null；
+  配方用根级 `conditions`（`forge:mod_loaded`），桶规则用根级 `"mod"`，三处同一个 mod id。
+  没装 Thermal 时桶回到 12 条，物品不存在。
+- **验证**：`-PtechMods` 下 `[barrel] 14 transforms (2 fluid, 12 item)`；dump 两条新规则；
+  `/summon item` 出 Gale / Blizzard Doll；配方经 `/reload` 解析探测（坏 JSON 会报
+  `Couldn't parse`）。**未验**：工作台摆放、右键桶、JEI、贴图亮度。
 
 ## 历史批次（详细见 [history.md](history.md)）
 
+- **2026-11-03 晚**：工匠巧思（TiT）阿迪特 / 叶绿素 + AE2 赛特斯石英。
 - **2026-11-03**：数据包 v2 移植、末影蛋糕移植、三路径 P1/P1.5/P2/P3、Mek 氟石 + Thermal 六种。
 - **2026-11-02**：datagen 第二/三批移植、Tinkers 3 / IE 接入、科技模组锭、0.1.0 发布。
 - **2026-11-01**：M1–M10（桶/筛/锤钩/坩埚/巫水/瓷桶/蚕/人偶/机器）、P1 薄门面、P2 数据管线。
@@ -53,14 +50,15 @@
 - **已知不一致**：沙/砂砾/尘土各少 1 条钴（1/64），基表 113 vs 主线 116；分支没有
   `generate_sieve_assets.py`，要么补脚本要么手工对齐。
 - **dev 环境**：`libs/` 有 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME；删掉即回基表。
-- **进游戏验收（剩余）**：一次性验收清单里的画面/右键手感；TiT/AE2 实际筛出与 JEI 页；
-  匠魂炉实际熔化；自动输出抽屉。
+  热力人偶只在 Thermal 在场（`-PtechMods`）时注册；不带时桶 12 条、物品不存在。
+- **进游戏验收（剩余）**：一次性验收清单里的画面/右键手感；热力人偶合成/右键/JEI；
+  TiT/AE2 实际筛出与 JEI 页；匠魂炉实际熔化；自动输出抽屉。
 - 不要提交 `build/`、`run/`、`reference/`、`libs/`、`.gradle/`。
 
 ## 功能现状
 
 - 核心循环与主线一致：12 桶、7 输入筛表、6 锤 / 2 钩、39 熔点 + 9 热源、巫水/瓷桶/11 木坩埚/
-  蚕/5 人偶、四台机器 + 自动输出。
+  蚕/7 人偶（含 2 只热力条件人偶）、四台机器 + 自动输出。
 - 数据布局：`recipes/`、`loot_tables/`、`tags/blocks|items/`，标签命名空间 `forge:`；
   JSON 字段是 1.20.1 形态（裸 `conditions`）。
 - 22 种材料（14 金属 + 8 矿物）；`gems` 只在对应模组在场时注册；锭候选顺序与主线相同。
@@ -80,8 +78,10 @@
 - [ ] **巫水线**：满水桶 + 菌丝发酵；巫水桶装/倒；巫水+沙→灵魂沙、巫水+树苗→深色橡树苗；
       沙筛古代孢子 → 泥土变菌丝、牛变哞菇。
 - [ ] **瓷桶**：未烧制→烧制；舀水/熔岩/巫水；倒进木桶/坩埚；图标流体层染色。
-- [ ] **蚕/人偶**：蚕右键树叶→侵染、变白、扩散、掉线、Jade 百分比；5 种人偶配方与
-      桶规则（和平掉战利品 / 非和平生成生物）。
+- [ ] **蚕/人偶**：蚕右键树叶→侵染、变白、扩散、掉线、Jade 百分比；7 种人偶配方与
+      桶规则（和平掉战利品 / 非和平生成生物）；热力两只人偶的右键 / JEI / 模型。
+- [ ] **热力人偶**：工作台配方（硝石粉 / 雪球两条）；满熔岩 + 狂风人偶出狂风人、
+      满水 + 暴雪人偶出暴雪人；和平模式掉 `thermal:*_rod`。
 - [ ] **四台机器**：合成；右键开 GUI；能量/火焰/进度条；空槽虚影与状态行；
       插件槽只收对应插件（锤子时运槽上限 1）；燃料槽只收燃料；JEI 箭头点击。
 - [ ] **自动输出**：左侧标签页 → 面板；6 个面按钮（上/下/前/后/左/右）与 tooltip 世界方向；
@@ -101,9 +101,9 @@
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
 | `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
-| `check-textures.py` | ✅ | 266 模型 / 102 blockstate / 149 纹理；七个子模型只引用 vanilla block 贴图 |
+| `check-textures.py` | ✅ | 268 模型 / 102 blockstate / 151 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
-| 数据表加载 | ✅ | 全装：`[materials] 22`、`[sieve] 7 inputs / 141 drops`、`[hammer] 79`、`[barrel] 12`、`[compost] 67`、`[crucible] 39/9` |
+| 数据表加载 | ✅ | 全装：`[materials] 22`、`[sieve] 7 inputs / 141 drops`、`[hammer] 79`、`[barrel] 14`（缺 Thermal 12）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |
 | P1 守卫 | ⚠️ | 分支只跑 build + 纹理；`common/table` 的 core 守卫在主线跑 |
 | TiT 阿迪特 / 叶绿素 | ✅ | 22 entries；`ardite → tinkers_thinking:ardite_ingot`、`chlorophyll → chlorophyte_compound`；RCON 熔炉通过；缺 TiT 静默跳过 |
@@ -114,14 +114,15 @@
 | 桶 / 堆肥 / 固化 | ✅ | RCON：堆肥成土、满桶固化、牛奶史莱姆、比较器/雨水 |
 | 坩埚 / 巫水 / 瓷桶 | ✅ | 39+9 表、篝火/熔炉速率、巫水发酵与转化、瓷桶 capability |
 | 蚕 / 人偶 | ✅ | 侵染进度/扩散、5 种人偶生成与和平掉落 RCON 验过 |
-| 客户端画面 | ⚠️ | 最近一次客户端冒烟停在 2026-11-02；TiT/AE2 物品、JEI 页、机器动画未目视 |
+| 热力人偶 | ✅ / ⚠️ | `[barrel] 14`、dump 两条规则（`thermal:blitz` / `thermal:blizz`，和平 `thermal:*_rod`）、`/summon` 两物品通过；配方经 `/reload` 解析探测；合成 / 右键 / JEI 未实测 |
+| 客户端画面 | ⚠️ | 最近一次客户端冒烟停在 2026-11-02；热力人偶、TiT/AE2 物品、JEI 页、机器动画未目视 |
 | 合成 / 右键手感 | ⚠️ | 全部配方 JSON 已加载，但没有玩家逐项实测 |
 
 ## 下一步（按价值排序）
 
 1. **1.0.0 商店收尾**：tag `v1.0.0-1.20.1` 已打；CurseForge / Modrinth 上传待所有者。
-2. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶 + 四台机器、
-   自动输出抽屉、BER 动画、JEI 页面、TiT/AE2 实际筛出。
+2. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶（含热力两只）+
+   四台机器、自动输出抽屉、BER 动画、JEI 页面、TiT/AE2 实际筛出。
 3. **修分支筛表钴差异**：沙/砂砾/尘土各补 1 条 1/64（或补 `generate_sieve_assets.py`），
    与主线基表 116 对齐。
 4. **P4 JEI 同步 + fixture CI**；P3 状态机拆分；advancement / CI。
