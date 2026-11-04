@@ -20,7 +20,7 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.0.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.0.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
 
 1. 装好 Forge 47.4.x（Java 17），把 jar 放进 `mods/`。
 2. 可选：**JEI**（配方查询，`runClient -PdevMods` 时从 `libs/` 加载）、**Jade**（方块信息）、
