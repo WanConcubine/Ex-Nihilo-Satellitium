@@ -4,6 +4,7 @@
 > 版本号：`1.1.2`；两条线同版本号，分别对应 1.21.1 与 1.20.1。
 > **性质：纯 Bug 修复版**——没有新增玩法、数据表、贴图或渲染改动。
 > 上一版：1.1.1（2026-11-04）。
+> 已推送：`main` 6a1eadd / `1.20.1-forge` 78c369b；tag `v1.1.2` / `v1.1.2-1.20.1`（2026-11-04）。
 
 ## 产物
 
@@ -52,8 +53,8 @@ jar 文件名仍带 MC 版本（`<mod_id>-<mc_version>-<mod_version>.jar`），�
 - [x] 两条线 `build` 成功，jar 内版本号 1.1.2
 - [x] 两份 jar 的大小 / sha256 回填
 - [x] 耐久修复实测（服务端 FakePlayer + `gameMode.destroyBlock`）
-- [ ] 打 tag：`v1.1.2`（main）、`v1.1.2-1.20.1`（1.20.1-forge）
-- [ ] 推送分支与 tag 到 origin
+- [x] 打 tag：`v1.1.2`（main）、`v1.1.2-1.20.1`（1.20.1-forge）
+- [x] 推送分支与 tag 到 origin
 - [ ] CurseForge 上传 1.21.1 / 1.20.1 两个文件
 - [ ] Modrinth 上传对应两个版本
 - [ ] 把商店下载链接补进 README
