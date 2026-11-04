@@ -21,8 +21,8 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.0.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
-| 1.20.1 | Forge 47.4.x | 同一版本号，由 `1.20.1-forge` 分支构建 |
+| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.0.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.0.0.jar`（由 `1.20.1-forge` 分支构建） |
 
 1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
 2. 把 jar 放进 `mods/`。

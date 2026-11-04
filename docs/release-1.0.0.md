@@ -8,11 +8,13 @@
 
 | 线 | 加载器 | jar | 大小 | sha256 |
 |---|---|---|---|---:|
-| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.0.0.jar` | 845 KB | `34b3875b6986053f8fde3e145275d2595f5a41491a94eab2dc8a2b75b2c1ccb9` |
-| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.0.0.jar` | 848 KB | `f526d01f2f9cc6b8ed2ffa1f1abd663b4c2bbabe23ace8b7e031c6b756a31e52` |
+| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.0.0.jar` | 845 KB | `2bf36705e40fbae7165ba57b1a3a98479f74d0a6bbfcd36b697374a2ebac1007` |
+| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.0.0.jar` | 848 KB | `bb9a38a8bbe9561966f49442fc57be04a2e5efdceec0948cc9742e51d8f0dae4` |
 
 两份 jar 都包含 `LICENSE`、`THIRD-PARTY.md`、`icon.png` 和 `META-INF/*mods.toml`；
 `mods.toml` 里的 `version="1.0.0"` 已核对。产物构建于 2026-11-04。
+
+jar 文件名带 MC 版本（`<mod_id>-<mc_version>-<mod_version>.jar`），两条线同时上传不会撞名。
 
 ## 商店页文案（中文）
 

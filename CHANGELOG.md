@@ -57,7 +57,7 @@
 ### 安装
 
 1. 安装 **NeoForge 21.1.x**（1.20.1 版用 **Forge 47.4.x**）。
-2. 把 `exnihilosatellitium-1.0.0.jar` 放进 `mods/`。
+2. 把 `exnihilosatellitium-1.21.1-1.0.0.jar` 放进 `mods/`。
 3. 可选：JEI（配方查询）、Jade（方块信息）、Create / Mekanism / Thermal / IE / Tinkers /
    TiT / AE2（资源与机器互通；IE / Tinkers / TiT 仅 1.20.1）。
 
