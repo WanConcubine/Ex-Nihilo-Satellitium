@@ -89,12 +89,15 @@ POWDERED = """
 
 STONE = ("#141414", "#2E2E2E", "#4A4A4A", "#6A6A6A", "#8A8A8A")
 
-# Some nether materials sit in a netherrack chunk, not a coal-grey stone one;
-# chlorophyll ore is sifted out of grass blocks, so it sits in a dirt chunk.
+# The `broken` stage is a chunk of whatever the material is sifted out of, not
+# always grey stone: nether materials sit in netherrack, chlorophyll in dirt and
+# draconium (crushed end stone) in end stone.  Any single-source material whose
+# table input is not plain gravel MUST get an entry here.
 NETHERRACK_STONE = ("#2A0D0D", "#4A1414", "#6B1D1D", "#8A2A2A", "#A83A3A")
 DIRT_STONE = ("#2A1A0E", "#4A2E18", "#6B4426", "#8A5C34", "#A87A4A")
+END_STONE = ("#5A5636", "#8E8A5E", "#C2BE86", "#DCD8A8", "#F4F2D2")
 STONE_PALETTES = {"cobalt": NETHERRACK_STONE, "ardite": NETHERRACK_STONE,
-                  "chlorophyll": DIRT_STONE}
+                  "chlorophyll": DIRT_STONE, "draconium": END_STONE}
 
 BROKEN_LIGHTS = ((6, 4), (7, 4), (6, 5))
 

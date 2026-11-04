@@ -137,8 +137,7 @@ assets/exnihilosatellitium/textures/
 旧 Ex Nihilo 用 `base + template + color` 运行时染色（`ItemBrokenBase` / `ItemCrushedBase` /
 `ItemPowderedBase`），不是每种金属一张 PNG。我们按同样思路**重绘三种不同剪影**：
 
-- `art/items/ore_pieces/generate.py`：每种金属 × 三种阶段，输出
-  铁/金/铜/锡/铅/银/镍/铝/铂/铀/锌/锇/钴 共 **39 张 16×16 PNG**，以及
+- `art/items/ore_pieces/generate.py`：每种材料 × 三种阶段（当前 26 种 → 78 张 16×16 PNG），以及
   `preview_stages_v65.png`（四种金属的三阶段对比）、`preview_all_v65.png`（全部材料）和
   `reference_vs_v65_broken.png`（旧版 vs 当前版）。
 - 剪影区分：
@@ -148,9 +147,11 @@ assets/exnihilosatellitium/textures/
   三者在 16×16 下必须一眼能分。
 - `broken` 边缘：轮廓保持完整，**左上受光内边 + 右下暗边**，不画整圈黑线、不加缺口，保证一眼是一块。
 - 风格：暗色 1px 边、透明背景、左上光源、4–5 阶；`broken` 的石体默认用共享深灰调，
-  但 **钴（以及以后从匠魂拓展来的阿迪特）用下界岩红棕基底**（`STONE_PALETTES`），
-  矿点仍用金属亮色；`crushed` / `powdered` 用金属色阶。颜色参考 1.20 原版矿物/锭，
-  但**不复制**旧 Ex Nihilo 或原版 PNG。
+  但**来源不是砂砾的材料必须按来源方块换基底**（`STONE_PALETTES`）：钴 / 阿迪特 → 下界岩红棕，
+  叶绿素 → 泥土深棕，龙尘 → **末地石淡黄**；矿点仍用金属亮色；`crushed` / `powdered`
+  用金属色阶。颜色参考 1.20 原版矿物/锭，但**不复制**旧 Ex Nihilo 或原版 PNG。
+- **硬规则**：新增单源材料（不从砂砾/沙子/尘土出）时，`STONE_PALETTES` 必须同时加一行，
+  否则 `broken` 会退回默认灰石基底——2026-11-04 的龙尘就因此返工过一次。
 - 已经进 `assets/textures/item/<m>_<stage>.png`（由 `scripts/generate_ore_variants.py`
   从 `art/` 复制/生成），并保证 16×16。
 - **自有锭**：`art/items/ingots/generate.py` 用同一套 5 阶色板生成
