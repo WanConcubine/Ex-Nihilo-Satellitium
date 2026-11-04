@@ -398,6 +398,60 @@
       ],
       "source": "estimate",
       "enabled": true
+    },
+    {
+      "id": "yellorium",
+      "color": "D0C44A",
+      "name": {
+        "en_us": "Yellorium",
+        "zh_cn": "黄铀"
+      },
+      "tier": "common",
+      "rarity": 8,
+      "gems": [
+        {
+          "item": "bigreactors:yellorium_ingot",
+          "mod": "bigreactors"
+        }
+      ],
+      "source": "estimate",
+      "enabled": true
+    },
+    {
+      "id": "anglesite",
+      "color": "E0A800",
+      "name": {
+        "en_us": "Anglesite",
+        "zh_cn": "铅矾"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "gems": [
+        {
+          "item": "bigreactors:anglesite_crystal",
+          "mod": "bigreactors"
+        }
+      ],
+      "source": "estimate",
+      "enabled": true
+    },
+    {
+      "id": "benitoite",
+      "color": "3AA8D0",
+      "name": {
+        "en_us": "Benitoite",
+        "zh_cn": "蓝锥矿"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "gems": [
+        {
+          "item": "bigreactors:benitoite_crystal",
+          "mod": "bigreactors"
+        }
+      ],
+      "source": "estimate",
+      "enabled": true
     }
   ]
 }

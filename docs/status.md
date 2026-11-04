@@ -10,9 +10,9 @@
 **最新一批（2026-11-04 晚，1.1.2）**：**Bug 修复版**——木钩/骨钩破坏树叶不掉耐久；
 补齐 `ToolEvents#onBreak` 的 crook 磨损逻辑。没有新增玩法或数据改动。
 上一批（1.1.1）：木桶堆肥“原版泥土模型 + 混合投入物颜色”、坩埚熔料真实方块模型、成土 30 秒。
-**联动**：22 种材料（14 金属 + 8 矿物）；Mek / Thermal / Create / IE / Tinkers / TiT / AE2 全部可选。
+**联动**：25 种材料（14 金属 + 11 矿物；ER 的 yellorium 走 `gems` 门控）；Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors 全部可选。
 **当前表尺**：筛子 7 输入 / 115 掉落（无科技模组；沙/砂砾/尘土比主线少 3 条钴，历史差异）；
-+AE2 119；全装 +TiT 141、再加 AE2 145；锤表 79（全装）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
++AE2 119；全装 +TiT 141、再加 AE2 145；装 ER 各 +9（150 / 154）；锤表 88（全装 +ER）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
 
 ## 未发布（2026-11-04 晚，筛表补骨粉 / 烈焰粉）
@@ -22,6 +22,15 @@
 - 基表 113 → 115；全装 +TiT 139 → 141、+AE2 143 → 145；AE2 117 → 119。
 - 验证：`build`（Java 17，`--offline`）+ 纹理守卫通过，数据用主线
   `check-data-paths.py --target 1.20.1` 验过；未进游戏手筛。
+
+## 未发布（2026-11-04 深夜，Extreme Reactors）
+
+- 三条 `gems` 门控材料：`yellorium`（1/8，common）、`anglesite` / `benitoite`（各 1/64，rare）；
+  没装 ER 时物品/方块/筛表补丁不出现，基表 115 不变；装 ER 时筛表 +9、锤表 +9。
+- 三档矿链熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；
+  石墨仍烧煤，cyanite/blutonium 等继续由反应堆产出。
+- 验证：全装 `[materials] 25`、`[sieve] 154`、`[hammer] 88`；RCON 熔炉三种产物均出；
+  未进游戏手筛、JEI 未目视。
 
 ## 当前批次（2026-11-04 晚，1.1.2 Bug 修复）
 
@@ -78,7 +87,7 @@
   涉及数据表时回主线跑 `check-data-paths.py --target 1.20.1`。
 - **已知不一致**：沙/砂砾/尘土各少 1 条钴（1/64），基表 115 vs 主线 118；分支没有
   `generate_sieve_assets.py`，要么补脚本要么手工对齐。
-- **dev 环境**：`libs/` 有 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME；删掉即回基表。
+- **dev 环境**：`libs/` 有 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME + ER/ZeroCore；删掉即回基表。
   热力人偶只在 Thermal 在场（`-PtechMods`）时注册；不带时桶 16 条、物品不存在。
 - **进游戏验收（剩余）**：一次性验收清单里的画面/右键手感；村民人偶/脑白金/糖水链/养蜂/
   热力人偶；TiT/AE2 实际筛出与 JEI 页；匠魂炉实际熔化；自动输出抽屉。
@@ -91,8 +100,8 @@
 - 村民/蜂蜜：村民人偶、脑白金、糖水/浓缩蜂蜜汁（source block + 桶）、养蜂、蜂箱配方。
 - 数据布局：`recipes/`、`loot_tables/`、`tags/blocks|items/`，标签命名空间 `forge:`；
   JSON 字段是 1.20.1 形态（裸 `conditions`）。
-- 22 种材料（14 金属 + 8 矿物）；`gems` 只在对应模组在场时注册；锭候选顺序与主线相同。
-- 联动：Mek / Thermal / Create / IE / Tinkers / TiT / AE2，全部可选、缺失降级。
+- 25 种材料（14 金属 + 11 矿物；ER 三条走 `gems` 门控）；`gems` 只在对应模组在场时注册；锭候选顺序与主线相同。
+- 联动：Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors，全部可选、缺失降级。
 - 已知差异：筛表少 3 条钴（沙 / 砂砾 / 尘土 1/64）；分支没有 core/data 守卫脚本。
 
 ## 一次性验收清单（作者进游戏）
@@ -134,13 +143,14 @@
 |---|---|---|
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
-| `check-textures.py` | ✅ | 272 模型 / 104 blockstate / 155 纹理；七个子模型只引用 vanilla block 贴图 |
+| `check-textures.py` | ✅ | 290 模型 / 113 blockstate / 163 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
-| 数据表加载 | ✅ | 全装：`[materials] 22`、`[sieve] 7 inputs / 145 drops`、`[hammer] 79`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
+| 数据表加载 | ✅ | 全装 + ER：`[materials] 25`、`[sieve] 7 inputs / 154 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |
 | P1 守卫 | ⚠️ | 分支只跑 build + 纹理；`common/table` 的 core 守卫在主线跑 |
 | TiT 阿迪特 / 叶绿素 | ✅ | 22 entries；`ardite → tinkers_thinking:ardite_ingot`、`chlorophyll → chlorophyte_compound`；RCON 熔炉通过；缺 TiT 静默跳过 |
 | AE2 赛特斯 / 陨石粉 | ✅ | 141 → 145 drops；RCON sand 含 crystal 0.16667 / dust 0.08333 / sky_dust 0.0625，gravel 含 sky_dust；缺 AE2 时 141、无 unknown |
+| Extreme Reactors | ✅ | ER 2.0.84 + ZeroCore 2.1.45 真装：`[materials] 25`、`[sieve] 154`、`[hammer] 88`；`yellorium` 1/8、`anglesite`/`benitoite` 各 1/64；RCON 三种矿块熔炉分别出 ER 锭 / 铅矾 / 蓝锥矿，`RecipesUsed` 指向 `*_smelting_bigreactors`；手筛/JEI 未目视 |
 | Mek / Thermal / Create / IE | ✅ | 锭候选与矿砾熔炼 6/6、IE 五锭、Create 锌 + 12 条 crushing；多方块未跑 |
 | Tinkers 钴 / 种子 / 熔炼 | ✅ | 钴 → `tconstruct:cobalt_ingot`；两个黏液草种子条件注册；84 条匠魂熔炼加载无报错 |
 | M10 机器 | ✅ | 电动/内能 × 筛/锤、插件、漏斗、自动输出 RCON 全过；JEI 箭头点击已修 |

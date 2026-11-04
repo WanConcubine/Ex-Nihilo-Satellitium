@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "exnihilosatellitium:anglesite_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:anglesite_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:anglesite_ore_dust",
+      "required": false
+    }
+  ]
+}

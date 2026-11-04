@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "bigreactors"
+    }
+  ],
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:benitoite_crushed"
+    }
+  },
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:benitoite_ore_sand"
+  },
+  "show_notification": true
+}

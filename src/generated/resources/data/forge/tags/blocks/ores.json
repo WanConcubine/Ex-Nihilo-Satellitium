@@ -21,6 +21,9 @@
     "#forge:ores/sulfur",
     "#forge:ores/ruby",
     "#forge:ores/sapphire",
-    "#forge:ores/chlorophyll"
+    "#forge:ores/chlorophyll",
+    "#forge:ores/yellorium",
+    "#forge:ores/anglesite",
+    "#forge:ores/benitoite"
   ]
 }

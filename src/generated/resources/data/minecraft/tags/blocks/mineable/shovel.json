@@ -266,6 +266,42 @@
     {
       "id": "exnihilosatellitium:chlorophyll_ore_dust",
       "required": false
+    },
+    {
+      "id": "exnihilosatellitium:yellorium_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:yellorium_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:yellorium_ore_dust",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:anglesite_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:anglesite_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:anglesite_ore_dust",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:benitoite_ore_gravel",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:benitoite_ore_sand",
+      "required": false
+    },
+    {
+      "id": "exnihilosatellitium:benitoite_ore_dust",
+      "required": false
     }
   ]
 }
