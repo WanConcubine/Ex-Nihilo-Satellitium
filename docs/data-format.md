@@ -527,7 +527,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
-- 当前 14 条：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
+- 当前 14 条（缺 Thermal 时 12 条）：水+熔岩→圆石、熔岩+水→黑曜石、熔岩+红石→下界岩、
   熔岩+荧石粉→末地石、水+尘土→粘土块（`water_dust_clay.json`）、
   水+牛奶桶→史莱姆/粘液球（`water_milk_slime.json`）；
   巫水+沙子→灵魂沙（`witch_water_sand_soul_sand.json`）、

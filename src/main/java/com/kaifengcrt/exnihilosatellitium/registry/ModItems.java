@@ -25,6 +25,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -128,7 +129,9 @@ public final class ModItems {
      * is loaded. Both fields stay {@code null} otherwise, and the hand-written
      * recipe / barrel JSON is gated on the same mod id.
      */
+    @Nullable
     public static final DeferredHolder<Item, Item> BLITZ_DOLL = thermalDoll("blitz_doll");
+    @Nullable
     public static final DeferredHolder<Item, Item> BLIZZ_DOLL = thermalDoll("blizz_doll");
 
     /** M6: infested leaves item; the infestation component picks 0 % or mature. */
@@ -316,6 +319,7 @@ public final class ModItems {
      * {@code thermal:blitz} / {@code thermal:blizz}; registering the doll in a
      * profile without Thermal would leave an item with no source and no use.</p>
      */
+    @Nullable
     private static DeferredHolder<Item, Item> thermalDoll(final String name) {
         if (!Platform.isModLoaded("thermal_foundation")) {
             return null;
