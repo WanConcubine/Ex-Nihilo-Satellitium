@@ -564,3 +564,16 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 **验证**：1.20.1 dev client 临时截图（脚本已删）确认腐肉红褐 / 树叶绿 / 50-50 黄褐 /
 成土原版泥土色，木坩埚（solid 60 / water 50）显示树叶方块；`build` 与资源守卫通过。
 主线的同一场景截图见主仓库 `docs/images/1.1.1-compost-crucible.png`。
+
+## 50. 1.1.2 Bug 修复：木钩 / 骨钩耐久（2026-11-04）
+
+**问题**：1.20.1 的 `ToolEvents#onBreak` 里，crook 分支只调用 `CrookDrops` 追加掉落，
+没有调用 `hurtAndBreak`；木钩/骨钩打树叶时耐久永远满格。1.21.1 走 `BlockDropsEvent` →
+`wearMainHand`，一直正常。
+
+**修复**：crook 分支在非创造模式、且方块确实有钩子表时，对 `player.getMainHandItem()`
+调用 `hurtAndBreak(1, player, broken -> broken.broadcastBreakEvent(MAIN_HAND))`，与 hammer
+分支同款。`BreakEvent` 在方块移除前触发，每次有效破坏只扣一次。
+
+**验证**：服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各
+`damage=1`（修复前 0）；`build` + `check-textures.py` 通过。
