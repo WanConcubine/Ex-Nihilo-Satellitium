@@ -1,17 +1,18 @@
-# 0.2.0 发布材料（发布准备）
+# 1.0.0 发布材料
 
-> 状态：**内容与 jar 已准备好，tag / 商店上传待所有者确认。**
-> 版本号：`0.2.0`；两条线同版本号，分别对应 1.21.1 与 1.20.1。
+> 状态：**1.0.0 已定稿并打 tag；CurseForge / Modrinth 上传待所有者操作。**
+> 版本号：`1.0.0`；两条线同版本号，分别对应 1.21.1 与 1.20.1。
+> 原 0.2.0 准备线在验收后直接定为 **1.0.0**（2026-11-04）。
 
 ## 产物
 
 | 线 | 加载器 | jar | 大小 | sha256 |
-|---|---|---|---:|---|
-| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-0.2.0.jar` | 657 KB | `fff01fc6c7e6fd4a624c266a207ee540f7667e2d884d701f2b3a4f35a2624cc7` |
-| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-0.2.0.jar` | 663 KB | `e579e3a10cfcedc48616b8fbbb6a4f5e841218736848034de30ef1e82decc1ff` |
+|---|---|---|---|---:|
+| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.0.0.jar` | 845 KB | `34b3875b6986053f8fde3e145275d2595f5a41491a94eab2dc8a2b75b2c1ccb9` |
+| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.0.0.jar` | 848 KB | `f526d01f2f9cc6b8ed2ffa1f1abd663b4c2bbabe23ace8b7e031c6b756a31e52` |
 
 两份 jar 都包含 `LICENSE`、`THIRD-PARTY.md`、`icon.png` 和 `META-INF/*mods.toml`；
-`mods.toml` 里的 `version="0.2.0"` 已核对。
+`mods.toml` 里的 `version="1.0.0"` 已核对。产物构建于 2026-11-04。
 
 ## 商店页文案（中文）
 
@@ -27,21 +28,24 @@
 
 - **木桶**：堆肥成土、1000 mB 流体、12 条桶内转化（圆石/黑曜石/下界岩/末地石/灵魂沙/
   深色橡树苗/史莱姆/人偶）。
-- **筛子**：6 种筛料；泥土出 9 种树苗、竹子、四种石子；粉碎下界岩出菌岩孢子、钴碎块、
-  下界合金碎片；沙子出农业/海洋资源；粉碎末地石出末地资源。
+- **筛子**：7 种筛料；泥土出 9 种树苗、竹子、四种石子；草方块出叶绿素碎矿；粉碎下界岩
+  出菌岩孢子、钴碎块、下界合金碎片、阿迪特碎矿；沙子出农业/海洋资源与 AE2 赛特斯石英；
+  粉碎末地石出末地资源。
 - **锤子 / 钩子**：石头降档、矿砾→粉碎→粉末、树叶取苗/苹果/蚕。
 - **坩埚**：熔点 + 热源；木坩埚被动熔树叶/树苗。
 - **巫水 / 瓷桶 / 蚕 / 人偶**：经典中后期链。
 - **M10 自动化**：电动 / 内能 × 自动筛 / 自动锤，速度/时运插件，自动输出。
-- **可选联动**：Mekanism、Thermal、Create、Immersive Engineering、Tinkers' Construct 3。
-  装了谁就把矿砾熔成谁家的锭；1.20.1 的匠魂还能把碎块/粉碎/粉末熔成 45 mB、矿块熔成 180 mB。
+- **可选联动**：Mekanism、Thermal、Create、Immersive Engineering、Tinkers' Construct 3、
+  工匠巧思（Tinkers' Thinking，1.20.1）、Applied Energistics 2。装了谁就把矿砾熔成谁家的锭；
+  1.20.1 的匠魂还能把碎块/粉碎/粉末熔成 45 mB、矿块熔成 180 mB；AE2 只掉赛特斯石英。
 - **JEI / Jade**：配方页与方块提示。
 
 **英文短描述**：
 
 An independent Ex Nihilo-style skyblock resource mod for Minecraft 1.21.1 (NeoForge) and 1.20.1
 (Forge). Buckets, sieves, hammers, crooks, crucibles, automation, and optional integrations
-with Mekanism, Thermal, Create, Immersive Engineering and Tinkers' Construct. No GPL assets copied.
+with Mekanism, Thermal, Create, Immersive Engineering, Tinkers' Construct, Tinkers' Thinking and
+Applied Energistics 2. No GPL assets copied.
 
 ## 建议的商店字段
 
@@ -51,18 +55,20 @@ with Mekanism, Thermal, Create, Immersive Engineering and Tinkers' Construct. No
 | 许可证 | MIT |
 | 分类 | Technology、Game Mechanics、World Generation（按平台可选 “Skyblock”） |
 | 游戏版本 | 1.21.1（NeoForge）、1.20.1（Forge） |
-| 依赖 | 无硬依赖；JEI / Jade 可选；1.20.1 的 IE / Tinkers + Mantle 可选 |
-| 更新日志 | 复制 [CHANGELOG.md](../CHANGELOG.md) 的 0.2.0 节 |
+| 依赖 | 无硬依赖；JEI / Jade / AE2 可选；1.20.1 的 IE / Tinkers + Mantle / 工匠巧思可选 |
+| 更新日志 | 复制 [CHANGELOG.md](../CHANGELOG.md) 的 1.0.0 节 |
 | 源码 / 问题 | `https://github.com/WanConcubine/Ex-Nihilo-Satellitium` |
 
 ## 发布前检查
 
-- [x] 两条线 `mod_version=0.2.0`
-- [x] `CHANGELOG.md` 增加 0.2.0 节（含已知限制）
+- [x] 两条线 `mod_version=1.0.0`
+- [x] `CHANGELOG.md` 的 1.0.0 节（含已知限制）
 - [x] README 下载表与支持模组更新
-- [x] 两条线 `build` 成功，jar 内版本号 0.2.0
-- [ ] 所有者确认版本号与发布日期
-- [ ] 打 tag：`v0.2.0`（main）、`v0.2.0-1.20.1`（1.20.1-forge）
+- [x] 两条线 `build` 成功，jar 内版本号 1.0.0
+- [x] 所有者确认版本号（0.2.0 准备线直接发 1.0.0）与发布日期
+- [x] 最终构建后回填两份 jar 的大小 / sha256
+- [x] 打 tag：`v1.0.0`（main）、`v1.0.0-1.20.1`（1.20.1-forge）
+- [ ] 推送 tag 到 origin
 - [ ] CurseForge 上传 1.21.1 / 1.20.1 两个文件
 - [ ] Modrinth 上传对应两个版本
 - [ ] 把商店下载链接补进 README
@@ -72,6 +78,7 @@ with Mekanism, Thermal, Create, Immersive Engineering and Tinkers' Construct. No
 
 - 部分画面与手感仍待作者验收：机器 GUI/动画、自动输出抽屉、筛料层、木桶竖棱、
   手动筛右键、匠魂种子右键、匠魂炉实际熔化。
-- 阿迪特未加入：Tinkers 3.12.1 已移除，等「工匠巧思」拓展。
-- IE 与 Tinkers 仅有 1.20.1 版本；1.21.1 只保留永不命中的候选/变体。
+- 阿迪特 / 叶绿素由 1.20.1 的「工匠巧思」补回（Tinkers 3.12.1 已移除阿迪特）；
+  AE2 只做赛特斯石英，不做充能赛特斯 / 天石粉。
+- IE、Tinkers 与工匠巧思仅有 1.20.1 版本；1.21.1 只保留永不命中的候选/变体。
 - 没有 advancement 树、自动化测试与 CI；「月光魔法」只有软依赖占位。

@@ -55,8 +55,8 @@
 - **0.1.0 已发**：main tag `v0.1.0`（`d4a6dc2`）、分支 `v0.1.0-1.20.1`（`35d98d4`），
   jar 649 KB / 587 KB（sha256 `2f3d1af5…` / `1168ca77…`）；已推 origin。
   CurseForge / Modrinth 上传需要所有者操作。
-- **0.2.0 准备**：两条线 `mod_version=0.2.0`，jar 657 KB / 663 KB；tag 与商店上传待所有者确认。
-  打包剔除 datagen `.cache/`，带 LICENSE / THIRD-PARTY.md / icon.png。
+- **0.2.0 准备 → 1.0.0 发布**：两条线原定 0.2.0，验收后直接定为 **1.0.0**；tag `v1.0.0` /
+  `v1.0.0-1.20.1`（2026-11-04）。打包剔除 datagen `.cache/`，带 LICENSE / THIRD-PARTY.md / icon.png。
 
 ## 2026-11-02（Tinkers' Construct 3 接入）
 
