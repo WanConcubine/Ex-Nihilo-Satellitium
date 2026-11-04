@@ -73,6 +73,8 @@ public final class ModCreativeTabs {
                             output.accept(ModItems.BLIZZ_DOLL.get());
                         }
                         output.accept(ModItems.WITCH_WATER_BUCKET.get());
+                        output.accept(ModItems.SUGAR_WATER_BUCKET.get());
+                        output.accept(ModItems.CONCENTRATED_HONEY_BUCKET.get());
                         ModItems.MACHINES.forEach(item -> output.accept(item.get()));
                         ModItems.UPGRADES.forEach(item -> output.accept(item.get()));
                         ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));

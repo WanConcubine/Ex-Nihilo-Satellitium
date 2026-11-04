@@ -169,6 +169,15 @@ public final class ModItems {
             ITEMS.register("witch_water_bucket", () -> new BucketItem(ModFluids.WITCH_WATER.get(),
                     new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
 
+    /** Sugar water / concentrated honey buckets (barrel-chain fluids). */
+    public static final DeferredHolder<Item, Item> SUGAR_WATER_BUCKET =
+            ITEMS.register("sugar_water_bucket", () -> new BucketItem(ModFluids.SUGAR_WATER.get(),
+                    new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
+    public static final DeferredHolder<Item, Item> CONCENTRATED_HONEY_BUCKET =
+            ITEMS.register("concentrated_honey_bucket", () -> new BucketItem(
+                    ModFluids.CONCENTRATED_HONEY.get(),
+                    new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
+
     public static final DeferredHolder<Item, Item> BARREL =
             registerBarrelItem("barrel", ModBlocks.BARREL);
     public static final DeferredHolder<Item, Item> SPRUCE_BARREL =

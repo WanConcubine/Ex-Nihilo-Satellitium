@@ -544,6 +544,8 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   `drain` 只能配 `added.item`（配 `added.fluid` 会跳过并打警告），也不能和 `entity` / `result_fluid` 同用。
 - **浓缩蜂蜜汁养蜂**：桶里有任意数量 `exnihilosatellitium:concentrated_honey` 时，每 100 tick 有
   1/6 概率在 6 格内生成 1 只蜜蜂，附近上限 5 只（不需要满桶）。
+- 两种流体都有 source block 和桶（`sugar_water_bucket` / `concentrated_honey_bucket`），
+  可放置、可舀取；桶内转化规则不变。
 - 流体按 registry id 精确匹配（still 水 / 熔岩）；未知 base / added / result 只跳过该条，
   不影响其它文件。
 - 客户端 JEI 读镜像后的 `assets/.../barrel/`；`/reload` 或重启后生效，不需要改 Java。
