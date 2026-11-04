@@ -489,6 +489,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   `ae2:certus_quartz_dust` **1/12**。不注册自有物品、不复制对方资源；没装 AE2 时整文件跳过
   （基表仍是 118 / 115），装了两版各 +4（本轮实测 122 / 119）。充能赛特斯与天石粉不做：前者用
   AE2 自己的 `ae2:charger` 充能（配方只要铁 / 铜 / 赛特斯），后者来自陨石天石，不属于空岛缺口。
+- **BambooMod（`bamboomod`，仅 1.20.1）**：`sieve/dirt.json` / `sieve/grass_block.json` 各 8 条
+  （4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），`sieve/gravel.json` 3 条宝石
+  （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过，基表仍是
+  118 / 115，装 BambooMod 时 1.20.1 全装 +19（泥土 8 / 草 8 / 砂砾 3）。
+  它的树叶/树苗/竹笋已在 `#minecraft:leaves` / `#minecraft:saplings`，堆肥由现有标签覆盖。
 - **1.21.4 的苍白橡木（pale oak）**不在 1.21.1 / 1.20.1 的物品表里，暂时没有对应掉落；
   升级目标版本时再加。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。

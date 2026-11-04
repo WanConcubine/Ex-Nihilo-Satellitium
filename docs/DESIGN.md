@@ -1829,3 +1829,22 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 - RCON `/exnihilo sieve` 三档都含新条目；熔炉三种矿块分别出 `yellorium_ingot` /
   `anglesite_crystal` / `benitoite_crystal`，`RecipesUsed` 指向我们的变体。
 - 未进游戏手筛，JEI 页面未目视。
+
+## 52. BambooMod 资源入口（2026-11-04，仅 1.20.1）
+
+**为什么**：BambooMod 0.6.2 只有 1.20.1 Forge 构建。它把原版竹子也放进 `forge:bamboo`，
+所以普通竹子配方本来就通；空岛缺的是**第一棵**——4 种树苗、竹笋、米种/豆/番茄、3 种宝石
+都只在世界生成或村庄箱子里。只补这些起步资源，不写它的机器/食物/村庄配方。
+
+**入口**：`sieve/dirt.json` / `grass_block.json` 各 +8（4 树苗 2%、竹笋 4%、米种 5%、
+豆 4%、番茄 4%），`sieve/gravel.json` +3 宝石（银杏/枫/樱各 1/64）。全部
+`"mod": "bamboomod"`，没装时在查物品前跳过，基表 118 / 115 不变；草方块由泥土生成，
+自动同款。宝石没有配方用途（全 data 只在 loot 出现），作为收藏补 1/64。
+
+**堆肥**：它的树叶/树苗/竹笋已进 `#minecraft:leaves` / `#minecraft:saplings`，
+现有 `#exnihilosatellitium:compostable` + `compost/default.json` 的 125 分直接覆盖，
+不新增 JSON。
+
+**验证**：1.20.1 分支真装 0.6.2：`[sieve] 173`（+19：泥土 8 / 草 8 / 砂砾 3）、
+`[hammer] 88`；RCON 泥土 32 / 砂砾 31 条含新条目；`/setblock` 树苗与竹笋成功；
+手筛、树苗生长与 JEI 未测。

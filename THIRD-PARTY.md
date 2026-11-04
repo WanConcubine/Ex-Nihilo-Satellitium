@@ -95,6 +95,14 @@ SirLyle 2017 / Wolforce 2019 textures）。
 **Ex Nihilo: Sequentia（传承）1.21 的许可证是 CC BY-NC-SA 4.0**（非 MIT，
 带非商业与相同方式共享条款），因此本项目**不采用**其任何贴图，只作玩法/数值对照。
 
+
+## BambooMod（兼容目标，不含代码/资源）
+
+1.20.1 的 **BambooMod**（`bamboomod`，作者 Ruby，0.6.2）只作为**兼容目标**：
+本项目的数据表里引用它的物品 id（树苗 / 竹笋 / 作物 / 宝石），不复制它的代码、贴图、模型、
+语言文件或配方。BambooMod 的代码按 **MMPL-1.0.1**、资源按 **CC BY-NC-SA 4.0** 授权，
+不随本项目分发；本项目仍按 MIT 发布。
+
 ## 美术
 
 `src/main/resources/assets/exnihilosatellitium/textures/` 下的贴图分三类来源：
