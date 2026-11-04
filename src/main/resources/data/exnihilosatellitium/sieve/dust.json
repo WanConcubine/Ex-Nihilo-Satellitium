@@ -60,6 +60,10 @@
     {
       "item": "minecraft:gunpowder",
       "chance": 0.0625
+    },
+    {
+      "item": "minecraft:bone_meal",
+      "chance": 0.2
     }
   ]
 }
