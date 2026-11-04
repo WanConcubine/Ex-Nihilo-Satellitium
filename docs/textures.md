@@ -46,7 +46,9 @@
 ```
 assets/exnihilosatellitium/textures/
 ├── block/
-│   └── barrel_compost.png       # 堆肥表面（自有）
+│   ├── machine_*                # M10 机器 / 插件（脚本生成，见下）
+│   ├── crucible.png             # 瓷坩埚（Creatio MIT，restyle.py）
+│   └── crushed_end_stone.png / crushed_netherrack.png / dust.png  # 筛料方块（自有）
 └── item/
     ├── porcelain.png            # 瓷土（自有）
     ├── ancient_spores.png       # 古代孢子（M6，脚本生成，紫色）

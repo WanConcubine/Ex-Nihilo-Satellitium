@@ -256,7 +256,7 @@ saves/<世界名>/datapacks/my_pack/
 
 - key 是物品 id 或 `#物品标签`；value 是正整数。
 - 同一个 stack 命中多条时取**最大值**，不叠加。
-- 总和到 `1000` 填满，然后 50 秒成土。
+- 总和到 `1000` 填满，然后 30 秒成土。
 - **必须同时改物品标签** `#exnihilosatellitium:compostable`，否则不能堆肥；
   标签有、JSON 没有 → 只给 1 点。
 

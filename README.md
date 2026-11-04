@@ -21,8 +21,8 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.1.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
-| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.1.0.jar`（由 `1.20.1-forge` 分支构建） |
+| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.1.1.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.1.1.jar`（由 `1.20.1-forge` 分支构建） |
 
 1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
 2. 把 jar 放进 `mods/`。
@@ -32,7 +32,7 @@
    **工匠巧思（Tinkers' Thinking）**（金属锭/匠魂熔炼/两种矿石）。
    所有联动都是可选的，没装就回退自有物品。
 
-1.1.0 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
+1.1.1 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术栈
 
@@ -61,7 +61,7 @@
 - [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运插件（服务端已验证，GUI 待验收）
 - [x] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 接管标签 / 掉落表 / 143 条配方 + 74 blockstate + 201 模型；语言仍手写）
 - [ ] M8 与「月光魔法」联动
-- [x] M9 发布（1.1.0 已打 tag；CurseForge / Modrinth 上传待所有者）
+- [x] M9 发布（1.1.1 已打 tag；CurseForge / Modrinth 上传待所有者）
 
 ## 文档
 

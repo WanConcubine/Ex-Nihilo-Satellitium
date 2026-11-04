@@ -9,19 +9,26 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 
 /**
  * Draws the crucible contents: the melt material while solid > fluid, the
- * fluid otherwise (classic Ex Nihilo). Both are drawn as a filled box in the
- * cavity (2..14, 4..16).
+ * fluid otherwise (classic Ex Nihilo).
+ *
+ * <p>The melt is rendered as the real block model of the inserted block (a
+ * leaves block for the wooden crucible) instead of a flat colour box. Wooden
+ * crucibles only ever melt leaves/saplings into water, so they keep showing the
+ * melt model until the last solid is gone even after the water volume overtakes
+ * it - otherwise the crucible read as a plain blue box.</p>
  */
 public class CrucibleRenderer implements BlockEntityRenderer<CrucibleBlockEntity> {
 
@@ -33,6 +40,8 @@ public class CrucibleRenderer implements BlockEntityRenderer<CrucibleBlockEntity
     private static final float Z1 = 13.98F / 16.0F;
     private static final float BOTTOM = 4.02F / 16.0F;
     private static final float HEIGHT = 11.96F / 16.0F;
+    /** Block model scale that fits the 2..14 cavity with a little clearance. */
+    private static final float MELT_SIZE = 0.70F;
 
     public CrucibleRenderer(final BlockEntityRendererProvider.Context context) {
     }
@@ -44,15 +53,9 @@ public class CrucibleRenderer implements BlockEntityRenderer<CrucibleBlockEntity
                 ? LevelRenderer.getLightColor(crucible.getLevel(), crucible.getBlockPos().above())
                 : 0xF000F0;
 
-        if (crucible.isMeltDominant() && crucible.getSolidVolume() > 0.0D) {
-            final ItemStack stack = crucible.getPendingStack();
-            if (!stack.isEmpty() && stack.getItem() instanceof BlockItem blockItem) {
-                final TextureAtlasSprite sprite = Minecraft.getInstance().getBlockRenderer()
-                        .getBlockModelShaper()
-                        .getParticleIcon(blockItem.getBlock().defaultBlockState());
-                final float top = BOTTOM + HEIGHT * crucible.getSolidRatio();
-                final VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-                contentBox(consumer, poseStack.last().pose(), sprite, top, light, 1.0F, 1.0F, 1.0F, 1.0F);
+        if (crucible.getSolidVolume() > 0.0D
+                && (crucible.isMeltDominant() || crucible.isWooden())) {
+            if (this.renderMelt(crucible, poseStack, bufferSource, light)) {
                 return;
             }
         }
@@ -77,6 +80,28 @@ public class CrucibleRenderer implements BlockEntityRenderer<CrucibleBlockEntity
         final float top = BOTTOM + HEIGHT * crucible.getFluidRatio();
         final VertexConsumer consumer = bufferSource.getBuffer(RenderType.translucent());
         contentBox(consumer, poseStack.last().pose(), sprite, top, light, red, green, blue, alpha);
+    }
+
+    /**
+     * Draws the block that is melting as its real model, centred in the cavity.
+     *
+     * @return true when the model was drawn; false if there is nothing to draw
+     *         and the fluid path should take over
+     */
+    private boolean renderMelt(final CrucibleBlockEntity crucible, final PoseStack poseStack,
+                               final MultiBufferSource bufferSource, final int light) {
+        final ItemStack stack = crucible.getPendingStack();
+        if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem blockItem)) {
+            return false;
+        }
+        final BlockState state = blockItem.getBlock().defaultBlockState();
+        poseStack.pushPose();
+        poseStack.translate(0.5F - MELT_SIZE / 2.0F, BOTTOM, 0.5F - MELT_SIZE / 2.0F);
+        poseStack.scale(MELT_SIZE, MELT_SIZE, MELT_SIZE);
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
+                state, poseStack, bufferSource, light, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+        return true;
     }
 
     private static void contentBox(final VertexConsumer consumer, final Matrix4f matrix,
