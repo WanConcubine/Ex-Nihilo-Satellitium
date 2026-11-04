@@ -101,6 +101,12 @@ public final class ToolEvents {
                     Block.popResource(level, pos, new ItemStack(drop.item()));
                 }
             }
+            // Like the hammer: wear the stack actually in hand. BreakEvent fires
+            // before the block is removed, so this runs exactly once per break.
+            if (!player.isCreative()) {
+                tool.hurtAndBreak(1, player,
+                        broken -> broken.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+            }
         }
     }
 }
