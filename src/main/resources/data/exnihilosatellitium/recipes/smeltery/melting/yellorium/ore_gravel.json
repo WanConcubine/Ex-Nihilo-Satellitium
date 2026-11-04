@@ -1,0 +1,22 @@
+{
+  "type": "tconstruct:melting",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tconstruct"
+    },
+    {
+      "type": "forge:mod_loaded",
+      "modid": "bigreactors"
+    }
+  ],
+  "ingredient": {
+    "item": "exnihilosatellitium:yellorium_ore_gravel"
+  },
+  "result": {
+    "amount": 180,
+    "tag": "forge:yellorium"
+  },
+  "temperature": 1000,
+  "time": 122
+}

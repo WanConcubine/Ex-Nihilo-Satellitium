@@ -607,6 +607,13 @@ anglesite/benitoite 是 2.x 后期晶体（充能器、insanite），一并补�
 每版 9 条 `<m>_ore_<kind>_smelting_bigreactors.json`（1.20.1 用裸 `conditions` +
 `forge:mod_loaded`）。ER 2.0.84 + ZeroCore 2.1.45 放入 `libs/`，`-PtechMods` 加载。
 
+**匠魂（1.20.1）**
+
+- yellorium 碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 / 块 810；再加锭/块 2 条铸造回
+  `forge:ingots/yellorium` / `forge:storage_blocks/yellorium`。用 ER 自带的
+  `forge:yellorium` 流体，不新增流体；10 条都带 `tconstruct` + `bigreactors` 条件。
+- 这是「gems 不写匠魂熔炼」的例外：不是所有 gems 都能熔，只有 ER 提供流体标签的 yellorium 能。
+
 **矿石识别**：ER 的 `yellorite_ore` 同时是 `forge:ores/yellorite` 与 `forge:ores/uranium`，
 Mek/IE/Create 的铀矿处理因此能磨它。我们的 yellorium 矿块原先只在 `forge:ores/yellorium`，机器看不到；
 现在矿块（块 + 物品）同时进两个 tag，`yellorium_broken` 进 `forge:raw_materials/yellorium`

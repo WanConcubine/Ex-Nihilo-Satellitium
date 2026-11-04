@@ -1,0 +1,22 @@
+{
+  "type": "tconstruct:melting",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tconstruct"
+    },
+    {
+      "type": "forge:mod_loaded",
+      "modid": "bigreactors"
+    }
+  ],
+  "ingredient": {
+    "tag": "forge:ingots/yellorium"
+  },
+  "result": {
+    "amount": 90,
+    "tag": "forge:yellorium"
+  },
+  "temperature": 1000,
+  "time": 61
+}
