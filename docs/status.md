@@ -1,13 +1,13 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-04
+> 最后更新：2026-11-05
 > 先看这 25 行；批次叙事在 [history.md](history.md)，架构/取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
 （`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.2.0 已发布**（两条线 tag：`v1.2.0` / `v1.2.0-1.20.1`）；1.0.0–1.2.0 的商店上传待所有者。
+**1.3.0 已发布**（两条线 tag：`v1.3.0` / `v1.3.0-1.20.1`）；1.0.0–1.3.0 的商店上传待所有者。
 **当前批次（2026-11-04 深夜）**：**龙之进化（DE）联动**——`draconium` 龙尘材料（两版），
 粉碎末地石 1/8 单源 → 破碎龙矿 → 矿块 → 靠 DE 的 `c:ores/draconium` 熔成龙锭；
 不碰觉醒龙 / 混沌碎片。
@@ -317,6 +317,7 @@ CraftTweaker）已完成。
 | 1.1.1 发布 | ✅ | 两版 `mod_version=1.1.1`；tag `v1.1.1` / `v1.1.1-1.20.1`；jar 版本与 sha 见 [release-1.1.1.md](release-1.1.1.md) |
 | 1.1.2 发布 | ✅ | 两版 `mod_version=1.1.2`；tag `v1.1.2` / `v1.1.2-1.20.1`；jar 版本与 sha 见 [release-1.1.2.md](release-1.1.2.md) |
 | 1.2.0 发布 | ✅ | 两版 `mod_version=1.2.0`；tag `v1.2.0` / `v1.2.0-1.20.1`；jar 版本与 sha 见 [release-1.2.0.md](release-1.2.0.md) |
+| 1.3.0 发布 | ✅ | 两版 `mod_version=1.3.0`；tag `v1.3.0` / `v1.3.0-1.20.1`；jar 版本与 sha 见 [release-1.3.0.md](release-1.3.0.md) |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | 木/骨钩耐久（1.21.1） | ✅ | 同一路径实测 `damage=1`；该线未改代码 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
@@ -359,7 +360,7 @@ CraftTweaker）已完成。
 > 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 
-1. **1.2.0 商店收尾**：版本号/日期确认、tag `v1.2.0` / `v1.2.0-1.20.1` 已打；
+1. **1.3.0 商店收尾**：版本号/日期确认、tag `v1.3.0` / `v1.3.0-1.20.1` 已打；
    CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
 2. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器、村民人偶 / 脑白金 / 糖水链 / 蜜蜂 / 热力人偶；清单见「交接清单」。
