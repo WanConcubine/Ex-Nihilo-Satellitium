@@ -323,7 +323,7 @@
   "jei.exnihilosatellitium.barrel.result": "Right-click to take out",
   "jei.exnihilosatellitium.barrel.result_fluid": "Turns into fluid",
   "jei.exnihilosatellitium.barrel_compost": "Barrel Composting",
-  "jei.exnihilosatellitium.barrel_compost.hint": "At 1000 points the barrel turns into dirt after 50 s",
+  "jei.exnihilosatellitium.barrel_compost.hint": "At 1000 points the barrel turns into dirt after 30 s",
   "jei.exnihilosatellitium.barrel_compost.value": "Compost value: +%s / 1000",
   "jei.exnihilosatellitium.crook": "Crook",
   "jei.exnihilosatellitium.crook.bone": "Bone crook: ×1.5 chance",

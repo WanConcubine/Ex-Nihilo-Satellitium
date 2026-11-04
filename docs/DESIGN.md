@@ -266,7 +266,7 @@ JEI 里，不需要额外写分类。
 
 - `BarrelBlock` + `BarrelBlockEntity`：1000 mB `FluidTank`、`IFluidHandler` capability、NBT 持久化、客户端同步。
 - 堆肥：`#exnihilosatellitium:compostable` 物品标签负责客户端交互预测；
-  `data/<namespace>/compost/*.json` 提供数值（默认 65 条）；满 1000 后 1000 tick 进入 DIRT 状态，
+  `data/<namespace>/compost/*.json` 提供数值（默认 65 条）；满 1000 后 600 tick（30 秒）进入 DIRT 状态，
   **木桶保留**；右键取出 1 个泥土并重置，桶可继续用。
 - 比较器输出：DIRT 状态固定 15；否则 `max(流体比例, 堆肥比例)` 映射到 0–15。
 - **模型**：从 16×16 满方块改为 **14×16×14 内缩桶身**，`getShape` / `getCollisionShape`
@@ -277,10 +277,12 @@ JEI 里，不需要额外写分类。
 - **客户端 `BarrelRenderer`**：液面 + 堆肥/泥土内容 box，按 fill 高度上升；堆肥计时期间
   颜色向泥土过渡，完成时播放 `COMPOSTER_READY` + 堆肥粒子；流体走
   `IClientFluidTypeExtensions`，堆肥走 `barrel_compost.png`，DIRT 状态走原版泥土贴图。
+  **2026-11-04（1.1.1）改成原版泥土方块模型 + 按投入物加权混色**，`barrel_compost.png`
+  已删除，见 §49。
 - **物品栏**：block model 补了标准 `display` 变换（gui/ground/手持）；`models/item/barrel.json`
   直接继承开口 block model，物品栏/手持是**空心**的 3D 桶。
-- **贴图**：木桶不再有自有 PNG（直接引用 vanilla block 贴图）；只保留 `barrel_compost.png`
-  和 `porcelain.png` 两张自有 16×16。`scripts/check-textures.py` 禁止 vanilla **item**
+- **贴图**：木桶不再有自有 PNG（直接引用 vanilla block 贴图）；当时保留 `barrel_compost.png`
+  和 `porcelain.png` 两张自有 16×16（1.1.1 起 `barrel_compost.png` 不再使用）。`scripts/check-textures.py` 禁止 vanilla **item**
   贴图，允许 vanilla **block** 贴图。
 - **许可证**：ARR → **MIT**；`gradle.properties`、`LICENSE`、`THIRD-PARTY.md` 同步。
 
@@ -404,7 +406,7 @@ vanilla-sampled 贴图（堆肥面/瓷土为自有 16×16）；没有复制原�
 
 **落地**
 
-- `COMPOST_MAX = 1000`、`COMPOST_TICKS = 1000`（50 秒，对齐原版 `MAX_COMPOSTING_TIME`）。
+- `COMPOST_MAX = 1000`、`COMPOST_TICKS = 600`（30 秒；1.1.1 从原版的 50 秒缩短，见 §49）。
 - `default.json` 改为 **65 条**（12 个标签 + 53 个具体物品），`compostable.json` 同步；
   肉类按 1.20.1 的十种生/熟肉显式列出，鱼用 `#minecraft:fishes`，种子/作物/蛋/线用
   `#forge:*` 标签。
@@ -539,3 +541,26 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 - **验证**：`-PtechMods` 下 `[barrel] 18 transforms (2 fluid, 16 item)`、`[sieve] 143 drops`；
   data merge 验证换液与养蜂；`/summon` 新物品正常；sand/gravel dump 含 `sky_dust 0.0625`。
   **未验**：真实右键链条、脑白金右键、JEI、流体亮度。
+
+## 49. 1.1.1 视觉修正：堆肥混色 + 木坩埚树叶模型（2026-11-04）
+
+**问题**：木桶堆肥只有一个固定的 `barrel_compost.png` 贴图，投腐肉/树叶颜色不变，远看是
+纯色方块；木坩埚只熔树叶/树苗→水，水量超过固体后按经典规则切成蓝色水盒，玩家要求
+“堆肥按投入物比例混色”“木坩埚堆水显示树叶模型”。
+
+**实现**
+
+- `BarrelBlockEntity` 新增 `CompostIngredient(item, points)` 列表，NBT `CompostItems`
+  （`getUpdateTag` 同步）；部分填满时只记剩余空间，权重和 = 1000。
+- `client/ItemTint` 采样物品图标平均色（方块物品走 block particle icon，普通物品走
+  baked item model），乘 `ItemColors` 的 tint（**树叶/草贴图是灰度的**，不乘植被色会得到
+  灰白）；按 sprite 实例缓存，资源重载失效。
+- `BarrelRenderer` 用 `renderSingleBlock` 画原版泥土方块模型（只缩放 Y），
+  `TintVertexConsumer` 按点数加权混色；腐熟计时中 tint 淡回纯白，DIRT 显示泥土本色。
+- `CrucibleRenderer` 用 `renderSingleBlock` 画被熔方块的真实模型（0.70 缩放居中）；
+  木坩埚在 `solidVolume > 0` 时始终显示熔料，不再中途切成水盒。
+- `COMPOST_TICKS` 1000 → 600（50 秒 → 30 秒），两版同步；JEI 提示同步。
+
+**验证**：1.20.1 dev client 临时截图（脚本已删）确认腐肉红褐 / 树叶绿 / 50-50 黄褐 /
+成土原版泥土色，木坩埚（solid 60 / water 50）显示树叶方块；`build` 与资源守卫通过。
+主线的同一场景截图见主仓库 `docs/images/1.1.1-compost-crucible.png`。

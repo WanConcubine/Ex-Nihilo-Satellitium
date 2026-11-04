@@ -12,7 +12,7 @@
 
 | # | 条目 | 本项目的实现 | 状态 | 备注 |
 |---|---|---|---|---|
-| 1 | 木桶 + 堆肥 → 泥土 | `BarrelBlock` / `BarrelBlockEntity` + 7 材质变体 | ✅ | 1000 分制、50 秒成土 |
+| 1 | 木桶 + 堆肥 → 泥土 | `BarrelBlock` / `BarrelBlockEntity` + 7 材质变体 | ✅ | 1000 分制、30 秒成土 |
 | 2 | 木桶储流体（水 / 熔岩，1000 mB） | `FluidTank` + `IFluidHandler` | ✅ | 石桶同 BE；木桶 ≤433 K，石桶不限（M1.5） |
 | 3 | 比较器读堆肥进度 | `getComparatorOutput` | ✅ | 逻辑已写，未实测 ⚠️ |
 | 4 | 桶内转化（方块 / 生物 / 流体） | `data/<ns>/barrel/*.json`（18 条：5 条基础 + 巫水/人偶 7 条 + 牛奶 1 条 + 糖水/蜂蜜 3 条 + 热力 2 条；支持 `result_fluid` / `delay_ticks` / `drain`）；`BarrelRecipes` 同时喂 BE 与 JEI | 🚧 | RCON 验过固化、巫水、人偶、牛奶、热力两条、延迟换液/养蜂；真实右键链条与 JEI 待实测 |
