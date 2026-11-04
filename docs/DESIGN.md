@@ -607,6 +607,11 @@ anglesite/benitoite 是 2.x 后期晶体（充能器、insanite），一并补�
 每版 9 条 `<m>_ore_<kind>_smelting_bigreactors.json`（1.20.1 用裸 `conditions` +
 `forge:mod_loaded`）。ER 2.0.84 + ZeroCore 2.1.45 放入 `libs/`，`-PtechMods` 加载。
 
+**矿石识别**：ER 的 `yellorite_ore` 同时是 `forge:ores/yellorite` 与 `forge:ores/uranium`，
+Mek/IE/Create 的铀矿处理因此能磨它。我们的 yellorium 矿块原先只在 `forge:ores/yellorium`，机器看不到；
+现在矿块（块 + 物品）同时进两个 tag，`yellorium_broken` 进 `forge:raw_materials/yellorium`
+（及根 tag），输出对方的铀粉，和 ER 原矿一致。这是「碎料不进 raw_materials」的唯一例外。
+
 **验证**：`[materials] 25`、`[sieve] 154`、`[hammer] 88`；RCON 熔炉三种矿块分别出
 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`，`RecipesUsed` 指向
 `*_smelting_bigreactors`；手筛/JEI 未目视。

@@ -97,7 +97,7 @@
 | Thermal 六种矿物（矿物链） | Thermal 1.20.1 | 新增 apatite/cinnabar/niter/sulfur/ruby/sapphire：筛三档 → 矿块 → 熔成 `thermal:*`；无自有兜底物品 | ✅ |
 | Immersive Engineering 锭联动 | IE 1.20.1 | 接在 **1.20.1 分支**：silver / lead / nickel / aluminum / uranium 候选；IE 粉碎机走 `forge:ores/<m>` 标签 | ✅ |
 | BambooMod 资源（树苗 / 竹笋 / 作物 / 宝石） | BambooMod 0.6.2（`bamboomod`，仅 1.20.1） | 泥土/草方块各 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%）、砂砾 3 宝石各 1/64；全部 `mod` 门控；堆肥由现有 leaves/saplings 标签覆盖 | ✅（真装；手筛/生长待实测） |
-| 黄铀 / 铅矾 / 蓝锥矿（过筛获得） | 极限反应堆 Extreme Reactors 2.x（`bigreactors`） | 1.20.1 接入 ER 2.0.84 + ZeroCore 2.1.45：`yellorium` 1/8、`anglesite` / `benitoite` 各 1/64；三条走 `gems` 门控，三档矿链 → 熔成 ER 锭/晶体；RCON 熔炉三种产物验证 | ✅（真装；手筛待实测） |
+| 黄铀 / 铅矾 / 蓝锥矿（过筛获得） | 极限反应堆 Extreme Reactors 2.x（`bigreactors`） | 1.20.1 接入 ER 2.0.84 + ZeroCore 2.1.45：`yellorium` 1/8、`anglesite` / `benitoite` 各 1/64；三条走 `gems` 门控，三档矿链 → 熔成 ER 锭/晶体；RCON 熔炉三种产物验证；yellorite/uranium 双 tag，Mek/IE/Create 铀矿处理可磨 | ✅（真装；手筛待实测） |
 | 橡胶树苗（过筛 + 可堆肥） | MFR | 1.20.1 无 MFR | ⏸ 等模组 |
 | 自然（Natura）树苗 / 灌木 | 自然 | 无 1.20.1 | ⏸ 等模组 |
 | 匠魂强化：锤 / 钩 traits | 匠魂 | 需按匠魂 3 重做 trait | ❓ |

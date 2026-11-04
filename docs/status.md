@@ -29,6 +29,11 @@
   没装 ER 时物品/方块/筛表补丁不出现，基表 115 不变；装 ER 时筛表 +9、锤表 +9。
 - 三档矿链熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；
   石墨仍烧煤，cyanite/blutonium 等继续由反应堆产出。
+- **矿石识别（补齐）**：ER 把 `yellorite_ore` 同时登记在 `forge:ores/yellorite` 和
+  `forge:ores/uranium`；我们的 yellorium 矿块现在同样进这两个 tag（块 + 物品），
+  `yellorium_broken` 进 `forge:raw_materials/yellorium`（及根 tag）。Mekanism 的 `enriching`、
+  IE 的 crusher 等按 `forge:ores/uranium` 取矿的机器因此能磨我们的矿，输出对方的铀粉
+  （和 ER 原矿一致，不是 yellorium）。
 - 验证：全装 `[materials] 25`、`[sieve] 154`、`[hammer] 88`；RCON 熔炉三种产物均出；
   未进游戏手筛、JEI 未目视。
 

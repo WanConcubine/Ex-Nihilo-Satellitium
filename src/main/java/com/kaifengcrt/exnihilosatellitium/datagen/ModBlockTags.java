@@ -72,6 +72,16 @@ public final class ModBlockTags extends BlockTagsProvider {
             }
             forgeOres.addTag(oreTag);
         }
+
+        // Extreme Reactors tags yellorite ore as an uranium ore too; mirror it so
+        // Mekanism / IE ore processing accepts our yellorium ore blocks.
+        final var yelloriumBlocks = ModOreBlocks.byMaterial().get("yellorium");
+        if (yelloriumBlocks != null) {
+            final var uraniumOres = this.tag(forge("ores/uranium"));
+            for (final String kind : ModOreBlocks.KINDS) {
+                uraniumOres.addOptional(ForgeRegistries.BLOCKS.getKey(yelloriumBlocks.get(kind).get()));
+            }
+        }
     }
 
     static TagKey<Block> forge(final String path) {
