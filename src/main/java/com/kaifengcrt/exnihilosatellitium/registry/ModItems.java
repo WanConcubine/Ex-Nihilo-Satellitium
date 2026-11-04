@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.registry;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.AncientSporesItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.BrainPlatinumItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.GrassSeedsItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
@@ -222,6 +223,13 @@ public final class ModItems {
             ITEMS.register("shulker_doll", () -> new Item(new Item.Properties().stacksTo(16)));
     public static final RegistryObject<Item> GUARDIAN_DOLL =
             ITEMS.register("guardian_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final RegistryObject<Item> VILLAGER_DOLL =
+            ITEMS.register("villager_doll", () -> new Item(new Item.Properties().stacksTo(16)));
+
+    /** "Brain Platinum": turns a nitwit villager into an ordinary unemployed villager. */
+    public static final RegistryObject<Item> BRAIN_PLATINUM =
+            ITEMS.register("brain_platinum", () -> new BrainPlatinumItem(
+                    new Item.Properties().stacksTo(16)));
 
     /**
      * Thermal dolls: the crafting catalyst (niter dust) and the summoned mobs

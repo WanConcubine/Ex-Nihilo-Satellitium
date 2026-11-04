@@ -1,0 +1,8 @@
+{
+  "base": "exnihilosatellitium:witch_water",
+  "added": {
+    "item": "exnihilosatellitium:villager_doll"
+  },
+  "entity": "minecraft:zombie_villager",
+  "peaceful_drop": "minecraft:rotten_flesh"
+}

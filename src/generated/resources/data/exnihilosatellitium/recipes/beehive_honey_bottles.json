@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "h": {
+      "item": "minecraft:honey_bottle"
+    },
+    "p": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "ppp",
+    "hhh",
+    "ppp"
+  ],
+  "result": {
+    "item": "minecraft:beehive"
+  },
+  "show_notification": true
+}

@@ -517,3 +517,21 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
   条件物品的模型手写，`ModItemModels.HAND_FLAT_MODELS` 按名字跳过（临时强制注册后 datagen
   不会写出同名模型）；字段 `@Nullable`，创造栏 null 检查。
   **未验**：工作台摆放、右键桶、JEI、贴图亮度。
+
+## 48. 村民 / 脑白金 / 蜂蜜链 / 蜜蜂 / 蜂箱 / AE2 陨石粉（2026-11-04）
+
+- **物品**：`villager_doll`（8 绿宝石围人偶；巫水桶 → 僵尸村民，和平掉腐肉）、
+  `brain_platinum`（蛋 4 + 糖 4 + 绿宝石；右键傻子村民 → 普通无职业村民）。
+- **桶表**：`BarrelRecipes` 增加 `resultFluid` / `delayTicks` / `drain`；`result_fluid` 与
+  `result`/`entity` 互斥，`drain` 只配 `added.item` 且不要求满桶。
+- **BE**：`PendingFluidFrom/To/Ticks` 保存 30 秒换液；到点且仍是原流体才替换，每 20 tick 同步；
+  玻璃瓶抽取 250 mB → 蜂蜜瓶；浓缩蜂蜜桶每 100 tick 1/6 概率在 6 格内生成 1 只蜜蜂（上限 5）。
+- **流体**：`sugar_water` / `concentrated_honey`（+ flowing）只注册 still/flowing 与
+  `TintedWaterFluidType`（`initializeClient` 挂 `TintedWaterClientExtensions`，复用原版水贴图 + tint）；
+  **不注册方块和桶**。
+- **JEI / Jade / dump**：JEI 流体结果槽 + 延迟/抽取提示；Jade「转化中」；dump 输出
+  `fluid:` / `delay:` / `drain:`。
+- **AE2**：沙、砂砾各 1/16 `ae2:sky_dust`；**蜂箱**：3 木板 + 3 蜂蜜瓶 + 3 木板 → 原版蜂箱。
+- **验证**：`-PtechMods` 下 `[barrel] 18 transforms (2 fluid, 16 item)`、`[sieve] 143 drops`；
+  data merge 验证换液与养蜂；`/summon` 新物品正常；sand/gravel dump 含 `sky_dust 0.0625`。
+  **未验**：真实右键链条、脑白金右键、JEI、流体亮度。

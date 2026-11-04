@@ -34,6 +34,13 @@ public enum BarrelComponentProvider implements IBlockComponentProvider {
                     barrel.getTank().getFluid().getDisplayName(), fluid, BarrelBlockEntity.CAPACITY));
         }
 
+        if (barrel.isCooking()) {
+            tooltip.add(Component.translatable(barrel.isConvertingFluid()
+                    ? "jade.exnihilosatellitium.barrel.converting"
+                    : "jade.exnihilosatellitium.barrel.cooking", barrel.getCookSeconds()));
+            return;
+        }
+
         if (barrel.isDirtReady()) {
             tooltip.add(Component.translatable("jade.exnihilosatellitium.barrel.ready"));
             return;

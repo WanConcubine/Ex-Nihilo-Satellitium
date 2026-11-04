@@ -7,31 +7,28 @@
 
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.0.0 已发**（tag `v1.0.0-1.20.1`）；0.2.0 准备线并入 1.0.0，商店上传待所有者。
-**最新一批（2026-11-04 上午）**：热力（Thermal）狂风人偶 / 暴雪人偶。两个**条件物品**只在
-Thermal Foundation 在场时注册；工作台配方用硝石粉 / 雪球，桶规则熔岩 + 狂风 → `thermal:blitz`、
-水 + 暴雪 → `thermal:blizz`。没装 Thermal 时物品 / 配方 / 桶规则一起消失。
+**最新一批（2026-11-04 下午）**：村民人偶 / 脑白金 / 糖水 + 浓缩蜂蜜汁 / 蜜蜂 / 蜂箱配方 /
+AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规则；与主线同步。
 **联动**：22 种材料（14 金属 + 8 矿物）；Mek / Thermal / Create / IE / Tinkers / TiT / AE2 全部可选。
 **当前表尺**：筛子 7 输入 / 113 掉落（无科技模组；沙/砂砾/尘土比主线少 3 条钴，历史差异）；
-+AE2 115；全装 +TiT 139、再加 AE2 141；锤表 79（全装）/ 55（无模组）；桶 14（全装）/ 12（缺 Thermal）。
++AE2 117；全装 +TiT 139、再加 AE2 143；锤表 79（全装）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
 
-## 当前批次（2026-11-04，热力人偶：狂风 / 暴雪）
+## 当前批次（2026-11-04 下午，村民 / 脑白金 / 蜂蜜 / 蜜蜂）
 
-- **对象**：Thermal Foundation 11.0.6 + Thermal Core（`libs/`，`-PtechMods` 加载）。
-  新增两个条件物品 `blitz_doll`（狂风人偶）/ `blizz_doll`（暴雪人偶），中文名按所有者指定，
-  不用参考图的「劲风 / 冻结」。
-- **配方**：`xyx / zwz / xvx`；四角 4 `thermal:niter_dust`（硝石粉）或 `minecraft:snowball`，
-  上中红石、两侧荧石粉、中心 `exnihilosatellitium:doll`、下中下界疣。两张工作台配方，手写 JSON。
-- **桶规则**：满熔岩 + `blitz_doll` → `thermal:blitz`（狂风人），和平掉 `thermal:blitz_rod`；
-  满水 + `blizz_doll` → `thermal:blizz`（暴雪人），和平掉 `thermal:blizz_rod`。右键立即生效。
-- **门控**：`registerThermalDoll` 在 `ModList` 没有 `thermal_foundation` 时返回 null；
-  配方用根级 `conditions`（`forge:mod_loaded`），桶规则用根级 `"mod"`，三处同一个 mod id。
-  没装 Thermal 时桶回到 12 条，物品不存在。
-- **验证**：`-PtechMods` 下 `[barrel] 14 transforms (2 fluid, 12 item)`；dump 两条新规则；
-  `/summon item` 出 Gale / Blizzard Doll；配方经 `/reload` 解析探测（坏 JSON 会报
-  `Couldn't parse`）。**未验**：工作台摆放、右键桶、JEI、贴图亮度。
-- **datagen 防撞**：`ModItemModels.HAND_FLAT_MODELS` 按名字跳过这两个手写模型；字段标
-  `@Nullable`，创造栏 null 检查。临时把门控改成恒真跑 `runData`，确认不会写出同名生成模型。
+- **村民人偶**（`villager_doll`）：8 绿宝石围一圈普通人偶；巫水满桶 + 右键 → 僵尸村民，
+  和平掉腐肉。**脑白金**（`brain_platinum`）：蛋 4 + 糖 4 + 绿宝石，右键傻子村民 → 普通村民。
+- **糖水 → 浓缩蜂蜜汁**：两个桶专用流体（无方块、无桶）；满水 + 糖 → 糖水，
+  满糖水 + 蒲公英黄 30 秒 → 浓缩蜂蜜汁；玻璃瓶扣 250 mB → 蜂蜜瓶；浓缩蜂蜜桶每 100 tick
+  1/6 概率在 6 格内养 1 只蜜蜂（上限 5）。
+- **蜂箱**：3 木板 + 3 蜂蜜瓶 + 3 木板 → 原版蜂箱。
+- **AE2 陨石粉**：沙、砂砾各 1/16 `ae2:sky_dust`；AE2 掉落 141 → 143。
+- **实现**：`BarrelRecipes` 增加 `resultFluid` / `delayTicks` / `drain`；BE 增加延迟换液状态机
+  （NBT `PendingFluidFrom/To/Ticks`）、玻璃瓶抽取、蜂蜜养蜂；JEI 流体结果槽 + 延迟/抽取提示；
+  Jade 显示“转化中”。流体用 `TintedWaterFluidType` + 原版水贴图 tint。
+- **验证**：`-PtechMods` 下 `[barrel] 18 transforms (2 fluid, 16 item)`、`[sieve] 143 drops`；
+  data merge 验证 30 秒换液与养蜂；`/summon` 两个新物品正常；sand/gravel dump 含
+  `sky_dust 0.0625`。**未验**：真实右键链条、脑白金右键、JEI、流体亮度。
 
 ## 历史批次（详细见 [history.md](history.md)）
 
@@ -52,15 +49,16 @@ Thermal Foundation 在场时注册；工作台配方用硝石粉 / 雪球，桶�
 - **已知不一致**：沙/砂砾/尘土各少 1 条钴（1/64），基表 113 vs 主线 116；分支没有
   `generate_sieve_assets.py`，要么补脚本要么手工对齐。
 - **dev 环境**：`libs/` 有 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME；删掉即回基表。
-  热力人偶只在 Thermal 在场（`-PtechMods`）时注册；不带时桶 12 条、物品不存在。
-- **进游戏验收（剩余）**：一次性验收清单里的画面/右键手感；热力人偶合成/右键/JEI；
-  TiT/AE2 实际筛出与 JEI 页；匠魂炉实际熔化；自动输出抽屉。
+  热力人偶只在 Thermal 在场（`-PtechMods`）时注册；不带时桶 16 条、物品不存在。
+- **进游戏验收（剩余）**：一次性验收清单里的画面/右键手感；村民人偶/脑白金/糖水链/养蜂/
+  热力人偶；TiT/AE2 实际筛出与 JEI 页；匠魂炉实际熔化；自动输出抽屉。
 - 不要提交 `build/`、`run/`、`reference/`、`libs/`、`.gradle/`。
 
 ## 功能现状
 
 - 核心循环与主线一致：12 桶、7 输入筛表、6 锤 / 2 钩、39 熔点 + 9 热源、巫水/瓷桶/11 木坩埚/
-  蚕/7 人偶（含 2 只热力条件人偶）、四台机器 + 自动输出。
+  蚕/8 人偶（含 2 只热力条件人偶、村民人偶）、四台机器 + 自动输出。
+- 村民/蜂蜜：村民人偶、脑白金、桶专用糖水/浓缩蜂蜜汁（无方块无桶）、养蜂、蜂箱配方。
 - 数据布局：`recipes/`、`loot_tables/`、`tags/blocks|items/`，标签命名空间 `forge:`；
   JSON 字段是 1.20.1 形态（裸 `conditions`）。
 - 22 种材料（14 金属 + 8 矿物）；`gems` 只在对应模组在场时注册；锭候选顺序与主线相同。
@@ -80,10 +78,12 @@ Thermal Foundation 在场时注册；工作台配方用硝石粉 / 雪球，桶�
 - [ ] **巫水线**：满水桶 + 菌丝发酵；巫水桶装/倒；巫水+沙→灵魂沙、巫水+树苗→深色橡树苗；
       沙筛古代孢子 → 泥土变菌丝、牛变哞菇。
 - [ ] **瓷桶**：未烧制→烧制；舀水/熔岩/巫水；倒进木桶/坩埚；图标流体层染色。
-- [ ] **蚕/人偶**：蚕右键树叶→侵染、变白、扩散、掉线、Jade 百分比；7 种人偶配方与
-      桶规则（和平掉战利品 / 非和平生成生物）；热力两只人偶的右键 / JEI / 模型。
+- [ ] **蚕/人偶**：蚕右键树叶→侵染、变白、扩散、掉线、Jade 百分比；8 种人偶配方与
+      桶规则（和平掉战利品 / 非和平生成生物）；热力两只 / 村民人偶的右键 / JEI / 模型。
 - [ ] **热力人偶**：工作台配方（硝石粉 / 雪球两条）；满熔岩 + 狂风人偶出狂风人、
       满水 + 暴雪人偶出暴雪人；和平模式掉 `thermal:*_rod`。
+- [ ] **村民 / 蜂蜜**：村民人偶 + 巫水 → 僵尸村民；脑白金右键傻子村民；
+      水+糖 / 糖水+蒲公英黄 30 秒 / 玻璃瓶抽蜂蜜；浓缩蜂蜜桶养蜂；蜂箱配方。
 - [ ] **四台机器**：合成；右键开 GUI；能量/火焰/进度条；空槽虚影与状态行；
       插件槽只收对应插件（锤子时运槽上限 1）；燃料槽只收燃料；JEI 箭头点击。
 - [ ] **自动输出**：左侧标签页 → 面板；6 个面按钮（上/下/前/后/左/右）与 tooltip 世界方向；
@@ -103,28 +103,29 @@ Thermal Foundation 在场时注册；工作台配方用硝石粉 / 雪球，桶�
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
 | `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
-| `check-textures.py` | ✅ | 268 模型 / 102 blockstate / 151 纹理；七个子模型只引用 vanilla block 贴图 |
+| `check-textures.py` | ✅ | 270 模型 / 102 blockstate / 153 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
-| 数据表加载 | ✅ | 全装：`[materials] 22`、`[sieve] 7 inputs / 141 drops`、`[hammer] 79`、`[barrel] 14`（缺 Thermal 12）、`[compost] 67`、`[crucible] 39/9` |
+| 数据表加载 | ✅ | 全装：`[materials] 22`、`[sieve] 7 inputs / 143 drops`、`[hammer] 79`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |
 | P1 守卫 | ⚠️ | 分支只跑 build + 纹理；`common/table` 的 core 守卫在主线跑 |
 | TiT 阿迪特 / 叶绿素 | ✅ | 22 entries；`ardite → tinkers_thinking:ardite_ingot`、`chlorophyll → chlorophyte_compound`；RCON 熔炉通过；缺 TiT 静默跳过 |
-| AE2 赛特斯 | ✅ | 139 → 141 drops；RCON sand 含 crystal 0.16667 / dust 0.08333；缺 AE2 时 139、无 unknown |
+| AE2 赛特斯 / 陨石粉 | ✅ | 139 → 143 drops；RCON sand 含 crystal 0.16667 / dust 0.08333 / sky_dust 0.0625，gravel 含 sky_dust；缺 AE2 时 139、无 unknown |
 | Mek / Thermal / Create / IE | ✅ | 锭候选与矿砾熔炼 6/6、IE 五锭、Create 锌 + 12 条 crushing；多方块未跑 |
 | Tinkers 钴 / 种子 / 熔炼 | ✅ | 钴 → `tconstruct:cobalt_ingot`；两个黏液草种子条件注册；84 条匠魂熔炼加载无报错 |
 | M10 机器 | ✅ | 电动/内能 × 筛/锤、插件、漏斗、自动输出 RCON 全过；JEI 箭头点击已修 |
 | 桶 / 堆肥 / 固化 | ✅ | RCON：堆肥成土、满桶固化、牛奶史莱姆、比较器/雨水 |
 | 坩埚 / 巫水 / 瓷桶 | ✅ | 39+9 表、篝火/熔炉速率、巫水发酵与转化、瓷桶 capability |
-| 蚕 / 人偶 | ✅ | 侵染进度/扩散、5 种人偶生成与和平掉落 RCON 验过 |
-| 热力人偶 | ✅ / ⚠️ | `[barrel] 14`、dump 两条规则（`thermal:blitz` / `thermal:blizz`，和平 `thermal:*_rod`）、`/summon` 两物品通过；配方经 `/reload` 解析探测；合成 / 右键 / JEI 未实测 |
-| 客户端画面 | ⚠️ | 最近一次客户端冒烟停在 2026-11-02；热力人偶、TiT/AE2 物品、JEI 页、机器动画未目视 |
+| 蚕 / 人偶 | ✅ | 侵染进度/扩散、8 种人偶（含热力 2 只、村民）生成与和平掉落 RCON 验过 |
+| 热力人偶 | ✅ / ⚠️ | `[barrel] 18`、dump 两条规则（`thermal:blitz` / `thermal:blizz`，和平 `thermal:*_rod`）、`/summon` 两物品通过；配方经 `/reload` 解析探测；合成 / 右键 / JEI 未实测 |
+| 村民 / 蜂蜜 | ✅ / ⚠️ | 两个新物品 `/summon` 正常、配方由 datagen 生成；data merge 验证 30 秒换液、蜜蜂生成（`PersistenceRequired`）；真实右键 / 玻璃瓶抽取 / JEI 未测 |
+| 客户端画面 | ⚠️ | 最近一次客户端冒烟停在 2026-11-02；新物品/流体、热力人偶、TiT/AE2 物品、JEI 页未目视 |
 | 合成 / 右键手感 | ⚠️ | 全部配方 JSON 已加载，但没有玩家逐项实测 |
 
 ## 下一步（按价值排序）
 
 1. **1.0.0 商店收尾**：tag `v1.0.0-1.20.1` 已打；CurseForge / Modrinth 上传待所有者。
-2. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶（含热力两只）+
-   四台机器、自动输出抽屉、BER 动画、JEI 页面、TiT/AE2 实际筛出。
+2. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶（含热力两只、村民）+
+   糖水链/养蜂、四台机器、自动输出抽屉、BER 动画、JEI 页面、TiT/AE2 实际筛出。
 3. **修分支筛表钴差异**：沙/砂砾/尘土各补 1 条 1/64（或补 `generate_sieve_assets.py`），
    与主线基表 116 对齐。
 4. **P4 JEI 同步 + fixture CI**；P3 状态机拆分；advancement / CI。

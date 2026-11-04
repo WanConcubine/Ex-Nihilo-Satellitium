@@ -1,0 +1,7 @@
+{
+  "base": "minecraft:water",
+  "added": {
+    "item": "minecraft:sugar"
+  },
+  "result_fluid": "exnihilosatellitium:sugar_water"
+}
