@@ -260,6 +260,14 @@ dependencies {
         // AE2 15.x is the 1.20.1 Forge line; the prod jar must be deobf'd for the FG dev runtime.
         runtimeOnly fg.deobf("libs:appliedenergistics2-forge:15.4.12")
     }
+    if (project.hasProperty("techMods") && file("libs/ZeroCore2-1.20.1-2.1.45.jar").exists()) {
+        // Extreme Reactors requires ZeroCore 2.1.x on the 1.20.1 line.
+        runtimeOnly fg.deobf("libs:ZeroCore2-1.20.1:2.1.45")
+    }
+    if (project.hasProperty("techMods") && file("libs/ExtremeReactors2-1.20.1-2.0.84.jar").exists()) {
+        // Extreme Reactors 2.0.x: yellorium / anglesite / benitoite source for the skyblock.
+        runtimeOnly fg.deobf("libs:ExtremeReactors2-1.20.1:2.0.84")
+    }
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

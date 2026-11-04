@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:benitoite_ore_gravel",
+  "result": "exnihilosatellitium:benitoite_crushed",
+  "min": 4,
+  "max": 6,
+  "mod": "bigreactors"
+}

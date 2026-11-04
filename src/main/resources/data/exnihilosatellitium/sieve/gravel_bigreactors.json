@@ -1,0 +1,19 @@
+{
+  "mod": "bigreactors",
+  "patch": true,
+  "input": "minecraft:gravel",
+  "outputs": [
+    {
+      "item": "exnihilosatellitium:yellorium_broken",
+      "chance": 0.125
+    },
+    {
+      "item": "exnihilosatellitium:anglesite_broken",
+      "chance": 0.01562
+    },
+    {
+      "item": "exnihilosatellitium:benitoite_broken",
+      "chance": 0.01562
+    }
+  ]
+}
