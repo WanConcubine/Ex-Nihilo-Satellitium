@@ -23,6 +23,9 @@
 - `COMPOST_TICKS` 1000 → 600（30 秒），JEI 提示同步；删除 `barrel_compost.png`。
 - 验证：本线 dev client 截图（腐肉红褐 / 树叶绿 / 50-50 黄褐 / 成土泥土色；木坩埚树叶）；
   `build` + 纹理守卫通过。详情见主仓库 DESIGN §49。
+- **未发布修复（1.20.1 独有）**：木钩 / 骨钩在 1.20.1 不掉耐久。`ToolEvents#onBreak` 的
+  crook 分支只加了掉落、漏了 `hurtAndBreak`；已按锤子同款逻辑补上（非创造模式，每次有效
+  树叶破坏 −1）。服务端 fake player 实测两把钩子各掉 1 点耐久。等所有者确认是否发 1.1.2。
 
 ## 上一批（2026-11-04 下午，村民 / 脑白金 / 蜂蜜 / 蜜蜂）
 
@@ -112,6 +115,7 @@
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
+| 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
 | `check-textures.py` | ✅ | 272 模型 / 104 blockstate / 155 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
