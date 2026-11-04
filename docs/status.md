@@ -212,7 +212,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
 | 热力人偶：注册 / 桶规则 | ✅ | 1.20.1 `-PtechMods`：`[barrel] 18`、dump = 熔岩+`blitz_doll`→`thermal:blitz`（和平 `thermal:blitz_rod`）、水+`blizz_doll`→`thermal:blizz`（和平 `thermal:blizz_rod`）；物品 `/summon` 出 Gale / Blizzard Doll；主线无 Thermal 时桶 16、物品不存在 |
 | 热力人偶：配方 / JEI / 手感 | ⚠️ | 两张工作台配方经 `/reload` 解析探测（坏 JSON 会报 `Couldn't parse`，恢复后无错）；未实际摆放合成、未进游戏右键、未看 JEI |
-| 村民人偶 / 脑白金 | ✅ / ⚠️ | 两个物品 `/summon` 正常、配方由 `runData` 生成；巫水+村民人偶→僵尸村民 在 dump 中；右键僵尸村民 / 傻子村民未实测 |
+| 村民人偶 / 脑白金 | ✅ / ⚠️ | 两个物品 `/summon` 正常、配方由 `runData` 生成；巫水+村民人偶→僵尸村民 在 dump 中；脑白金已改为 `EntityInteract` 抢先于交易界面（免 Shift），右键僵尸村民 / 傻子村民待实测 |
 | 糖水 / 浓缩蜂蜜 / 蜜蜂 | ✅ / ⚠️ | 1.20.1 与 1.21.1：`[barrel] 18 / 16`；data merge 验证 30 秒延迟换液、浓缩蜂蜜生成蜜蜂（`PersistenceRequired`）；真实右键链条 / 玻璃瓶抽取 / JEI 未测 |
 | 巫水 / 古代孢子 | ✅ | 满水+菌丝约 25 秒变巫水；蘑菇煲起酵；流体方块可放置；沙筛 1/128 |
 | 坩埚：熔点/热源/容量 | ✅ | RCON：19+9 条加载；篝火 0.25 / 熔炉 0.15 / 熄灭 0；容量 8000→3000 热改生效 |
@@ -293,6 +293,10 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
   `use()` 中先于普通物品规则判断；`drain` 配 `added.fluid` / `entity` / `result_fluid` 会被跳过。
 - **1.21.1 与 1.20.1 的 `FluidTank` NBT 不同**（嵌套 `{Fluid:{id,amount}}` vs 顶层
   `FluidName`/`Amount`）：用 RCON `data merge` 测糖水/蜂蜜时按版本写对。
+- **村民交易界面会抢右键**：`Item#interactLivingEntity` 在村民身上只有潜行时才走到
+  （Forge/NeoForge 只在 `Villager#mobInteract` 的 `!isSecondaryUseActive()` 分支里继续）；
+  要免 Shift 必须在 `PlayerInteractEvent.EntityInteract` 里取消事件（该事件在 `Entity#interact`
+  之前）。脑白金走这个入口，`BrainPlatinumItem.tryConvert` 仍保留给潜行/其它路径。
 - **Jade provider 缺配置翻译会炸资源包**：`config.jade.plugin_exnihilosatellitium.<uid>` 必须有，
   否则 `AssertionError` 会导致 "removing all selected resourcepacks"。
 - **`BlockDropsEvent#getTool()` 是复制栈**：扣耐久要扣 `player.getMainHandItem()`，扣事件里的工具无效。
