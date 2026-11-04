@@ -39,7 +39,8 @@
 ```
 assets/exnihilosatellitium/textures/
 ├── block/
-│   └── barrel_compost.png   # 堆肥表面（自有）
+│   ├── machine_*            # M10 机器 / 插件（脚本生成，见下）
+│   └── barrel_compost.png   # （1.1.1 起不再使用，见 DESIGN §49）
 └── item/
     └── porcelain.png        # 瓷土（自有）
 ```

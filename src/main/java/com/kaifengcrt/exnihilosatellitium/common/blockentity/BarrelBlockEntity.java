@@ -41,6 +41,9 @@ import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Barrel state: a 1000 mB fluid tank, a compost progress bar, and a solid
  * block (cobblestone / obsidian / netherrack / end stone) produced by fluid
@@ -61,11 +64,15 @@ import org.jetbrains.annotations.Nullable;
  */
 public class BarrelBlockEntity extends BlockEntity {
 
+    /** One compost ingredient: the item and the points it contributed. */
+    public record CompostIngredient(Item item, int points) {
+    }
+
     public static final int CAPACITY = 1000;
     /** Compost capacity (Ex Nihilo Omnia's 1000 mB table). */
     public static final int COMPOST_MAX = 1000;
-    /** 50 seconds, matching the original Ex Nihilo {@code MAX_COMPOSTING_TIME}. */
-    public static final int COMPOST_TICKS = 1000;
+    /** 30 seconds to turn a full compost pile into dirt (1.1.1 tuning). */
+    public static final int COMPOST_TICKS = 600;
     /** Wood barrels reject fluids hotter than this (water 300 K, lava 1300 K). */
     public static final int WOOD_MAX_TEMPERATURE = 433;
     /** Rain adds water in batches, so the block update is not sent every tick. */
@@ -114,6 +121,12 @@ public class BarrelBlockEntity extends BlockEntity {
     private int compostProgress;
     private int compostTicks;
     private boolean dirtReady;
+    /**
+     * What was put in, with the points each item contributed. The renderer
+     * averages the item colours by these weights so a pile of rotten flesh
+     * looks reddish-brown and leaves push the tint towards green.
+     */
+    private final List<CompostIngredient> compostIngredients = new ArrayList<>();
     /** A finished barrel block waiting to be taken out; empty when none. */
     private ItemStack solid = ItemStack.EMPTY;
     /** Fractional rain accumulation, reset when it cannot be added. */
@@ -152,6 +165,11 @@ public class BarrelBlockEntity extends BlockEntity {
 
     public int getCompostTicks() {
         return this.compostTicks;
+    }
+
+    /** Snapshot of the compost pile, used by the client renderer for the tint. */
+    public List<CompostIngredient> getCompostIngredients() {
+        return List.copyOf(this.compostIngredients);
     }
 
     public boolean isDirtReady() {
@@ -333,12 +351,20 @@ public class BarrelBlockEntity extends BlockEntity {
             return InteractionResult.PASS;
         }
 
+        final Item item = stack.getItem();
         final int value = Math.max(1, CompostRegistry.valueOf(stack));
+        // A partially filled barrel only credits the room that is left, so the
+        // recorded weights always add up to COMPOST_MAX.
+        final int added = Math.min(value, COMPOST_MAX - this.compostProgress);
+        if (added <= 0) {
+            return InteractionResult.PASS;
+        }
         if (!player.isCreative()) {
             stack.shrink(1);
         }
 
-        this.compostProgress = Math.min(COMPOST_MAX, this.compostProgress + value);
+        this.compostProgress += added;
+        this.addCompostIngredient(item, added);
         if (this.compostProgress >= COMPOST_MAX) {
             this.compostTicks = COMPOST_TICKS;
         }
@@ -372,13 +398,30 @@ public class BarrelBlockEntity extends BlockEntity {
         }
     }
 
+    /** Merges a new ingredient into the pile, keeping the "one entry per item" shape. */
+    private void addCompostIngredient(final Item item, final int points) {
+        for (int i = 0; i < this.compostIngredients.size(); i++) {
+            final CompostIngredient existing = this.compostIngredients.get(i);
+            if (existing.item() == item) {
+                this.compostIngredients.set(i, new CompostIngredient(item, existing.points() + points));
+                return;
+            }
+        }
+        this.compostIngredients.add(new CompostIngredient(item, points));
+    }
+
+    private void clearCompost() {
+        this.compostProgress = 0;
+        this.compostTicks = 0;
+        this.compostIngredients.clear();
+    }
+
     /** Turns the tank contents into a block; the fluid is consumed. */
     private void setSolid(final ItemStack result) {
         this.solid = result.copyWithCount(1);
         this.tank.setFluid(FluidStack.EMPTY);
         this.dirtReady = false;
-        this.compostProgress = 0;
-        this.compostTicks = 0;
+        this.clearCompost();
         this.setChanged();
         this.sync();
         if (this.level != null) {
@@ -420,8 +463,7 @@ public class BarrelBlockEntity extends BlockEntity {
         }
 
         this.dirtReady = false;
-        this.compostProgress = 0;
-        this.compostTicks = 0;
+        this.clearCompost();
 
         if (this.level != null) {
             this.level.playSound(null, this.worldPosition, SoundEvents.COMPOSTER_EMPTY,
@@ -632,8 +674,7 @@ public class BarrelBlockEntity extends BlockEntity {
         this.cookTicks = rule.cookTicks();
         this.tank.setFluid(FluidStack.EMPTY);
         this.dirtReady = false;
-        this.compostProgress = 0;
-        this.compostTicks = 0;
+        this.clearCompost();
         this.setChanged();
         this.sync();
         if (this.level != null) {
@@ -855,6 +896,16 @@ public class BarrelBlockEntity extends BlockEntity {
         this.tank.writeToNBT(tag);
         tag.putInt("Compost", this.compostProgress);
         tag.putInt("CompostTicks", this.compostTicks);
+        if (!this.compostIngredients.isEmpty()) {
+            final net.minecraft.nbt.ListTag ingredients = new net.minecraft.nbt.ListTag();
+            for (final CompostIngredient ingredient : this.compostIngredients) {
+                final CompoundTag entry = new CompoundTag();
+                entry.putString("id", ForgeRegistries.ITEMS.getKey(ingredient.item()).toString());
+                entry.putInt("points", ingredient.points());
+                ingredients.add(entry);
+            }
+            tag.put("CompostItems", ingredients);
+        }
         tag.putBoolean("DirtReady", this.dirtReady);
         tag.putInt("Spore", this.sporeProgress);
         if (this.pendingEntity != null) {
@@ -890,6 +941,22 @@ public class BarrelBlockEntity extends BlockEntity {
         this.tank.readFromNBT(tag);
         this.compostProgress = tag.getInt("Compost");
         this.compostTicks = tag.getInt("CompostTicks");
+        this.compostIngredients.clear();
+        if (tag.contains("CompostItems")) {
+            for (final net.minecraft.nbt.Tag element
+                    : tag.getList("CompostItems", net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+                final CompoundTag entry = (CompoundTag) element;
+                final ResourceLocation id = ResourceLocation.tryParse(entry.getString("id"));
+                final int points = entry.getInt("points");
+                if (id == null || points <= 0) {
+                    continue;
+                }
+                final Item item = ForgeRegistries.ITEMS.getValue(id);
+                if (item != null && item != Items.AIR) {
+                    this.compostIngredients.add(new CompostIngredient(item, points));
+                }
+            }
+        }
         this.dirtReady = tag.getBoolean("DirtReady");
         this.sporeProgress = tag.getInt("Spore");
         this.pendingEntity = tag.contains("CookEntity")

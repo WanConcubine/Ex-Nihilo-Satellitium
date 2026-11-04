@@ -27,7 +27,7 @@
 - value 是**正整数**；小于等于 0 的条目会被忽略。
 - 同一个 stack 命中多条时，取**最大值**（不是相加）。
 - 总和到 `1000` 填满；`COMPOST_MAX = 1000`。
-- 填满后计时 `COMPOST_TICKS = 1000`（50 秒），然后进入 DIRT。
+- 填满后计时 `COMPOST_TICKS = 600`（30 秒），然后进入 DIRT。
 - 服务端在资源重载时读取；改完执行 `/reload`（或重启）生效。
 - **客户端不读这个 JSON**；客户端只用物品标签做交互预测。
 
@@ -90,6 +90,7 @@ Omnia 是 85 / 125 / 175 / 120 / 150）按 Omnia 1.10.2 取；如果你要严格
 | `Amount` | int | 流体量，0–1000 mB |
 | `Compost` | int | 堆肥进度，0–1000 |
 | `CompostTicks` | int | 剩余计时 tick；>0 表示正在腐熟 |
+| `CompostItems` | list | 堆肥投入物 `[{id:"minecraft:rotten_flesh", points:500}, ...]`，按点数加权给客户端混色；旧存档没有该键 |
 | `DirtReady` | boolean | `1b` 表示泥土已就绪，右键可取 |
 | `CompostScale` | int | 进度刻度；新存档固定 `1000`，老存档没有这个键 |
 
