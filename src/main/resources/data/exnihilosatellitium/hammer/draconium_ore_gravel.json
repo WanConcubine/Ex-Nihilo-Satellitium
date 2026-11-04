@@ -1,0 +1,7 @@
+{
+  "input": "exnihilosatellitium:draconium_ore_gravel",
+  "result": "exnihilosatellitium:draconium_crushed",
+  "min": 4,
+  "max": 6,
+  "mod": "draconicevolution"
+}

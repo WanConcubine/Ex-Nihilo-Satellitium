@@ -226,7 +226,7 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `rarity` | ✅ | 三种筛料共用的 `1/N`，必须 > 0。需要分筛料微调时写成对象 `{"gravel":18,"sand":32,"dust":48}` |
 | `ingot` | ❌ | **无条件**复用某个锭：写具体物品名（`minecraft:iron_ingot`）。填了就熔炼到它，不注册自有锭。标签（`#forge:ingots/copper`）**不支持**：读表时标签还没加载，会打警告并按自有锭处理 |
 | `ingots` | ❌ | **受支持模组的有序候选**：`[{"item": "thermal:tin_ingot", "mod": "thermal_foundation"}]`。运行时取第一个 `mod` 已加载的候选；都不在就注册自有 `<id>_ingot`。数据侧 base 配方 `not(or(...))`、第 i 条变体 `mod_loaded(i) + not(之前所有候选)`。**注意 mod id 与物品命名空间可能不同**（Thermal：`thermal_foundation` / `thermal:`） |
-| `gems` | ❌ | **受支持模组的候选矿物/模组专属材料**（与 `ingots` 同构）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石；也用于只在模组在场时注册的锭类材料（ER 的 `yellorium`）——共同点是产物由对方提供、没有自有兜底。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 已加载时注册**：没装时物品、方块、三档碎料、筛出物、锤表、配方和标签都不出现。装模组时矿砾熔成对方物品。**不能与 `ingot`/`ingots` 混用**，混用整条跳过 |
+| `gems` | ❌ | **受支持模组的候选矿物/模组专属材料**（与 `ingots` 同构）：氟石、磷灰石、朱砂、硝石、硫磺、红宝石、蓝宝石；也用于只在模组在场时注册的锭类材料（ER 的 `yellorium`、DE 的 `draconium`）——共同点是产物由对方提供、没有自有兜底。第一个已加载候选胜出；**不注册自有兜底物品、不生成 `forge:gems` 标签、也不生成 base 熔炼配方**。**整条材料只在候选 mod 已加载时注册**：没装时物品、方块、三档碎料、筛出物、锤表、配方和标签都不出现。装模组时矿砾熔成对方物品。**不能与 `ingot`/`ingots` 混用**，混用整条跳过 |
 | `owner_mod` | ❌ | 主要来源模组，只用于自检与文档 |
 | `source` | ❌ | `classic`（照 1.7.10 对照）/ `estimate`（我们估的）；省略视为 `estimate` |
 | `enabled` | ❌ | 默认 `true`；表外骨架行默认 `false` |
@@ -264,6 +264,10 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   `anglesite → anglesite_crystal`、`benitoite → benitoite_crystal`，都走 `gems` 门控；
   mod id 与命名空间都是 `bigreactors`；1.20.1 用 2.0.84 + ZeroCore 2.1.45；
   同样没有自有兜底物品，无模组时没有熔炼终点。
+- **龙之进化（2026-11-04，两版）**：`draconium → draconicevolution:draconium_ingot`，`gems` 门控；
+  唯一入口是**粉碎末地石 1/8**（`sieve/crushed_end_stone_draconicevolution.json`，根级 `mod` + patch）；
+  矿块进 `forge:ores/draconium`，直接靠 DE 自己的标签熔炼，**不要**再写
+  `*_smelting_draconicevolution.json`（同一输入会匹配两条配方）。觉醒龙 / 混沌碎片不补。
 
 ### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
 

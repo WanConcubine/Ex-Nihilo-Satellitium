@@ -24,6 +24,7 @@
     "#forge:ores/chlorophyll",
     "#forge:ores/yellorium",
     "#forge:ores/anglesite",
-    "#forge:ores/benitoite"
+    "#forge:ores/benitoite",
+    "#forge:ores/draconium"
   ]
 }
