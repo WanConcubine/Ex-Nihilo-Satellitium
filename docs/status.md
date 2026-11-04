@@ -30,6 +30,8 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
   全装 `-PtechMods -PdeMods`：`[materials] 26`、`[sieve] 174`、`[hammer] 91`；
   RCON 熔炉把 `draconium_ore_dust` 熔成 `draconicevolution:draconium_ingot`；手筛 / JEI 未目视。
 - 1.20.1 的锤表是手写的（本分支没有 `generate_sieve_assets.py`），新增材料时要手补三条。
+- 破碎龙矿的石壳跟来源方块：`STONE_PALETTES["draconium"] = END_STONE`（末地石淡黄），
+  不是默认灰石。
 
 ## 1.2.0（2026-11-04）
 

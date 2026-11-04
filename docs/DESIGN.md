@@ -658,6 +658,9 @@ Mek/IE/Create 的铀矿处理因此能磨它。我们的 yellorium 矿块原先�
 
 **不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心）与混沌碎片（混沌守卫）保持 DE 原样。
 
+**贴图**：破碎阶段的石壳必须跟来源方块——龙尘来自粉碎末地石，所以
+`STONE_PALETTES["draconium"] = END_STONE`（末地石淡黄），不是默认灰石。
+
 **验证**：真装 DE 3.1.2.621 + Brandons Core 3.2.1.302 + CodeChicken Lib 4.4.0.528
 （`libs/` + `-PdeMods`）；全装叠加 `-PtechMods`：`[materials] 26`、`[sieve] 174`、
 `[hammer] 91`；RCON 熔炉把 `draconium_ore_dust` 熔成
