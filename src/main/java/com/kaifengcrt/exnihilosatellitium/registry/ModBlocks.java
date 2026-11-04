@@ -121,6 +121,15 @@ public final class ModBlocks {
             BLOCKS.register("witch_water", () -> new LiquidBlock(ModFluids.WITCH_WATER.get(),
                     BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)));
 
+    /** Sugar water / concentrated honey source blocks (bucket placement). */
+    public static final DeferredHolder<Block, LiquidBlock> SUGAR_WATER =
+            BLOCKS.register("sugar_water", () -> new LiquidBlock(ModFluids.SUGAR_WATER.get(),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)));
+    public static final DeferredHolder<Block, LiquidBlock> CONCENTRATED_HONEY =
+            BLOCKS.register("concentrated_honey", () -> new LiquidBlock(
+                    ModFluids.CONCENTRATED_HONEY.get(),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)));
+
     /** M6: wooden crucibles, melt leaves/saplings into water without a heat source. */
     public static final DeferredHolder<Block, Block> WOODEN_CRUCIBLE =
             registerWoodenCrucible("wooden_crucible", Blocks.OAK_PLANKS);

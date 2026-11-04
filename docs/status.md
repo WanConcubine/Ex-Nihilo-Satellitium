@@ -24,7 +24,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
   和平模式掉腐肉，桶恢复空桶。是第 8 只人偶。
 - **脑白金**（`brain_platinum`）：鸡蛋 4 + 糖 4 + 绿宝石 1（`ese / sMs / ese`）；
   右键**傻子村民**转成普通（无职业）村民，消耗 1 个，成功音效 + 绿色粒子。
-- **糖水 → 浓缩蜂蜜汁**（两个**桶专用流体**，无方块、无桶）：
+- **糖水 → 浓缩蜂蜜汁**（两个可放置流体，有 source block + 桶）：
   - 满水桶 + 糖 → 糖水；满糖水桶 + 蒲公英黄 → 30 秒（600 tick）后变浓缩蜂蜜汁；
   - 满/不满的浓缩蜂蜜汁桶 + 玻璃瓶 → 扣 250 mB、给蜂蜜瓶（`drain` 规则，不要求满桶）；
   - 桶里有任意数量浓缩蜂蜜汁时，每 100 tick 有 1/6 概率在 6 格内生成 1 只蜜蜂，附近上限 5 只。
@@ -121,7 +121,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
   **熔岩+狂风→狂风人、水+暴雪→暴雪人**，
   **右键立即生效**（不再有 30 秒烹饪）：非和平直接生成生物，和平掉烈焰棒 / 末影珍珠 / 潜影壳 /
   海晶碎片或海晶砂粒（随机）/ 狂风沙尘 / 暴雪立方，桶恢复空桶。
-- **糖水 / 浓缩蜂蜜汁**（2026-11-04）：两个**桶专用流体**（无方块、无桶，只靠桶存）：
+- **糖水 / 浓缩蜂蜜汁**（2026-11-04）：两个可放置流体（source block + 桶，可舀取/放置）：
   满水桶 + 糖 → 糖水；满糖水桶 + 蒲公英黄 → 30 秒后变浓缩蜂蜜汁；浓缩蜂蜜汁桶 + 玻璃瓶 →
   扣 250 mB 给蜂蜜瓶（不要求满桶）；任意数量浓缩蜂蜜汁每 100 tick 有 1/6 概率在 6 格内生成
   1 只蜜蜂（附近上限 5 只）。蜂箱新增 3 木板 + 3 蜂蜜瓶 + 3 木板配方。
@@ -204,7 +204,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | P1 core 守卫 | ✅ | `check-core-imports.py` → `0 known leak(s)`，`common/table` 已纳入扫描 |
 | `./gradlew build` | ✅ | 2026-11-04 两版 `BUILD SUCCESSFUL`（`--offline`） |
 | 1.0.0 发布 | ✅ | 两版 `mod_version=1.0.0`；tag `v1.0.0` / `v1.0.0-1.20.1`；jar 版本与 sha 见 [release-1.0.0.md](release-1.0.0.md) |
-| `check-textures.py` | ✅ | 主线 268 模型 / 102 blockstate / 157 纹理；分支 270 / 102 / 153；无 `minecraft:item/*` |
+| `check-textures.py` | ✅ | 主线 270 模型 / 104 blockstate / 159 纹理；分支 272 / 104 / 155；无 `minecraft:item/*` |
 | `check-data-paths.py` | ✅ | 1.21.1：263 recipes / 75 loot / 63 tags；1.20.1 分支没有该脚本 |
 | `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 68 JSON / 7 nav |
 | 数据表 JSON | ✅ | 7 输入筛表 116（基表）、55 锤、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
@@ -213,7 +213,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 | 热力人偶：注册 / 桶规则 | ✅ | 1.20.1 `-PtechMods`：`[barrel] 18`、dump = 熔岩+`blitz_doll`→`thermal:blitz`（和平 `thermal:blitz_rod`）、水+`blizz_doll`→`thermal:blizz`（和平 `thermal:blizz_rod`）；物品 `/summon` 出 Gale / Blizzard Doll；主线无 Thermal 时桶 16、物品不存在 |
 | 热力人偶：配方 / JEI / 手感 | ⚠️ | 两张工作台配方经 `/reload` 解析探测（坏 JSON 会报 `Couldn't parse`，恢复后无错）；未实际摆放合成、未进游戏右键、未看 JEI |
 | 村民人偶 / 脑白金 | ✅ / ⚠️ | 两个物品 `/summon` 正常、配方由 `runData` 生成；巫水+村民人偶→僵尸村民 在 dump 中；脑白金已改为 `EntityInteract` 抢先于交易界面（免 Shift），右键僵尸村民 / 傻子村民待实测 |
-| 糖水 / 浓缩蜂蜜 / 蜜蜂 | ✅ / ⚠️ | 1.20.1 与 1.21.1：`[barrel] 18 / 16`；data merge 验证 30 秒延迟换液、浓缩蜂蜜生成蜜蜂（`PersistenceRequired`）；真实右键链条 / 玻璃瓶抽取 / JEI 未测 |
+| 糖水 / 浓缩蜂蜜 / 蜜蜂 | ✅ / ⚠️ | 1.20.1 与 1.21.1：`[barrel] 18 / 16`；data merge 验证 30 秒延迟换液、浓缩蜂蜜生成蜜蜂（`PersistenceRequired`）；流体有 source block + 桶；桶内流体改为四面盒渲染（不再只画顶面）；真实右键链条 / 玻璃瓶抽取 / JEI 未测 |
 | 巫水 / 古代孢子 | ✅ | 满水+菌丝约 25 秒变巫水；蘑菇煲起酵；流体方块可放置；沙筛 1/128 |
 | 坩埚：熔点/热源/容量 | ✅ | RCON：19+9 条加载；篝火 0.25 / 熔炉 0.15 / 熄灭 0；容量 8000→3000 热改生效 |
 | 坩埚：显示 / Jade / JEI | ⚠️ | 熔料↔流体切换、Jade 剩余、两页 JEI 未目视 |
@@ -263,7 +263,7 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 - **热力人偶（2026-11-04，所有者指定）**：中文名「狂风人偶 / 暴雪人偶」，**不沿用参考图的
   「劲风 / 冻结」**；熔岩 + 狂风 → 狂风人、水 + 暴雪 → 暴雪人，和平掉 `thermal:*_rod`；
   只在 `thermal_foundation` 在场时注册（条件物品，模型 / 配方 / 桶规则手写）。
-- **糖水 / 浓缩蜂蜜（2026-11-04）**：两个桶专用流体（无方块、无桶）；水+糖 → 糖水，
+- **糖水 / 浓缩蜂蜜（2026-11-04）**：两个可放置流体（source block + 桶）；水+糖 → 糖水，
   糖水+蒲公英黄 30 秒 → 浓缩蜂蜜；玻璃瓶抽 250 mB → 蜂蜜瓶；浓缩蜂蜜每 100 tick 1/6 概率
   在 6 格内养 1 只蜜蜂、附近上限 5 只。
 - **桶表新字段（2026-11-04）**：`result_fluid` + `delay_ticks`（满桶换液，延迟按 tick）、
@@ -284,9 +284,10 @@ AE2 陨石粉。桶表新增 `result_fluid`、`delay_ticks`、`drain` 三种规�
 
 ## 踩过的坑
 
-- **桶专用流体可以没有方块/桶**：`BaseFlowingFluid.Properties` 不调 `.block()` / `.bucket()` 也能
-  被 `FluidTank`、JEI 和渲染器使用；但必须注册 still/flowing 对与 `FluidType`，并在客户端
-  注册 tint，否则渲染成紫黑格。**不要**把这类流体做成可放置的液方块。
+- **桶内流体可以暂不挂方块/桶**：`BaseFlowingFluid.Properties` 不调 `.block()` / `.bucket()` 也能
+  被 `FluidTank`、JEI 和渲染器使用；但玩家无法舀取。糖水/蜂蜜后来补了 source block + 桶
+  （`LiquidBlock` + `BucketItem`），否则只能“有流体没桶装物”。无论哪种形态，都必须注册
+  still/flowing 对与 `FluidType`，并在客户端注册 tint，否则渲染成紫黑格。
 - **`result_fluid` 规则的 `result()` 是空栈**：JEI 必须按 `producesFluid()` 分流到流体槽，
   `TableDump` 也必须输出 `fluid:`；任何“取 `result().getItem()`”的旧代码都要加分支。
 - **`drain` 规则不要求满桶**：`itemMixRule` 只看满桶，抽取规则走单独的 `drainRule`，且在

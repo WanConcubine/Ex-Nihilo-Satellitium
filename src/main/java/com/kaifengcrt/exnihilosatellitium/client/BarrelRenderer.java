@@ -98,7 +98,12 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
 
         final float y = BOTTOM + HEIGHT * fill;
         final VertexConsumer consumer = bufferSource.getBuffer(RenderType.translucent());
-        topQuad(consumer, poseStack.last().pose(), sprite, y, light, red, green, blue, alpha);
+        // A top-only quad is nearly invisible at eye level, which made pale
+        // fluids look empty. Draw the four inner sides too, inset half a pixel
+        // so they do not z-fight with the barrel walls.
+        contentBox(consumer, poseStack.last().pose(), sprite, y, light, red, green, blue,
+                X0 + 0.5F / 16.0F, X1 - 0.5F / 16.0F,
+                Z0 + 0.5F / 16.0F, Z1 - 0.5F / 16.0F);
     }
 
     private void renderCompost(final BarrelBlockEntity barrel, final PoseStack poseStack,
@@ -149,23 +154,30 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
     private static void contentBox(final VertexConsumer consumer, final Matrix4f matrix,
                                    final TextureAtlasSprite sprite, final float topY, final int light,
                                    final float red, final float green, final float blue) {
-        topQuad(consumer, matrix, sprite, topY, light, red, green, blue, 1.0F);
+        contentBox(consumer, matrix, sprite, topY, light, red, green, blue, X0, X1, Z0, Z1);
+    }
+
+    private static void contentBox(final VertexConsumer consumer, final Matrix4f matrix,
+                                   final TextureAtlasSprite sprite, final float topY, final int light,
+                                   final float red, final float green, final float blue,
+                                   final float x0, final float x1, final float z0, final float z1) {
+        topQuad(consumer, matrix, sprite, topY, light, red, green, blue, 1.0F, x0, x1, z0, z1);
 
         // north
         side(consumer, matrix, sprite,
-                X0, BOTTOM, Z0, X0, topY, Z0, X1, topY, Z0, X1, BOTTOM, Z0,
+                x0, BOTTOM, z0, x0, topY, z0, x1, topY, z0, x1, BOTTOM, z0,
                 light, red * 0.68F, green * 0.68F, blue * 0.68F, 0.0F, 0.0F, -1.0F);
         // south
         side(consumer, matrix, sprite,
-                X1, BOTTOM, Z1, X1, topY, Z1, X0, topY, Z1, X0, BOTTOM, Z1,
+                x1, BOTTOM, z1, x1, topY, z1, x0, topY, z1, x0, BOTTOM, z1,
                 light, red * 0.86F, green * 0.86F, blue * 0.86F, 0.0F, 0.0F, 1.0F);
         // west
         side(consumer, matrix, sprite,
-                X0, BOTTOM, Z1, X0, topY, Z1, X0, topY, Z0, X0, BOTTOM, Z0,
+                x0, BOTTOM, z1, x0, topY, z1, x0, topY, z0, x0, BOTTOM, z0,
                 light, red * 0.74F, green * 0.74F, blue * 0.74F, -1.0F, 0.0F, 0.0F);
         // east
         side(consumer, matrix, sprite,
-                X1, BOTTOM, Z0, X1, topY, Z0, X1, topY, Z1, X1, BOTTOM, Z1,
+                x1, BOTTOM, z0, x1, topY, z0, x1, topY, z1, x1, BOTTOM, z1,
                 light, red * 0.92F, green * 0.92F, blue * 0.92F, 1.0F, 0.0F, 0.0F);
     }
 
@@ -211,26 +223,28 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
 
     private static void topQuad(final VertexConsumer consumer, final Matrix4f matrix,
                                 final TextureAtlasSprite sprite, final float y, final int light,
-                                final float red, final float green, final float blue, final float alpha) {
-        vert(consumer, matrix, X0, y, Z1)
+                                final float red, final float green, final float blue,
+                                final float alpha, final float x0, final float x1,
+                                final float z0, final float z1) {
+        vert(consumer, matrix, x0, y, z1)
                 .setColor(red, green, blue, alpha)
                 .setUv(sprite.getU(0.0F), sprite.getV(1.0F))
                 .setLight(light)
                 .setNormal(0.0F, 1.0F, 0.0F)
                 ;
-        vert(consumer, matrix, X1, y, Z1)
+        vert(consumer, matrix, x1, y, z1)
                 .setColor(red, green, blue, alpha)
                 .setUv(sprite.getU(1.0F), sprite.getV(1.0F))
                 .setLight(light)
                 .setNormal(0.0F, 1.0F, 0.0F)
                 ;
-        vert(consumer, matrix, X1, y, Z0)
+        vert(consumer, matrix, x1, y, z0)
                 .setColor(red, green, blue, alpha)
                 .setUv(sprite.getU(1.0F), sprite.getV(0.0F))
                 .setLight(light)
                 .setNormal(0.0F, 1.0F, 0.0F)
                 ;
-        vert(consumer, matrix, X0, y, Z0)
+        vert(consumer, matrix, x0, y, z0)
                 .setColor(red, green, blue, alpha)
                 .setUv(sprite.getU(0.0F), sprite.getV(0.0F))
                 .setLight(light)

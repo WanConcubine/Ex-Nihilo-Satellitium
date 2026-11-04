@@ -43,10 +43,9 @@ public final class ModFluids {
             FLUIDS.register("flowing_witch_water", () -> new BaseFlowingFluid.Flowing(witchWaterProperties()));
 
     /**
-     * Sugar water and concentrated honey are barrel-only fluids: they have no
-     * block or bucket, so they can only be produced, stored and drawn from a
-     * barrel. A still/flowing pair is still registered because the barrel tank
-     * and JEI store a {@link net.minecraft.world.level.material.Fluid}.
+     * Sugar water and concentrated honey are barrel-chain fluids. Both have a
+     * source block and a bucket so they can be transported; the barrel-specific
+     * effects (delayed conversion, bee spawning) live in the block entity.
      */
     public static final DeferredHolder<FluidType, FluidType> SUGAR_WATER_TYPE =
             FLUID_TYPES.register("sugar_water", () -> new FluidType(FluidType.Properties.create()
@@ -88,17 +87,20 @@ public final class ModFluids {
     }
 
     /**
-     * Properties for the two barrel-only fluids: no block and no bucket, so
-     * there is no world placement path. They still need the still/flowing pair
-     * and the fluid type for tank storage and JEI rendering.
+     * Properties for the two barrel-chain fluids: block + bucket are attached
+     * by the per-fluid methods below; this part only sets the flow behaviour.
      */
     private static BaseFlowingFluid.Properties sugarWaterProperties() {
-        return barrelFluidProperties(SUGAR_WATER_TYPE, SUGAR_WATER, FLOWING_SUGAR_WATER);
+        return barrelFluidProperties(SUGAR_WATER_TYPE, SUGAR_WATER, FLOWING_SUGAR_WATER)
+                .block(ModBlocks.SUGAR_WATER)
+                .bucket(ModItems.SUGAR_WATER_BUCKET);
     }
 
     private static BaseFlowingFluid.Properties concentratedHoneyProperties() {
         return barrelFluidProperties(CONCENTRATED_HONEY_TYPE, CONCENTRATED_HONEY,
-                FLOWING_CONCENTRATED_HONEY);
+                FLOWING_CONCENTRATED_HONEY)
+                .block(ModBlocks.CONCENTRATED_HONEY)
+                .bucket(ModItems.CONCENTRATED_HONEY_BUCKET);
     }
 
     private static BaseFlowingFluid.Properties barrelFluidProperties(
