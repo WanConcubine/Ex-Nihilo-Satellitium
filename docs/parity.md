@@ -98,7 +98,7 @@
 | Create 锌回归 | Create 1.20.1 | 已有 `zinc` 材料 + `create:zinc_ingot` 候选；本轮随 Thermal/Mek 同服复验，链路未被新矿物影响 | ✅ |
 | Immersive Engineering 锭联动 | IE 1.20.1 | 接在 **1.20.1 分支**：silver / lead / nickel / aluminum / uranium 候选（排在 Thermal / Mek 之后）；IE 粉碎机走 `forge:ores/<m>` 标签，矿块直接能吃 | ✅ |
 | BambooMod 资源（树苗 / 竹笋 / 作物 / 宝石） | BambooMod 0.6.2（`bamboomod`，仅 1.20.1） | 泥土/草方块各 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%）、砂砾 3 宝石各 1/64；全部 `mod` 门控；堆肥由现有 leaves/saplings 标签覆盖 | ✅（真装；手筛/生长待实测） |
-| 黄铀 / 铅矾 / 蓝锥矿（过筛获得） | 极限反应堆 Extreme Reactors 2.x（`bigreactors`） | 两版接入：`yellorium` 1/8、`anglesite` / `benitoite` 各 1/64；三条都走 `gems` 门控，三档矿链 → 熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；石墨仍烧煤，cyanite/blutonium 继续由反应堆产出 | ✅（两版真装；手筛待实测） |
+| 黄铀 / 铅矾 / 蓝锥矿（过筛获得） | 极限反应堆 Extreme Reactors 2.x（`bigreactors`） | 两版接入：`yellorium` 1/8、`anglesite` / `benitoite` 各 1/64；三条都走 `gems` 门控，三档矿链 → 熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；石墨仍烧煤，cyanite/blutonium 继续由反应堆产出；yellorite/uranium 双 tag，Mek/IE/Create 铀矿处理可磨 | ✅（两版真装；手筛待实测） |
 | 橡胶树苗（过筛 + 可堆肥） | MFR | 1.20.1 无 MFR | ⏸ 等模组 |
 | 自然（Natura）树苗 / 灌木 | 自然 | 无 1.20.1 | ⏸ 等模组 |
 | 匠魂强化：锤 / 钩 traits | 匠魂 | 需按匠魂 3 重做 trait | ❓ |

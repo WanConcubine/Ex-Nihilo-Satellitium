@@ -494,6 +494,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过，基表仍是
   118 / 115，装 BambooMod 时 1.20.1 全装 +19（泥土 8 / 草 8 / 砂砾 3）。
   它的树叶/树苗/竹笋已在 `#minecraft:leaves` / `#minecraft:saplings`，堆肥由现有标签覆盖。
+- **ER 矿石识别（例外）**：ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和
+  `c:ores/uranium`；我们的 yellorium 矿块也进这两个 tag（块 + 物品），`yellorium_broken`
+  进 `c:raw_materials/yellorium`（及根 tag）。这样 Mekanism `enriching` / IE crusher / Create crushing 这类
+  按 `c:ores/uranium` 取矿的机器能磨我们的矿，输出对方的铀粉（与 ER 原矿一致）。
+  这是「碎料不进 raw_materials」规则的唯一例外。
 - **1.21.4 的苍白橡木（pale oak）**不在 1.21.1 / 1.20.1 的物品表里，暂时没有对应掉落；
   升级目标版本时再加。
 - 筛网档位不改变掉落表，只决定寿命（木 10 / 丝 64 / 铁 256）。

@@ -55,6 +55,17 @@ public final class ModItemTags extends ItemTagsProvider {
             }
         }
 
+        // Mirror Extreme Reactors: yellorite ore is also an uranium ore for
+        // Mekanism / IE ore processing.
+        final var yelloriumItems = ModOreItems.byMaterial().get("yellorium");
+        if (yelloriumItems != null) {
+            final var uraniumOres = this.tag(c("ores/uranium"));
+            for (final String kind : ModOreBlocks.KINDS) {
+                uraniumOres.addOptional(BuiltInRegistries.ITEM.getKey(
+                        yelloriumItems.get("ore_" + kind).get()));
+            }
+        }
+
         final var compostable = this.tag(ModTags.Items.COMPOSTABLE);
         compostable.addTag(ItemTags.SAPLINGS);
         compostable.addTag(ItemTags.LEAVES);
