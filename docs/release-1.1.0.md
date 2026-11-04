@@ -82,7 +82,7 @@ Tinkers' Thinking and Applied Energistics 2. No GPL assets copied.
 - [x] 两条线 `build` 成功，jar 内版本号 1.1.0
 - [x] 两份 jar 的大小 / sha256 回填
 - [x] 打 tag：`v1.1.0`（main）、`v1.1.0-1.20.1`（1.20.1-forge）
-- [ ] 推送 tag 到 origin
+- [x] 推送 tag 到 origin（2026-11-04）
 - [ ] CurseForge 上传 1.21.1 / 1.20.1 两个文件
 - [ ] Modrinth 上传对应两个版本
 - [ ] 把商店下载链接补进 README
