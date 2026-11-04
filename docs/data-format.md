@@ -294,6 +294,11 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   （根级 `"mod": "ae2"` + `"patch": true`）：`ae2:certus_quartz_crystal` **1/6**、
   `ae2:certus_quartz_dust` **1/12**；没装 AE2 时整文件跳过，基表仍是 115 条。
   充能赛特斯 / 天石粉不做：前者用 AE2 自己的 `ae2:charger` 充能，后者来自陨石天石。
+- **ER 矿石识别（例外）**：ER 的 `yellorite_ore` 同时登记在 `forge:ores/yellorite` 和
+  `forge:ores/uranium`；我们的 yellorium 矿块也进这两个 tag（块 + 物品），`yellorium_broken`
+  进 `forge:raw_materials/yellorium`（及根 tag）。这样 Mekanism `enriching` / IE crusher / Create crushing
+  这类按 `forge:ores/uranium` 取矿的机器能磨我们的矿，输出对方的铀粉（与 ER 原矿一致）。
+  这是「碎料不进 raw_materials」规则的唯一例外。
 - BambooMod（`bamboomod`，仅 1.20.1）：不新增材料。`sieve/dirt.json` / `sieve/grass_block.json`
   各加 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），`sieve/gravel.json` 加 3 条宝石
   （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过。
