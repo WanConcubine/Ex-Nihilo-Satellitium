@@ -29,6 +29,7 @@
 3. 可选：**JEI**（配方查询）、**Jade**（方块信息）、**Create / Mekanism / Thermal**
    （金属锭与矿石块的互通）、**Applied Energistics 2 + GuideME**（筛沙出赛特斯石英）、
    **Extreme Reactors + ZeroCore**（黄铀 / 铅矾 / 蓝锥矿的矿链）；
+   1.20.1 还可选 **BambooMod**（树苗 / 竹笋 / 作物 / 宝石的筛源）；
    1.20.1 还可选 **Immersive Engineering**、**Tinkers' Construct 3 + Mantle** 与
    **工匠巧思（Tinkers' Thinking）**（金属锭/匠魂熔炼/两种矿石）。
    所有联动都是可选的，没装就回退自有物品。
@@ -126,6 +127,7 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 | Tinkers' Construct（1.20.1） | 钴 | `tconstruct:cobalt_ingot`；只有金属有匠魂熔炼，氟石等矿物不写 |
 | [Tinkers' Thinking](https://modrinth.com/mod/tinkers-thinking)（工匠巧思，1.20.1） | 阿迪特 / 叶绿素 | 碎下界岩 1% → `ardite_broken`（没装 TiT 熔成自有阿迪特锭），草方块 1% → `chlorophyll_broken`（熔成 `tinkers_thinking:chlorophyte_compound`）；走本模组三档矿链 |
 | [Applied Energistics 2](https://modrinth.com/mod/ae2)（两版） | 赛特斯石英 | 筛沙 1/6 → `ae2:certus_quartz_crystal`、1/12 → `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json` 带 `mod` 门补丁，没装时整文件跳过，不注册自有物品 |
+| [BambooMod](https://www.mcmod.cn/class/109.html)（仅 1.20.1） | 树苗 / 竹笋 / 作物 / 宝石 | 泥土与草方块各 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），砂砾 3 宝石各 1/64；全部 `mod` 门控；堆肥由 leaves/saplings 标签覆盖 |
 | [Extreme Reactors](https://modrinth.com/mod/extreme-reactors) + [ZeroCore](https://modrinth.com/mod/zerocore)（两版） | 黄铀 / 铅矾 / 蓝锥矿 | 三条 `gems` 门控材料：三档矿链 → 熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；没装 ER 时整条不注册（基表不变） |
 
 加模组支持 = 在 `materials.json` 对应材料里加一条 `{"item": "...", "mod": "..."}`，

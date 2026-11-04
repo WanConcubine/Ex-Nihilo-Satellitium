@@ -13,11 +13,12 @@
 上一批（1.1.1）：木桶堆肥“原版泥土模型 + 投入物加权混色”、坩埚熔料真实方块模型、
 成土时间 50 秒 → 30 秒。
 **联动**：25 种材料（14 金属 + 11 矿物；ER 的 yellorium 走 `gems` 门控）；
-Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors
+Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / BambooMod（仅 1.20.1）
 全部可选，缺失即降级；核心门面 P1 与三路径（数据包 / KubeJS / CraftTweaker）已完成。
 **当前表尺**：筛子 7 输入 / 118 掉落（无科技模组；1.20.1 115，缺 3 条钴历史差异）；
 +AE2 122 / 119；1.20.1 全装 +TiT 141、再加 AE2 145；主线 Mek+Thermal 139、+AE2 143；
-装 Extreme Reactors 各 **+9**（150 / 154，主线 Mek+Thermal+AE2 152）。
+装 Extreme Reactors 各 **+9**（150 / 154，主线 Mek+Thermal+AE2 152）；
+1.20.1 装 BambooMod **+19**（全装 173）。
 锤表 55 基础 / 79 全装（装 ER 88）；桶 18（装 Thermal）/ 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
 **下一步**：商店上传 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
 
@@ -44,6 +45,17 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors
   主线 AE2+ER `[sieve] 131 drops`；RCON 熔炉三种产物均出，
   `RecipesUsed` 指向 `*_ore_*_smelting_bigreactors`；手筛与 JEI 未目视。
 - **版本**：1.20.1 用 ER 2.0.84 + ZeroCore 2.1.45；1.21.1 用 ER 2.4.9 + ZeroCore 2.4.9。
+
+## 未发布（2026-11-04 夜，BambooMod，仅 1.20.1）
+
+- BambooMod 0.6.2 只有 1.20.1 Forge 构建，接在 `1.20.1-forge` 分支；主线不加载。
+- `sieve/dirt.json` / `grass_block.json` 各 +8（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），
+  `sieve/gravel.json` +3 宝石（银杏/枫/樱各 1/64）；全部 `mod: bamboomod` 门控，
+  没装时整条跳过，基表 118/115 不变；1.20.1 全装 `[sieve] 173`。
+- 堆肥不新增 JSON：它的树叶/树苗/竹笋已在 `#minecraft:leaves` / `#minecraft:saplings`，
+  现有标签 + `compost/default.json` 已按 125 分处理。
+- 验证：分支真装 0.6.2，`[sieve] 173`、`[hammer] 88`；RCON 泥土 32 / 砂砾 31 含新条目，
+  树苗/竹笋 `/setblock` 成功；手筛、树苗生长与 JEI 未目视。
 
 ## 当前批次（2026-11-04 晚，1.1.2 Bug 修复）
 
@@ -293,6 +305,7 @@ Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors
 | supported mods：Tinkers / TiT | ✅ | 钴 → `tconstruct:cobalt_ingot`；阿迪特/叶绿素 22 entries、RCON 熔炉两条都通过 |
 | supported mods：AE2 | ✅ | 1.21.1 118→122 / 1.20.1 141→145（+4，含沙/砂砾各 1/16 陨石粉）；RCON sand/gravel 含 `sky_dust 0.0625`；缺 AE2 静默跳过、无 unknown |
 | supported mods：Extreme Reactors | ✅ | 1.20.1 ER 2.0.84 / 1.21.1 ER 2.4.9（+ ZeroCore）；yellorium 1/8、anglesite/benitoite 各 1/64 走 `gems` 门控；三档矿链熔成 ER 锭/晶体；RCON 熔炉三种产物 + `RecipesUsed` 验证；手筛/JEI 未目视 |
+| supported mods：BambooMod（仅 1.20.1） | ✅ | 0.6.2 真装：泥土/草各 +8（树苗/竹笋/作物）、砂砾 +3 宝石，全带 `mod` 门；`[sieve] 173`（+19）；RCON 泥土 32 / 砂砾 31；堆肥靠现有 leaves/saplings 标签；手筛/生长/JEI 未测 |
 | 客户端画面 | ⚠️ | **1.1.1 的堆肥混色 / 坩埚树叶已在两条线 dev client 目视**；其余（机器 GUI、自动输出抽屉、热力人偶、TiT/AE2 物品与 JEI 页）仍停在 2026-10-31 之后未看 |
 | 旧内容目视 | ⚠️ | 桶/筛比例、木桶竖棱、筛料层、Jade tooltip 等仍待作者确认 |
 
