@@ -452,6 +452,24 @@
       ],
       "source": "estimate",
       "enabled": true
+    },
+    {
+      "id": "draconium",
+      "color": "8A5CF5",
+      "name": {
+        "en_us": "Draconium",
+        "zh_cn": "龙"
+      },
+      "tier": "rare",
+      "rarity": 64,
+      "gems": [
+        {
+          "item": "draconicevolution:draconium_ingot",
+          "mod": "draconicevolution"
+        }
+      ],
+      "source": "estimate",
+      "enabled": true
     }
   ]
 }

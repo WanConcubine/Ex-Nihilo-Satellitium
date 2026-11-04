@@ -7,13 +7,29 @@
 
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.2.0 已发**（tag `v1.2.0-1.20.1`）；1.0.0–1.2.0 的商店上传待所有者。
-**最新一批（2026-11-04 夜，1.2.0）**：**内容更新**——Extreme Reactors、BambooMod、
+**当前批次（2026-11-04 深夜）**：龙之进化（DE）龙尘材料；**粉碎末地石 1/8** 单源 →
+破碎龙矿 → 矿块 → DE 的 `forge:ores/draconium` 标签熔成龙锭；不碰觉醒龙 / 混沌碎片。
+上一批（1.2.0）：**内容更新**——Extreme Reactors、BambooMod、
 骨粉 / 烈焰粉、ER 矿石/原矿标签与匠魂 yellorium 熔炼/铸造。
 上一批（1.1.1）：木桶堆肥“原版泥土模型 + 混合投入物颜色”、坩埚熔料真实方块模型、成土 30 秒。
-**联动**：25 种材料（14 金属 + 11 矿物；ER 的 yellorium 走 `gems` 门控）；Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / BambooMod（仅 1.20.1）全部可选。
+**联动**：26 种材料（14 金属 + 12 矿物；ER 的 yellorium 与 DE 的 draconium 走 `gems` 门控）；
+Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 / BambooMod 全部可选。
 **当前表尺**：筛子 7 输入 / 115 掉落（无科技模组；沙/砂砾/尘土比主线少 3 条钴，历史差异）；
-+AE2 119；全装 +TiT 141、再加 AE2 145；装 ER 各 +9（150 / 154）；装 BambooMod +19（全装 173）；锤表 88（全装 +ER）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
++AE2 119；全装 +TiT 141、再加 AE2 145；装 ER 各 +9（150 / 154）；装 BambooMod +19（全装 173）；
+**装龙之进化 +1**（全装 + Bamboo 174）；锤表 88（全装 +ER；装 DE 91）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
+
+## 当前批次（2026-11-04 深夜，龙之进化）
+
+- `materials.json` 新增 `draconium`（`gems`，`draconicevolution` 门控）：唯一来源
+  `sieve/crushed_end_stone_draconicevolution.json`（根级 `mod` + `patch`）**粉碎末地石 1/8**；
+  4 破碎 → 矿块 → 3 条锤表（矿砾→粉碎 / 矿砂→粉末 4–6、矿尘→自身，全带 `mod` 门）。
+- 矿块进 `forge:ores/draconium`，**直接复用 DE 的标签熔炼**，不写
+  `*_smelting_draconicevolution.json`（避免 JEI 重复配方）。
+- 验证：真装 DE 3.1.2.621 + Brandons Core 3.2.1.302 + CodeChicken Lib 4.4.0.528；
+  全装 `-PtechMods -PdeMods`：`[materials] 26`、`[sieve] 174`、`[hammer] 91`；
+  RCON 熔炉把 `draconium_ore_dust` 熔成 `draconicevolution:draconium_ingot`；手筛 / JEI 未目视。
+- 1.20.1 的锤表是手写的（本分支没有 `generate_sieve_assets.py`），新增材料时要手补三条。
 
 ## 1.2.0（2026-11-04）
 

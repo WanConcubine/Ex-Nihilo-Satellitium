@@ -273,6 +273,16 @@ dependencies {
         runtimeOnly fg.deobf("libs:bamboomod-1.20.1:0.6.2")
     }
 
+    // Draconic Evolution (1.20.1, `draconicevolution`): draconium source. DE is a
+    // hard dependency of nothing here, so it stays behind its own flag and only
+    // loads when the three production jars are present in libs/ (gitignored).
+    //   ./gradlew runServer -PdeMods
+    if (project.hasProperty("deMods") && file("libs/Draconic-Evolution-1.20.1-3.1.2.621-universal.jar").exists()) {
+        runtimeOnly fg.deobf("libs:CodeChickenLib-1.20.1:4.4.0.528-universal")
+        runtimeOnly fg.deobf("libs:BrandonsCore-1.20.1:3.2.1.302-universal")
+        runtimeOnly fg.deobf("libs:Draconic-Evolution-1.20.1:3.1.2.621-universal")
+    }
+
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")

@@ -641,3 +641,24 @@ Mek/IE/Create 的铀矿处理因此能磨它。我们的 yellorium 矿块原先�
 **验证**：BambooMod 0.6.2 真装（`libs/` + `-PtechMods`）：`[sieve] 173`（+19：泥土 8 /
 草 8 / 砂砾 3）、`[hammer] 88`；RCON 泥土 32 / 砂砾 31 条含新条目；`/setblock` 树苗与竹笋成功；
 未进游戏手筛、树苗生长与 JEI 未测。
+
+## 54. 龙之进化：龙尘 / 龙锭（2026-11-04，两版）
+
+**为什么**：DE（`draconicevolution`，1.20.1 3.1.2.621）的龙矿只在世界生成，空岛拿不到；
+它的矿掉 2–4 龙尘，龙尘 1:1 熔成龙锭，且熔炼按 `forge:ores/draconium` 标签取矿——
+这正是 datagen 已经会生成的同名标签。
+
+**入口**：`draconium` 是 `gems` 材料（DE 不在场整条不注册），唯一来源
+`sieve/crushed_end_stone_draconicevolution.json`（根级 `"mod"` + `patch`）：
+**粉碎末地石 1/8 → `draconium_broken`**。分支没有 `generate_sieve_assets.py`，所以这是
+手写补丁文件；4 破碎 → 矿砾，三条锤表（`mod` 门）手写补齐。
+
+**终点**：矿块进 `forge:ores/draconium`，直接吃 DE 自己的熔炼配方，出
+`draconicevolution:draconium_ingot`；不要在 datagen 之外再写 `*_smelting_draconicevolution.json`。
+
+**不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心）与混沌碎片（混沌守卫）保持 DE 原样。
+
+**验证**：真装 DE 3.1.2.621 + Brandons Core 3.2.1.302 + CodeChicken Lib 4.4.0.528
+（`libs/` + `-PdeMods`）；全装叠加 `-PtechMods`：`[materials] 26`、`[sieve] 174`、
+`[hammer] 91`；RCON 熔炉把 `draconium_ore_dust` 熔成
+`draconicevolution:draconium_ingot`；手筛 / JEI 未目视。
