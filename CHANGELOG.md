@@ -1,5 +1,16 @@
 # 更新记录
 
+## 未发布
+
+### 新增内容
+
+- **热力人偶（1.20.1 / Thermal）**：狂风人偶（`blitz_doll`）与暴雪人偶（`blizz_doll`）。
+  工作台配方分别是 4 硝石粉 / 雪球 + 红石 + 2 荧石粉 + 人偶 + 下界疣；
+  满熔岩桶 + 狂风人偶生成 `thermal:blitz`（狂风人），满水桶 + 暴雪人偶生成 `thermal:blizz`
+  （暴雪人）；和平模式掉 `thermal:blitz_rod` / `thermal:blizz_rod`。
+  两个物品只在 Thermal Foundation 加载时注册，缺 Thermal 时配方 / 桶规则一起消失。
+- **贴图**：狂风人偶金黄、暴雪人偶冰蓝，沿用 64×64 人偶轮廓。
+
 ## 1.0.0 — 2026-11-04（首个正式版）
 
 面向 **Minecraft 1.21.1 / NeoForge 21.1.x** 的空岛资源获取模组；1.20.1 / Forge 47.4.x

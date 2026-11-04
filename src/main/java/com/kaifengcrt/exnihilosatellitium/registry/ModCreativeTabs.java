@@ -63,6 +63,13 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.CREEPY_DOLL.get());
                         output.accept(ModItems.SHULKER_DOLL.get());
                         output.accept(ModItems.GUARDIAN_DOLL.get());
+                        // Thermal dolls are only registered while Thermal is loaded.
+                        if (ModItems.BLITZ_DOLL != null) {
+                            output.accept(ModItems.BLITZ_DOLL.get());
+                        }
+                        if (ModItems.BLIZZ_DOLL != null) {
+                            output.accept(ModItems.BLIZZ_DOLL.get());
+                        }
                         output.accept(ModItems.WITCH_WATER_BUCKET.get());
                         ModItems.MACHINES.forEach(item -> output.accept(item.get()));
                         ModItems.UPGRADES.forEach(item -> output.accept(item.get()));
