@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketFluidHandler;
+import com.kaifengcrt.exnihilosatellitium.platform.barrel.BarrelItemHandler;
 import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineEnergy;
 import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineItemHandler;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
@@ -28,6 +29,10 @@ public final class CapabilityEvents {
         event.registerItem(Capabilities.FluidHandler.ITEM,
                 (stack, context) -> new PorcelainBucketFluidHandler(stack),
                 ModItems.PORCELAIN_BUCKET.get());
+
+        // Barrel: slot 0 = compost input, slot 1 = dirt / solid product output.
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.BARREL.get(),
+                (barrel, side) -> new BarrelItemHandler(barrel));
 
         // M10: every machine exposes its slots as an item handler (hoppers / pipes).
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.ELECTRIC_MACHINE.get(),

@@ -1920,3 +1920,28 @@ Ender IO 自己的虚空框架 / 电容 / 无限杆配方会消耗它。
 
 **验证**：两版 `build` + 纹理 / 核心 / 数据守卫通过；**未进游戏筛过、未真装 Ender IO**，
 JEI 未目视。
+
+## 55. 木桶：满桶拦截与管道能力（2026-11-05）
+
+**问题一：满桶右键堆肥会放方块。** 玩家拿着树叶右键一个堆肥已满的桶时，
+`BarrelBlockEntity#canUse` 因为 `compostProgress >= COMPOST_MAX` 返回 false，
+`use()` 返回 `PASS`；随后原版 `ItemStack#useOn` 把树叶放到桶顶。
+修复：可堆肥物品**始终**被木桶视为已处理——`canUse` 对 `#compostable` 直接返回 true；
+`use()` 在「有流体」或「堆肥已满」时对可堆肥物品返回 `InteractionResult.CONSUME`。
+1.21.1 的 `useItemOn` 把 `consumesAction()` 映射成 `SUCCESS`，不再落到默认放置；
+1.20.1 的 `Block#use` 直接返回 `CONSUME`。客户端预测走同一条 `canUse`，避免幽灵方块。
+
+**问题二：管道不能输入 / 输出。** 木桶原来没有物品 capability；1.20.1 连流体 capability
+也没有。修复：
+
+- `platform/barrel/BarrelItemHandler`（两版各自实现）：**槽 0 = 堆肥输入**，插入即按
+  `CompostRegistry` 计分（一次可吃多件，最后一件可部分计分）；**槽 1 = 泥土 / 固体产物输出**。
+  堆肥进度 > 0、有固体或有泥土时拒绝输入；输出随时可抽。
+- 1.21.1：`CapabilityEvents` 注册 `Capabilities.ItemHandler.BLOCK`；原有的
+  `FluidHandler.BLOCK`（`getTank()`）保留。
+- 1.20.1：`BarrelBlockEntity#getCapability` 返回 `ForgeCapabilities.ITEM_HANDLER` /
+  `FLUID_HANDLER`（tank）。
+- 状态互斥不变：堆肥与流体不能同时进行；管道输入也遵守这一点。
+
+**验证**：两版 `build` 通过；**未进游戏**测满桶右键与管道（开发环境没有装管道模组），
+JEI 未目视。

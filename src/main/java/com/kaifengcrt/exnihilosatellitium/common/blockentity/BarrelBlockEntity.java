@@ -269,9 +269,83 @@ public class BarrelBlockEntity extends BlockEntity {
         if (stack.is(Items.MUSHROOM_STEW) && this.isFullWater()) {
             return true;
         }
-        return this.tank.getFluidAmount() == 0
-                && this.compostProgress < COMPOST_MAX
-                && stack.is(ModTags.Items.COMPOSTABLE);
+        // A compostable item is always "handled": when the barrel is full the
+        // use() path returns CONSUME, which must block the block placement that
+        // would otherwise put the leaf on top of the barrel.
+        return stack.is(ModTags.Items.COMPOSTABLE);
+    }
+
+    /** True while a pipe may add compost: empty tank, no solid/dirt, room left. */
+    public boolean canAcceptCompost() {
+        return !this.dirtReady && !this.hasSolid()
+                && this.tank.getFluidAmount() == 0
+                && this.compostProgress < COMPOST_MAX;
+    }
+
+    public boolean canInsertCompost(final ItemStack stack) {
+        return this.canAcceptCompost() && stack.is(ModTags.Items.COMPOSTABLE);
+    }
+
+    /**
+     * Pipe/hopper insertion: credits up to {@code maxCount} compostable items.
+     * Returns how many items were accepted; the caller shrinks its own stack.
+     * The last accepted item may be credited partially, exactly like a hand use.
+     */
+    public int insertCompost(final ItemStack stack, final int maxCount, final boolean simulate) {
+        if (maxCount <= 0 || !this.canInsertCompost(stack)) {
+            return 0;
+        }
+        final int value = Math.max(1, CompostRegistry.valueOf(stack));
+        final int room = COMPOST_MAX - this.compostProgress;
+        final int accepted = Math.min(maxCount, (room + value - 1) / value);
+        if (accepted <= 0) {
+            return 0;
+        }
+        if (simulate) {
+            return accepted;
+        }
+        final int credited = Math.min(room, accepted * value);
+        this.compostProgress += credited;
+        this.addCompostIngredient(stack.getItem(), credited);
+        if (this.compostProgress >= COMPOST_MAX) {
+            this.compostTicks = COMPOST_TICKS;
+        }
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.COMPOSTER_FILL,
+                    SoundSource.BLOCKS, 1.0F, 0.8F + this.level.random.nextFloat() * 0.4F);
+        }
+        this.setChanged();
+        this.sync();
+        return accepted;
+    }
+
+    /** The ready dirt or solid product, without removing it (pipes peek here). */
+    public ItemStack getOutputStack() {
+        if (this.dirtReady) {
+            return new ItemStack(Items.DIRT);
+        }
+        return this.solid.isEmpty() ? ItemStack.EMPTY : this.solid.copy();
+    }
+
+    /** Pipe/hopper extraction: takes the dirt or solid product, or empty. */
+    public ItemStack extractOutput(final boolean simulate) {
+        final ItemStack out = this.getOutputStack();
+        if (out.isEmpty() || simulate) {
+            return out;
+        }
+        if (this.dirtReady) {
+            this.dirtReady = false;
+            this.clearCompost();
+        } else {
+            this.solid = ItemStack.EMPTY;
+        }
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.ITEM_PICKUP,
+                    SoundSource.BLOCKS, 0.6F, 1.2F);
+        }
+        this.setChanged();
+        this.sync();
+        return out;
     }
 
     /** Server-side interaction. */
@@ -355,7 +429,12 @@ public class BarrelBlockEntity extends BlockEntity {
         }
 
         if (this.tank.getFluidAmount() > 0 || this.compostProgress >= COMPOST_MAX) {
-            return InteractionResult.PASS;
+            // The barrel owns compostable items even when it cannot take more:
+            // CONSUME blocks the vanilla block placement, PASS lets other blocks
+            // be placed on top as usual.
+            return stack.is(ModTags.Items.COMPOSTABLE)
+                    ? InteractionResult.CONSUME
+                    : InteractionResult.PASS;
         }
         if (!stack.is(ModTags.Items.COMPOSTABLE)) {
             return InteractionResult.PASS;

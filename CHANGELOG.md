@@ -1,5 +1,17 @@
 # 更新记录
 
+## 未发布（2026-11-05，木桶修复）
+
+### 修复
+
+- **满桶右键堆肥不再放方块**：可堆肥物品现在始终被木桶视为「已处理」；满桶 / 有流体时
+  `BarrelBlockEntity#use` 返回 `CONSUME`，客户端预测也按已处理走，树叶不会再被放到桶顶。
+- **木桶接管道（物品）**：新增 `BarrelItemHandler`（槽 0 堆肥输入、槽 1 泥土 / 固体产物输出）；
+  1.21.1 在 `CapabilityEvents` 注册 `Capabilities.ItemHandler.BLOCK`，1.20.1 在 BE 的
+  `getCapability` 返回 `ForgeCapabilities.ITEM_HANDLER`。
+- **木桶接管道（流体）**：1.21.1 原有 `FluidHandler.BLOCK` 保留；1.20.1 补上
+  `ForgeCapabilities.FLUID_HANDLER`（`getCapability` 返回 tank）。
+
 ## 1.3.1 — 2026-11-05（深板岩 / 末影接口起步 + 脑白金提示）
 
 ### 新增

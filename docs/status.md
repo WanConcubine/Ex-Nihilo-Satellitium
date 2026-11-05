@@ -46,6 +46,17 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 - **验证**：两版 `./gradlew build --offline` + `check-textures.py` 通过；主线
   `check-core-imports.py` / `check-data-paths.py` 通过。**未进游戏筛过**、未看 tooltip，JEI 未目视。
 
+## 未发布（2026-11-05，木桶修复）
+
+- **满桶右键堆肥不再放方块**：可堆肥物品始终被视为「已处理」——`canUse` 对任意可堆肥物品返回
+  true；满桶 / 有流体时 `use()` 返回 `CONSUME`，客户端预测也按已处理走。树叶不再被放到桶顶。
+- **管道（物品）**：新增 `BarrelItemHandler`：槽 0 堆肥输入（插入即计分）、槽 1 泥土 / 固体产物输出。
+  1.21.1 在 `CapabilityEvents` 注册 `Capabilities.ItemHandler.BLOCK`；1.20.1 在 BE
+  `getCapability` 返回 `ForgeCapabilities.ITEM_HANDLER`。
+- **管道（流体）**：1.21.1 原有 `FluidHandler.BLOCK` 保留；1.20.1 补
+  `ForgeCapabilities.FLUID_HANDLER`（tank）。堆肥进行中 / 有固体 / 有泥土时仍拒绝输入，这是状态互斥。
+- **验证**：两版 `build` 通过；**未进游戏**测右键拦截 / 管道（没有装管道模组），JEI 未目视。
+
 ## 上一批（2026-11-04 深夜，龙之进化）
 
 - **材料**：`materials.json` 新增 `draconium`（`gems`，`draconicevolution` 门控，tier `rare`、
@@ -349,6 +360,7 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 | 数据表 JSON | ✅ | 7 输入筛表 119（基表；装末影接口 +1、装 ER +9、装 DE +1）、55 锤（装 ER +9、装 DE +3）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
+| 木桶：满桶右键 / 管道 | ⚠️ | 可堆肥物品满桶返回 `CONSUME`；新增 `BarrelItemHandler`（0 输入 / 1 输出）+ 两版流体 capability；`build` 通过，**未进游戏**测右键拦截与管道 |
 | 热力人偶：注册 / 桶规则 | ✅ | 1.20.1 `-PtechMods`：`[barrel] 18`、dump = 熔岩+`blitz_doll`→`thermal:blitz`（和平 `thermal:blitz_rod`）、水+`blizz_doll`→`thermal:blizz`（和平 `thermal:blizz_rod`）；物品 `/summon` 出 Gale / Blizzard Doll；主线无 Thermal 时桶 16、物品不存在 |
 | 热力人偶：配方 / JEI / 手感 | ⚠️ | 两张工作台配方经 `/reload` 解析探测（坏 JSON 会报 `Couldn't parse`，恢复后无错）；未实际摆放合成、未进游戏右键、未看 JEI |
 | 村民人偶 / 脑白金 | ✅ / ⚠️ | 两个物品 `/summon` 正常、配方由 `runData` 生成；巫水+村民人偶→僵尸村民 在 dump 中；脑白金已改为 `EntityInteract` 抢先于交易界面（免 Shift），右键僵尸村民 / 傻子村民待实测 |
