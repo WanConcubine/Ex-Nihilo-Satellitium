@@ -56,6 +56,7 @@ assets/exnihilosatellitium/textures/
     ├── warped_nylium_spores.png  # 诡异菌岩孢子（2026-11-02，脚本生成，青色）
     ├── sky_slime_grass_seeds.png # 碧空黏液草种子（2026-11-02，脚本生成，天蓝）
     ├── ender_slime_grass_seeds.png # 末影黏液草种子（2026-11-02，脚本生成，紫）
+    ├── deepslate_pebble.png     # 深板岩石子（2026-11-05，与四种石子同轮廓，深板岩灰蓝）
     └── witch_water_bucket.png   # 巫水桶（M6，原版水桶重着色）
 ```
 
@@ -82,6 +83,10 @@ assets/exnihilosatellitium/textures/
 
 古代孢子图标由 `art/items/ancient_spores/generate.py` 逐像素生成（紫色系，和巫水同一套色板），
 要改就改脚本重跑，不要手改 PNG。
+
+石子（圆石 / 安山岩 / 花岗岩 / 闪长岩 / 深板岩）由 `art/items/pebbles/generate.py` 用同一轮廓 +
+5 套色板生成；深板岩色板 `#26262C` / `#3C3C44` / `#52525C` / `#6A6A74` / `#888892`。
+新增石子 = 在 `PALETTES` 加一行 + 补 lang 两行 + `runData`（配方/模型由 datagen 出）。
 绯红 / 诡异菌岩孢子与草种子共用 `art/items/sieve_extras/generate.py`：16×16 自有像素，
 红 / 青两套 4 色板（轮廓 / 阴影 / 底色 / 高光），只换色不动轮廓。
 碧空 / 末影黏液草种子也在同一脚本里（天蓝 / 紫两套色板）；它们只在 1.20.1 + 匠魂时注册，

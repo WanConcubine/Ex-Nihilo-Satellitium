@@ -459,22 +459,24 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - `input` 是物品 id；筛子一次只装 1 个该物品。
 - `outputs` 每条独立掷 `chance`（0..1），不是权重；一次结算可能同时出多个产物。
 - `min` / `max` 可选，默认 `1`：一次**成功**掷出几件（闭区间，`min <= max`）。
-  目前只有泥土的四种石子用 `4..6`；机器筛和手动筛走同一个 `SieveRolls`，JEI 会在概率下面多一行掉落数量。
+  目前只有泥土的四种石子用 `4..6`、深板岩石子用 `3..5`；机器筛和手动筛走同一个 `SieveRolls`，
+  JEI 会在概率下面多一行掉落数量。
 - `mod` 可选：写模组 id（如 `"tconstruct"`）。模组不在时**在查物品之前**跳过该条，
   所以条件物品（匠魂种子）不会刷 unknown item；没有这个字段的条目行为不变。
 - `chance <= 0` 或物品 id 解析不到：该条跳过并打 `[sieve]` 警告。
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 **7 个输入、141 掉落**（1.20.1 全装 Mek+Thermal+Create+IE+Tinkers+工匠巧思；1.21.1 装
-  Mek+Thermal 时约 139，两版无科技模组分别 118 / 115；**装 AE2 时两版各 +4**，
-  **装 Extreme Reactors 时两版各 +9**）：`gravel` / `sand` / `dirt` / `dust` /
+- 当前有 **7 个输入、142 掉落**（1.20.1 全装 Mek+Thermal+Create+IE+Tinkers+工匠巧思；1.21.1 装
+  Mek+Thermal 时约 140，两版无科技模组分别 119 / 116；**装末影接口时两版各 +1**，
+  **装 AE2 时两版各 +4**，**装 Extreme Reactors 时两版各 +9**）：`gravel` / `sand` / `dirt` / `dust` /
   `grass_block`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
   `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **9 种树苗**（橡木 8% / 白桦 4% /
   云杉 4% / 丛林 3% / 金合欢 3% / 樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%，合计 31%/次）+
   **竹子 5%** + **碧空 / 末影黏液草种子各 2% / 1%**（仅 Tinkers 在场）+ **四种石子各 4-6 个、100% 出**
-  （圆石/安山岩/花岗岩/闪长岩，四个石子合成一块对应石头；一次泥土 ≈ 4-6 块石头）），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
+  （圆石/安山岩/花岗岩/闪长岩，四个石子合成一块对应石头；一次泥土 ≈ 4-6 块石头）+
+  **深板岩石子 50% × 3-5 个**（4 个合成深板岩圆石，熔炉再烧成深板岩；草方块表不加）），`sand` 额外给仙人掌、甘蔗、可可豆、海带、
   **烈焰粉 3%**、管珊瑚、海晶砂粒与**古代孢子**（`ancient_spores`，1/128，M6 巫水链起点）；
   `crushed_netherrack` 出石英/荧石/下界疣/烈焰粉/岩浆膏/灵魂沙、**绯红 / 诡异菌岩孢子各 5%**、
   **钴碎块 1%** 与**下界合金碎片 0.4%**；
@@ -488,6 +490,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **骨粉 / 烈焰粉**：`dust` 20% 出 `minecraft:bone_meal`（对齐经典 Ex Nihilo 的尘土 1/5），
   `sand` 3% 出 `minecraft:blaze_powder`（碎下界岩 6% 仍是更高产的第二来源）。骨粉接瓷土与
   菌岩催菌，烈焰粉接酿造、末影之眼和愤怒人偶；两者都不再只靠怪物 / 碎下界岩。
+- **末影接口（Ender IO，`enderio`，两版 beta）**：独立补丁文件 `sieve/dust_enderio.json`，
+  根级 `"mod": "enderio"` + `"patch": true`，对尘土追加 `enderio:grains_of_infinity` **2%**。
+  1.20.1/1.21.1 的 Ender IO 只有这一个「无限粉」；1.12.2 的 `dustBedrock` / 基岩粉块在 6.x / 8.x
+  已不存在。**不注册自有物品、不写「粉 → 基岩」**；没装时整文件跳过（基表 119 / 116）。
+  用途：虚空框架 / 电容 / 无限杆；1.20.1 的 Primitive Alloy Smelter 另需 6 个深板岩，由深板岩石子提供。
 - **钴 / 下界合金碎片**：`cobalt_broken` 1% 从碎下界岩出，走普通 4→块→熔炼链；有匠魂时
   锭解析到 `tconstruct:cobalt_ingot`，没有时自有钴锭。`netherite_scrap` 0.4% 从碎下界岩出，
   双线都有。钴碎块的 broken 贴图用下界岩红棕基底（`STONE_PALETTES`），不是灰石底。
@@ -506,12 +513,12 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **应用能源 2（`ae2`，两版）**：独立补丁文件 `sieve/sand_ae2.json`，根级 `"mod": "ae2"` +
   `"patch": true`，对沙追加两条：`ae2:certus_quartz_crystal` **1/6**、
   `ae2:certus_quartz_dust` **1/12**。不注册自有物品、不复制对方资源；没装 AE2 时整文件跳过
-  （基表仍是 118 / 115），装了两版各 +4（本轮实测 122 / 119）。充能赛特斯与天石粉不做：前者用
+  （基表仍是 119 / 116），装了两版各 +4（本轮实测 123 / 120）。充能赛特斯与天石粉不做：前者用
   AE2 自己的 `ae2:charger` 充能（配方只要铁 / 铜 / 赛特斯），后者来自陨石天石，不属于空岛缺口。
 - **BambooMod（`bamboomod`，仅 1.20.1）**：`sieve/dirt.json` / `sieve/grass_block.json` 各 8 条
   （4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），`sieve/gravel.json` 3 条宝石
   （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过，基表仍是
-  118 / 115，装 BambooMod 时 1.20.1 全装 +19（泥土 8 / 草 8 / 砂砾 3）。
+  119 / 116，装 BambooMod 时 1.20.1 全装 +19（泥土 8 / 草 8 / 砂砾 3）。
   它的树叶/树苗/竹笋已在 `#minecraft:leaves` / `#minecraft:saplings`，堆肥由现有标签覆盖。
 - **ER 矿石识别（例外）**：ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和
   `c:ores/uranium`；我们的 yellorium 矿块也进这两个 tag（块 + 物品），`yellorium_broken`

@@ -7,28 +7,46 @@
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
 （`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.3.0 已发布**（两条线 tag：`v1.3.0` / `v1.3.0-1.20.1`）；1.0.0–1.3.0 的商店上传待所有者。
-**当前批次（2026-11-04 深夜）**：**龙之进化（DE）联动**——`draconium` 龙尘材料（两版），
+**1.3.1 已发布**（两条线 tag：`v1.3.1` / `v1.3.1-1.20.1`）；1.0.0–1.3.1 的商店上传待所有者。
+**当前批次（2026-11-05）**：**深板岩石子 + 末影接口（Ender IO）起步**——泥土 50% × 3-5
+深板岩石子（4 → 深板岩圆石）；尘土 2% 出 `enderio:grains_of_infinity`（末影接口 1.20.1/1.21.1
+的「无限粉」，`mod` 门控）；不新增基岩粉物品、不写「粉 → 基岩」配方。
+上一批（2026-11-04 深夜）：**龙之进化（DE）联动**——`draconium` 龙尘材料（两版），
 粉碎末地石 1/8 单源 → 破碎龙矿 → 矿块 → 靠 DE 的 `c:ores/draconium` 熔成龙锭；
 不碰觉醒龙 / 混沌碎片。
 上一批（1.2.0）：**内容更新**——Extreme Reactors（两版）、BambooMod（仅 1.20.1）、
 骨粉 / 烈焰粉筛出物、ER 矿块标签与匠魂 yellorium 熔炼/铸造。
-上一批（1.1.1）：木桶堆肥“原版泥土模型 + 投入物加权混色”、坩埚熔料真实方块模型、
-成土时间 50 秒 → 30 秒。
 **联动**：26 种材料（14 金属 + 12 矿物；ER 三条与 DE 的 draconium 走 `gems` 门控）；
 Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 /
-BambooMod（仅 1.20.1）全部可选，缺失即降级；核心门面 P1 与三路径（数据包 / KubeJS /
-CraftTweaker）已完成。
-**当前表尺**：筛子 7 输入 / 118 掉落（无科技模组；1.20.1 115，缺 3 条钴历史差异）；
-+AE2 122 / 119；1.20.1 全装 +TiT 141、再加 AE2 145；主线 Mek+Thermal 139、+AE2 143；
-装 Extreme Reactors 各 **+9**（150 / 154，主线 Mek+Thermal+AE2 152）；
-1.20.1 装 BambooMod **+19**（全装 173）；装龙之进化各 **+1**（主线 AE2+ER+DE 132，
-1.20.1 全装 + Bamboo 174）。
+BambooMod（仅 1.20.1）/ 末影接口（Ender IO，两版 beta）全部可选，缺失即降级；
+核心门面 P1 与三路径（数据包 / KubeJS / CraftTweaker）已完成。
+**当前表尺**：筛子 7 输入 / 119 掉落（无科技模组；1.20.1 116，缺 3 条钴历史差异）；
+装末影接口各 **+1**（120 / 117）；+AE2 123 / 120；1.20.1 全装 +TiT 142、再加 AE2 146；
+主线 Mek+Thermal 140、+AE2 144；装 Extreme Reactors 各 **+9**（151 / 155，主线
+Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙之进化各 **+1**
+（主线 AE2+ER+DE 133，1.20.1 全装 + Bamboo 175）；以上再装末影接口各再 **+1**（134 / 176）。
 锤表 55 基础 / 79 全装（装 ER 88）；装 DE **+3**（58 / 82 / 91）；桶 18（装 Thermal）/
 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
 **下一步**：商店上传 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
 
-## 当前批次（2026-11-04 深夜，龙之进化）
+## 当前批次（2026-11-05，深板岩 / 末影接口起步）
+
+- **深板岩石子**（无条件）：`sieve/dirt.json` 泥土 **50% × 3-5** 个；4 个 → `minecraft:cobbled_deepslate`
+  （2×2），熔炉烧成 `minecraft:deepslate`。草方块表**不加**（`generate_sieve_assets.py` 明确过滤）。
+  用途：1.20.1 的「原始合金炉」要 6 个深板岩；1.21.1 的深板岩火焰合成也要它。
+- **末影接口（Ender IO）起步**：`sieve/dust_enderio.json`（根级 `mod: enderio` + `patch`）——
+  尘土 **2%** 出 `enderio:grains_of_infinity`（1.20.1/1.21.1 的「无限粉」；1.12.2 的
+  「基岩粉 / 基岩粉块」在 6.x / 8.x 已不存在）。**不新增基岩粉物品、不写「粉 → 基岩」配方**；
+  该物品在 Ender IO 自己的虚空框架 / 电容 / 无限杆配方里使用。
+- **脑白金提示**：`BrainPlatinumItem#appendHoverText` + `item.exnihilosatellitium.brain_platinum.tooltip`
+  （中英双语），文字「对傻子村民使用使其变为普通村民」；1.3.1 发布内容。
+- **数字**：基表 118 → **119**（1.20.1 115 → **116**）；装 Ender IO 各 **+1**（120 / 117）。
+  纹理/模型 **295 / 171**（分支 **297 / 167**），配方 **285**；`check-data-paths` 285 recipes /
+  75 loot / 75 tags。
+- **验证**：两版 `./gradlew build --offline` + `check-textures.py` 通过；主线
+  `check-core-imports.py` / `check-data-paths.py` 通过。**未进游戏筛过**、未看 tooltip，JEI 未目视。
+
+## 上一批（2026-11-04 深夜，龙之进化）
 
 - **材料**：`materials.json` 新增 `draconium`（`gems`，`draconicevolution` 门控，tier `rare`、
   rarity 64、颜色 `8A5CF5`）；DE 不在场时整条不注册，基表 118 / 115 不变。
@@ -153,15 +171,18 @@ CraftTweaker）已完成。
   7 条人偶规则（熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者、
   **熔岩+狂风→狂风人、水+暴雪→暴雪人**，后两条只在 Thermal 在场时出现；**巫水+村民人偶→僵尸村民**）；
   糖水 / 蜂蜜 3 条（水+糖→糖水、糖水+蒲公英黄 30 秒→浓缩蜂蜜汁、玻璃瓶抽 250 mB→蜂蜜瓶）。
-- 筛子 7 输入 / 118 掉落（无科技模组：砂砾 / 沙 / 泥土 / 尘土 / 草方块 / 粉碎下界岩 / 粉碎末地石）；
-  +AE2 122 / 119（沙、砂砾各 1/16 陨石粉）；1.20.1 全装 +TiT 141、再加 AE2 145；
-  主线 Mek+Thermal 139、+AE2 143；**装龙之进化 +1**（粉碎末地石 1/8 破碎龙矿）。
-  三档筛网只影响耐久。
+- 筛子 7 输入 / 119 掉落（无科技模组：砂砾 / 沙 / 泥土 / 尘土 / 草方块 / 粉碎下界岩 / 粉碎末地石）；
+  **装末影接口 +1**（尘土 2% 无限粉）；+AE2 123 / 120（沙、砂砾各 1/16 陨石粉）；
+  1.20.1 全装 +TiT 142、再加 AE2 146；主线 Mek+Thermal 140、+AE2 144；
+  **装龙之进化 +1**（粉碎末地石 1/8 破碎龙矿）。三档筛网只影响耐久。
 - 矿物链：26 种材料（14 金属 + 12 矿物；ER 三条与 DE 的 draconium 走 `gems` 门控）；
   4 碎块 → 矿方块 → 熔炼成锭/对方矿物；
   锤矿砾/矿砂掉 4–6、粉尘掉自身。`gems` 材料只在对应模组在场时注册。
 - **泥土的石头来源**：四种石子（圆石/安山岩/花岗岩/闪长岩）每次 4-6 个、100% 出，
-  四个合成一块对应石头。
+  四个合成一块对应石头；**深板岩石子 50% × 3-5 个**，四个合成深板岩圆石，熔炉再烧成深板岩。
+  草方块表仍只出前四种。
+- **末影接口起步**：尘土 2% 出 `enderio:grains_of_infinity`（`sieve/dust_enderio.json`，`mod` 门控），
+  供虚空框架 / 电容；1.20.1 的 Primitive Alloy Smelter 另外要 6 个深板岩，由深板岩石子提供。
 - **泥土的树苗来源**：橡木 8% / 白桦 4% / 云杉 4% / 丛林 3% / 金合欢 3% +
   **樱花 3% / 红树 3% / 杜鹃 2% / 盛开的杜鹃 1%**（共 9 种、合计 31%；经典 Ex Nihilo 的树种子位）。
 - **竹子来源**：泥土筛 5% 出 `minecraft:bamboo`（原版竹子物品就是竹笋）；竹桶、竹坩埚、
@@ -282,7 +303,7 @@ CraftTweaker）已完成。
   分支 `libs/` 有 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME，
   用 `-PtechMods` 启动；DE 三个 jar 也在 `libs/`，用 `-PdeMods` 单独加载（两个 flag 可叠加）。
   删掉即回基表。热力人偶只在 `-PtechMods`（Thermal 在场）时出现；不带 `-PtechMods` 时桶只有 16 条。
-- **已知不一致**：1.20.1 分支筛表少 3 条钴（沙/砂砾/尘土各 1/64），基表 115 vs 主线 118；
+- **已知不一致**：1.20.1 分支筛表少 3 条钴（沙/砂砾/尘土各 1/64），基表 116 vs 主线 119；
   分支生成器缺失（没有 `generate_sieve_assets.py`），下次要么补脚本要么手工对齐。
 - **进游戏验收（剩余）**：M1.5–M10 的画面/右键手感（机器 GUI/自动输出抽屉/BER/筛料渲染/
   木桶竖棱/镐挖机器）、村民人偶/脑白金/糖水链/蜜蜂/JEI、热力人偶合成/右键、TiT 与 AE2 的实际筛出。
@@ -318,25 +339,27 @@ CraftTweaker）已完成。
 | 1.1.2 发布 | ✅ | 两版 `mod_version=1.1.2`；tag `v1.1.2` / `v1.1.2-1.20.1`；jar 版本与 sha 见 [release-1.1.2.md](release-1.1.2.md) |
 | 1.2.0 发布 | ✅ | 两版 `mod_version=1.2.0`；tag `v1.2.0` / `v1.2.0-1.20.1`；jar 版本与 sha 见 [release-1.2.0.md](release-1.2.0.md) |
 | 1.3.0 发布 | ✅ | 两版 `mod_version=1.3.0`；tag `v1.3.0` / `v1.3.0-1.20.1`；jar 版本与 sha 见 [release-1.3.0.md](release-1.3.0.md) |
+| 1.3.1 发布 | ✅ | 两版 `mod_version=1.3.1`；tag `v1.3.1` / `v1.3.1-1.20.1`；jar 版本与 sha 见 [release-1.3.1.md](release-1.3.1.md) |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | 木/骨钩耐久（1.21.1） | ✅ | 同一路径实测 `damage=1`；该线未改代码 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
-| `check-textures.py` | ✅ | 主线 294 模型 / 116 blockstate / 170 纹理；分支 296 / 116 / 166；无 `minecraft:item/*` |
-| `check-data-paths.py` | ✅ | 1.21.1：284 recipes / 75 loot / 75 tags；1.20.1 用 `--target 1.20.1` 验过（190 / 75 / 75） |
+| `check-textures.py` | ✅ | 主线 295 模型 / 116 blockstate / 171 纹理；分支 297 / 116 / 167；无 `minecraft:item/*` |
+| `check-data-paths.py` | ✅ | 1.21.1：285 recipes / 75 loot / 75 tags；1.20.1 用 `--target 1.20.1` 验过 |
 | `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 74 JSON / 7 nav |
-| 数据表 JSON | ✅ | 7 输入筛表 118（基表；装 ER +9、装 DE +1）、55 锤（装 ER +9、装 DE +3）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
+| 数据表 JSON | ✅ | 7 输入筛表 119（基表；装末影接口 +1、装 ER +9、装 DE +1）、55 锤（装 ER +9、装 DE +3）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
 | 热力人偶：注册 / 桶规则 | ✅ | 1.20.1 `-PtechMods`：`[barrel] 18`、dump = 熔岩+`blitz_doll`→`thermal:blitz`（和平 `thermal:blitz_rod`）、水+`blizz_doll`→`thermal:blizz`（和平 `thermal:blizz_rod`）；物品 `/summon` 出 Gale / Blizzard Doll；主线无 Thermal 时桶 16、物品不存在 |
 | 热力人偶：配方 / JEI / 手感 | ⚠️ | 两张工作台配方经 `/reload` 解析探测（坏 JSON 会报 `Couldn't parse`，恢复后无错）；未实际摆放合成、未进游戏右键、未看 JEI |
 | 村民人偶 / 脑白金 | ✅ / ⚠️ | 两个物品 `/summon` 正常、配方由 `runData` 生成；巫水+村民人偶→僵尸村民 在 dump 中；脑白金已改为 `EntityInteract` 抢先于交易界面（免 Shift），右键僵尸村民 / 傻子村民待实测 |
+| 脑白金 tooltip | ⚠️ | `BrainPlatinumItem#appendHoverText` + 中英 `item.exnihilosatellitium.brain_platinum.tooltip`；`build` 通过，**未进游戏看提示** |
 | 糖水 / 浓缩蜂蜜 / 蜜蜂 | ✅ / ⚠️ | 1.20.1 与 1.21.1：`[barrel] 18 / 16`；data merge 验证 30 秒延迟换液、浓缩蜂蜜生成蜜蜂（`PersistenceRequired`）；流体有 source block + 桶；桶内流体改为四面盒渲染（不再只画顶面）；真实右键链条 / 玻璃瓶抽取 / JEI 未测 |
 | 巫水 / 古代孢子 | ✅ | 满水+菌丝约 25 秒变巫水；蘑菇煲起酵；流体方块可放置；沙筛 1/128 |
 | 坩埚：熔点/热源/容量 | ✅ | RCON：19+9 条加载；篝火 0.25 / 熔炉 0.15 / 熄灭 0；容量 8000→3000 热改生效 |
 | 坩埚：显示 / Jade / JEI | ⚠️ | 熔料↔流体切换、Jade 剩余、两页 JEI 未目视 |
-| 筛子：基础表 | ✅ | 2026-11-04 审计：`[sieve] 7 inputs, 118 drops`（无科技模组），含树苗 9 种、竹子、海晶、菌岩孢子、下界合金碎片、**尘土 20% 骨粉**、**沙子 3% / 碎下界岩 6% 烈焰粉** |
+| 筛子：基础表 | ✅ | 2026-11-05 审计：`[sieve] 7 inputs, 119 drops`（无科技模组），含树苗 9 种、竹子、海晶、菌岩孢子、下界合金碎片、**尘土 20% 骨粉**、**沙子 3% / 碎下界岩 6% 烈焰粉**、**泥土 50% × 3-5 深板岩石子** |
 | 筛子：矿物/联动 | ✅ | Mek+Thermal 139；1.20.1 +TiT 141；+AE2 145；主线 +AE2 122；装 ER 各 +9（150 / 154）；RCON 概率与 JSON 一致，无 unknown item |
-| 筛子：草方块 / 泥土 | ✅ | 草方块 = 泥土 24 条 + 叶绿素碎矿 1%；四种石子 4-6 个 100% 出 |
+| 筛子：草方块 / 泥土 | ✅ | 草方块 = 泥土 24 条（不含深板岩石子）+ 叶绿素碎矿 1%；四种石子 4-6 个 100% 出；泥土另有深板岩石子 50% × 3-5 |
 | 筛子：手筛 / 机器 / JEI | ⚠️ | 实际出货手感、JEI 筛子页未目视（尤其 TiT/AE2 条目） |
 | 锤 / 钩 | ⚠️ | 6 锤 / 2 钩、左键唯一路径、耐久与 4–6 掉落逻辑就位；手感与 JEI 未验 |
 | 矿物链 | ✅ | 4 碎块→矿块→熔炼 RCON 通过；14 金属 + 11 矿物按候选解析；`gems` 缺模组整条不注册（含 ER 三条） |
@@ -348,7 +371,8 @@ CraftTweaker）已完成。
 | supported mods：Thermal | ✅ | 1.20.1：磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石 6/6 熔成 `thermal:*`；两只热力人偶的桶规则与物品注册通过 |
 | supported mods：Create / IE | ✅ | Create 锌锭 + 12 条 crushing；IE 五锭候选与 `forge:ores` 标签；多方块未跑 |
 | supported mods：Tinkers / TiT | ✅ | 钴 → `tconstruct:cobalt_ingot`；阿迪特/叶绿素 22 entries、RCON 熔炉两条都通过 |
-| supported mods：AE2 | ✅ | 1.21.1 118→122 / 1.20.1 141→145（+4，含沙/砂砾各 1/16 陨石粉）；RCON sand/gravel 含 `sky_dust 0.0625`；缺 AE2 静默跳过、无 unknown |
+| supported mods：AE2 | ✅ | 1.21.1 119→123 / 1.20.1 142→146（+4，含沙/砂砾各 1/16 陨石粉）；RCON sand/gravel 含 `sky_dust 0.0625`；缺 AE2 静默跳过、无 unknown |
+| supported mods：末影接口（Ender IO） | ✅ / ⚠️ | 两版 `sieve/dust_enderio.json`：尘土 2% 出 `enderio:grains_of_infinity`（`mod: enderio` + `patch`，缺 Ender IO 整文件跳过）；`build` + 守卫通过，**未真装 Ender IO 验过**、JEI 未目视；不新增基岩粉物品/基岩合成 |
 | supported mods：Extreme Reactors | ✅ | 1.20.1 ER 2.0.84 / 1.21.1 ER 2.4.9（+ ZeroCore）；yellorium 1/8、anglesite/benitoite 各 1/64 走 `gems` 门控；三档矿链熔成 ER 锭/晶体；RCON 熔炉三种产物 + `RecipesUsed` 验证；手筛/JEI 未目视 |
 | supported mods：龙之进化 | ✅ / ⚠️ | 两版真装 DE 3.1.4.633（1.21.1）+ 3.1.2.621（1.20.1），带 Brandons Core / CodeChicken Lib；主线 AE2+ER+DE `[materials] 18`、`[sieve] 132`、`[hammer] 67`；1.20.1 全装+Bamboo+DE `[materials] 26`、`[sieve] 174`、`[hammer] 91`；RCON 熔炉两版都把 `draconium_ore_sand` / `draconium_ore_dust` 熔成 `draconicevolution:draconium_ingot`；手筛/JEI 未目视 |
 | supported mods：BambooMod（仅 1.20.1） | ✅ | 0.6.2 真装：泥土/草各 +8（树苗/竹笋/作物）、砂砾 +3 宝石，全带 `mod` 门；`[sieve] 173`（+19）；RCON 泥土 32 / 砂砾 31；堆肥靠现有 leaves/saplings 标签；手筛/生长/JEI 未测 |
@@ -360,7 +384,7 @@ CraftTweaker）已完成。
 > 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 
-1. **1.3.0 商店收尾**：版本号/日期确认、tag `v1.3.0` / `v1.3.0-1.20.1` 已打；
+1. **1.3.1 商店收尾**：版本号/日期确认、tag `v1.3.1` / `v1.3.1-1.20.1` 已打；
    CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
 2. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器、村民人偶 / 脑白金 / 糖水链 / 蜜蜂 / 热力人偶；清单见「交接清单」。
@@ -369,7 +393,7 @@ CraftTweaker）已完成。
 5. **工程收尾**：advancement 树、CI、零测试（tech-debt P3 #37）；M8 月光魔法联动占位。
 6. **更多 supported mods**：AE2 充能赛特斯 / 天石粉（若所有者要）、TiT 其它矿（锆/锆石）、
    IE 1.21.1、其它科技模组；按 [data-format.md](data-format.md) §8 加候选/补丁（只接基础资源）。
-7. **修 1.20.1 分支筛表钴差异**：沙/砂砾/尘土各缺 1 条 1/64（基表 115 vs 118），
+7. **修 1.20.1 分支筛表钴差异**：沙/砂砾/尘土各缺 1 条 1/64（基表 116 vs 119），
    决定是补生成器还是手工对齐。
 
 ## 已拍板的决策
@@ -377,6 +401,10 @@ CraftTweaker）已完成。
 - **龙之进化（2026-11-04，所有者拍板）**：两版都做；完整矿链（破碎 → 矿块 → 熔炼）；
   唯一来源是**粉碎末地石 1/8**；不碰觉醒龙 / 混沌碎片。靠 DE 自己的 `c:ores/draconium`
   标签熔炼，不写自有熔炼变体。
+- **深板岩 / 末影接口起步（2026-11-05，所有者指定）**：泥土 **50% × 3-5** 深板岩石子
+  （4 → 深板岩圆石，熔炉 → 深板岩）；尘土 **2%** 出 `enderio:grains_of_infinity`
+  （1.20.1/1.21.1 的无限粉，`mod` 门控）。**不新增基岩粉物品、不写「粉 → 基岩」配方**；
+  1.12.2 的「基岩粉 / 基岩粉块」在 1.20.1/1.21.1 的 Ender IO 里不存在。
 - **1.1.1 堆肥/坩埚视觉（2026-11-04，所有者指定）**：堆肥 = 原版泥土模型 + 投入物按点数
   加权混色，成土后显示泥土本色；木坩埚在固体未熔完时显示被熔方块（树叶）模型，不中途
   切成水盒；成土时间 30 秒。
@@ -591,7 +619,7 @@ python3 scripts/generate_ore_variants.py             # 矿物链物品贴图 + �
 python3 art/items/tools/restyle.py                   # 锤/钩/蚕/熟蚕/尘土贴图 + 预览
 python3 art/blocks/crucible/restyle.py               # 坩埚模型/贴图（Creatio 现代化）
 python3 scripts/generate_machine_assets.py           # M10 机器方块/插件/GUI 贴图（模型归 datagen）
-./gradlew runServer   # RCON：localhost:25575 / eni（AE2/GuideME 在 run/mods 时 118 drops）
+./gradlew runServer   # RCON：localhost:25575 / eni（`[sieve]` 日志看 run/mods 当前掉落数）
 ./gradlew runClient
 ```
 

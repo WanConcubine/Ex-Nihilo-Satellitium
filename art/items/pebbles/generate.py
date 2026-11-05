@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Hand-authored 16x16 pebble textures (dirt sifting).
 
-Four kinds, one silhouette, four palettes: cobblestone (mid grey), andesite
-(light grey), diorite (near white) and granite (pink-brown). The shape is a
-small lump with the light coming from the top-left, matching the stone blocks
-they craft into.
+Five kinds, one silhouette, five palettes: cobblestone (mid grey), andesite
+(light grey), diorite (near white), granite (pink-brown) and deepslate (blue-grey,
+the 2026-11-05 Ender IO source). The shape is a small lump with the light coming
+from the top-left, matching the stone blocks they craft into.
 
     python3 art/items/pebbles/generate.py
     python3 art/items/pebbles/generate.py --out path/to/assets/exnihilosatellitium/textures/item
@@ -43,6 +43,7 @@ PALETTES = {
     "andesite_pebble": ("#4A4A4A", "#767676", "#9A9A9A", "#B6B6B6", "#D2D2D2"),
     "diorite_pebble": ("#6B6B6B", "#A8A8A8", "#CCCCCC", "#E4E4E4", "#F6F6F6"),
     "granite_pebble": ("#4A2E26", "#7A4A3C", "#9C6A5A", "#BC8A78", "#D8A896"),
+    "deepslate_pebble": ("#26262C", "#3C3C44", "#52525C", "#6A6A74", "#888892"),
 }
 
 ROOT = Path(__file__).resolve().parents[3]
