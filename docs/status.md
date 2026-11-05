@@ -37,6 +37,15 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 - **验证**：`./gradlew build --offline` + `check-textures.py` 通过；**未进游戏筛过**、未真装
   Ender IO、JEI 未目视。
 
+## 未发布（2026-11-05，木桶修复）
+
+- **满桶右键堆肥不再放方块**：可堆肥物品始终被视为「已处理」——`canUse` 对任意可堆肥物品返回
+  true；满桶 / 有流体时 `use()` 返回 `CONSUME`，客户端预测也按已处理走。树叶不再被放到桶顶。
+- **管道（物品 / 流体）**：BE 的 `getCapability` 现在返回 `ForgeCapabilities.ITEM_HANDLER`
+  （`BarrelItemHandler`：槽 0 堆肥输入、槽 1 泥土 / 固体产物输出）和
+  `ForgeCapabilities.FLUID_HANDLER`（tank）。
+- **验证**：`build` 通过；**未进游戏**测右键拦截 / 管道（没有装管道模组），JEI 未目视。
+
 ## 上一批（2026-11-04 深夜，龙之进化）
 
 - `materials.json` 新增 `draconium`（`gems`，`draconicevolution` 门控）：唯一来源

@@ -6,7 +6,9 @@ import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModFluids;
+import com.kaifengcrt.exnihilosatellitium.platform.barrel.BarrelItemHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -33,7 +35,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
@@ -150,6 +154,8 @@ public class BarrelBlockEntity extends BlockEntity {
     @Nullable
     private Fluid pendingFluidTo;
     private int pendingFluidTicks;
+    /** Pipe/hopper view: slot 0 compost input, slot 1 dirt/solid output. */
+    private final BarrelItemHandler itemHandler = new BarrelItemHandler(this);
 
     public BarrelBlockEntity(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.BARREL.get(), pos, state);
@@ -157,6 +163,17 @@ public class BarrelBlockEntity extends BlockEntity {
 
     public FluidTank getTank() {
         return this.tank;
+    }
+
+    @Override
+    public <T> LazyOptional<T> getCapability(final Capability<T> capability, @Nullable final Direction side) {
+        if (capability == ForgeCapabilities.ITEM_HANDLER) {
+            return LazyOptional.of(() -> this.itemHandler).cast();
+        }
+        if (capability == ForgeCapabilities.FLUID_HANDLER) {
+            return LazyOptional.of(() -> this.tank).cast();
+        }
+        return super.getCapability(capability, side);
     }
 
     public int getCompostProgress() {
@@ -259,9 +276,83 @@ public class BarrelBlockEntity extends BlockEntity {
         if (this.itemMixRule(stack) != null) {
             return true;
         }
-        return this.tank.getFluidAmount() == 0
-                && this.compostProgress < COMPOST_MAX
-                && stack.is(ModTags.Items.COMPOSTABLE);
+        // A compostable item is always "handled": when the barrel is full the
+        // use() path returns CONSUME, which must block the block placement that
+        // would otherwise put the leaf on top of the barrel.
+        return stack.is(ModTags.Items.COMPOSTABLE);
+    }
+
+    /** True while a pipe may add compost: empty tank, no solid/dirt, room left. */
+    public boolean canAcceptCompost() {
+        return !this.dirtReady && !this.hasSolid()
+                && this.tank.getFluidAmount() == 0
+                && this.compostProgress < COMPOST_MAX;
+    }
+
+    public boolean canInsertCompost(final ItemStack stack) {
+        return this.canAcceptCompost() && stack.is(ModTags.Items.COMPOSTABLE);
+    }
+
+    /**
+     * Pipe/hopper insertion: credits up to {@code maxCount} compostable items.
+     * Returns how many items were accepted; the caller shrinks its own stack.
+     * The last accepted item may be credited partially, exactly like a hand use.
+     */
+    public int insertCompost(final ItemStack stack, final int maxCount, final boolean simulate) {
+        if (maxCount <= 0 || !this.canInsertCompost(stack)) {
+            return 0;
+        }
+        final int value = Math.max(1, CompostRegistry.valueOf(stack));
+        final int room = COMPOST_MAX - this.compostProgress;
+        final int accepted = Math.min(maxCount, (room + value - 1) / value);
+        if (accepted <= 0) {
+            return 0;
+        }
+        if (simulate) {
+            return accepted;
+        }
+        final int credited = Math.min(room, accepted * value);
+        this.compostProgress += credited;
+        this.addCompostIngredient(stack.getItem(), credited);
+        if (this.compostProgress >= COMPOST_MAX) {
+            this.compostTicks = COMPOST_TICKS;
+        }
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.COMPOSTER_FILL,
+                    SoundSource.BLOCKS, 1.0F, 0.8F + this.level.random.nextFloat() * 0.4F);
+        }
+        this.setChanged();
+        this.sync();
+        return accepted;
+    }
+
+    /** The ready dirt or solid product, without removing it (pipes peek here). */
+    public ItemStack getOutputStack() {
+        if (this.dirtReady) {
+            return new ItemStack(Items.DIRT);
+        }
+        return this.solid.isEmpty() ? ItemStack.EMPTY : this.solid.copy();
+    }
+
+    /** Pipe/hopper extraction: takes the dirt or solid product, or empty. */
+    public ItemStack extractOutput(final boolean simulate) {
+        final ItemStack out = this.getOutputStack();
+        if (out.isEmpty() || simulate) {
+            return out;
+        }
+        if (this.dirtReady) {
+            this.dirtReady = false;
+            this.clearCompost();
+        } else {
+            this.solid = ItemStack.EMPTY;
+        }
+        if (this.level != null) {
+            this.level.playSound(null, this.worldPosition, SoundEvents.ITEM_PICKUP,
+                    SoundSource.BLOCKS, 0.6F, 1.2F);
+        }
+        this.setChanged();
+        this.sync();
+        return out;
     }
 
     /** Server-side interaction. */
@@ -345,7 +436,12 @@ public class BarrelBlockEntity extends BlockEntity {
         }
 
         if (this.tank.getFluidAmount() > 0 || this.compostProgress >= COMPOST_MAX) {
-            return InteractionResult.PASS;
+            // The barrel owns compostable items even when it cannot take more:
+            // CONSUME blocks the vanilla block placement, PASS lets other blocks
+            // be placed on top as usual.
+            return stack.is(ModTags.Items.COMPOSTABLE)
+                    ? InteractionResult.CONSUME
+                    : InteractionResult.PASS;
         }
         if (!stack.is(ModTags.Items.COMPOSTABLE)) {
             return InteractionResult.PASS;
