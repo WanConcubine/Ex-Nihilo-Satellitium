@@ -300,8 +300,13 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   叶绿素是 `gems`，没有熔融液体，不写熔炼。
 - 应用能源 2（`ae2`，两版）：不新增材料，直接给筛沙补丁 `sieve/sand_ae2.json`
   （根级 `"mod": "ae2"` + `"patch": true`）：`ae2:certus_quartz_crystal` **1/6**、
-  `ae2:certus_quartz_dust` **1/12**；没装 AE2 时整文件跳过，基表仍是 115 条。
+  `ae2:certus_quartz_dust` **1/12**；没装 AE2 时整文件跳过，基表仍是 116 条。
   充能赛特斯 / 天石粉不做：前者用 AE2 自己的 `ae2:charger` 充能，后者来自陨石天石。
+- **末影接口（`enderio`，beta）**：不新增材料，独立补丁 `sieve/dust_enderio.json`
+  （根级 `"mod": "enderio"` + `"patch": true`）：尘土 **2%** 出 `enderio:grains_of_infinity`
+  （无限粉）。没装时整文件跳过；**不新增基岩粉物品、不写「粉 → 基岩」**。
+- **深板岩石子**（无门控）：`sieve/dirt.json` 泥土 50% × 3-5；4 个 → `cobbled_deepslate`，
+  熔炉 → `deepslate`。草方块表不加。
 - **ER 矿石识别（例外）**：ER 的 `yellorite_ore` 同时登记在 `forge:ores/yellorite` 和
   `forge:ores/uranium`；我们的 yellorium 矿块也进这两个 tag（块 + 物品），`yellorium_broken`
   进 `forge:raw_materials/yellorium`（及根 tag）。这样 Mekanism `enriching` / IE crusher / Create crushing

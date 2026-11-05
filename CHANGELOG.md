@@ -1,5 +1,22 @@
 # 更新记录
 
+## 1.3.1 — 2026-11-05（深板岩 / 末影接口起步 + 脑白金提示）
+
+### 新增
+
+- **深板岩石子**（无门控）：泥土筛 **50% × 3-5**；4 个 → `minecraft:cobbled_deepslate`，
+  熔炉烧成 `minecraft:deepslate`。草方块表不加。1.20.1 的 Primitive Alloy Smelter 要 6 深板岩。
+- **末影接口起步**：`sieve/dust_enderio.json`（`mod: enderio` + `patch`）——尘土 **2%** 出
+  `enderio:grains_of_infinity`（1.20.1/1.21.1 的无限粉）；不新增基岩粉物品/基岩合成。
+
+### 改进
+
+- **脑白金提示**：物品介绍新增「对傻子村民使用使其变为普通村民」；中英双语 tooltip。
+
+### 数据
+
+- 筛表基表 115 → **116**；装 Ender IO +1（117）；纹理/模型 297 / 167。
+
 ## 1.3.0 — 2026-11-05（龙之进化联动）
 
 > 新增 **Draconic Evolution（龙之进化）** 的 `draconium` 材料：粉碎末地石 1/8 单源 →

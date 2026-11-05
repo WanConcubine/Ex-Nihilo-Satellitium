@@ -6,20 +6,38 @@
 ## 一句话
 
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.3.0 已发**（tag `v1.3.0-1.20.1`）；1.0.0–1.3.0 的商店上传待所有者。
-**当前批次（2026-11-04 深夜）**：龙之进化（DE）龙尘材料；**粉碎末地石 1/8** 单源 →
+**1.3.1 已发**（tag `v1.3.1-1.20.1`）；1.0.0–1.3.1 的商店上传待所有者。
+**当前批次（2026-11-05）**：**深板岩石子 + 末影接口起步**——泥土 50% × 3-5 深板岩石子
+（4 → 深板岩圆石）；尘土 2% 出 `enderio:grains_of_infinity`（`mod` 门控）；不新增基岩粉物品、
+不写「粉 → 基岩」。
+上一批（2026-11-04 深夜）：龙之进化（DE）龙尘材料；**粉碎末地石 1/8** 单源 →
 破碎龙矿 → 矿块 → DE 的 `forge:ores/draconium` 标签熔成龙锭；不碰觉醒龙 / 混沌碎片。
 上一批（1.2.0）：**内容更新**——Extreme Reactors、BambooMod、
 骨粉 / 烈焰粉、ER 矿石/原矿标签与匠魂 yellorium 熔炼/铸造。
 上一批（1.1.1）：木桶堆肥“原版泥土模型 + 混合投入物颜色”、坩埚熔料真实方块模型、成土 30 秒。
 **联动**：26 种材料（14 金属 + 12 矿物；ER 的 yellorium 与 DE 的 draconium 走 `gems` 门控）；
-Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 / BambooMod 全部可选。
-**当前表尺**：筛子 7 输入 / 115 掉落（无科技模组；沙/砂砾/尘土比主线少 3 条钴，历史差异）；
-+AE2 119；全装 +TiT 141、再加 AE2 145；装 ER 各 +9（150 / 154）；装 BambooMod +19（全装 173）；
-**装龙之进化 +1**（全装 + Bamboo 174）；锤表 88（全装 +ER；装 DE 91）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
+Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 / BambooMod /
+末影接口（Ender IO，beta）全部可选。
+**当前表尺**：筛子 7 输入 / 116 掉落（无科技模组；沙/砂砾/尘土比主线少 3 条钴，历史差异）；
+装末影接口 +1（117）；+AE2 120；全装 +TiT 142、再加 AE2 146；装 ER 各 +9（151 / 155）；
+装 BambooMod +19（全装 174）；**装龙之进化 +1**（全装 + Bamboo 175）；再装末影接口各再 +1。
+锤表 88（全装 +ER；装 DE 91）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
 
-## 当前批次（2026-11-04 深夜，龙之进化）
+## 当前批次（2026-11-05，深板岩 / 末影接口起步）
+
+- **深板岩石子**（无门控）：`sieve/dirt.json` 泥土 **50% × 3-5**；4 个 → `minecraft:cobbled_deepslate`
+  （2×2），熔炉烧成 `minecraft:deepslate`。草方块表不加。1.20.1 的 Primitive Alloy Smelter
+  要 **6 个深板岩**，这是它的空岛来源。
+- **末影接口起步**：`sieve/dust_enderio.json`（`mod: enderio` + `patch`）——尘土 **2%** 出
+  `enderio:grains_of_infinity`（1.20.1/1.21.1 的无限粉）；不新增基岩粉物品、不写「粉 → 基岩」。
+- **脑白金提示**：`BrainPlatinumItem#appendHoverText` + 中英 `item.exnihilosatellitium.brain_platinum.tooltip`
+  （「对傻子村民使用使其变为普通村民」）；1.3.1 发布内容。
+- **数字**：基表 115 → **116**；装 Ender IO **+1**（117）；纹理/模型 **297 / 167**。
+- **验证**：`./gradlew build --offline` + `check-textures.py` 通过；**未进游戏筛过**、未真装
+  Ender IO、JEI 未目视。
+
+## 上一批（2026-11-04 深夜，龙之进化）
 
 - `materials.json` 新增 `draconium`（`gems`，`draconicevolution` 门控）：唯一来源
   `sieve/crushed_end_stone_draconicevolution.json`（根级 `mod` + `patch`）**粉碎末地石 1/8**；
@@ -120,10 +138,10 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
   主工作区 `/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium` 是 `main`。两条线都已推 origin。
 - **构建**：`JAVA_HOME=/Users/kaifengcrt/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home ./gradlew build`。
 - **客户端**：`./gradlew runClient -PdevMods -PtechMods`；**专用服**：`./gradlew runServer -PtechMods`
-  （`libs/` 有 jar 才加载；不带 `-PtechMods` 是 115 / 55 的基表）。
+  （`libs/` 有 jar 才加载；不带 `-PtechMods` 是 116 / 55 的基表）。
 - **先跑**：`./gradlew build` + `python3 scripts/check-textures.py`；分支没有 core/data 守卫脚本，
   涉及数据表时回主线跑 `check-data-paths.py --target 1.20.1`。
-- **已知不一致**：沙/砂砾/尘土各少 1 条钴（1/64），基表 115 vs 主线 118；分支没有
+- **已知不一致**：沙/砂砾/尘土各少 1 条钴（1/64），基表 116 vs 主线 119；分支没有
   `generate_sieve_assets.py`，要么补脚本要么手工对齐。
 - **dev 环境**：`libs/` 有 Mek/Thermal/Create/IE/Tinkers/TiT + AE2/GuideME + ER/ZeroCore + BambooMod；删掉即回基表。
   热力人偶只在 Thermal 在场（`-PtechMods`）时注册；不带时桶 16 条、物品不存在。
@@ -181,7 +199,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 |---|---|---|
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
-| `check-textures.py` | ✅ | 290 模型 / 113 blockstate / 163 纹理；七个子模型只引用 vanilla block 贴图 |
+| `check-textures.py` | ✅ | 297 模型 / 116 blockstate / 167 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装 + ER + BambooMod：`[materials] 25`、`[sieve] 7 inputs / 173 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |
@@ -207,7 +225,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 2. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶（含热力两只、村民）+
    糖水链/养蜂、四台机器、自动输出抽屉、BER 动画、JEI 页面、TiT/AE2 实际筛出。
 3. **修分支筛表钴差异**：沙/砂砾/尘土各补 1 条 1/64（或补 `generate_sieve_assets.py`），
-   与主线基表 118 对齐。
+   与主线基表 119 对齐。
 4. **P4 JEI 同步 + fixture CI**；P3 状态机拆分；advancement / CI。
 5. **更多 supported mods**：AE2 充能赛特斯 / 天石粉、TiT 其它矿、IE 1.21.1。
 
