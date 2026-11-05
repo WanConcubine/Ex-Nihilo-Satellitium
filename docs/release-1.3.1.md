@@ -5,12 +5,14 @@
 > 性质：**内容更新**——深板岩石子 + 末影接口（Ender IO）起步 + 脑白金物品提示。
 > 上一版：1.3.0（2026-11-05）。
 > 已推送：`main` d7bdadb / `1.20.1-forge` a982fc2；tag `v1.3.1` / `v1.3.1-1.20.1`（2026-11-05）。
+> 注：原始 1.3.1 jar 已被后续构建覆盖；下表 sha 为 2026-11-05 按 tag 重建的 jar，
+> 内容对应 tag 源码，字节可能因构建时间戳与原始构建不同。
 
 ## 产物
 
 | 线 | 加载器 | jar | 大小 | sha256 |
 |---|---|---|---|---:|
-| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.3.1.jar` | 915 KB | `938194093b7b155b6f9157aa1713d963958c65238e4e31fef09d36f6c15bfe09` |
+| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.3.1.jar` | 915 KB | `23b4117c55aae8699b4c3c79a667ccec8ebdd4dc1a77a12d415a6761e57ea5c4` |
 | `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.3.1.jar` | 920 KB | `f814f789a248abca2ce2d58d7e2350a8e5a6a4c1667e5c01edc06367523b65c5` |
 
 两份 jar 都包含 `LICENSE`、`THIRD-PARTY.md`、`icon.png` 和 `META-INF/*mods.toml`；
