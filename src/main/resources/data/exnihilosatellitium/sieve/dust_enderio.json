@@ -1,0 +1,11 @@
+{
+  "mod": "enderio",
+  "patch": true,
+  "input": "exnihilosatellitium:dust",
+  "outputs": [
+    {
+      "item": "enderio:grains_of_infinity",
+      "chance": 0.02
+    }
+  ]
+}

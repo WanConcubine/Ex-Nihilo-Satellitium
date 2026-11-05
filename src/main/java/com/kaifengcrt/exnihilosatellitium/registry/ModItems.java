@@ -194,9 +194,13 @@ public final class ModItems {
             ITEMS.register("diorite_pebble", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> GRANITE_PEBBLE =
             ITEMS.register("granite_pebble", () -> new Item(new Item.Properties()));
+    /** 2026-11-05: deepslate source for the Primitive Alloy Smelter. */
+    public static final RegistryObject<Item> DEEPSLATE_PEBBLE =
+            ITEMS.register("deepslate_pebble", () -> new Item(new Item.Properties()));
 
     public static final List<RegistryObject<Item>> PEBBLES = List.of(
-            COBBLESTONE_PEBBLE, ANDESITE_PEBBLE, DIORITE_PEBBLE, GRANITE_PEBBLE);
+            COBBLESTONE_PEBBLE, ANDESITE_PEBBLE, DIORITE_PEBBLE, GRANITE_PEBBLE,
+            DEEPSLATE_PEBBLE);
 
     public static final RegistryObject<Item> GRASS_SEEDS =
             ITEMS.register("grass_seeds", () -> new GrassSeedsItem(new Item.Properties()));

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "exnihilosatellitium:deepslate_pebble"
+    }
+  },
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "result": {
+    "item": "minecraft:cobbled_deepslate"
+  },
+  "show_notification": true
+}
