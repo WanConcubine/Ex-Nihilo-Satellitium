@@ -93,9 +93,13 @@ public final class ModItems {
             ITEMS.register("diorite_pebble", () -> new Item(new Item.Properties()));
     public static final DeferredHolder<Item, Item> GRANITE_PEBBLE =
             ITEMS.register("granite_pebble", () -> new Item(new Item.Properties()));
+    /** 2026-11-05: deepslate source for the Ender IO 1.20.1 primitive smelter. */
+    public static final DeferredHolder<Item, Item> DEEPSLATE_PEBBLE =
+            ITEMS.register("deepslate_pebble", () -> new Item(new Item.Properties()));
 
     public static final List<DeferredHolder<Item, Item>> PEBBLES = List.of(
-            COBBLESTONE_PEBBLE, ANDESITE_PEBBLE, DIORITE_PEBBLE, GRANITE_PEBBLE);
+            COBBLESTONE_PEBBLE, ANDESITE_PEBBLE, DIORITE_PEBBLE, GRANITE_PEBBLE,
+            DEEPSLATE_PEBBLE);
 
     /** M6: grass seeds turn dirt into grass; hammered netherrack / end stone. */
     public static final DeferredHolder<Item, Item> GRASS_SEEDS =

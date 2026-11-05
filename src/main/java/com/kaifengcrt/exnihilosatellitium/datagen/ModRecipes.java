@@ -330,6 +330,7 @@ public final class ModRecipes extends RecipeProvider {
         pebble(out, ModItems.ANDESITE_PEBBLE.get(), Items.ANDESITE);
         pebble(out, ModItems.DIORITE_PEBBLE.get(), Items.DIORITE);
         pebble(out, ModItems.GRANITE_PEBBLE.get(), Items.GRANITE);
+        pebble(out, ModItems.DEEPSLATE_PEBBLE.get(), Items.COBBLED_DEEPSLATE);
     }
 
     private static void pebble(final RecipeOutput out, final ItemLike pebble, final ItemLike block) {

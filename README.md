@@ -21,8 +21,8 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.3.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
-| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.3.0.jar`（由 `1.20.1-forge` 分支构建） |
+| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.3.1.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.3.1.jar`（由 `1.20.1-forge` 分支构建） |
 
 1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
 2. 把 jar 放进 `mods/`。
@@ -35,7 +35,7 @@
    **工匠巧思（Tinkers' Thinking）**（金属锭/匠魂熔炼/两种矿石）。
    所有联动都是可选的，没装就回退自有物品。
 
-1.3.0 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
+1.3.1 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术栈
 
@@ -64,7 +64,7 @@
 - [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运插件（服务端已验证，GUI 待验收）
 - [x] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 接管标签 / 掉落表 / 143 条配方 + 74 blockstate + 201 模型；语言仍手写）
 - [ ] M8 与「月光魔法」联动
-- [x] M9 发布（1.3.0 已打 tag；CurseForge / Modrinth 上传待所有者）
+- [x] M9 发布（1.3.1 已打 tag；CurseForge / Modrinth 上传待所有者）
 
 ## 文档
 
@@ -130,6 +130,10 @@ python3 scripts/check-textures.py   # 确保没有原版贴图占位
 | [Applied Energistics 2](https://modrinth.com/mod/ae2)（两版） | 赛特斯石英 | 筛沙 1/6 → `ae2:certus_quartz_crystal`、1/12 → `ae2:certus_quartz_dust`；独立 `sieve/sand_ae2.json` 带 `mod` 门补丁，没装时整文件跳过，不注册自有物品 |
 | [BambooMod](https://www.mcmod.cn/class/109.html)（仅 1.20.1） | 树苗 / 竹笋 / 作物 / 宝石 | 泥土与草方块各 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），砂砾 3 宝石各 1/64；全部 `mod` 门控；堆肥由 leaves/saplings 标签覆盖 |
 | [Extreme Reactors](https://modrinth.com/mod/extreme-reactors) + [ZeroCore](https://modrinth.com/mod/zerocore)（两版） | 黄铀 / 铅矾 / 蓝锥矿 | 三条 `gems` 门控材料：三档矿链 → 熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；没装 ER 时整条不注册（基表不变） |
+| [Ender IO](https://modrinth.com/mod/enderio)（末影接口，两版 beta） | 无限粉（无矿） | 尘土 2% → `enderio:grains_of_infinity`（`sieve/dust_enderio.json`，`mod` 门控）；不新增物品、不写「粉 → 基岩」；1.20.1 的原始合金炉另需 6 深板岩 |
+
+**深板岩石子**是基础内容（不依赖模组）：泥土 50% × 3-5，4 个 → 深板岩圆石，熔炉烧成深板岩；
+草方块表不加。它同时供给 1.20.1 的原始合金炉和 1.21.1 的深板岩火焰合成。
 
 加模组支持 = 在 `materials.json` 对应材料里加一条 `{"item": "...", "mod": "..."}`，
 再跑 `python3 scripts/generate_ore_variants.py` 和 `./gradlew runData`。**对方物品本身就是基础资源时**

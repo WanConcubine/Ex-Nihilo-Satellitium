@@ -161,9 +161,12 @@ def main(argv=None):
     # (chlorophyll, from Tinkers' Thinking).  Built from dirt.json (the read-only
     # source, so --out previews work) instead of being copied by hand, so the two
     # soils cannot drift apart; the pieces stay mod-gated like every gem entry.
+    # Deepslate pebbles are deliberately dirt-only (2026-11-05): grass sifting
+    # keeps the four classic pebbles, dirt carries the Ender IO deepslate line.
     soil = json.loads((SOURCE / f"data/{MOD_ID}/sieve/dirt.json").read_text(encoding="utf-8"))
     grass = [entry for entry in soil["outputs"]
-             if not entry.get("item", "").startswith(f"{MOD_ID}:chlorophyll_")]
+             if not entry.get("item", "").startswith(f"{MOD_ID}:chlorophyll_")
+             and entry.get("item") != f"{MOD_ID}:deepslate_pebble"]
     for material in GEMS:
         if material["id"] != "chlorophyll":
             continue

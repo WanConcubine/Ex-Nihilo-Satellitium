@@ -1895,3 +1895,28 @@ AE2 是空岛最典型的「没有筛子就永远拿不到」的科技模组：�
 RCON 熔炉把 `draconium_ore_sand` 熔成 `draconicevolution:draconium_ingot`。
 1.20.1 分支真装 DE 3.1.2.621 + Brandons Core 3.2.1.302 + CodeChicken Lib 4.4.0.528：
 见 status 验证表。手筛与 JEI 未目视。
+
+## 54. 深板岩石子 / 末影接口起步（2026-11-05，两版）
+
+**为什么**：Ender IO（`enderio`）两版都只发 beta（1.21.1 8.2.12-beta / 1.20.1 6.2.18-beta）。
+它的所有机器都要 `enderio:void_chassis`（4 铁 + 4 无限粉）；1.20.1 的机器还要玄钢，
+开局只能先做 `primitive_alloy_smelter`，配方要 **6 个 `minecraft:deepslate`**。
+1.21.1 的无限粉可火烤深板岩（40%，消耗）或基岩（80%）；1.20.1 只认基岩（50%）。
+我们的空岛原本既没有深板岩也没有基岩，所以 1.20.1 必卡、1.21.1 看地图有没有基岩。
+
+**深板岩石子（无门控）**：`sieve/dirt.json` 加一条 50% × 3-5；4 个 → `cobbled_deepslate`（2×2），
+熔炉 → `deepslate`。草方块表由 `generate_sieve_assets.py` 从 dirt 生成，明确过滤这条，
+保持「泥土 / 草方块」两套石头来源的区分。深板岩在 1.21.1 的火焰合成里会被消耗，所以保持
+`dirt` 可再生入口。
+
+**末影接口无限粉（mod 门控）**：`sieve/dust_enderio.json`（根级 `"mod": "enderio"` +
+`"patch": true`）给尘土 **2%** `enderio:grains_of_infinity`。没有装 Ender IO 时整文件跳过，
+基表不变。**不新增基岩粉物品、不写「粉 → 基岩」**：1.12.2 的 `dustBedrock`（基岩粉）/
+`compressed1xDustBedrock`（基岩粉块）在 1.20.1/1.21.1 的 6.x/8.x 已不存在，只剩无限粉；
+Ender IO 自己的虚空框架 / 电容 / 无限杆配方会消耗它。
+
+**数字**：基表 118 → 119（1.20.1 115 → 116）；装 Ender IO 各 +1（120 / 117）。
+纹理/模型 295 / 171（分支 297 / 167）；配方 285。
+
+**验证**：两版 `build` + 纹理 / 核心 / 数据守卫通过；**未进游戏筛过、未真装 Ender IO**，
+JEI 未目视。
