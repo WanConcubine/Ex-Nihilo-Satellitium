@@ -1,6 +1,6 @@
 # Cookbook: Common Changes
 
-> Last checked: 2026-11-03 · Applies to: 1.21.1 / 1.20.1
+> Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 
 > The seven tables are written **exactly the same way** for datapacks and KubeJS; KJS just puts the files under `kubejs/data/`.
 > Below, `data/mypack/...` stands for the datapack path; for KJS, swap in `kubejs/data/mypack/...`.
@@ -153,10 +153,11 @@ StartupEvents.registry('item', event => {
 Then write it into the drops in `kubejs/data/mypack/sieve/*.json`, or write a crafting recipe for it.
 It will **not** enter this mod's material chain / creative tab group.
 
-## 13. Add a 21st material
+## 13. Add a new material
 
 None of the three routes can do this. The material table is `materials.json` inside the jar and is read at registration time;
-a new material also needs a texture, model, recipe, tag, and JEI group. You'd have to change the mod source or wait for later schema support.
+a new material also needs a texture, model, recipe, tag, and JEI group. You'd have to change the mod source, or open an
+issue/PR following [Material Chain & Mod Integration](material-chain.md).
 
 ## 14. Change several tables at once
 

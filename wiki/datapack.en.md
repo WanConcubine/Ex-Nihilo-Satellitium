@@ -1,6 +1,6 @@
 # Datapack: seven gameplay tables
 
-> Last checked: 2026-11-03 · Applies to: 1.21.1 / 1.20.1
+> Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 
 The datapack is the **recommended way**: no code, takes effect on `/reload`, and the server is the authority.
 
@@ -38,6 +38,8 @@ saves/<世界名>/datapacks/my_pack/
 - It only counts as loaded once `/datapack list` shows `file/my_pack`.
 - The seven tables scan **all namespaces**, so `mypack` does not have to equal `exnihilosatellitium`.
 - After editing, `/reload`; the log first shows `waiting for tags`, then the full entry counts — **the second one is authoritative**.
+- Ready-to-copy example pack:
+  [examples/datapack](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/tree/main/examples/datapack).
 
 ## 2. Common fields
 
@@ -390,7 +392,8 @@ In 1.20.1 change `result` to `{ "item": "minecraft:iron_ingot", "count": 1 }`.
 - `/exnihilo dump <table>` prints the whole table as sorted text (`sieve` / `hammer` / `crook` / `barrel` /
   `compost` / `crucible_melt` / `crucible_heat`), which you can use to confirm exactly which rows a patch changed.
 - `/exnihilo customize ...` is a P1 internal debug entry point (it queues directly into the runtime overlay, writes no files,
-  and is cleared on restart); it is not a player feature. The official KJS / CT entry points are P2 / P3 in the roadmap.
+  and is cleared on restart); it is not a player feature. The official KJS / CT entry points are
+  [KubeJS](kubejs.md) / [CraftTweaker](crafttweaker.md).
 
 Log prefixes:
 
@@ -402,5 +405,6 @@ Log prefixes:
 ## 12. Client-side JEI
 
 - Single player / LAN: JEI reads the server tables, so datapack changes show up.
-- **Dedicated server**: the client cannot read server datapacks, so JEI still shows the values built into the jar; actual drops/crafting follow the server.
+- **Dedicated server**: the client cannot read server datapacks, so JEI only shows client-local data
+  (jar defaults or the client's own datapacks); actual drops/crafting follow the server.
   This is a current limitation, not a datapack that failed to load.

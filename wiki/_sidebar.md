@@ -2,6 +2,7 @@
 - [数据包](datapack.md)
 - [KubeJS](kubejs.md)
 - [CraftTweaker](crafttweaker.md)
+- [材料链与联动](material-chain.md)
 - [常见任务](cookbook.md)
 - [排错](troubleshooting.md)
 - [维护契约](MAINTAINING.md)

@@ -1,6 +1,6 @@
 # 排错与日志
 
-> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> 最后核对：2026-11-06 · 适用：1.21.1 / 1.20.1
 
 ## 1. 先做这 4 步
 
@@ -57,8 +57,8 @@
 ## 5. JEI 和实际不一致
 
 - 单人 / 局域网：JEI 读服务端表，应该一致。
-- **专用服**：客户端读不到服务端数据包，JEI 显示 jar 内置值；实际以服务端为准。
-  这不是数据包没生效。
+- **专用服**：客户端读不到服务端数据包，JEI 只显示客户端本地资源（jar 内置值或客户端自己的数据包）；
+  实际以服务端为准。这不是数据包没生效。
 - 改完 `/reload` 后 JEI 没刷新：重开 JEI 界面或重进世界。
 
 ## 6. KubeJS 专属
@@ -66,7 +66,7 @@
 | 现象 | 检查 |
 |---|---|
 | `kubejs/data` 的 JSON 不生效 | 路径必须是 `kubejs/data/<ns>/sieve/...`，不是 `kubejs/sieve/...` |
-| 脚本改了配方但表没变 | 七张表没有 KJS API；表只认 JSON |
+| 脚本改了配方但表没变 | 脚本没在 `/reload` 后重跑；用 `add` 改已有 key 会被忽略（改用 `replace`）；或绑定名写错 |
 | 启动脚本报错 | 看 `logs/kubejs/startup.log` |
 | 服务器脚本报错 | 看 `logs/kubejs/server.log` |
 | `/reload` 后 `kubejs/data` 没重读 | 退出重进世界 / 重启服务器（取决于 KJS 版本） |
@@ -76,7 +76,7 @@
 
 | 现象 | 检查 |
 |---|---|
-| 想改筛子/桶/堆肥 | **做不到**；用数据包或 KJS |
+| 想改筛子/桶/堆肥 | 用 `mods.exnihilosatellitium.*`（Sieve / Barrel / Compost 等）；本模组没有 CT recipe type，不要写 `<recipetype:...>` |
 | `<recipetype:exnihilosatellitium:sieve>` 报错 | 本模组没有注册 CT recipe type |
 | 脚本语法错误 | 看 `logs/crafttweaker.log`，ZenScript 会带行号 |
 | 配方删不掉 | 用输出删 `craftingTable.remove(<item:...>)`；确认 CT 版本用 `craftingTable` 而不是 1.12 的 `recipes` |
