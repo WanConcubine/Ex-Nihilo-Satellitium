@@ -1,6 +1,6 @@
 # Troubleshooting and Logs
 
-> Last checked: 2026-11-03 · Applies to: 1.21.1 / 1.20.1
+> Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 
 ## 1. Do these 4 steps first
 
@@ -57,8 +57,8 @@ Check the current value with `/exnihilo compost <item>`:
 ## 5. JEI doesn't match the actual behavior
 
 - Singleplayer / LAN: JEI reads the server tables, so they should match.
-- **Dedicated server**: the client can't read the server datapacks, so JEI shows the jar's built-in values;
-  the server is authoritative. This doesn't mean the datapack isn't working.
+- **Dedicated server**: the client can't read the server datapacks, so JEI only shows client-local data
+  (jar defaults or the client's own datapacks); the server is authoritative. This doesn't mean the datapack isn't working.
 - JEI doesn't refresh after `/reload` and changes: reopen the JEI screen or re-enter the world.
 
 ## 6. KubeJS-specific
@@ -66,7 +66,7 @@ Check the current value with `/exnihilo compost <item>`:
 | Symptom | Check |
 |---|---|
 | JSON in `kubejs/data` doesn't take effect | The path must be `kubejs/data/<ns>/sieve/...`, not `kubejs/sieve/...` |
-| A script changed a recipe but the table didn't change | The seven tables have no KJS API; the tables only read JSON |
+| A script changed a table but nothing happened | The script did not run after `/reload`; `add` on an existing key is ignored (use `replace`); or the binding name is wrong |
 | Startup script errors | Check `logs/kubejs/startup.log` |
 | Server script errors | Check `logs/kubejs/server.log` |
 | `kubejs/data` isn't re-read after `/reload` | Quit and re-enter the world / restart the server (depending on the KJS version) |
@@ -76,7 +76,7 @@ Check the current value with `/exnihilo compost <item>`:
 
 | Symptom | Check |
 |---|---|
-| You want to change the sieve/barrel/compost | **Not possible**; use a datapack or KJS |
+| You want to change the sieve/barrel/compost | Use `mods.exnihilosatellitium.*` (Sieve / Barrel / Compost, etc.); this mod has no CT recipe type, so don't write `<recipetype:...>` |
 | `<recipetype:exnihilosatellitium:sieve>` errors | This mod registers no CT recipe type |
 | Script syntax errors | Check `logs/crafttweaker.log`; ZenScript includes line numbers |
 | Can't remove a recipe | Remove by output with `craftingTable.remove(<item:...>)`; make sure your CT version uses `craftingTable`, not the 1.12 `recipes` |

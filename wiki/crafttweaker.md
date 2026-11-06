@@ -1,6 +1,6 @@
 # CraftTweaker：七张表脚本 API + 原版配方
 
-> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> 最后核对：2026-11-06 · 适用：1.21.1 / 1.20.1
 > CT 版本：1.21.1 用 CraftTweaker 21.x；1.20.1 用 14.x；两版入口命名相同
 
 CraftTweaker 现在有两条用法：
@@ -126,7 +126,7 @@ CT 的自定义 recipe type 需要模组注册 `RecipeType` / serializer / `IRec
 
 ## 5. CT 做不到的
 
-- 不能改 `materials.json`，也不能让 CT 物品进入本模组材料链。
+- 不能改 `materials.json`，也不能让 CT 物品进入本模组材料链；边界和替代方案见[材料链与联动](material-chain.md)。
 - 不能注册本模组的方块/物品。
 - 没有 CT recipe type，JEI 不显示七张表的 CT 配方页。
 - 专用服客户端 JEI 仍读不到服务端表（P4 客户端同步）。

@@ -1,6 +1,6 @@
 # KubeJS: Datapack Channel + Script API for Seven Tables
 
-> Last checked: 2026-11-03 · Applies to: 1.21.1 / 1.20.1
+> Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 > KubeJS versions: 1.21.1 uses `2101.x`, 1.20.1 uses `2001.x`; binding names and call syntax are the same
 
 KubeJS now has two channels:
@@ -135,7 +135,7 @@ ServerEvents.tags('item', event => {
 
 ## 6. What KJS cannot do
 
-- Cannot change `materials.json`, nor make KJS items enter this mod's material chain.
+- Cannot change `materials.json`, nor make KJS items enter this mod's material chain; see [Material Chain & Mod Integration](material-chain.md) for boundaries and alternatives.
 - Cannot register this mod's blocks/items (KJS's own content is fine).
 - On dedicated servers the client JEI still cannot read server tables (P4 client sync).
 

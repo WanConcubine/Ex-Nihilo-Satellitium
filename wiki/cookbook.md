@@ -1,6 +1,6 @@
 # Cookbook：常见改法
 
-> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> 最后核对：2026-11-06 · 适用：1.21.1 / 1.20.1
 
 > 数据包和 KubeJS 的七张表写法**完全一样**；KJS 只是把文件放到 `kubejs/data/`。
 > 下面用 `data/mypack/...` 表示数据包路径，KJS 换成 `kubejs/data/mypack/...` 即可。
@@ -153,10 +153,11 @@ StartupEvents.registry('item', event => {
 然后要在 `kubejs/data/mypack/sieve/*.json` 里把它写进掉落，或写合成配方。
 它**不会**进入本模组的材料链/创造栏分组。
 
-## 13. 加第 21 种材料
+## 13. 加一种新材料
 
 三条路线都做不到。材料表在 jar 内 `materials.json`，注册期读取；
-新增材料还要贴图、模型、配方、标签、JEI 分组。需要改模组源码或等后续 schema 支持。
+新增材料还要贴图、模型、配方、标签、JEI 分组。需要改模组源码，或按
+[材料链与联动](material-chain.md) 的流程提 issue/PR。
 
 ## 14. 一次改多张表
 

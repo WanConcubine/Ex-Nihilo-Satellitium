@@ -2,7 +2,7 @@
 
 > English: [English version](https://wanconcubine.github.io/Ex-Nihilo-Satellitium/en/)
 
-> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> 最后核对：2026-11-06 · 适用：1.21.1 / 1.20.1
 
 面向玩家和整合包作者的「改配方」说明。这里不讲 Java 开发，只讲**装好模组之后怎么改数据**。
 
@@ -22,6 +22,8 @@
 
 **一句话：** 七张玩法表（筛子/锤子/钩子/桶/堆肥/坩埚）两版都可以用
 **JSON、KubeJS 脚本或 CraftTweaker 脚本**；CT 还额外能改原版配方。
+
+> 不确定“我的模组矿能不能进筛子”？先看[材料链与联动](material-chain.md)。
 
 ## 版本差异
 
@@ -74,11 +76,15 @@
 5. 用 `/exnihilo tables` 看条数；`/exnihilo sieve minecraft:sand` 查单条；
    `/exnihilo dump <table>` 看整张表（按行排序，方便对比）。
 
+> 可直接复制/对照的示例包：
+> [examples/datapack](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/tree/main/examples/datapack)。
+
 ## 目录
 
 - [数据包：完整表结构与示例](datapack.md)
 - [KubeJS：能做什么、怎么写](kubejs.md)
 - [CraftTweaker：边界与替代方案](crafttweaker.md)
+- [材料链与联动：哪些矿能进、作者能做什么](material-chain.md)
 - [常见任务 Cookbook](cookbook.md)
 - [排错与日志](troubleshooting.md)
 - [维护契约](MAINTAINING.md)
@@ -94,8 +100,9 @@
 
 ## 不能通过这三条路线做到的事
 
-- **新增材料**（第 21 种矿）：材料表在 jar 内的 `materials.json`，注册期读取；
+- **新增材料**（表外矿种）：材料表在 jar 内的 `materials.json`，注册期读取；
   数据包/KJS/CT 都改不了。KJS 可以自己注册一套物品做“平行矿链”，但它不属于本模组的材料链。
+  详见[材料链与联动](material-chain.md)。
 - **新增本模组的物品/方块**：同上，注册期决定。
 - **直接删除原版配方**：数据包没有“删除配方”的 JSON；用 KubeJS 或 CraftTweaker。
 

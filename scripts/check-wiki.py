@@ -39,6 +39,7 @@ CONTENT_PAGES = [
     "datapack.md",
     "kubejs.md",
     "crafttweaker.md",
+    "material-chain.md",
     "cookbook.md",
     "troubleshooting.md",
     "MAINTAINING.md",

@@ -1,6 +1,6 @@
 # CraftTweaker: script API for the seven tables + vanilla recipes
 
-> Last checked: 2026-11-03 · Applies to: 1.21.1 / 1.20.1
+> Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 > CT version: CraftTweaker 21.x for 1.21.1; 14.x for 1.20.1; the entry point names are the same in both versions
 
 CraftTweaker now has two ways of being used:
@@ -132,7 +132,7 @@ type / JEI display comes later. So scripts call `mods.exnihilosatellitium.Sieve.
 
 ## 5. What CT cannot do
 
-- It cannot change `materials.json`, nor make CT items enter the mod's material chain.
+- It cannot change `materials.json`, nor make CT items enter the mod's material chain; see [Material Chain & Mod Integration](material-chain.md) for boundaries and alternatives.
 - It cannot register the mod's blocks/items.
 - There is no CT recipe type, so JEI shows no CT recipe pages for the seven tables.
 - On dedicated servers the client-side JEI still cannot read the server tables (P4 client sync).

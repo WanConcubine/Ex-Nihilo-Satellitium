@@ -1,6 +1,6 @@
 # Wiki 维护契约
 
-> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> 最后核对：2026-11-06 · 适用：1.21.1 / 1.20.1
 
 这份 wiki 是**玩家向**的自定义配方文档。目标不是“写一次”，而是**每次改表结构都不会过时**。
 
@@ -26,7 +26,7 @@
 | 新增 KJS 事件 / 脚本 API | `kubejs.md`、`README.md` 能力矩阵、`docs/customization-roadmap.md` |
 | 新增 CT recipe type / 脚本 API | `crafttweaker.md`、`README.md` 能力矩阵、`docs/customization-roadmap.md` |
 | 改 1.20.1 / 1.21.1 路径、`pack_format`、标签命名空间 | `README.md` 版本矩阵、`datapack.md`、`troubleshooting.md` |
-| 改材料表 / 注册期内容 | `README.md`「不能通过这三条路线做到的事」、`cookbook.md` |
+| 改材料表 / 注册期内容 | `README.md`「不能通过这三条路线做到的事」、`cookbook.md`、`material-chain.md` |
 
 ## 3. 三条路径的写作规则
 
@@ -41,7 +41,7 @@
    并在 `docs/customization-roadmap.md` 的验收表里打勾。
 3. **同一条规则三处同步。** 如果一条 JSON 规则在 KJS 里也能写，`kubejs.md` 必须有同样的例子；
    CT 支持后同理。不要只改一处。
-4. **不把临时限制写成永久设计。** 例如“CT 碰不到七张表”目前是事实，
+4. **不把临时限制写成永久设计。** 例如“CT 没有 recipe type / JEI 分类”目前是事实，
    但应标注“当前版本”，并在 roadmap 里列出等价化计划。
 5. **版本差异单独标注。** 任何只适用于 1.21.1 或 1.20.1 的写法，必须在段落里写版本，
    不能只放在页面顶部的矩阵里。
@@ -67,6 +67,7 @@
 | `datapack.md` | 改表结构的贡献者 | 七张表的完整字段、原版配方、标签 |
 | `kubejs.md` | 做 KJS 集成的贡献者 | `kubejs/data`、脚本 API、KJS 边界 |
 | `crafttweaker.md` | 做 CT 集成的贡献者 | CT 边界、原版配方、替代方案 |
+| `material-chain.md` | Owner | 材料链、已支持模组、三条路径的边界 |
 | `cookbook.md` | Owner + 贡献者 | 常见任务，三种写法对照 |
 | `troubleshooting.md` | 支持/排错的人 | 日志、命令、版本差异、常见误解 |
 | `MAINTAINING.md` | Owner | 本文件 |

@@ -2,7 +2,7 @@
 
 > Chinese: [Chinese version](https://wanconcubine.github.io/Ex-Nihilo-Satellitium/)
 
-> Last checked: 2026-11-03 · Applies to: 1.21.1 / 1.20.1
+> Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 
 A "recipe editing" guide for players and modpack authors. No Java development here — only **how to change data once the mod is installed**.
 
@@ -22,6 +22,8 @@ A "recipe editing" guide for players and modpack authors. No Java development he
 
 **In one sentence:** both versions can drive the seven gameplay tables (sieve/hammer/crook/barrel/compost/crucible) with
 **JSON, a KubeJS script, or a CraftTweaker script**; CT can additionally change vanilla recipes.
+
+> Not sure whether a modded ore can be sifted? Start with [Material Chain & Mod Integration](material-chain.md).
 
 ## Version Differences
 
@@ -74,11 +76,15 @@ where tag namespaces, vanilla recipe JSON, or `pack_format` differ, they are not
 5. Use `/exnihilo tables` to see entry counts; `/exnihilo sieve minecraft:sand` to query a single entry;
    `/exnihilo dump <table>` to see the whole table (sorted by line, easy to compare).
 
+> Ready-to-copy example pack:
+> [examples/datapack](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/tree/main/examples/datapack).
+
 ## Contents
 
 - [Datapack: full table structure and examples](datapack.md)
 - [KubeJS: what it can do, how to write it](kubejs.md)
 - [CraftTweaker: limits and alternatives](crafttweaker.md)
+- [Material chain & mod integration: which ores can enter, what authors can do](material-chain.md)
 - [Cookbook for common tasks](cookbook.md)
 - [Troubleshooting and logs](troubleshooting.md)
 - [Maintenance contract](MAINTAINING.md)
@@ -94,8 +100,9 @@ where tag namespaces, vanilla recipe JSON, or `pack_format` differ, they are not
 
 ## What These Three Paths Cannot Do
 
-- **Add materials** (a 21st ore): the material table lives in `materials.json` inside the jar and is read at registry time;
+- **Add materials** (an ore outside the table): the material table lives in `materials.json` inside the jar and is read at registry time;
   datapacks/KJS/CT cannot change it. KJS can register its own item set as a "parallel ore chain", but it is not part of this mod's material chain.
+  See [Material Chain & Mod Integration](material-chain.md).
 - **Add items/blocks for this mod**: same as above — decided at registry time.
 - **Delete vanilla recipes directly**: datapacks have no "delete recipe" JSON; use KubeJS or CraftTweaker.
 

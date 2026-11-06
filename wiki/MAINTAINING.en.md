@@ -1,6 +1,6 @@
 # Wiki Maintenance Contract
 
-> Last checked: 2026-11-03 · Applies to: 1.21.1 / 1.20.1
+> Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 
 This wiki is the **player-facing** documentation for custom recipes. The goal is not to "write it once", but that **it never goes stale when the table schema changes**.
 
@@ -25,7 +25,7 @@ For any of the following changes, the wiki **must** be updated in the same commi
 | Add a KJS event / script API | `kubejs.md`, the `README.md` capability matrix, `docs/customization-roadmap.md` |
 | Add a CT recipe type / script API | `crafttweaker.md`, the `README.md` capability matrix, `docs/customization-roadmap.md` |
 | Change the 1.20.1 / 1.21.1 paths, `pack_format`, tag namespaces | the `README.md` version matrix, `datapack.md`, `troubleshooting.md` |
-| Change the material table / registration-time content | `README.md` "Things you cannot do through these three paths", `cookbook.md` |
+| Change the material table / registration-time content | `README.md` "Things you cannot do through these three paths", `cookbook.md`, `material-chain.md` |
 
 ## 3. Writing rules for the three paths
 
@@ -40,7 +40,7 @@ Rules:
    and it must be ticked in the acceptance table of `docs/customization-roadmap.md`.
 3. **The same rule stays in sync in three places.** If a JSON rule can also be written in KJS, `kubejs.md` must have the same example;
    likewise once CT supports it. Do not change only one place.
-4. **Do not write a temporary limitation as permanent design.** For example, "CT cannot reach the seven tables" is a fact today,
+4. **Do not write a temporary limitation as permanent design.** For example, "CT has no recipe type / JEI category" is a fact today,
    but it should be marked "current version", and the equivalence plan should be listed in the roadmap.
 5. **Version differences are labelled separately.** Any form that applies only to 1.21.1 or 1.20.1 must name the version in the paragraph,
    not only in the matrix at the top of the page.
@@ -66,6 +66,7 @@ Every page has this line at the top:
 | `datapack.md` | contributors who change the table schema | complete fields of the seven tables, vanilla recipes, tags |
 | `kubejs.md` | contributors doing KJS integration | `kubejs/data`, script API, KJS boundaries |
 | `crafttweaker.md` | contributors doing CT integration | CT boundaries, vanilla recipes, alternatives |
+| `material-chain.md` | Owner | material chain, supported mods, boundaries of the three paths |
 | `cookbook.md` | Owner + contributors | common tasks, the three ways side by side |
 | `troubleshooting.md` | the people doing support / troubleshooting | logs, commands, version differences, common misunderstandings |
 | `MAINTAINING.md` | Owner | this file |

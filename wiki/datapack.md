@@ -1,6 +1,6 @@
 # 数据包：七张玩法表
 
-> 最后核对：2026-11-03 · 适用：1.21.1 / 1.20.1
+> 最后核对：2026-11-06 · 适用：1.21.1 / 1.20.1
 
 数据包是**推荐方式**：不写代码、`/reload` 生效、服务端为准。
 
@@ -38,6 +38,8 @@ saves/<世界名>/datapacks/my_pack/
 - `/datapack list` 能看到 `file/my_pack` 才算加载。
 - 七张表会扫描**所有命名空间**，所以 `mypack` 不需要等于 `exnihilosatellitium`。
 - 改完 `/reload`；日志里先出现一次 `waiting for tags`，再出现完整条数，**以第二次为准**。
+- 可直接复制/对照的示例包：
+  [examples/datapack](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/tree/main/examples/datapack)。
 
 ## 2. 通用字段
 
@@ -391,7 +393,7 @@ saves/<世界名>/datapacks/my_pack/
 - `/exnihilo dump <table>` 输出整张表的排序文本（`sieve` / `hammer` / `crook` / `barrel` /
   `compost` / `crucible_melt` / `crucible_heat`），用来确认补丁到底改了哪几行。
 - `/exnihilo customize ...` 是 P1 的内部调试入口（直接向运行期 overlay 排队，不写文件、
-  重启即清空），不是玩家功能；KJS / CT 的正式入口在 roadmap 的 P2 / P3。
+  重启即清空），不是玩家功能；KJS / CT 的正式入口见 [KubeJS](kubejs.md) / [CraftTweaker](crafttweaker.md)。
 
 日志前缀：
 
@@ -403,5 +405,5 @@ saves/<世界名>/datapacks/my_pack/
 ## 12. 客户端 JEI
 
 - 单人 / 局域网：JEI 读服务端表，数据包改动会显示。
-- **专用服**：客户端读不到服务端数据包，JEI 仍显示 jar 内置值；实际掉落/合成以服务端为准。
-  这是当前限制，不是数据包没生效。
+- **专用服**：客户端读不到服务端数据包，JEI 只显示客户端本地资源（jar 内置值或客户端自己的数据包）；
+  实际掉落/合成以服务端为准。这是当前限制，不是数据包没生效。
