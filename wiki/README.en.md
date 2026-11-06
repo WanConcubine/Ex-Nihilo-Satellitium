@@ -4,7 +4,7 @@
 
 > Last checked: 2026-11-06 · Applies to: 1.21.1 / 1.20.1
 
-A "recipe editing" guide for players and modpack authors. No Java development here — only **how to change data once the mod is installed**.
+A "recipe editing" guide for players and modpack authors.
 
 > Maintenance convention: this directory is the single source of truth for the player wiki. When you change table structures, field names, or load order in code,
 > update the corresponding pages in the same commit and run `python3 scripts/check-wiki.py`. For maintainer duties and release checks see
@@ -12,15 +12,15 @@ A "recipe editing" guide for players and modpack authors. No Java development he
 > [`docs/customization-roadmap.md`](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/docs/customization-roadmap.md). The full developer-facing schema still lives in
 > [`docs/data-format.md`](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/blob/main/docs/data-format.md).
 
-## Choosing Between the Three Paths
+## Choosing Between the Three Approaches
 
-| Path | What it can do | What it cannot do | Who it is for |
+| Approach | What it can do | What it cannot do | Who it is for |
 |---|---|---|---|
 | **Datapack** (recommended) | Change the seven tables — sieve / hammer / crook / barrel / compost / crucible; add vanilla recipes; add tags | Cannot add items, blocks, or materials; cannot delete vanilla recipes directly | Everyone, no code |
 | **KubeJS** | Script API for the seven tables (1.21.1 / 1.20.1) + `kubejs/data`; change vanilla recipes / tags from scripts; register your own items | Cannot change `materials.json` | Modpacks that already ship KubeJS |
 | **CraftTweaker** | Script API for the seven tables (1.21.1 / 1.20.1) + vanilla recipes (crafting, smelting, etc.) | Cannot add items/blocks/materials; no CT recipe type / JEI category | Packs that already ship CT |
 
-**In one sentence:** both versions can drive the seven gameplay tables (sieve/hammer/crook/barrel/compost/crucible) with
+**Summary:** all three approaches can drive the seven gameplay tables (sieve/hammer/crook/barrel/compost/crucible):
 **JSON, a KubeJS script, or a CraftTweaker script**; CT can additionally change vanilla recipes.
 
 > Not sure whether a modded ore can be sifted? Start with [Material Chain & Mod Integration](material-chain.md).
@@ -45,36 +45,36 @@ where tag namespaces, vanilla recipe JSON, or `pack_format` differ, they are not
 ## Getting Started (Datapack)
 
 1. Create a directory in the save or on the server:
-   - Single-player: `saves/<world name>/datapacks/my_pack/`
-   - Server: `<level-name>/datapacks/my_pack/`
+    - Single-player: `saves/<world name>/datapacks/my_pack/`
+    - Server: `<level-name>/datapacks/my_pack/`
 2. Add `pack.mcmeta`:
 
-   ```json
-   {
-     "pack": {
-       "pack_format": 48,
-       "description": "我的空岛配方"
-     }
-   }
-   ```
+    ```json
+    {
+      "pack": {
+        "pack_format": 48,
+        "description": "我的空岛配方"
+      }
+    }
+    ```
 
-   1.20.1 changes `pack_format` to `15`.
+    1.20.1 changes `pack_format` to `15`.
 3. Place files by namespace, e.g. `data/mypack/sieve/sand.json`:
 
-   ```json
-   {
-     "input": "minecraft:sand",
-     "patch": true,
-     "remove": ["minecraft:cactus"],
-     "outputs": [
-       { "item": "minecraft:diamond", "chance": 0.5 }
-     ]
-   }
-   ```
+    ```json
+    {
+      "input": "minecraft:sand",
+      "patch": true,
+      "remove": ["minecraft:cactus"],
+      "outputs": [
+        { "item": "minecraft:diamond", "chance": 0.5 }
+      ]
+    }
+    ```
 
 4. In game, run `/reload` (or `/datapack list` to confirm it is enabled).
 5. Use `/exnihilo tables` to see entry counts; `/exnihilo sieve minecraft:sand` to query a single entry;
-   `/exnihilo dump <table>` to see the whole table (sorted by line, easy to compare).
+    `/exnihilo dump <table>` to see the whole table (sorted by line, easy to compare).
 
 > Ready-to-copy example pack:
 > [examples/datapack](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/tree/main/examples/datapack).
