@@ -12,6 +12,9 @@
   三种宝石做的自有锤。
 - **贴图**：`art/items/tools/hammer_variants.py` 从铁锤 / 钻石锤底图换头色；金属复用矿链
   五阶调色板，宝石用 BambooMod 宝石采样色（不复制像素）。
+- **3 把龙之进化锤（仅装 DE 时）**：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`
+  继承 DE 的 `ModularPickaxe`，走聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，
+  8M / 32M / 128M OP），可用 DE 的速度 / AOE / 能量模块；不消耗耐久。
 
 ### 说明
 

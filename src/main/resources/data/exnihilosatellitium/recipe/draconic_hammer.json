@@ -1,0 +1,68 @@
+{
+  "type": "draconicevolution:fusion_crafting",
+  "catalyst": {
+    "item": "exnihilosatellitium:wyvern_hammer"
+  },
+  "ingredients": [
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/netherite"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "item": "draconicevolution:wyvern_core"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/netherite"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/netherite"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "item": "draconicevolution:draconic_energy_core"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/netherite"
+      }
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:draconic_hammer"
+  },
+  "techLevel": "draconic",
+  "totalEnergy": 32000000,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "draconicevolution"
+    }
+  ]
+}

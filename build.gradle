@@ -89,6 +89,42 @@ neoForge {
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
+// Optional Draconic Evolution integration. The DE jars live in libs/de (gitignored);
+// when they are absent the `de` source set is not compiled and the core code's
+// reflective lookup simply finds no DEHammers class.
+def deJars = files(
+        'libs/de/Draconic-Evolution-1.21.1-3.1.4.633.jar',
+        'libs/de/BrandonsCore-1.21.1-3.2.1.309.jar',
+        'libs/de/CodeChickenLib-1.21.1-4.6.1.529.jar'
+)
+if (deJars.files.every { it.exists() }) {
+    sourceSets {
+        de {
+            java.srcDir 'src/de/java'
+            compileClasspath += sourceSets.main.output.classesDirs + sourceSets.main.compileClasspath + deJars
+            runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + deJars
+        }
+    }
+    tasks.named('jar') { from sourceSets.de.output }
+    // Register the optional source set with the mod so the dev-run transforming
+    // classloader can see DEHammers, not just the plain JavaExec classpath.
+    neoForge {
+        mods {
+            exnihilosatellitium {
+                sourceSet sourceSets.de
+            }
+        }
+    }
+    // ModDevGradle's run tasks use classpathProvider, not the plain JavaExec
+    // classpath; add the optional DE classes there so runServer/runClient can
+    // load DEHammers in dev.
+    ['runServer', 'runClient', 'runData'].each { name ->
+        tasks.named(name) {
+            classpathProvider.from(sourceSets.de.output)
+        }
+    }
+}
+
 tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
             minecraft_version      : minecraft_version,
@@ -157,4 +193,15 @@ tasks.named('jar', Jar).configure {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+
+tasks.register('printDeClasspath') {
+    doLast {
+        def run = tasks.named('runServer').get()
+        println '--- classpathProvider ---'
+        run.classpathProvider.files.each { println it }
+        println '--- classpath ---'
+        run.classpath.files.each { println it }
+    }
 }

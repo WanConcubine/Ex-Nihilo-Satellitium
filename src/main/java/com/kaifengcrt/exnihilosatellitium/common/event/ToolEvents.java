@@ -5,6 +5,7 @@ import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -41,7 +42,7 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onHarvestCheck(final PlayerEvent.HarvestCheck event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerItem)) {
+        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getTargetBlock()) != null) {
@@ -51,7 +52,7 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onBreakSpeed(final PlayerEvent.BreakSpeed event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerItem)) {
+        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getState()) == null) {
@@ -68,7 +69,7 @@ public final class ToolEvents {
     @SubscribeEvent
     public static void onCreativeBreak(final BlockEvent.BreakEvent event) {
         final Player player = event.getPlayer();
-        if (!player.isCreative() || !(player.getMainHandItem().getItem() instanceof HammerItem)) {
+        if (!player.isCreative() || !(player.getMainHandItem().getItem() instanceof HammerTool)) {
             return;
         }
         final HammerRecipes.Rule rule = HammerRecipes.ruleFor(event.getState());
@@ -86,7 +87,7 @@ public final class ToolEvents {
             return;
         }
         final ItemStack tool = event.getTool();
-        if (tool.getItem() instanceof HammerItem) {
+        if (tool.getItem() instanceof HammerTool) {
             final List<ItemStack> results = HammerRolls.roll(event.getState(), 0, event.getLevel().random);
             if (results.isEmpty()) {
                 return;
@@ -126,7 +127,7 @@ public final class ToolEvents {
             return;
         }
         final ItemStack held = player.getMainHandItem();
-        if (!held.isEmpty() && held.getItem() == eventTool.getItem()) {
+        if (held.getItem() instanceof HammerItem && held.getItem() == eventTool.getItem()) {
             held.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
         }
     }

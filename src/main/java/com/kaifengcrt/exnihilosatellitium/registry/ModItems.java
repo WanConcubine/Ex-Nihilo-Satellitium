@@ -338,6 +338,15 @@ public final class ModItems {
         return Collections.unmodifiableMap(hammers);
     }
 
+    /**
+     * Optional Draconic Evolution hammers (wyvern / draconic / chaotic).
+     *
+     * <p>The DE classes live in the optional {@code de} source set, so they are
+     * loaded reflectively only when Draconic Evolution is on the mod list; a
+     * build without the DE jars simply has no DE hammers.</p>
+     */
+    private static final List<DeferredHolder<Item, Item>> DE_HAMMERS = draconicHammers();
+
     public static final List<DeferredHolder<Item, Item>> HAMMERS = allHammers();
 
     private static List<DeferredHolder<Item, Item>> allHammers() {
@@ -345,7 +354,26 @@ public final class ModItems {
                 WOODEN_HAMMER, STONE_HAMMER, IRON_HAMMER, GOLDEN_HAMMER,
                 DIAMOND_HAMMER, NETHERITE_HAMMER));
         hammers.addAll(METAL_HAMMERS.values());
+        hammers.addAll(DE_HAMMERS);
         return List.copyOf(hammers);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<DeferredHolder<Item, Item>> draconicHammers() {
+        if (!Platform.isModLoaded("draconicevolution")) {
+            return List.of();
+        }
+        try {
+            final Class<?> type = Class.forName(
+                    "com.kaifengcrt.exnihilosatellitium.compat.draconicevolution.DEHammers");
+            final Object value = type.getMethod("register", DeferredRegister.class)
+                    .invoke(null, ITEMS);
+            return (List<DeferredHolder<Item, Item>>) value;
+        } catch (final ReflectiveOperationException | ClassCastException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[de] failed to register Draconic Evolution hammers", exception);
+            return List.of();
+        }
     }
 
     /** Registry metadata for one generated metal hammer. */

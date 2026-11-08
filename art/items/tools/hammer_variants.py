@@ -33,6 +33,8 @@ ORE_PALETTES = ROOT / "art/items/ore_pieces/generate.py"
 
 METALS = ("tin", "aluminum", "zinc", "copper", "silver", "lead", "nickel", "osmium", "platinum")
 GEMS = ("sakura", "maple", "ginkgo")
+#: Optional Draconic Evolution hammers (only present when the DE jars are on the build).
+DE = ("wyvern", "draconic", "chaotic")
 
 #: Head colours in the restyled iron hammer -> tone slot.
 IRON_MAP = {
@@ -79,6 +81,34 @@ GEM_PALETTES = {
         "base": (0xD8, 0xB2, 0x2A),
         "light": (0xF2, 0xD4, 0x4E),
         "highlight": (0xFF, 0xF4, 0xB0),
+    },
+}
+
+#: Draconic Evolution tiers (colours sampled from DE's tool sprites, no DE pixels copied).
+DE_PALETTES = {
+    "wyvern": {
+        "outline": (0x1E, 0x0A, 0x33),
+        "dark": (0x3A, 0x0F, 0x66),
+        "shadow": (0x57, 0x27, 0x91),
+        "base": (0x7A, 0x3A, 0xC8),
+        "light": (0x9B, 0x3B, 0xFF),
+        "highlight": (0xD8, 0xB0, 0xFF),
+    },
+    "draconic": {
+        "outline": (0x1A, 0x00, 0x00),
+        "dark": (0x4A, 0x00, 0x00),
+        "shadow": (0x8A, 0x00, 0x00),
+        "base": (0xC2, 0x3A, 0x00),
+        "light": (0xFF, 0x76, 0x00),
+        "highlight": (0xFF, 0xC0, 0x80),
+    },
+    "chaotic": {
+        "outline": (0x05, 0x00, 0x00),
+        "dark": (0x15, 0x00, 0x00),
+        "shadow": (0x2A, 0x00, 0x00),
+        "base": (0x4F, 0x00, 0x00),
+        "light": (0x8A, 0x10, 0x10),
+        "highlight": (0xFF, 0x40, 0x40),
     },
 }
 
@@ -139,6 +169,8 @@ def build(ids: list[str], metal_palettes: dict[str, tuple[str, ...]]) -> dict[st
     for material in ids:
         if material in GEMS:
             out[material] = recolor(diamond, GEM_PALETTES[material], DIAMOND_MAP)
+        elif material in DE:
+            out[material] = recolor(iron, DE_PALETTES[material], IRON_MAP)
         else:
             out[material] = recolor(iron, six_tone(metal_palettes[material]), IRON_MAP)
     return out
@@ -148,13 +180,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=TEXTURES,
                         help="texture directory (default: the mod's item textures)")
-    parser.add_argument("--ids", default=",".join(METALS + GEMS),
+    parser.add_argument("--ids", default=",".join(METALS + GEMS + DE),
                         help="comma-separated material ids")
     args = parser.parse_args()
 
     ids = [value.strip() for value in args.ids.split(",") if value.strip()]
     palettes = load_metal_palettes()
-    unknown = [value for value in ids if value not in METALS and value not in GEMS]
+    unknown = [value for value in ids if value not in METALS and value not in GEMS and value not in DE]
     if unknown:
         raise SystemExit(f"unknown material(s): {', '.join(unknown)}")
 
