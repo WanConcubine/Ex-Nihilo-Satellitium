@@ -185,6 +185,6 @@ python3 scripts/check-textures.py
 
 ## DE 锤（2026-11-08）
 
-- 双足飞龙 / 神龙 / 混沌三把沿用铁锤底图，分别用 DE 的紫 / 红 / 黑红调色板；模型手写
-  `item/handheld`（DE 原版工具是 3D 自定义渲染，这里先采用 2D 图标）。
+- 双足飞龙 / 神龙 / 混沌三把是 **3D cube 模型**（左右锤头 + 发光核心 + 长柄），
+  每个面用 `textures/item/de_hammer/` 分区贴图；模型从主线复制，不使用 2D 图标。
 - 生成器在主线的 `art/items/tools/hammer_variants.py`，本线只提交生成的 PNG。

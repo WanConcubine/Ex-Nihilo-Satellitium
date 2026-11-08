@@ -7,6 +7,7 @@ import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
+import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineHooks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -44,7 +45,8 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onHarvestCheck(final PlayerEvent.HarvestCheck event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
+        final ItemStack stack = event.getEntity().getMainHandItem();
+        if (!canUseHammer(event.getEntity(), stack)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getTargetBlock()) != null) {
@@ -54,7 +56,8 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onBreakSpeed(final PlayerEvent.BreakSpeed event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
+        final ItemStack stack = event.getEntity().getMainHandItem();
+        if (!canUseHammer(event.getEntity(), stack)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getState()) == null) {
@@ -73,8 +76,8 @@ public final class ToolEvents {
         final BlockPos pos = event.getPos();
         final BlockState state = event.getState();
 
-        if (tool.getItem() instanceof HammerTool) {
-            if (HammerRecipes.ruleFor(state) == null) {
+        if (tool.getItem() instanceof HammerTool hammer) {
+            if (HammerRecipes.ruleFor(state) == null || !canUseHammer(player, tool)) {
                 return;
             }
             // No drop-replacement event on 1.20.1: take the break over completely.
@@ -84,8 +87,13 @@ public final class ToolEvents {
             for (final ItemStack result : HammerRolls.roll(state, 0, level.random)) {
                 Block.popResource(level, pos, result);
             }
-            if (!player.isCreative() && tool.getItem() instanceof HammerItem) {
-                tool.hurtAndBreak(1, player, broken -> broken.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+            if (!player.isCreative()) {
+                if (tool.getItem() instanceof HammerItem) {
+                    tool.hurtAndBreak(1, player,
+                            broken -> broken.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+                } else if (hammer.energyPerUse() > 0) {
+                    MachineHooks.extractItemEnergy(tool, hammer.energyPerUse());
+                }
             }
             return;
         }
@@ -109,5 +117,16 @@ public final class ToolEvents {
                         broken -> broken.broadcastBreakEvent(InteractionHand.MAIN_HAND));
             }
         }
+    }
+
+    /** A hammer needs either durability (plain) or its per-use energy. */
+    private static boolean canUseHammer(final Player player, final ItemStack stack) {
+        if (!(stack.getItem() instanceof HammerTool hammer)) {
+            return false;
+        }
+        if (player.isCreative() || hammer.energyPerUse() <= 0) {
+            return true;
+        }
+        return MachineHooks.getItemEnergy(stack) >= hammer.energyPerUse();
     }
 }

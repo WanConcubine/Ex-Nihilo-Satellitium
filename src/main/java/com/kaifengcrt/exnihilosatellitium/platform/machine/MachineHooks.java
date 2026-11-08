@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -37,5 +38,17 @@ public final class MachineHooks {
             return stack;
         }
         return ItemHandlerHelper.insertItemStacked(target, stack, false);
+    }
+
+    /** Energy stored in an item stack (DE modular tools, capacitors, ...). */
+    public static int getItemEnergy(final ItemStack stack) {
+        return stack.getCapability(ForgeCapabilities.ENERGY)
+                .map(IEnergyStorage::getEnergyStored).orElse(0);
+    }
+
+    /** Extracts up to {@code amount} FE/OP from an item stack; returns the extracted amount. */
+    public static int extractItemEnergy(final ItemStack stack, final int amount) {
+        return stack.getCapability(ForgeCapabilities.ENERGY)
+                .map(storage -> storage.extractEnergy(amount, false)).orElse(0);
     }
 }

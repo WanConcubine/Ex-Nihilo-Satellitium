@@ -683,9 +683,14 @@ Bamboo 三把只在 1.20.1 分支、`bamboomod` 在场（或 datagen JVM）时�
 `forge:mod_loaded(bamboomod)` 配方。贴图由主线 `art/items/tools/hammer_variants.py`
 从铁/钻石锤底图换色，金属复用矿链五阶调色板。
 
-**验证**：本线 `build` + `check-textures.py` 通过（309 模型 / 179 纹理）；
+**DE 锤（2026-11-08 追加）**：三把 DE 锤使用 3D cube 模型（与主线同源），
+`HammerTool.energyPerUse()` 返回 256（DE 配置 `-99` 哨兵回退），手锤 / 自动锤都扣电，
+空电停机；模块 host / 能量 capability 走 1.20.1 的 `initCapabilities`。
+
+**验证**：本线 `build` + `check-textures.py` 通过（312 模型 / 189 纹理）；
 `runData` 生成 12 个模型与 9 条金属配方；`-PtechMods` 真装 BambooMod 后 RCON
-`summon item` 樱/枫/银杏 + 金属锤全部注册；**未进游戏**验合成/耐久/JEI。
+`summon item` 樱/枫/银杏 + 金属锤全部注册；3D 模型 / 能量已在主线实机确认，
+本线未单独复验聚合合成 / 模块 GUI / JEI。
 
 ## 龙之进化锤：双足飞龙 / 神龙 / 混沌（2026-11-08）
 
