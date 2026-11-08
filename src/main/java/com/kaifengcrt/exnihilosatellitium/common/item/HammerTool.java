@@ -11,4 +11,12 @@ public interface HammerTool {
 
     /** 1 = wood ... 6 = netherite; 7-9 = the optional DE wyvern / draconic / chaotic tiers. */
     int tier();
+
+    /**
+     * Energy paid per broken block / machine operation. {@code 0} means the
+     * tool uses durability instead (the plain {@link HammerItem} hammers).
+     */
+    default int energyPerUse() {
+        return 0;
+    }
 }

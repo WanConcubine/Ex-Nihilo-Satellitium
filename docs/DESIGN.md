@@ -2005,13 +2005,26 @@ RCON `summon item` 9 把金属锤全部注册；1.20.1 分支 `build` + 纹理�
 
 **模块与能量**：`DEHammerItem extends ModularPickaxe implements HammerTool`，直接继承
 DE 的模块网格（`pickaxe` 类型）、`ModuleHost` / `ModularOPStorage`、模块 GUI、速度与 AOE
-判定；不消耗耐久，`ToolEvents` 只对普通 `HammerItem` 扣耐久。DE 只在它自己的物品注册表上
-挂模块 / 能量 capability，所以 `DEHammers` 额外注册 `DECapabilities.Host.ITEM` 与
-`Capabilities.EnergyStorage.ITEM` 两个 provider。
+判定；不消耗耐久。DE 只在它自己的物品注册表上挂模块 / 能量 capability，所以 `DEHammers`
+额外注册 `DECapabilities.Host.ITEM` 与 `Capabilities.EnergyStorage.ITEM`：
+`ModuleHostImpl` / `ModularOPStorage` 必须 `updateDataAccess(DataComponentAccessor)`，
+否则模块没写进物品，GUI 打开后 `stillValid` 立即失败。
+
+**模型**：不用平面图标，三个 3D `elements` 模型（左右锤头 + 中间发光核心 + 长柄 + 柄尾），
+每个面用 `textures/item/de_hammer/*` 分区贴图，自定义 GUI / 手持 `display`。平面图标在
+T 形锤上不是像镐就是像砖头，是这次返工的主因。
+
+**能量**：`HammerTool.energyPerUse()` 是统一接口；普通锤 0（走耐久），DE 锤取
+`EquipCfg.energyHarvest`。DE 配置里 `-99` 是“用内部默认 256”的哨兵，直接读会得到 -99，
+被当成“不耗能”——这是手锤/自动锤都不掉电的根因。现在 `<= 0` 回退到 256。
+`Capabilities.EnergyStorage.ITEM` 的 provider 还要包一层可抽取的 `IEnergyStorage`
+（DE 的 `ModularOPStorage` 默认 receive-only）。服务端扣完后必须
+`inventoryMenu.broadcastChanges()` / 机器菜单 `broadcastChanges()`，否则客户端能量条不刷新。
 
 **构建隔离**：DE 类放在可选的 `src/de/java` source set；`build.gradle` 只有 `libs/de`
 三个 jar 都在时才编译它，并打进 jar。核心 `ModItems` / `CapabilityEvents` 用反射查找
 `DEHammers`，所以没有 DE jars 的正常构建不会引用任何 DE 类，装 DE 的玩家才看到这三把。
 
-**限制**：两线都已实机验证三把注册与配方解析（1.20.1 用 `-PtechMods -PdeMods`），
-但**还没在聚合装置里实际合成**，模块 GUI / AOE / 能量消耗也没目视。
+**验证**：主线真装 DE 3.1.4.633 后三把注册，模块 GUI / 能量模块可用；手锤与自动锤都按
+256/次扣电，空电停机；作者实机确认。**未验**：聚合装置实际合成、AOE 实际范围、JEI 目视。
+1.20.1 分支已编译并注册，能量接口同源，但未做同等实机验收。

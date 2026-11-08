@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
@@ -35,5 +36,17 @@ public final class MachineHooks {
             return stack;
         }
         return ItemHandlerHelper.insertItemStacked(target, stack, false);
+    }
+
+    /** Energy stored in an item stack (DE modular tools, capacitors, ...). */
+    public static int getItemEnergy(final ItemStack stack) {
+        final IEnergyStorage storage = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+        return storage == null ? 0 : storage.getEnergyStored();
+    }
+
+    /** Extracts up to {@code amount} FE/OP from an item stack; returns the extracted amount. */
+    public static int extractItemEnergy(final ItemStack stack, final int amount) {
+        final IEnergyStorage storage = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+        return storage == null ? 0 : storage.extractEnergy(amount, false);
     }
 }

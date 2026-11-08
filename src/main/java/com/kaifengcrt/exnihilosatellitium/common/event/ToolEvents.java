@@ -7,6 +7,7 @@ import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
+import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineHooks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -42,7 +43,8 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onHarvestCheck(final PlayerEvent.HarvestCheck event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
+        final ItemStack stack = event.getEntity().getMainHandItem();
+        if (!canUseHammer(event.getEntity(), stack)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getTargetBlock()) != null) {
@@ -52,7 +54,8 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onBreakSpeed(final PlayerEvent.BreakSpeed event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
+        final ItemStack stack = event.getEntity().getMainHandItem();
+        if (!canUseHammer(event.getEntity(), stack)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getState()) == null) {
@@ -87,7 +90,10 @@ public final class ToolEvents {
             return;
         }
         final ItemStack tool = event.getTool();
-        if (tool.getItem() instanceof HammerTool) {
+        if (tool.getItem() instanceof HammerTool hammer) {
+            if (!canUseHammer(player, player.getMainHandItem())) {
+                return;
+            }
             final List<ItemStack> results = HammerRolls.roll(event.getState(), 0, event.getLevel().random);
             if (results.isEmpty()) {
                 return;
@@ -96,7 +102,11 @@ public final class ToolEvents {
             for (final ItemStack result : results) {
                 event.getDrops().add(drop(event.getLevel(), event.getPos(), result));
             }
-            wearMainHand(player, tool);
+            if (hammer instanceof HammerItem) {
+                wearMainHand(player, tool);
+            } else {
+                consumeEnergy(player, event.getTool(), hammer);
+            }
             return;
         }
         if (tool.getItem() instanceof CrookItem crook) {
@@ -122,6 +132,32 @@ public final class ToolEvents {
      * the player's main hand. The item check guards against the hand changing
      * between the break and this event.</p>
      */
+    /** A hammer needs either durability (plain) or its per-use energy. */
+    private static boolean canUseHammer(final Player player, final ItemStack stack) {
+        if (!(stack.getItem() instanceof HammerTool hammer)) {
+            return false;
+        }
+        if (player.isCreative() || hammer.energyPerUse() <= 0) {
+            return true;
+        }
+        return MachineHooks.getItemEnergy(stack) >= hammer.energyPerUse();
+    }
+
+    /** DE (or another energy tool): pay the per-use cost on the held stack. */
+    private static void consumeEnergy(final Player player, final ItemStack eventTool,
+                                      final HammerTool hammer) {
+        if (player.isCreative() || hammer.energyPerUse() <= 0) {
+            return;
+        }
+        final ItemStack held = player.getMainHandItem();
+        if (!held.isEmpty() && held.getItem() == eventTool.getItem()) {
+            MachineHooks.extractItemEnergy(held, hammer.energyPerUse());
+            // The held stack changed on the server; push the new component to the
+            // client or the energy bar/tooltip keeps showing the old value.
+            player.inventoryMenu.broadcastChanges();
+        }
+    }
+
     private static void wearMainHand(final Player player, final ItemStack eventTool) {
         if (player.isCreative()) {
             return;

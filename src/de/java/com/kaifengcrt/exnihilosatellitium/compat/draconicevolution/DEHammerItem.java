@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.compat.draconicevolution;
 
 import com.brandon3055.brandonscore.api.TechLevel;
 import com.brandon3055.draconicevolution.init.DEContent;
+import com.brandon3055.draconicevolution.init.EquipCfg;
 import com.brandon3055.draconicevolution.init.TechProperties;
 import com.brandon3055.draconicevolution.items.equipment.DETier;
 import com.brandon3055.draconicevolution.items.equipment.ModularPickaxe;
@@ -46,5 +47,11 @@ public final class DEHammerItem extends ModularPickaxe implements HammerTool {
     @Override
     public int tier() {
         return this.tier;
+    }
+
+    @Override
+    public int energyPerUse() {
+        // DE uses -99 in its config as "keep the internal default" (256).
+        return EquipCfg.energyHarvest > 0 ? EquipCfg.energyHarvest : 256;
     }
 }
