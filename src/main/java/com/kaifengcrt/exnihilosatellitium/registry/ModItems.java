@@ -346,6 +346,9 @@ public final class ModItems {
     @Nullable
     public static final RegistryObject<Item> GINKGO_HAMMER = bambooHammer("ginkgo", 6, 2048);
 
+    /** Optional DE hammers; loaded reflectively only when DE is present. */
+    private static final List<RegistryObject<Item>> DE_HAMMERS = draconicHammers();
+
     public static final List<RegistryObject<Item>> HAMMERS = allHammers();
 
     private static Map<String, HammerSpec> metalHammerSpecs() {
@@ -385,7 +388,26 @@ public final class ModItems {
         addHammer(hammers, SAKURA_HAMMER);
         addHammer(hammers, MAPLE_HAMMER);
         addHammer(hammers, GINKGO_HAMMER);
+        hammers.addAll(DE_HAMMERS);
         return List.copyOf(hammers);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<RegistryObject<Item>> draconicHammers() {
+        if (ModList.get() == null || !ModList.get().isLoaded("draconicevolution")) {
+            return List.of();
+        }
+        try {
+            final Class<?> type = Class.forName(
+                    "com.kaifengcrt.exnihilosatellitium.compat.draconicevolution.DEHammers");
+            final Object value = type.getMethod("register", DeferredRegister.class)
+                    .invoke(null, ITEMS);
+            return (List<RegistryObject<Item>>) value;
+        } catch (final ReflectiveOperationException | ClassCastException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[de] failed to register Draconic Evolution hammers", exception);
+            return List.of();
+        }
     }
 
     private static void addHammer(final List<RegistryObject<Item>> hammers,

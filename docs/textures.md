@@ -182,3 +182,9 @@ python3 scripts/check-textures.py
   `art/items/tools/hammer_variants.py`，本线只提交生成的 PNG。
 - 金属复用 `art/items/ore_pieces/generate.py` 的五阶调色板；宝石用 BambooMod 宝石的
   采样色，只取颜色，不复制像素。16×16 RGBA，模型仍是 `item/handheld`。
+
+## DE 锤（2026-11-08）
+
+- 双足飞龙 / 神龙 / 混沌三把沿用铁锤底图，分别用 DE 的紫 / 红 / 黑红调色板；模型手写
+  `item/handheld`（DE 原版工具是 3D 自定义渲染，这里先采用 2D 图标）。
+- 生成器在主线的 `art/items/tools/hammer_variants.py`，本线只提交生成的 PNG。

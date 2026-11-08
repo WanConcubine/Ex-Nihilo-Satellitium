@@ -10,6 +10,9 @@
   `forge:mod_loaded` 条件。BambooMod 0.6.2 本身没有宝石锤，这三把是用它的三种宝石做的自有锤。
 - **贴图**：由主线 `art/items/tools/hammer_variants.py` 生成后复制；金属复用矿链五阶调色板，
   宝石用 BambooMod 宝石采样色。
+- **3 把 DE 锤（仅装 DE 时）**：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer` 继承
+  DE 的 `ModularPickaxe`，走聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，
+  8M / 32M / 128M OP），可用 DE 模块；不消耗耐久。
 
 ### 说明
 
