@@ -286,10 +286,11 @@ Creatio 是 MIT 授权，允许复制与再分发；完整版权/许可见
   `art/items/ore_pieces/generate.py` 的五阶调色板（osmium 用同一默认值），宝石用
   BambooMod 宝石的采样色——**只取颜色，不复制它的像素**。
 - 全部 16×16 RGBA；模型仍是 `item/handheld`。宝石锤只在 1.20.1 分支存在。
-- **DE 三把**（双足飞龙 / 神龙 / 混沌）也用同一铁锤底图，分别用 DE 的紫 / 红 / 黑红
-  三套调色板；因为开关物品无法由 datagen 生成，模型手写在 `src/main/resources`。
-  DE 原版工具是 3D 自定义渲染，这里先采用 2D 图标，后续可换 DE 风格模型。
-- DE 三把预览：[de-hammers.png](images/de-hammers.png)。
+- **DE 三把**（双足飞龙 / 神龙 / 混沌）是 **3D cube 模型**（左右锤头 + 中间发光核心 +
+  长柄 + 柄尾），不是平面图标；模型手写在 `src/main/resources`，每个面用
+  `textures/item/de_hammer/` 里的分区贴图（共享 `handle` + 每档 `head` / `top` / `core`）。
+- DE 三把预览：[de-hammer-3d-draft.png](images/de-hammer-3d-draft.png)（草案渲染，最终模型
+  在游戏里还会被 `display` 变换影响）。
 - 预览：[material-hammers.png](images/material-hammers.png)（9 金属 + 3 宝石，6×）。
 
 ## 末影蛋糕（2026-11-03）

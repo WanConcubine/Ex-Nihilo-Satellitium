@@ -45,16 +45,21 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 - **3 把龙之进化锤**：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`，装 DE 时注册；
   走 DE 聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，8M / 32M / 128M OP），
   继承 DE 的模块网格 / 能量 / 速度 / AOE 模块与模块 GUI；不消耗耐久，走 DE 能量。
+- **DE 锤模型**：不是平面图标，而是 3D cube 模型（左右锤头 + 中间发光核心 + 长柄 + 柄尾），
+  每个面用 `textures/item/de_hammer/*` 分区贴图，自定义 GUI / 手持 display。
+- **DE 锤能量**：`HammerTool.energyPerUse()` 统一接口；DE 锤返回 `EquipCfg.energyHarvest`
+  （DE 配置的 -99 哨兵回退到 256）。手锤和自动锤都扣能量；空电时手锤不触发锤表、机器停机。
+  服务端扣完必须 `broadcastChanges()`，否则客户端能量条/提示不刷新。
 - **不做**：钴 / 阿迪特转匠魂工具路线；铀因放射性不做锤。三者在 `materials.json` 里的矿链保留。
 - **实现**：`ModItems.METAL_HAMMERS` 从 `materials.json` 生成（材料 disabled 时锤子一起消失）；
   配方走 `c:ingots/<id>`（1.20.1 用 `forge:ingots/<id>`），铜用原版铜锭；
   宝石锤配方手写 `forge:mod_loaded(bamboomod)`；DE 锤在可选的 `src/de/java` source set 里继承
   `ModularPickaxe`，由反射在 DE 在场时注册/接能力，配方是 DE `fusion_crafting`（带 `mod_loaded` 门）；
   贴图由 `art/items/tools/hammer_variants.py` 从铁/钻石锤底图换色；创造栏与 JEI catalyst 遍历 `HAMMERS`。
-- **数字**：主线无 DE 15 把锤（6 基础 + 9 金属）、装 DE 18 把；307 模型 / 183 纹理 / 297 配方；
+- **数字**：主线无 DE 15 把锤（6 基础 + 9 金属）、装 DE 18 把；307 模型 / 190 纹理 / 297 配方；
   1.20.1 18 把锤（+3 宝石），数字见分支验证。
-- **验证**：两版 `build` + 守卫通过；主线真装 DE 后 RCON `summon item` 3 把 DE 锤注册，
-  聚合配方加载无解析错误；**未进游戏**验聚合实际合成、模块 GUI / AOE、耐久 / JEI。
+- **验证**：两版 `build` + 守卫通过；主线真装 DE 后 3 把 DE 锤注册、模块 GUI / 能量模块可用，
+  手锤与自动锤均按 256/次扣电、空电停机，**作者实机确认通过**；聚合实际合成 / AOE / JEI 仍未目视。
 
 ## 上一批（1.3.1，深板岩 / 末影接口起步）
 
@@ -405,8 +410,8 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 | 筛子：草方块 / 泥土 | ✅ | 草方块 = 泥土 24 条（不含深板岩石子）+ 叶绿素碎矿 1%；四种石子 4-6 个 100% 出；泥土另有深板岩石子 50% × 3-5 |
 | 筛子：手筛 / 机器 / JEI | ⚠️ | 实际出货手感、JEI 筛子页未目视（尤其 TiT/AE2 条目） |
 | 锤 / 钩 | ⚠️ | 6 基础锤 / 2 钩、左键唯一路径、耐久与 4–6 掉落逻辑就位；手感与 JEI 未验 |
-| 材质锤（主线） | ⚠️ | 9 把金属锤：`build` + 纹理/数据/核心守卫通过（307 模型 / 183 纹理 / 297 配方）；RCON `summon item` 9/9 注册且名字正确；**未进游戏**验合成、耐久、JEI |
-| DE 锤（主线） | ⚠️ | `wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`：真装 DE 3.1.4.633 后 RCON 三把均注册；3 条 `fusion_crafting` 配方加载无解析错误；**未实机聚合**、未验模块 GUI / AOE / 能量 |
+| 材质锤（主线） | ⚠️ | 9 把金属锤：`build` + 纹理/数据/核心守卫通过（307 模型 / 190 纹理 / 297 配方）；RCON `summon item` 9/9 注册且名字正确；**未进游戏**验合成、耐久、JEI |
+| DE 锤（主线） | ✅ | `wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`：真装 DE 3.1.4.633 后三把注册；模块 GUI / 能量模块可用；手锤与自动锤均 256/次扣电、空电停机；作者实机确认。聚合实际合成 / AOE / JEI 未目视 |
 | 材质锤（1.20.1） | ⚠️ | +3 把 Bamboo 宝石锤（2048，条件注册）：`build` + 分支纹理守卫通过（309 模型 / 179 纹理）；`-PtechMods` 真装 BambooMod 后 RCON `summon item` 樱/枫/银杏 + 锡/铜/铂 全部注册；未验合成 / 耐久 / JEI |
 | 矿物链 | ✅ | 4 碎块→矿块→熔炼 RCON 通过；14 金属 + 11 矿物按候选解析；`gems` 缺模组整条不注册（含 ER 三条） |
 | 蚕 / 侵染树叶 | ⚠️ | 进度/扩散 RCON 验过；右键、变白渲染、破坏掉线未目视 |

@@ -1,11 +1,14 @@
 package com.kaifengcrt.exnihilosatellitium.compat.draconicevolution;
 
 import com.brandon3055.brandonscore.api.TechLevel;
+import com.brandon3055.draconicevolution.api.DataComponentAccessor;
 import com.brandon3055.draconicevolution.api.capability.DECapabilities;
 import com.brandon3055.draconicevolution.items.equipment.IModularEnergyItem;
+import com.brandon3055.draconicevolution.api.modules.lib.ModularOPStorage;
 import com.brandon3055.draconicevolution.items.equipment.IModularItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -54,12 +57,56 @@ public final class DEHammers {
                 .map(DeferredHolder::get)
                 .toArray(Item[]::new);
         event.registerItem(DECapabilities.Host.ITEM,
-                (stack, context) -> ((IModularItem) stack.getItem())
-                        .createHostCapForRegistration(stack),
+                (stack, context) -> {
+                    final var host = ((IModularItem) stack.getItem())
+                            .createHostCapForRegistration(stack);
+                    host.updateDataAccess(DataComponentAccessor.itemStack(stack));
+                    return host;
+                },
                 items);
         event.registerItem(Capabilities.EnergyStorage.ITEM,
-                (stack, context) -> ((IModularEnergyItem) stack.getItem())
-                        .createOPCapForRegistration(stack),
+                (stack, context) -> {
+                    final ModularOPStorage storage = ((IModularEnergyItem) stack.getItem())
+                            .createOPCapForRegistration(stack);
+                    storage.updateDataAccess(DataComponentAccessor.itemStack(stack));
+                    // DE's ModularOPStorage is receive-only; wrap it so our machine /
+                    // manual drain can actually extract, while DE itself still uses
+                    // the same backing storage.
+                    return new IEnergyStorage() {
+                        @Override
+                        public int receiveEnergy(final int maxReceive, final boolean simulate) {
+                            return storage.receiveEnergy(maxReceive, simulate);
+                        }
+
+                        @Override
+                        public int extractEnergy(final int maxExtract, final boolean simulate) {
+                            if (simulate) {
+                                return (int) Math.min(maxExtract, storage.getOPStored());
+                            }
+                            return (int) Math.abs(storage.modifyEnergyStored(-maxExtract));
+                        }
+
+                        @Override
+                        public int getEnergyStored() {
+                            return (int) Math.min(Integer.MAX_VALUE, storage.getOPStored());
+                        }
+
+                        @Override
+                        public int getMaxEnergyStored() {
+                            return (int) Math.min(Integer.MAX_VALUE, storage.getMaxOPStored());
+                        }
+
+                        @Override
+                        public boolean canExtract() {
+                            return true;
+                        }
+
+                        @Override
+                        public boolean canReceive() {
+                            return storage.canReceive();
+                        }
+                    };
+                },
                 items);
     }
 }
