@@ -32,12 +32,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.CRUCIBLE.get());
                         ModItems.WOODEN_CRUCIBLES.forEach(item -> output.accept(item.get()));
                         ModItems.MESHES.forEach(mesh -> output.accept(mesh.get()));
-                        output.accept(ModItems.WOODEN_HAMMER.get());
-                        output.accept(ModItems.STONE_HAMMER.get());
-                        output.accept(ModItems.IRON_HAMMER.get());
-                        output.accept(ModItems.GOLDEN_HAMMER.get());
-                        output.accept(ModItems.DIAMOND_HAMMER.get());
-                        output.accept(ModItems.NETHERITE_HAMMER.get());
+                        ModItems.HAMMERS.forEach(hammer -> output.accept(hammer.get()));
                         output.accept(ModItems.WOODEN_CROOK.get());
                         output.accept(ModItems.BONE_CROOK.get());
                         output.accept(ModItems.INFESTED_LEAVES.get());

@@ -14,6 +14,8 @@ import com.kaifengcrt.exnihilosatellitium.common.item.BrainPlatinumItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.NyliumSporesItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterial;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
@@ -28,7 +30,13 @@ import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Item registry: meshes, barrels, sieve and the plain porcelain item. */
 public final class ModItems {
@@ -282,8 +290,67 @@ public final class ModItems {
             ITEMS.register("netherite_hammer", () -> new HammerItem(
                     new Item.Properties().stacksTo(1).durability(2031), 6));
 
-    public static final List<DeferredHolder<Item, Item>> HAMMERS = List.of(
-            WOODEN_HAMMER, STONE_HAMMER, IRON_HAMMER, GOLDEN_HAMMER, DIAMOND_HAMMER, NETHERITE_HAMMER);
+    /**
+     * Extra hammers for the metals in {@code materials.json}.
+     *
+     * <p>Durability is built on the same 64-point base as the vanilla hammers.
+     * Tin / aluminium / zinc / copper all sit at 256 so none of them is a
+     * downgrade from the iron hammer; silver 320, lead 384, nickel 448 and
+     * osmium 512 fill the gap before diamond; platinum 1920 sits just below
+     * netherite. Cobalt and ardite go the Tinkers route, and uranium is left
+     * out on purpose, so those three get no hammer here.</p>
+     *
+     * <p>The registry is generated from the material table: disabling a metal
+     * removes its hammer and its recipe instead of leaving an item whose ingot
+     * tag is empty.</p>
+     */
+    private static final Map<String, HammerSpec> METAL_HAMMER_SPECS = metalHammerSpecs();
+
+    public static final Map<String, DeferredHolder<Item, Item>> METAL_HAMMERS =
+            registerMetalHammers();
+
+    private static Map<String, HammerSpec> metalHammerSpecs() {
+        final Map<String, HammerSpec> specs = new LinkedHashMap<>();
+        specs.put("tin", new HammerSpec(3, 256));
+        specs.put("aluminum", new HammerSpec(3, 256));
+        specs.put("zinc", new HammerSpec(3, 256));
+        specs.put("copper", new HammerSpec(3, 256));
+        specs.put("silver", new HammerSpec(4, 320));
+        specs.put("lead", new HammerSpec(4, 384));
+        specs.put("nickel", new HammerSpec(4, 448));
+        specs.put("osmium", new HammerSpec(4, 512));
+        specs.put("platinum", new HammerSpec(5, 1920));
+        return Collections.unmodifiableMap(specs);
+    }
+
+    private static Map<String, DeferredHolder<Item, Item>> registerMetalHammers() {
+        final Set<String> materials = OreMaterials.all().stream()
+                .map(OreMaterial::id)
+                .collect(Collectors.toSet());
+        final Map<String, DeferredHolder<Item, Item>> hammers = new LinkedHashMap<>();
+        METAL_HAMMER_SPECS.forEach((id, spec) -> {
+            if (!materials.contains(id)) {
+                return;
+            }
+            hammers.put(id, ITEMS.register(id + "_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(spec.durability()), spec.tier())));
+        });
+        return Collections.unmodifiableMap(hammers);
+    }
+
+    public static final List<DeferredHolder<Item, Item>> HAMMERS = allHammers();
+
+    private static List<DeferredHolder<Item, Item>> allHammers() {
+        final List<DeferredHolder<Item, Item>> hammers = new ArrayList<>(List.of(
+                WOODEN_HAMMER, STONE_HAMMER, IRON_HAMMER, GOLDEN_HAMMER,
+                DIAMOND_HAMMER, NETHERITE_HAMMER));
+        hammers.addAll(METAL_HAMMERS.values());
+        return List.copyOf(hammers);
+    }
+
+    /** Registry metadata for one generated metal hammer. */
+    private record HammerSpec(int tier, int durability) {
+    }
 
     public static final DeferredHolder<Item, Item> WOODEN_CROOK =
             ITEMS.register("wooden_crook", () -> new CrookItem(
