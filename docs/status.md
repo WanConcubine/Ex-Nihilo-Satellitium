@@ -41,14 +41,18 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
   `forge:mod_loaded` 条件。
 - **3 把 DE 锤（装 DE 时）**：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer` 继承
   DE 的 `ModularPickaxe`，走聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，
-  8M / 32M / 128M OP），可用 DE 模块；不消耗耐久，走 DE 能量。
+  8M / 32M / 128M OP），可用 DE 模块；不消耗耐久，走 DE 能量。3D cube 模型
+  （左右锤头 + 发光核心 + 长柄），材质在 `textures/item/de_hammer/`。
+- **DE 锤能量**：`HammerTool.energyPerUse()` 统一接口；DE 锤 256/次（`-99` 哨兵回退）。
+  手锤和自动锤都扣电，空电停机；服务端扣完 `broadcastChanges()` 同步客户端。
 - **不做**：钴 / 阿迪特转匠魂工具路线；铀因放射性不做锤。三者的矿链 / 筛表保留。
 - **实现**：耐久 only；`tier` 仍只排序，不改锤表/速度；创造栏与 JEI catalyst 遍历 `HAMMERS`；
   贴图由 `art/items/tools/hammer_variants.py` 换色（主线脚本生成后复制到分支）。
-- **数字**：无 DE 18 把锤（6 基础 + 9 金属 + 3 宝石），装 DE 21 把；312 模型 / 182 纹理；394 个配方文件（含手写 + datagen）。
+- **数字**：无 DE 18 把锤（6 基础 + 9 金属 + 3 宝石），装 DE 21 把；312 模型 / 189 纹理；394 个配方文件（含手写 + datagen）。
 - **验证**：`build` + 纹理守卫通过；`-PtechMods` 真装 BambooMod 后 RCON `summon item`
-  樱/枫/银杏 + 锡/铜/铂 全部注册；`-PtechMods -PdeMods` 真装 DE 后 RCON 3 把 DE 锤注册，
-  聚合配方无解析错误；**未实机聚合**、未验模块 GUI / AOE / 能量 / 耐久 / JEI。
+  樱/枫/银杏 + 锡/铜/铂 全部注册；`-PtechMods -PdeMods` 真装 DE 后 3 把 DE 锤注册。
+  3D 模型 / 模块 GUI / 手锤与自动锤能量已在主线由作者实机确认；本线同源但未单独复验
+  聚合合成 / AOE / JEI。
 
 ## 上一批（1.3.1，深板岩 / 末影接口起步）
 

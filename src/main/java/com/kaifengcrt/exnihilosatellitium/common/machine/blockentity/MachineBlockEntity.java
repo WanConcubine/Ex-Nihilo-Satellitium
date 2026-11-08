@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.common.machine.blockentity;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
 import com.kaifengcrt.exnihilosatellitium.common.machine.MachineEnergyBuffer;
@@ -357,7 +358,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     }
 
     private boolean canWork() {
-        if (!this.hasTool() || !this.hasOutputSpace()) {
+        if (!this.hasTool() || !this.hasToolEnergy() || !this.hasOutputSpace()) {
             return false;
         }
         final ItemStack input = this.inventory.getItem(INPUT_SLOT);
@@ -413,7 +414,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
                 : HammerRolls.roll(input, fortune, this.level.random);
 
         this.inventory.removeItem(INPUT_SLOT, 1);
-        this.damageTool();
+        this.consumeToolUse();
 
         for (final ItemStack stack : outputs) {
             if (!this.insertOutput(stack)) {
@@ -474,8 +475,41 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         final ItemStack tool = this.inventory.getItem(TOOL_SLOT);
         return switch (this.kind()) {
             case SIEVE -> tool.getItem() instanceof MeshItem;
-            case HAMMER -> tool.getItem() instanceof HammerItem;
+            case HAMMER -> tool.getItem() instanceof HammerTool;
         };
+    }
+
+    /** True when the installed hammer can pay its next operation's cost. */
+    private boolean hasToolEnergy() {
+        if (this.kind() != MachineKind.HAMMER) {
+            return true;
+        }
+        final ItemStack tool = this.inventory.getItem(TOOL_SLOT);
+        if (!(tool.getItem() instanceof HammerTool hammer)) {
+            return false;
+        }
+        return hammer.energyPerUse() <= 0
+                || MachineHooks.getItemEnergy(tool) >= hammer.energyPerUse();
+    }
+
+    /** Sieve meshes wear durability; hammer tools either wear or pay energy. */
+    private void consumeToolUse() {
+        if (this.kind() == MachineKind.SIEVE) {
+            this.damageTool();
+            return;
+        }
+        final ItemStack tool = this.inventory.getItem(TOOL_SLOT);
+        if (tool.isEmpty() || !(tool.getItem() instanceof HammerTool hammer)) {
+            return;
+        }
+        if (hammer instanceof HammerItem) {
+            this.damageTool();
+            return;
+        }
+        if (hammer.energyPerUse() > 0) {
+            MachineHooks.extractItemEnergy(tool, hammer.energyPerUse());
+            this.inventory.setItem(TOOL_SLOT, tool);
+        }
     }
 
     private void damageTool() {
@@ -541,7 +575,7 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         if (slot == TOOL_SLOT) {
             return switch (this.kind()) {
                 case SIEVE -> stack.getItem() instanceof MeshItem;
-                case HAMMER -> stack.getItem() instanceof HammerItem;
+                case HAMMER -> stack.getItem() instanceof HammerTool;
             };
         }
         if (slot == INPUT_SLOT) {
