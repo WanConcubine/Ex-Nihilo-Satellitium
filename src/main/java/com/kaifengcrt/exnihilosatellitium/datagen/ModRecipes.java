@@ -281,6 +281,13 @@ public final class ModRecipes extends RecipeProvider {
         hammer(out, "golden_hammer", ModItems.GOLDEN_HAMMER.get(), Ingredient.of(Items.GOLD_INGOT));
         hammer(out, "diamond_hammer", ModItems.DIAMOND_HAMMER.get(), Ingredient.of(Items.DIAMOND));
 
+        // Material hammers follow the ingot tags so Mekanism / Thermal / IE / Create
+        // ingots work too; copper is always the vanilla ingot.
+        ModItems.METAL_HAMMERS.forEach((material, holder) -> hammer(out, material + "_hammer",
+                holder.get(), "copper".equals(material)
+                        ? Ingredient.of(Items.COPPER_INGOT)
+                        : Ingredient.of(forge("ingots/" + material))));
+
         SmithingTransformRecipeBuilder.smithing(
                         Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
                         Ingredient.of(ModItems.DIAMOND_HAMMER.get()),
@@ -304,6 +311,10 @@ public final class ModRecipes extends RecipeProvider {
                 .define('x', Items.BONE)
                 .unlockedBy("has_bone", has(Items.BONE))
                 );
+    }
+
+    private static TagKey<Item> forge(final String path) {
+        return ItemTags.create(new ResourceLocation("forge", path));
     }
 
     private static void hammer(final Consumer<FinishedRecipe> out, final String name, final ItemLike result,

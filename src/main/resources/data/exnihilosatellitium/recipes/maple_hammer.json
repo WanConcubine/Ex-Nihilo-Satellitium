@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "bamboomod:maple_gem"
+    },
+    "y": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "pattern": [
+    " x ",
+    " yx",
+    "y  "
+  ],
+  "result": {
+    "item": "exnihilosatellitium:maple_hammer"
+  },
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "bamboomod"
+    }
+  ]
+}

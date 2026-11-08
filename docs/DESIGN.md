@@ -665,3 +665,24 @@ Mek/IE/Create 的铀矿处理因此能磨它。我们的 yellorium 矿块原先�
 （`libs/` + `-PdeMods`）；全装叠加 `-PtechMods`：`[materials] 26`、`[sieve] 174`、
 `[hammer] 91`；RCON 熔炉把 `draconium_ore_dust` 熔成
 `draconicevolution:draconium_ingot`；手筛 / JEI 未目视。
+
+## 材质锤：9 金属 + 3 Bamboo 宝石（2026-11-08）
+
+**为什么**：六档基础锤之外，空岛已经注册了 14 种金属，但铜/锡/银/铅/镍/铂/铝/锇/锌
+没有对应的手动锤；BambooMod 的樱/枫/银杏宝石也没有消耗口。
+
+**耐久（所有者 2026-11-08 拍板）**：锡/铝/锌/铜 **256**、银 **320**、铅 **384**、
+镍 **448**、锇 **512**、铂 **1920**；Bamboo 樱/枫/银杏统一 **2048**。
+以 64 为基数，钻石 1561 仍是普通材质上限，宝石锤略高于下界合金。
+**不做**：钴/阿迪特转匠魂工具路线；铀因放射性不做锤。只加耐久，不改锤表/速度。
+
+**注册**：`ModItems.METAL_HAMMERS` 从 `materials.json` 生成；材料 disabled 时锤子一起消失。
+Bamboo 三把只在 1.20.1 分支、`bamboomod` 在场（或 datagen JVM）时注册。
+
+**配方/贴图**：金属锤 head 走 `forge:ingots/<id>`，铜用原版铜锭；宝石锤手写
+`forge:mod_loaded(bamboomod)` 配方。贴图由主线 `art/items/tools/hammer_variants.py`
+从铁/钻石锤底图换色，金属复用矿链五阶调色板。
+
+**验证**：本线 `build` + `check-textures.py` 通过（309 模型 / 179 纹理）；
+`runData` 生成 12 个模型与 9 条金属配方；`-PtechMods` 真装 BambooMod 后 RCON
+`summon item` 樱/枫/银杏 + 金属锤全部注册；**未进游戏**验合成/耐久/JEI。

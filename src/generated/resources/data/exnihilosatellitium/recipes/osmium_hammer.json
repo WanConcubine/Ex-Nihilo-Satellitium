@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "tag": "forge:ingots/osmium"
+    },
+    "y": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "pattern": [
+    " x ",
+    " yx",
+    "y  "
+  ],
+  "result": {
+    "item": "exnihilosatellitium:osmium_hammer"
+  },
+  "show_notification": true
+}
