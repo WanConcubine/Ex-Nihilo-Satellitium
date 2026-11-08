@@ -11,7 +11,7 @@ import net.minecraft.world.item.Item;
  * only orders the materials (and their durability); it does not change the
  * crush table.</p>
  */
-public class HammerItem extends Item {
+public class HammerItem extends Item implements HammerTool {
 
     private final int tier;
 
@@ -21,6 +21,7 @@ public class HammerItem extends Item {
     }
 
     /** 1 = wood, 2 = stone, 3 = iron, 4 = gold, 5 = diamond, 6 = netherite. */
+    @Override
     public int tier() {
         return this.tier;
     }

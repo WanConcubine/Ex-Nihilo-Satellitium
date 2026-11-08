@@ -686,3 +686,21 @@ Bamboo 三把只在 1.20.1 分支、`bamboomod` 在场（或 datagen JVM）时�
 **验证**：本线 `build` + `check-textures.py` 通过（309 模型 / 179 纹理）；
 `runData` 生成 12 个模型与 9 条金属配方；`-PtechMods` 真装 BambooMod 后 RCON
 `summon item` 樱/枫/银杏 + 金属锤全部注册；**未进游戏**验合成/耐久/JEI。
+
+## 龙之进化锤：双足飞龙 / 神龙 / 混沌（2026-11-08）
+
+**目标**：三把 DE 主题锤，沿用 DE 聚合装置升级链，并使用 DE 模块。DE 3.1.x 没有锤子物品，
+所以这三把是自造的 `ModularPickaxe` 子类。
+
+**升级链**：`diamond_hammer` → `wyvern_hammer`（8M OP）→ `draconic_hammer`（32M）→
+`chaotic_hammer`（128M）；材料沿用 DE 镐的龙核/龙锭/中继水晶/能量核心/下界合金/觉醒龙/混沌核心。
+配方手写 `forge:mod_loaded(draconicevolution)` 条件。
+
+**模块/能量**：`DEHammerItem extends ModularPickaxe implements HammerTool`，继承 DE 模块网格、
+`createHost` / `createOPStorage` 与 1.20.1 的 `initCapabilities`；`ToolEvents` 对 DE 锤跳过
+`hurtAndBreak`，走 DE 能量。DE 类放在可选 `src/de/java` source set，只有 `libs/` 三个 DE jar
+都在时才编译并打进 jar；核心用反射查找 `DEHammers`。
+
+**验证**：本线 `build` + 纹理守卫通过（312 模型 / 182 纹理）；`-PtechMods -PdeMods` 真装
+BambooMod + DE 后 RCON 3 把 DE 锤均注册，聚合配方无解析错误；**未实机聚合**，模块 GUI /
+AOE / 能量未目视。

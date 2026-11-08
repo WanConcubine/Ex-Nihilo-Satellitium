@@ -5,6 +5,7 @@ import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
+import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -43,7 +44,7 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onHarvestCheck(final PlayerEvent.HarvestCheck event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerItem)) {
+        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getTargetBlock()) != null) {
@@ -53,7 +54,7 @@ public final class ToolEvents {
 
     @SubscribeEvent
     public static void onBreakSpeed(final PlayerEvent.BreakSpeed event) {
-        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerItem)) {
+        if (!(event.getEntity().getMainHandItem().getItem() instanceof HammerTool)) {
             return;
         }
         if (HammerRecipes.ruleFor(event.getState()) == null) {
@@ -72,7 +73,7 @@ public final class ToolEvents {
         final BlockPos pos = event.getPos();
         final BlockState state = event.getState();
 
-        if (tool.getItem() instanceof HammerItem) {
+        if (tool.getItem() instanceof HammerTool) {
             if (HammerRecipes.ruleFor(state) == null) {
                 return;
             }
@@ -83,7 +84,7 @@ public final class ToolEvents {
             for (final ItemStack result : HammerRolls.roll(state, 0, level.random)) {
                 Block.popResource(level, pos, result);
             }
-            if (!player.isCreative()) {
+            if (!player.isCreative() && tool.getItem() instanceof HammerItem) {
                 tool.hurtAndBreak(1, player, broken -> broken.broadcastBreakEvent(InteractionHand.MAIN_HAND));
             }
             return;
