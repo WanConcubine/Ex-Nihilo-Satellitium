@@ -174,3 +174,11 @@ python3 scripts/check-textures.py
   `art/blocks/end_cake/inventory.png`（`render_inventory.py`，复用 barrel 渲染器）。
 - 模型只写 `parent: minecraft:block/cake` / `cake_slice1..6` + 覆盖
   `particle/bottom/top/side/inside`，几何沿用 vanilla，不复制模型文件。
+
+## 材质锤（2026-11-08）
+
+- 9 把金属锤（锡/铝/锌/铜/银/铅/镍/锇/铂）和 3 把 Bamboo 宝石锤（樱/枫/银杏）
+  都在铁锤 / 钻石锤底图上换头色，木柄不变；生成器在主线的
+  `art/items/tools/hammer_variants.py`，本线只提交生成的 PNG。
+- 金属复用 `art/items/ore_pieces/generate.py` 的五阶调色板；宝石用 BambooMod 宝石的
+  采样色，只取颜色，不复制像素。16×16 RGBA，模型仍是 `item/handheld`。

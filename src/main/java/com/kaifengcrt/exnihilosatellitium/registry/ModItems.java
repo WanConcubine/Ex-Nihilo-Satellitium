@@ -14,6 +14,8 @@ import com.kaifengcrt.exnihilosatellitium.common.item.SilkwormItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.TinkersGrassSeedItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterial;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
@@ -29,7 +31,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Item registry. Placeholder content lives here until the first gameplay
@@ -316,8 +324,95 @@ public final class ModItems {
     public static final RegistryObject<Item> NETHERITE_HAMMER =
             ITEMS.register("netherite_hammer", () -> new HammerItem(
                     new Item.Properties().stacksTo(1).durability(2031), 6));
-    public static final List<RegistryObject<Item>> HAMMERS = List.of(
-            WOODEN_HAMMER, STONE_HAMMER, IRON_HAMMER, GOLDEN_HAMMER, DIAMOND_HAMMER, NETHERITE_HAMMER);
+    /**
+     * Extra hammers for the metals in {@code materials.json}.
+     *
+     * <p>Same 64-point base as the vanilla hammers: tin / aluminium / zinc /
+     * copper 256, silver 320, lead 384, nickel 448, osmium 512, platinum 1920.
+     * Cobalt and ardite go the Tinkers route and uranium is left out on
+     * purpose, so none of those gets a hammer here. The registry is generated
+     * from the material table: disabling a metal removes its hammer and its
+     * recipe instead of leaving an item whose ingot tag is empty.</p>
+     */
+    private static final Map<String, HammerSpec> METAL_HAMMER_SPECS = metalHammerSpecs();
+
+    public static final Map<String, RegistryObject<Item>> METAL_HAMMERS = registerMetalHammers();
+
+    /** BambooMod 0.6.2 gems; this line only exists on the 1.20.1 branch. */
+    @Nullable
+    public static final RegistryObject<Item> SAKURA_HAMMER = bambooHammer("sakura", 6, 2048);
+    @Nullable
+    public static final RegistryObject<Item> MAPLE_HAMMER = bambooHammer("maple", 6, 2048);
+    @Nullable
+    public static final RegistryObject<Item> GINKGO_HAMMER = bambooHammer("ginkgo", 6, 2048);
+
+    public static final List<RegistryObject<Item>> HAMMERS = allHammers();
+
+    private static Map<String, HammerSpec> metalHammerSpecs() {
+        final Map<String, HammerSpec> specs = new LinkedHashMap<>();
+        specs.put("tin", new HammerSpec(3, 256));
+        specs.put("aluminum", new HammerSpec(3, 256));
+        specs.put("zinc", new HammerSpec(3, 256));
+        specs.put("copper", new HammerSpec(3, 256));
+        specs.put("silver", new HammerSpec(4, 320));
+        specs.put("lead", new HammerSpec(4, 384));
+        specs.put("nickel", new HammerSpec(4, 448));
+        specs.put("osmium", new HammerSpec(4, 512));
+        specs.put("platinum", new HammerSpec(5, 1920));
+        return Collections.unmodifiableMap(specs);
+    }
+
+    private static Map<String, RegistryObject<Item>> registerMetalHammers() {
+        final Set<String> materials = OreMaterials.all().stream()
+                .map(OreMaterial::id)
+                .collect(Collectors.toSet());
+        final Map<String, RegistryObject<Item>> hammers = new LinkedHashMap<>();
+        METAL_HAMMER_SPECS.forEach((id, spec) -> {
+            if (!materials.contains(id)) {
+                return;
+            }
+            hammers.put(id, ITEMS.register(id + "_hammer", () -> new HammerItem(
+                    new Item.Properties().stacksTo(1).durability(spec.durability()), spec.tier())));
+        });
+        return Collections.unmodifiableMap(hammers);
+    }
+
+    private static List<RegistryObject<Item>> allHammers() {
+        final List<RegistryObject<Item>> hammers = new ArrayList<>(List.of(
+                WOODEN_HAMMER, STONE_HAMMER, IRON_HAMMER, GOLDEN_HAMMER,
+                DIAMOND_HAMMER, NETHERITE_HAMMER));
+        hammers.addAll(METAL_HAMMERS.values());
+        addHammer(hammers, SAKURA_HAMMER);
+        addHammer(hammers, MAPLE_HAMMER);
+        addHammer(hammers, GINKGO_HAMMER);
+        return List.copyOf(hammers);
+    }
+
+    private static void addHammer(final List<RegistryObject<Item>> hammers,
+                                  @Nullable final RegistryObject<Item> hammer) {
+        if (hammer != null) {
+            hammers.add(hammer);
+        }
+    }
+
+    /**
+     * Conditional gem hammer: registered only while BambooMod is loaded, or in
+     * the datagen JVM so the icon/model exists for packs that do install it.
+     */
+    @Nullable
+    private static RegistryObject<Item> bambooHammer(final String name, final int tier,
+                                                     final int durability) {
+        final boolean datagen = Boolean.getBoolean("exnihilosatellitium.datagen");
+        if (!datagen && (ModList.get() == null || !ModList.get().isLoaded("bamboomod"))) {
+            return null;
+        }
+        return ITEMS.register(name + "_hammer", () -> new HammerItem(
+                new Item.Properties().stacksTo(1).durability(durability), tier));
+    }
+
+    /** Registry metadata for one generated metal hammer. */
+    private record HammerSpec(int tier, int durability) {
+    }
 
     public static final RegistryObject<Item> WOODEN_CROOK =
             ITEMS.register("wooden_crook", () -> new CrookItem(

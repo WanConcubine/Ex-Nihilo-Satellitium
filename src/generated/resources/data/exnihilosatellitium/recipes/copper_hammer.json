@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "item": "minecraft:copper_ingot"
+    },
+    "y": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "pattern": [
+    " x ",
+    " yx",
+    "y  "
+  ],
+  "result": {
+    "item": "exnihilosatellitium:copper_hammer"
+  },
+  "show_notification": true
+}
