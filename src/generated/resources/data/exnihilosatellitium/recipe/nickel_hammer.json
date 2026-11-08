@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "x": {
+      "tag": "c:ingots/nickel"
+    },
+    "y": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    " x ",
+    " yx",
+    "y  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:nickel_hammer"
+  }
+}

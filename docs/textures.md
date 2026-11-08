@@ -277,6 +277,17 @@ Creatio 是 MIT 授权，允许复制与再分发；完整版权/许可见
 - **Sequentia（传承）1.21 是 CC BY-NC-SA 4.0**，只能看风格、不能采用其贴图。
 - 待办：进游戏 4× 目视 6 种锤/2 种钩、蚕动画、尘土方块接缝。
 
+## 材质锤（2026-11-08）
+
+- **9 把金属锤**（锡 / 铝 / 锌 / 铜 / 银 / 铅 / 镍 / 锇 / 铂）和 **3 把 Bamboo 宝石锤**
+  （樱 / 枫 / 银杏）都是在 `restyle.py` 产出的 `iron_hammer.png` / `diamond_hammer.png`
+  底图上换头色，木柄保持原样；不新增手绘轮廓。
+- 生成器 `art/items/tools/hammer_variants.py`：金属复用
+  `art/items/ore_pieces/generate.py` 的五阶调色板（osmium 用同一默认值），宝石用
+  BambooMod 宝石的采样色——**只取颜色，不复制它的像素**。
+- 全部 16×16 RGBA；模型仍是 `item/handheld`。宝石锤只在 1.20.1 分支存在。
+- 预览：[material-hammers.png](images/material-hammers.png)（9 金属 + 3 宝石，6×）。
+
 ## 末影蛋糕（2026-11-03）
 
 - 4 张 16×16 方块贴图（Creatio MIT 原图经 restyle）：`end_cake_top.png` / `end_cake_side.png` /
