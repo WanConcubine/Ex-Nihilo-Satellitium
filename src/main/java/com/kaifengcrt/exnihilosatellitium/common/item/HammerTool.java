@@ -9,6 +9,6 @@ package com.kaifengcrt.exnihilosatellitium.common.item;
  */
 public interface HammerTool {
 
-    /** 1 = wood, 2 = stone, 3 = iron, 4 = gold, 5 = diamond, 6 = netherite. */
+    /** 1 = wood ... 6 = netherite; 7-9 = the optional DE wyvern / draconic / chaotic tiers. */
     int tier();
 }
