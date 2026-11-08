@@ -1986,3 +1986,32 @@ Bamboo 三把只在 1.20.1 分支、`bamboomod` 在场（或 datagen JVM）时�
 RCON `summon item` 9 把金属锤全部注册；1.20.1 分支 `build` + 纹理守卫通过
 （309 模型 / 179 纹理），`-PtechMods` 真装 BambooMod 后樱/枫/银杏与金属锤全部注册。
 **未进游戏**验合成/耐久/JEI。
+
+## 57. 龙之进化锤：双足飞龙 / 神龙 / 混沌（2026-11-08，主线）
+
+**目标**：三把 DE 主题锤，沿用 DE 的聚合装置升级链，并且像 DE 工具一样使用模块
+（速度 / AOE / 能量等）。DE 3.1.x 本身没有锤子物品，所以这三把是我们自造的
+`ModularPickaxe` 子类。
+
+**升级链（聚合装置 / fusion crafting）**：
+
+| 锤 | 催化剂 | 核心材料 | 能量 |
+|---|---|---|---:|
+| `wyvern_hammer` | `diamond_hammer` | 龙核 + 2 龙锭 + 2 基础中继水晶 + 飞龙能量核心 | 8M |
+| `draconic_hammer` | `wyvern_hammer` | 4 下界合金锭 + 飞龙核心 + 2 觉醒龙锭 + 神龙能量核心 | 32M |
+| `chaotic_hammer` | `draconic_hammer` | 6 觉醒龙锭 + 混沌核心 + 混沌能量核心 | 128M |
+
+三把都带 `neoforge:mod_loaded(draconicevolution)` 条件，没装 DE 时配方跳过。
+
+**模块与能量**：`DEHammerItem extends ModularPickaxe implements HammerTool`，直接继承
+DE 的模块网格（`pickaxe` 类型）、`ModuleHost` / `ModularOPStorage`、模块 GUI、速度与 AOE
+判定；不消耗耐久，`ToolEvents` 只对普通 `HammerItem` 扣耐久。DE 只在它自己的物品注册表上
+挂模块 / 能量 capability，所以 `DEHammers` 额外注册 `DECapabilities.Host.ITEM` 与
+`Capabilities.EnergyStorage.ITEM` 两个 provider。
+
+**构建隔离**：DE 类放在可选的 `src/de/java` source set；`build.gradle` 只有 `libs/de`
+三个 jar 都在时才编译它，并打进 jar。核心 `ModItems` / `CapabilityEvents` 用反射查找
+`DEHammers`，所以没有 DE jars 的正常构建不会引用任何 DE 类，装 DE 的玩家才看到这三把。
+
+**限制**：两线都已实机验证三把注册与配方解析（1.20.1 用 `-PtechMods -PdeMods`），
+但**还没在聚合装置里实际合成**，模块 GUI / AOE / 能量消耗也没目视。

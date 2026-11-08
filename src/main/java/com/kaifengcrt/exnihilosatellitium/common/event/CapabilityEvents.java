@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketFluidHandler;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.kaifengcrt.exnihilosatellitium.platform.barrel.BarrelItemHandler;
 import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineEnergy;
 import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineItemHandler;
@@ -46,5 +47,18 @@ public final class CapabilityEvents {
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.FUEL_MACHINE.get(),
                 (machine, side) -> machine.getEnergyBuffer() == null
                         ? null : new MachineEnergy(machine.getEnergyBuffer()));
+
+        // Optional DE hammers: hand their module host / OP storage to DE's own
+        // capability tokens. The class lives in the optional `de` source set.
+        if (Platform.isModLoaded("draconicevolution")) {
+            try {
+                Class.forName("com.kaifengcrt.exnihilosatellitium.compat.draconicevolution.DEHammers")
+                        .getMethod("registerCapabilities", RegisterCapabilitiesEvent.class)
+                        .invoke(null, event);
+            } catch (final ReflectiveOperationException exception) {
+                ExNihiloSatellitium.LOGGER.error(
+                        "[de] failed to register hammer capabilities", exception);
+            }
+        }
     }
 }

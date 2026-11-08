@@ -1,0 +1,68 @@
+{
+  "type": "draconicevolution:fusion_crafting",
+  "catalyst": {
+    "item": "exnihilosatellitium:draconic_hammer"
+  },
+  "ingredients": [
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "item": "draconicevolution:chaotic_core"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "item": "draconicevolution:chaotic_energy_core"
+      }
+    },
+    {
+      "consume": true,
+      "ingredient": {
+        "tag": "c:ingots/draconium_awakened"
+      }
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:chaotic_hammer"
+  },
+  "techLevel": "chaotic",
+  "totalEnergy": 128000000,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "draconicevolution"
+    }
+  ]
+}

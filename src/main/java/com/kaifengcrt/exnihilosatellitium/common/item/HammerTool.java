@@ -1,0 +1,14 @@
+package com.kaifengcrt.exnihilosatellitium.common.item;
+
+/**
+ * Marker for every item that should use the hammer crush table.
+ *
+ * <p>{@link HammerItem} is the plain durability tool; the optional Draconic
+ * Evolution hammers extend DE's modular pickaxe and therefore cannot share that
+ * superclass, so the event hooks only depend on this interface.</p>
+ */
+public interface HammerTool {
+
+    /** 1 = wood, 2 = stone, 3 = iron, 4 = gold, 5 = diamond, 6 = netherite. */
+    int tier();
+}
