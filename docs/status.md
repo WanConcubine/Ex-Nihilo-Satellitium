@@ -1,6 +1,6 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-05
+> 最后更新：2026-11-09
 > 先看这 25 行；批次叙事在 [history.md](history.md)，架构/取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
@@ -27,6 +27,8 @@ capability（1.21.1 流体原有）。
 Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 /
 BambooMod（仅 1.20.1）/ 末影接口（Ender IO，两版 beta）全部可选，缺失即降级；
 核心门面 P1 与三路径（数据包 / KubeJS / CraftTweaker）已完成。
+**匠魂可改造锤（2026-11-09）只在 1.20.1 线**：`ex_nihilo_hammer` 是真正的匠魂工具
+（材料 / 特性 / 强化槽 + 我们的锤表）；Tinkers 3 没有官方 1.21.1 构建，主线不加这个物品。
 **当前表尺**：筛子 7 输入 / 119 掉落（无科技模组；1.20.1 116，缺 3 条钴历史差异）；
 装末影接口各 **+1**（120 / 117）；+AE2 123 / 120；1.20.1 全装 +TiT 142、再加 AE2 146；
 主线 Mek+Thermal 140、+AE2 144；装 Extreme Reactors 各 **+9**（151 / 155，主线
