@@ -4,7 +4,6 @@ import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
-import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
 import com.kaifengcrt.exnihilosatellitium.platform.machine.MachineHooks;
@@ -37,9 +36,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = ExNihiloSatellitium.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class ToolEvents {
 
-    /** Classic hammer was 0.75 x an iron tool's efficiency on smashable blocks. */
-    private static final float HAMMER_SPEED = 6.0F;
-
     private ToolEvents() {
     }
 
@@ -63,7 +59,10 @@ public final class ToolEvents {
         if (HammerRecipes.ruleFor(event.getState()) == null) {
             return;
         }
-        event.setNewSpeed(Math.max(event.getNewSpeed(), HAMMER_SPEED));
+        final float floor = ((HammerTool) stack.getItem()).breakSpeed(stack);
+        if (floor > 0.0F) {
+            event.setNewSpeed(Math.max(event.getNewSpeed(), floor));
+        }
     }
 
     @SubscribeEvent
@@ -88,11 +87,10 @@ public final class ToolEvents {
                 Block.popResource(level, pos, result);
             }
             if (!player.isCreative()) {
-                if (tool.getItem() instanceof HammerItem) {
-                    tool.hurtAndBreak(1, player,
-                            broken -> broken.broadcastBreakEvent(InteractionHand.MAIN_HAND));
-                } else if (hammer.energyPerUse() > 0) {
+                if (hammer.energyPerUse() > 0) {
                     MachineHooks.extractItemEnergy(tool, hammer.energyPerUse());
+                } else {
+                    hammer.wear(player, tool);
                 }
             }
             return;

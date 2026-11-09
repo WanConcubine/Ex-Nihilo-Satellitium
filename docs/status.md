@@ -1,16 +1,18 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-05
+> 最后更新：2026-11-09
 > 先看这 20 行；批次叙事在 [history.md](history.md)，设计与取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
 
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.3.2 已发**（tag `v1.3.2-1.20.1`）；1.0.0–1.3.2 的商店上传待所有者。
-**当前批次（材质锤 + DE 锤，2026-11-08）**：**9 把金属锤 + 3 把 Bamboo 宝石锤 + 3 把 DE 锤**——
+**当前批次（匠魂可改造锤，2026-11-09，仅 1.20.1）**：新增 `ex_nihilo_hammer`（碎矿锤）——
+匠魂装配站用 **锤头 + 坚韧手柄 + 2 大板** 做成的真正匠魂工具，继承材料属性 / 特性 / 强化槽，
+掉落走同一张锤表；不装匠魂时物品与数据全部不存在。
+上一批（材质锤 + DE 锤，2026-11-08）：9 把金属锤 + 3 把 Bamboo 宝石锤 + 3 把 DE 锤——
 锡/铝/锌/铜 256、银 320、铅 384、镍 448、锇 512、铂 1920；樱/枫/银杏统一 2048；
 DE 双足飞龙/神龙/混沌继承 DE 模块，走聚合装置升级链，无耐久消耗。
-钴/阿迪特转匠魂路线、铀不做。宝石锤按 `bamboomod` 条件注册，DE 锤按 `draconicevolution`。
 未发布，版本号待定。
 上一批（1.3.2，2026-11-05）：**木桶修复**——满桶右键堆肥材料不再把方块放到桶顶；
 新增物品 `BarrelItemHandler`（槽 0 堆肥输入 / 槽 1 泥土·固体输出），补上物品 + 流体 capability。
@@ -31,7 +33,52 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 锤表 88（全装 +ER；装 DE 91）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
 
-## 当前批次（材质锤，2026-11-08）
+## 当前批次（匠魂可改造锤，2026-11-09，仅 1.20.1）
+
+- **物品**：`exnihilosatellitium:ex_nihilo_hammer`（显示名 **碎矿锤**；id 保留，测试世界里已有
+  旧 id 的锤子）。不是自有 `HammerItem`，
+  而是 TiC 的 `ModifiableItem` 子类 + `HammerTool`；装配站用 **锤头 + 坚韧手柄 + 2×大板**
+  （大锤同款部件）合成，钴 / 阿迪特 / 玛玉灵等匠魂材料都能做头。
+- **属性**：部件比例与匠魂大锤一致（头 0.5、板各 0.25、手柄），耐久 ×4.0；但**去掉大锤的
+  0.4 挖掘惩罚**，单方块速度 = 头部材料速度（铁头 6.0），因为本工具没有基础 3×3；
+  攻击 1.35 倍 + 基础 3.0；强化槽 1 能力 / 2 升级；自带 `tconstruct:smite` 1。
+- **效果**：实现 `HammerTool`，复用 1.20.1 的 `ToolEvents#onBreak` 锤表判定；命中锤表方块时
+  取消原版破坏、掉锤表产物，其余方块正常挖掘。耐久走 `HammerTool#wear` 覆写，
+  用 `ToolDamageUtil.damageAnimated` 扣 1 点（强化 / 粘液覆层 / 破损动画都生效）。
+- **匠魂特性**：材料特性（铁磁性 / 木质栽培等）、强化槽、材料耐久；工具定义本身不加
+  `box_aoe`，也不登记 `modifiable/aoe`，保持“像我们的锤”单方块（锤表方块的破坏由我们接管，
+  AOE 强化只对非锤表方块生效，登记了反而误导）。
+- **构建 / 注册**：TConstruct 没有官方 1.21.1，所以只有 1.20.1 线；`src/tinkers/java` 可选
+  source set 仅在 `libs/` 有 TConstruct + Mantle 时编译并打进 jar，核心反射 `TinkersTools`，
+  运行时再按 `tconstruct` 门控。`-PtinkersMods` 只加载 Mantle + TConstruct，便于快速验证。
+- **数据**：`tinkering/tool_definitions/ex_nihilo_hammer.json`、`tinkering/station_layouts/...`、
+  `recipes/tools/building/...`（`forge:mod_loaded` 条件）；6 个 `data/tconstruct/tags/items/...`
+  追加文件把物品接入 harvest / multipart / durability / melee / broad（不登记 aoe）。
+- **强化外观**：模型加了 `modifier_maps: ["exnihilosatellitium:ex_nihilo_hammer"]`，对应
+  `assets/exnihilosatellitium/tinkering/modifiers/sprites/ex_nihilo_hammer.json`；第一批接了
+  16 个强化 overlay（急速/发光/火焰/强化/钻石/绿宝石/下界合金/亡灵杀手/自动烧炼/幸运/丝触/
+  经验/不毁/斩首/磁力/坏死），贴图由 `crushing_hammer_overlays.py` 按锤头位置生成。
+  流体类（储罐/装桶）和染色/粘液覆层仍没有外观，这是匠魂工具本身的边界；要加其它强化
+  只需在 sprite map 里补一条 + 一张 overlay。
+- **贴图 / 模型**：`art/items/tools/crushing_hammer_parts.py` 把铁锤底图拆成 **head / handle**
+  两张 16×16 灰度部件图；模型走 `exnihilosatellitium:tool` loader——装匠魂时委托 TiC 的
+  `tconstruct:tool` 按部件材料染色（创造栏里木/铁/钴/玛玉灵颜色不同），没装匠魂时回退成普通
+  layered item，不会刷未知 loader 错误；另补了 `*_tconstruct_unknown` 别名图给裸物品模型。
+- **兼容**：自动锤机器也接受它；`MachineBlockEntity` 对非能量锤改为走 `damageTool()`，
+  否则会白嫖（机器不触发 TiC 的 `damageAnimated`，只扣原始耐久）。
+- **验证**：`build` + `check-textures.py`（313 模型 / 209 纹理）+ 主线
+  `check-data-paths.py --target 1.20.1`（197 recipes / 10 tags）通过；`runServer -PtinkersMods`
+  日志 `Loaded 46 tool definitions` / `24 station slot layouts`，定义 `dataLoaded=true`、
+  布局命中、合成配方 `exnihilosatellitium:tools/building/ex_nihilo_hammer` 存在；
+  RCON `summon item` 正常。临时 FakePlayer 探针（铁头 + 木柄 + 2 铁板）：耐久 1000 / 速度 6.0 /
+  攻击 6.75，特性 `magnetic` + `cultivated` + `smite`；破坏砂砾掉 **沙子** 且 `Damage=1`。
+  客户端已开（`-PdevMods -PtinkersMods`）：装配站造出 **木碎矿锤**（240 耐久 / 5.05 攻击），
+  tooltip 显示 `培植 IV` + `亡灵杀手 I` + 我们的一行说明；强化页可正常装「自动烧炼」；
+  创造栏里不同材料的锤头/手柄颜色明显不同（木、铁/钴/玛玉灵等）。强化 overlay 已接入
+  （`smite` 默认就有，创造栏的锤子应该都能看到那枚淡黄十字），但**还没逐个强化目视**；
+  **JEI 工具页 / 左键手感**也未单独验。
+
+## 上一批（材质锤 + DE 锤，2026-11-08）
 
 - **9 把金属锤**：锡 / 铝 / 锌 / 铜 256、银 320、铅 384、镍 448、锇 512、铂 1920；
   `ModItems.METAL_HAMMERS` 从 `materials.json` 生成，配方 head 走 `forge:ingots/<id>`，
@@ -45,7 +92,8 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
   （左右锤头 + 发光核心 + 长柄），材质在 `textures/item/de_hammer/`。
 - **DE 锤能量**：`HammerTool.energyPerUse()` 统一接口；DE 锤 256/次（`-99` 哨兵回退）。
   手锤和自动锤都扣电，空电停机；服务端扣完 `broadcastChanges()` 同步客户端。
-- **不做**：钴 / 阿迪特转匠魂工具路线；铀因放射性不做锤。三者的矿链 / 筛表保留。
+- **当时不做**：钴 / 阿迪特自有锤——改走匠魂路线；2026-11-09 由 `ex_nihilo_hammer` 承接。
+  铀因放射性不做锤。三者的矿链 / 筛表保留。
 - **实现**：耐久 only；`tier` 仍只排序，不改锤表/速度；创造栏与 JEI catalyst 遍历 `HAMMERS`；
   贴图由 `art/items/tools/hammer_variants.py` 换色（主线脚本生成后复制到分支）。
 - **数字**：无 DE 18 把锤（6 基础 + 9 金属 + 3 宝石），装 DE 21 把；312 模型 / 189 纹理；394 个配方文件（含手写 + datagen）。
@@ -178,6 +226,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 - **构建**：`JAVA_HOME=/Users/kaifengcrt/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home ./gradlew build`。
 - **客户端**：`./gradlew runClient -PdevMods -PtechMods`；**专用服**：`./gradlew runServer -PtechMods`
   （`libs/` 有 jar 才加载；不带 `-PtechMods` 是 116 / 55 的基表）。
+  **只测匠魂锤**：`./gradlew runServer -PtinkersMods`（Mantle + TConstruct，不加载其它科技模组）。
 - **先跑**：`./gradlew build` + `python3 scripts/check-textures.py`；分支没有 core/data 守卫脚本，
   涉及数据表时回主线跑 `check-data-paths.py --target 1.20.1`。
 - **已知不一致**：沙/砂砾/尘土各少 1 条钴（1/64），基表 116 vs 主线 119；分支没有
@@ -190,7 +239,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 ## 功能现状
 
-- 核心循环与主线一致：12 桶、7 输入筛表、6 基础锤 + 9 材质锤 + 3 Bamboo 宝石锤 + 3 DE 锤 / 2 钩、39 熔点 + 9 热源、巫水/瓷桶/11 木坩埚/
+- 核心循环与主线一致：12 桶、7 输入筛表、6 基础锤 + 9 材质锤 + 3 Bamboo 宝石锤 + 3 DE 锤 + 1 匠魂锤（装匠魂时）/ 2 钩、39 熔点 + 9 热源、巫水/瓷桶/11 木坩埚/
   蚕/8 人偶（含 2 只热力条件人偶、村民人偶）、四台机器 + 自动输出。
 - 村民/蜂蜜：村民人偶、脑白金、糖水/浓缩蜂蜜汁（source block + 桶）、养蜂、蜂箱配方。
 - 数据布局：`recipes/`、`loot_tables/`、`tags/blocks|items/`，标签命名空间 `forge:`；
@@ -228,6 +277,8 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
       热改生效（坩埚容量、机器速度/耗电）。
 - [ ] **TiT / AE2**：草方块筛出叶绿素碎矿、碎下界岩筛出阿迪特碎矿；沙筛出赛特斯水晶/粉；
       两条 AE2 掉落在 JEI 筛子页可见。
+- [ ] **匠魂锤**：装配站放下锤头 / 坚韧手柄 / 2 大板 → 合成碎矿锤；材料属性 / 特性
+      与强化槽显示；左键砂砾掉沙子、耐久 −1；装 JEI 看 TiC 自己的工具页。
 
 ## 验证状态
 
@@ -236,6 +287,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
+| 匠魂锤（1.20.1） | ✅ / ⚠️ | 真装 TConstruct 3.12.1 + Mantle 1.11.117：46 tool definitions / 24 station layouts；定义 `dataLoaded=true`、布局命中、`tool_building` 配方存在；临时 FakePlayer 探针铁头+木柄+2 铁板：1000 耐久 / 6.0 速度 / 6.75 攻击、`magnetic`+`cultivated`+`smite`，砂砾→沙子且 `Damage=1`；build + 纹理 + data 守卫通过。客户端已看装配站 / 强化页 / tooltip / 材质染色（创造栏多材质锤颜色不同）；无匠魂客户端启动正常（模型走 fallback，无 unknown loader）；强化 overlay 已接入但未逐个目视；JEI 工具页 / 手感未单独验 |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
 | `check-textures.py` | ✅ | 297 模型 / 116 blockstate / 167 纹理；七个子模型只引用 vanilla block 贴图 |
@@ -292,7 +344,12 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 - **Jade 是可选依赖**：`compileOnly` API，不打包；没装时插件类不加载。
 - **月光魔法是可选软依赖**：`moonlight_magic`，目前只占位，没有实际联动内容。
 
-## 踩过的坑（改代码前先看）
+## 踩过的坑
+
+- **可选兼容类不能挂 `@EventBusSubscriber`**：`TinkersClient` 一旦带注解，FML 在没有匠魂的
+  客户端也会加载它，类里的 TiC 引用直接让游戏崩在 `common_setup`。正确做法是核心在
+  “客户端 + 模组在场”时反射调用 compat 的 `register(modBus)`，已改。
+（改代码前先看）
 
 - **ForgeGradle 卡 `Checking server connections`**：加 `-Dnet.minecraftforge.gradle.check.certs=false`。
 - **直连 TLS 失败（libraries.minecraft.net / repo.maven TLS handshake）**：缓存已齐时用 `--offline` 构建/启动。

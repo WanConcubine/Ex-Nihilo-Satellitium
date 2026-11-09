@@ -674,7 +674,8 @@ Mek/IE/Create 的铀矿处理因此能磨它。我们的 yellorium 矿块原先�
 **耐久（所有者 2026-11-08 拍板）**：锡/铝/锌/铜 **256**、银 **320**、铅 **384**、
 镍 **448**、锇 **512**、铂 **1920**；Bamboo 樱/枫/银杏统一 **2048**。
 以 64 为基数，钻石 1561 仍是普通材质上限，宝石锤略高于下界合金。
-**不做**：钴/阿迪特转匠魂工具路线；铀因放射性不做锤。只加耐久，不改锤表/速度。
+**当时不做**：钴/阿迪特自有锤——改走匠魂路线；2026-11-09 由匠魂可改造锤承接（见文末）。
+铀因放射性不做锤。只加耐久，不改锤表/速度。
 
 **注册**：`ModItems.METAL_HAMMERS` 从 `materials.json` 生成；材料 disabled 时锤子一起消失。
 Bamboo 三把只在 1.20.1 分支、`bamboomod` 在场（或 datagen JVM）时注册。
@@ -709,3 +710,56 @@ Bamboo 三把只在 1.20.1 分支、`bamboomod` 在场（或 datagen JVM）时�
 **验证**：本线 `build` + 纹理守卫通过（312 模型 / 182 纹理）；`-PtechMods -PdeMods` 真装
 BambooMod + DE 后 RCON 3 把 DE 锤均注册，聚合配方无解析错误；**未实机聚合**，模块 GUI /
 AOE / 能量未目视。
+
+## 匠魂可改造锤：碎矿锤（2026-11-09，仅 1.20.1）
+
+**目标**：不是再造一把自有锤，而是让“钴 / 阿迪特走匠魂路线”真正落地——用匠魂 3 的部件、
+材料、特性与强化系统做一把锤，同时保留我们的粉碎表。
+
+**做法**：`ExNihiloHammerItem extends ModifiableItem implements HammerTool`。
+- `ModifiableItem` 负责匠魂的一切：材料属性、材料特性、强化槽、耐久、Tool Stack NBT、
+  装配站合成、强化台、破损动画。
+- `HammerTool` 只桥接我们的判定：1.20.1 的 `ToolEvents#onBreak` 已经接管锤表方块的破坏，
+  所以“是不是锤”只取决于这个接口，不需要第二套判定。
+- **耐久**：1.20.1 取消 `BlockEvent.BreakEvent` 后，TiC 的 `ToolHarvestLogic` 不会跑，
+  因此 `HammerTool#wear` 负责扣耐久；匠魂锤覆写为 `ToolDamageUtil.damageAnimated`，
+  让强化 / 粘液覆层 / 耐久倍率 / 破损广播都生效。普通锤走默认的 `hurtAndBreak`。
+
+**工具定义**（`data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json`）：
+- 部件与匠魂大锤一致：`hammer_head`（0.5）+ `tough_handle` + `large_plate`（0.25）×2；
+  这样钴 / 阿迪特 / 玛玉灵锤头直接复用匠魂的铸造与材料。
+- 去掉了大锤的 `mining_speed ×0.4`：本工具没有基础 3×3，单方块速度按头部材料算（铁头 6.0），
+  否则会比自有铁锤还慢。耐久仍 ×4.0，保持“大锤级”耐久。
+- 1 能力 + 2 升级槽，自带 `tconstruct:smite` 1；`pickaxe_dig` + `mineable/pickaxe` 有效；
+  不加 `box_aoe`；锤表方块的破坏由我们接管，AOE 强化只对非锤表方块生效，所以不登记
+  `modifiable/aoe`，保持单方块。
+
+**构建**：TConstruct 没有官方 1.21.1，所以只有 1.20.1 分支。`src/tinkers/java` 是可选 source set，
+和 DE 锤同一模式：`libs/` 里有 TConstruct + Mantle 才编译并打进 jar；核心
+`ModItems#tinkersHammers` 反射加载 `TinkersTools`，运行时按 `tconstruct` 门控。
+数据文件始终在 jar 里，但合成配方与装配站布局带 `forge:mod_loaded(tconstruct)` 条件；
+没有匠魂时工具定义不会被注册，JSON 被忽略。
+
+**模型**：loader 是 `exnihilosatellitium:tool`（我们注册，始终存在）。装匠魂时它委托 TiC 的
+`tconstruct:tool`，用 `head` / `handle` 两张 16×16 灰度部件图，按每个部件的实际材料染色；
+没装匠魂时回退到 `forge:item_layers`，所以孤儿模型不会刷 unknown loader。`TinkersClient`
+只在“客户端 + 匠魂”时注册 `ToolModel.registerItemColors`，并用反射从核心调用——如果给它加
+`@EventBusSubscriber`，没有匠魂的客户端会因为类里的 TiC 引用直接崩在 `common_setup`。
+裸物品模型另补 `*_tconstruct_unknown.png` 别名，避免 `Missing textures`。
+
+**强化外观**：`modifier_maps` 指向我们的 sprite map（`tinkering/modifiers/sprites/`），第一批
+16 个常用强化各有 16×16 overlay；位置按锤头而不是大锤布局画，所以不会出现大锤的错位图案。
+匠魂的染色 / 粘液覆层 / 流体储罐有各自专用模型，工具侧暂不接；要补新强化只需 map 一条 +
+一张 overlay，不需要改代码。
+
+**兼容**：自动锤机器接受它（`HammerTool`）；`consumeToolUse` 改为对非能量锤统一
+`damageTool()`，否则匠魂锤会在机器里白嫖。机器只扣原始耐久，不触发 TiC 的
+`damageAnimated`（无玩家上下文），这是有意的取舍。
+
+**验证**：`-PtinkersMods` 启动 → 46 tool definitions / 24 station layouts；定义
+`dataLoaded=true`、布局命中、`tool_building` 配方存在；临时 FakePlayer 探针
+（铁头 + 木柄 + 2 铁板）得到 1000 耐久 / 6.0 速度 / 6.75 攻击、`magnetic` + `cultivated` +
+`smite`，破坏砂砾掉沙子且 `Damage=1`。客户端已开：装配站造出木锤（240 耐久 / 5.05 攻击），tooltip 的 `培植 IV` + `亡灵杀手 I` +
+我们的说明行都正常，强化页可装自动烧炼；创造栏里不同材料的锤头/手柄颜色明显不同
+（木、铁、钴、玛玉灵等）；无匠魂客户端也能正常启动（模型走 fallback，不报 unknown loader）。
+JEI 工具页 / 左键手感未单独验。

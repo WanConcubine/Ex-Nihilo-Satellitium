@@ -2,7 +2,6 @@ package com.kaifengcrt.exnihilosatellitium.common.machine.blockentity;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
-import com.kaifengcrt.exnihilosatellitium.common.item.HammerItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;
@@ -502,14 +501,15 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         if (tool.isEmpty() || !(tool.getItem() instanceof HammerTool hammer)) {
             return;
         }
-        if (hammer instanceof HammerItem) {
-            this.damageTool();
-            return;
-        }
         if (hammer.energyPerUse() > 0) {
             MachineHooks.extractItemEnergy(tool, hammer.energyPerUse());
             this.inventory.setItem(TOOL_SLOT, tool);
+            return;
         }
+        // Plain hammers and the optional Tinkers' Construct hammer both pay
+        // with durability; the TiC item is not a HammerItem but its damage
+        // accessors are TiC's own (stats-based), so damageTool() still works.
+        this.damageTool();
     }
 
     private void damageTool() {

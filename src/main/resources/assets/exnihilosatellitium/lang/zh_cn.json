@@ -231,6 +231,8 @@
   "item.exnihilosatellitium.draconium_powdered": "粉末龙矿",
   "item.exnihilosatellitium.end_cake": "末影蛋糕",
   "item.exnihilosatellitium.ender_slime_grass_seeds": "末影黏液草种子",
+  "item.exnihilosatellitium.ex_nihilo_hammer.tooltip": "命中砂砾 / 沙子 / 尘土 / 矿砾等方块时，按锤表掉落",
+  "item.exnihilosatellitium.ex_nihilo_hammer": "碎矿锤",
   "item.exnihilosatellitium.fluorite_broken": "破碎氟石矿",
   "item.exnihilosatellitium.fluorite_crushed": "粉碎氟石矿",
   "item.exnihilosatellitium.fluorite_powdered": "粉末氟石矿",

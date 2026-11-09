@@ -20,11 +20,14 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -349,6 +352,15 @@ public final class ModItems {
     /** Optional DE hammers; loaded reflectively only when DE is present. */
     private static final List<RegistryObject<Item>> DE_HAMMERS = draconicHammers();
 
+    /**
+     * Optional Tinkers' Construct hammer. A real TiC modifiable tool (built at
+     * the Tinker Station from a hammer head, a tough handle and two large
+     * plates), registered only while {@code tconstruct} is loaded. It is kept
+     * out of the plain creative-tab loop because a bare TiC tool has no
+     * materials; {@link #acceptTinkersCreative} asks TiC for material variants.
+     */
+    public static final List<RegistryObject<Item>> TINKERS_HAMMERS = tinkersHammers();
+
     public static final List<RegistryObject<Item>> HAMMERS = allHammers();
 
     private static Map<String, HammerSpec> metalHammerSpecs() {
@@ -389,7 +401,46 @@ public final class ModItems {
         addHammer(hammers, MAPLE_HAMMER);
         addHammer(hammers, GINKGO_HAMMER);
         hammers.addAll(DE_HAMMERS);
+        hammers.addAll(TINKERS_HAMMERS);
         return List.copyOf(hammers);
+    }
+
+    /**
+     * Registers the TiC hammer through the optional {@code tinkers} source set.
+     * The compat class is only loaded when Tinkers is on the mod list, so a
+     * normal build / game never links against TConstruct.
+     */
+    @SuppressWarnings("unchecked")
+    private static List<RegistryObject<Item>> tinkersHammers() {
+        if (ModList.get() == null || !ModList.get().isLoaded("tconstruct")) {
+            return List.of();
+        }
+        try {
+            final Class<?> type = Class.forName(
+                    "com.kaifengcrt.exnihilosatellitium.compat.tconstruct.TinkersTools");
+            final Object value = type.getMethod("register", DeferredRegister.class)
+                    .invoke(null, ITEMS);
+            return (List<RegistryObject<Item>>) value;
+        } catch (final ReflectiveOperationException | ClassCastException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[tinkers] failed to register the Tinkers' Construct hammer", exception);
+            return List.of();
+        }
+    }
+
+    /** Adds the TiC hammer's random-material creative variants, when present. */
+    public static void acceptTinkersCreative(final CreativeModeTab.Output output) {
+        if (TINKERS_HAMMERS.isEmpty()) {
+            return;
+        }
+        try {
+            Class.forName("com.kaifengcrt.exnihilosatellitium.compat.tconstruct.TinkersTools")
+                    .getMethod("addCreativeItems", CreativeModeTab.Output.class)
+                    .invoke(null, output);
+        } catch (final ReflectiveOperationException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[tinkers] failed to build creative tool variants", exception);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -491,5 +542,26 @@ public final class ModItems {
 
     public static void register(final IEventBus modBus) {
         ITEMS.register(modBus);
+        registerTinkersClient(modBus);
+    }
+
+    /**
+     * Registers the TiC model colour handler, but only on a client that has
+     * Tinkers. Loading {@code TinkersClient} without TConstruct would fail on
+     * its TiC imports, so the call is reflective and guarded here instead of
+     * using {@code @EventBusSubscriber} on the compat class.
+     */
+    private static void registerTinkersClient(final IEventBus modBus) {
+        if (TINKERS_HAMMERS.isEmpty() || FMLEnvironment.dist != Dist.CLIENT) {
+            return;
+        }
+        try {
+            Class.forName("com.kaifengcrt.exnihilosatellitium.compat.tconstruct.TinkersTools")
+                    .getMethod("registerClient", IEventBus.class)
+                    .invoke(null, modBus);
+        } catch (final ReflectiveOperationException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[tinkers] failed to register the client model colours", exception);
+        }
     }
 }

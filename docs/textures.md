@@ -188,3 +188,18 @@ python3 scripts/check-textures.py
 - 双足飞龙 / 神龙 / 混沌三把是 **3D cube 模型**（左右锤头 + 发光核心 + 长柄），
   每个面用 `textures/item/de_hammer/` 分区贴图；模型从主线复制，不使用 2D 图标。
 - 生成器在主线的 `art/items/tools/hammer_variants.py`，本线只提交生成的 PNG。
+
+## 碎矿锤（2026-11-09，仅 1.20.1）
+
+- `ex_nihilo_hammer` 沿用铁锤的 16×16 轮廓，拆成 **head / handle** 两张灰度部件图：
+  head 映射到金属调色板的 000/063/140/178/216/255 亮度档，handle 映射到匠魂木调色板的
+  000/102/178/255 档。仍是自有像素，不复制匠魂贴图。
+- 生成器在本线的 `art/items/tools/crushing_hammer_parts.py`（`--out` 可预览到 /tmp）。
+- 模型 loader 是 `exnihilosatellitium:tool`：装匠魂时委托 TiC 的 `tconstruct:tool`，按每个部件
+  的实际材料材质染色（部件模型 + `ToolModel.registerItemColors`）；没装匠魂时回退成
+  `forge:item_layers`，不会出现 unknown loader。另补 `*_tconstruct_unknown.png` 别名图，
+  避免裸物品模型刷 “Missing textures”。
+- 部件贴图是**灰度**的，不要直接放彩色图；否则匠魂的 `grey_to_color` 调色板无法正确映射。
+- 强化 overlay 是**彩色**小图案（不是灰度），按锤头位置画在 16×16 透明画布上；生成器
+  `art/items/tools/crushing_hammer_overlays.py`，目前 16 个常用强化（急速/发光/火焰/强化/
+  钻石/绿宝石/下界合金/亡灵杀手/自动烧炼/幸运/丝触/经验/不毁/斩首/磁力/坏死）。
