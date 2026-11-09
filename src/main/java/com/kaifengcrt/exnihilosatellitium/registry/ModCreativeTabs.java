@@ -33,7 +33,14 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.DUST.get());
                 output.accept(ModItems.UNFIRED_CRUCIBLE.get());
                 output.accept(ModItems.CRUCIBLE.get());
-                ModItems.HAMMERS.forEach(hammer -> output.accept(hammer.get()));
+                ModItems.HAMMERS.forEach(hammer -> {
+                    // TiC's tool needs a material list before it renders; the
+                    // compat hook below adds random-material variants instead.
+                    if (!ModItems.TINKERS_HAMMERS.contains(hammer)) {
+                        output.accept(hammer.get());
+                    }
+                });
+                ModItems.acceptTinkersCreative(output);
                 ModItems.CROOKS.forEach(crook -> output.accept(crook.get()));
                 output.accept(ModItems.INFESTED_LEAVES.get());
                 output.accept(com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem

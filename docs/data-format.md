@@ -317,6 +317,26 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过。
   它的树叶/树苗/竹笋已进 `#minecraft:leaves` / `#minecraft:saplings`，堆肥由现有标签覆盖。
 
+### 匠魂可改造锤（Tinkers' Construct 3，1.20.1）
+
+不是我们的玩法表，而是匠魂自己的数据文件；改它们要按匠魂的格式来，且**只在装匠魂时生效**。
+
+| 文件 | 作用 |
+|---|---|
+| `data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json` | 工具定义：部件 `hammer_head`(0.5) + `tough_handle` + 2×`large_plate`(0.25)、`base_stats` / `multiply_stats`、强化槽、`smite` 1、`pickaxe_dig`、有效方块 tag |
+| `data/exnihilosatellitium/tinkering/station_layouts/ex_nihilo_hammer.json` | 装配站 4 个输入槽的位置与图标；`conditions` 带 `forge:mod_loaded(tconstruct)` |
+| `data/exnihilosatellitium/recipes/tools/building/ex_nihilo_hammer.json` | `tconstruct:tool_building` 配方，`result` 指向本物品 |
+| `data/tconstruct/tags/items/modifiable/**` | 6 个追加文件，把物品接入 `harvest` / `multipart` / `durability` / `melee/primary` / `broad`（不登记 `aoe`，见下） |
+
+- 工具定义 JSON 没有 `conditions`（匠魂的 loader 只读已注册的定义）；不装匠魂时核心不会注册
+  这个定义，整个 JSON 被忽略。配方与布局有 `forge:mod_loaded` 条件，不会报 unknown item。
+- 工具的物品类在可选 `src/tinkers/java` source set，**不装匠魂的客户端不加载任何 TiC 类**；
+  贴图/模型始终在 jar 里：模型用我们自己的 `exnihilosatellitium:tool` loader，装匠魂时委托
+  TiC 的 `tconstruct:tool` 做部件材料染色，没装匠魂时回退成 `forge:item_layers` 分层模型，
+  不会报未知 loader。
+- 改数值只动 tool definition 的 `multiply_stats` / `base_stats`；改部件只动 `parts` 与
+  station layout 的 `input_slots`，两边必须一起改。
+
 ## 9. 桶转化 JSON（M1.5/M6）
 
 **路径**：`data/<namespace>/barrel/*.json`，一个转化一个文件。

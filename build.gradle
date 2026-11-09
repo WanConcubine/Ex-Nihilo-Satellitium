@@ -155,6 +155,42 @@ if (deJars.files.every { it.exists() }) {
     }
 }
 
+// Optional Tinkers' Construct integration. The hammer is a real TiC modifiable
+// tool, so the compat classes compile against TConstruct + Mantle; when the jars
+// are missing from libs/ the source set is skipped and the item simply does not
+// exist (its data files are then ignored, since no tool definition is
+// registered). Tinkers has no official 1.21.1 build, so this block is 1.20.1-only.
+def tinkersJars = files(
+        'libs/TConstruct-1.20.1-3.12.1.231.jar',
+        'libs/Mantle-1.20.1-1.11.117.jar'
+)
+if (tinkersJars.files.every { it.exists() }) {
+    configurations { tinkersCompile }
+    dependencies {
+        tinkersCompile fg.deobf("libs:TConstruct-1.20.1:3.12.1.231")
+        tinkersCompile fg.deobf("libs:Mantle-1.20.1:1.11.117")
+    }
+    sourceSets {
+        tinkers {
+            java.srcDir 'src/tinkers/java'
+            compileClasspath += sourceSets.main.output.classesDirs + sourceSets.main.compileClasspath + configurations.tinkersCompile
+        }
+    }
+    jar { from sourceSets.tinkers.output }
+    tasks.withType(JavaExec).configureEach { classpath += sourceSets.tinkers.output }
+    minecraft {
+        runs {
+            configureEach {
+                mods {
+                    "${mod_id}" {
+                        source sourceSets.tinkers
+                    }
+                }
+            }
+        }
+    }
+}
+
 repositories {
     // Jade API for the optional HUD plugin. Modrinth mirrors the released jar.
     maven {
@@ -244,6 +280,18 @@ dependencies {
         }
         if (file("libs/jecharacters-1.20.1-forge-4.6.11.jar").exists()) {
             runtimeOnly fg.deobf("libs:jecharacters-1.20.1-forge:4.6.11")
+        }
+    }
+
+    // Tinkers-only dev run for the optional TiC hammer: Mantle + TConstruct,
+    // without the rest of the tech pack.
+    //   ./gradlew runServer -PtinkersMods
+    if (project.hasProperty("tinkersMods")) {
+        if (file("libs/Mantle-1.20.1-1.11.117.jar").exists()) {
+            runtimeOnly fg.deobf("libs:Mantle-1.20.1:1.11.117")
+        }
+        if (file("libs/TConstruct-1.20.1-3.12.1.231.jar").exists()) {
+            runtimeOnly fg.deobf("libs:TConstruct-1.20.1:3.12.1.231")
         }
     }
 

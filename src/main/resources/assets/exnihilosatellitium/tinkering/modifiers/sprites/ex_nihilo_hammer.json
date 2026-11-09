@@ -1,0 +1,55 @@
+{
+  "modifiers": {
+    "tconstruct:glowing": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/glowing",
+      "luminosity": 15
+    },
+    "tconstruct:haste": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/haste",
+      "luminosity": 7
+    },
+    "tconstruct:fiery": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/fiery",
+      "luminosity": 10
+    },
+    "tconstruct:reinforced": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/reinforced"
+    },
+    "tconstruct:diamond": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/diamond"
+    },
+    "tconstruct:emerald": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/emerald"
+    },
+    "tconstruct:netherite": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/netherite"
+    },
+    "tconstruct:smite": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/smite"
+    },
+    "tconstruct:blasting": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/blasting"
+    },
+    "tconstruct:luck": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/luck"
+    },
+    "tconstruct:silky": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/silky"
+    },
+    "tconstruct:experienced": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/experienced"
+    },
+    "tconstruct:unbreakable": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/unbreakable"
+    },
+    "tconstruct:severing": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/severing"
+    },
+    "tconstruct:magnetic": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/magnetic"
+    },
+    "tconstruct:necrotic": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/necrotic"
+    }
+  }
+}
