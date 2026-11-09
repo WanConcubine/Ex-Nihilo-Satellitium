@@ -39,11 +39,19 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-wiki.txt
 
 # 开发客户端
 ./gradlew runClient
+
+# 1.20.1 分支的可选联动：只装 Mantle + TConstruct（匠魂锤）
+./gradlew runServer -PtinkersMods
 ```
 
 - 改完**至少**跑 `build` + `check-textures.py` + `check-data-paths.py`；改 wiki 再加 `check-wiki.py` + `mkdocs build --strict`。
 - 服务端逻辑用 RCON 验（`/setblock`、`/data merge`、`/execute if block`）。
 - **测试绿 ≠ 画面/手感验过**；没进游戏看过就不要在 status.md 写“已验证”。
+- **1.20.1 可选 source set**：`src/de/java`（龙之进化）、`src/tinkers/java`（匠魂 3）只有
+  `libs/` 里有对应 jar 才编译；`-PdeMods` / `-PtinkersMods` 只加载对应模组，`-PtechMods`
+  是完整科技包。**可选兼容类不要挂 `@EventBusSubscriber`**：没有对方模组的客户端也会被 FML
+  加载，类里的对方引用会直接把游戏崩在 `common_setup`；应由核心在“客户端 + 模组在场”时
+  反射调用 compat 的 `register(modBus)`。
 - NeoForge 1.21 运行时用官方名，生产 jar 可以直接放进 `run/mods` 测（已验证 Jade 15 / JEI 19 / Just Enough Characters）；`run/` 已 gitignore，别提交。
 
 ## 3. 硬规则
