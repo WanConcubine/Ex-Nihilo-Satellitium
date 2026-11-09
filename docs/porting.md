@@ -20,6 +20,10 @@
 - 数据：**145 个 recipe + 69 个 loot_table + 41 个 tag** 是 vanilla 类型，路径/格式随版本变
   （1.21 单数、`result.id`；1.20.1 复数、`result.item`）；自定义表（sieve/hammer/crook/compost/
   barrel/crucible_*）是我们自己的目录，**两版同构**。
+- **1.20.1 可选 source set**（2026-11-09）：`src/de/java`（龙之进化）、`src/tinkers/java`
+  （匠魂 3）只在 `libs/` 里存在对应 jar 时才编译；核心用反射加载 compat 入口，运行时再按
+  `draconicevolution` / `tconstruct` 门控。对应启动参数是 `-PdeMods` / `-PtinkersMods`；
+  这类 compat 类**不要挂 `@EventBusSubscriber`**（没有对方模组时类里的引用会崩在 common_setup）。
 - `DeferredHolder` 152 次，但只分布在 **12 个文件**（registry + `compat/jei` + `OreColors`）；
   其余代码只调 `.get()`。移植时改注册类即可，不需要全仓替换。
 - `ModConfig.*` 只有 **10 个调用点**；`DeferredHolder` 与 config 都适合做薄门面，不适合过度抽象。
