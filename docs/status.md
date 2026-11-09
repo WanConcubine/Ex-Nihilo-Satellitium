@@ -223,7 +223,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 - **工作区**：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`（`1.20.1-forge` worktree）；
   主工作区 `/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium` 是 `main`。两条线都已推 origin
-  （匠魂批次：`1.20.1-forge` 的 `00fe9b4`；主线说明：`main` 的 `06dbb08`）。
+  （匠魂批次：`1.20.1-forge` 的 `662a235`；主线说明：`main` 的 `b078814`）。
 - **构建**：`JAVA_HOME=/Users/kaifengcrt/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home ./gradlew build`。
 - **客户端**：`./gradlew runClient -PdevMods -PtechMods`；**专用服**：`./gradlew runServer -PtechMods`
   （`libs/` 有 jar 才加载；不带 `-PtechMods` 是 116 / 55 的基表）。
