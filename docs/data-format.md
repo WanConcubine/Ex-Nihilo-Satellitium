@@ -327,9 +327,13 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 | `data/exnihilosatellitium/tinkering/station_layouts/ex_nihilo_hammer.json` | 装配站 4 个输入槽的位置与图标；`conditions` 带 `forge:mod_loaded(tconstruct)` |
 | `data/exnihilosatellitium/recipes/tools/building/ex_nihilo_hammer.json` | `tconstruct:tool_building` 配方，`result` 指向本物品 |
 | `data/tconstruct/tags/items/modifiable/**` | 6 个追加文件，把物品接入 `harvest` / `multipart` / `durability` / `melee/primary` / `broad`（不登记 `aoe`，见下） |
+| `assets/exnihilosatellitium/tinkering/modifiers/sprites/ex_nihilo_hammer.json` | 强化外观：16 个 modifier id → overlay 贴图；模型里的 `modifier_maps` 指向它 |
 
 - 工具定义 JSON 没有 `conditions`（匠魂的 loader 只读已注册的定义）；不装匠魂时核心不会注册
   这个定义，整个 JSON 被忽略。配方与布局有 `forge:mod_loaded` 条件，不会报 unknown item。
+- 强化外观同样是匠魂的数据：`modifier_maps` 指向我们的 sprite map，再指向
+  `assets/exnihilosatellitium/textures/item/ex_nihilo_hammer/modifiers/*.png`。没列进的
+  强化不会显示 overlay，也不会报错；要加就是 map 一条 + 一张 16×16 图。
 - 工具的物品类在可选 `src/tinkers/java` source set，**不装匠魂的客户端不加载任何 TiC 类**；
   贴图/模型始终在 jar 里：模型用我们自己的 `exnihilosatellitium:tool` loader，装匠魂时委托
   TiC 的 `tconstruct:tool` 做部件材料染色，没装匠魂时回退成 `forge:item_layers` 分层模型，
