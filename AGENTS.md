@@ -28,6 +28,10 @@ python3 scripts/check-textures.py
 - 改完**至少**跑 `build` + `check-textures.py`。
 - 服务端逻辑用 RCON 验（`/setblock`、`/data merge`、`/execute if block`）。
 - **测试绿 ≠ 画面/手感验过**；没进游戏看过就不要在 status.md 写“已验证”。
+- **1.20.1 可选 source set**：`src/de/java`（龙之进化）、`src/tinkers/java`（匠魂 3）只有
+  `libs/` 里有对应 jar 才编译；`-PdeMods` / `-PtinkersMods` 只加载对应模组。**可选兼容类不要挂
+  `@EventBusSubscriber`**：没有对方模组的客户端也会被 FML 加载，类里的对方引用会崩在
+  `common_setup`；应由核心在“客户端 + 模组在场”时反射调用 compat 的 `register(modBus)`。
 - 不要在 dev 的 `run/mods` 里塞生产 jar（Jade/月光魔法）做测试；SRG 名会 `NoSuchFieldError`。
 
 ## 3. 硬规则

@@ -222,7 +222,8 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 ## 交接清单（新会话先看）
 
 - **工作区**：`/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium-1.20.1`（`1.20.1-forge` worktree）；
-  主工作区 `/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium` 是 `main`。两条线都已推 origin。
+  主工作区 `/Users/kaifengcrt/Projects/Ex-Nihilo-Satellitium` 是 `main`。两条线都已推 origin
+  （匠魂批次：`1.20.1-forge` 的 `00fe9b4`；主线说明：`main` 的 `06dbb08`）。
 - **构建**：`JAVA_HOME=/Users/kaifengcrt/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home ./gradlew build`。
 - **客户端**：`./gradlew runClient -PdevMods -PtechMods`；**专用服**：`./gradlew runServer -PtechMods`
   （`libs/` 有 jar 才加载；不带 `-PtechMods` 是 116 / 55 的基表）。
@@ -312,16 +313,25 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 ## 下一步（按价值排序）
 
-1. **1.1.0 商店收尾**：tag `v1.1.0-1.20.1` 已打；CurseForge / Modrinth 上传待所有者。
-2. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶（含热力两只、村民）+
+1. **匠魂锤收尾**：逐个强化看 overlay 位置/大小（急速 / 发光 / 钻石 / 自动烧炼等），
+   决定要不要补流体罐/装桶；再看 JEI 工具页与左键手感；如果决定连 id 改成
+   `crushing_hammer`，要接受测试世界旧锤失效。
+2. **1.3.2 商店收尾 + 匠魂批次版本号**：`v1.3.2-1.20.1` 已发；CurseForge / Modrinth
+   上传待所有者；匠魂批次未发布，版本号待定。
+3. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶（含热力两只、村民）+
    糖水链/养蜂、四台机器、自动输出抽屉、BER 动画、JEI 页面、TiT/AE2 实际筛出。
-3. **修分支筛表钴差异**：沙/砂砾/尘土各补 1 条 1/64（或补 `generate_sieve_assets.py`），
+4. **修分支筛表钴差异**：沙/砂砾/尘土各补 1 条 1/64（或补 `generate_sieve_assets.py`），
    与主线基表 119 对齐。
-4. **P4 JEI 同步 + fixture CI**；P3 状态机拆分；advancement / CI。
-5. **更多 supported mods**：AE2 充能赛特斯 / 天石粉、TiT 其它矿、IE 1.21.1。
+5. **P4 JEI 同步 + fixture CI**；P3 状态机拆分；advancement / CI。
+6. **更多 supported mods**：AE2 充能赛特斯 / 天石粉、TiT 其它矿、IE 1.21.1。
 
 ## 已拍板的决策
 
+- **匠魂可改造锤（2026-11-09，所有者指定）**：只做 1.20.1（匠魂 3 无官方 1.21.1）；
+  装配站用 **锤头 + 坚韧手柄 + 2×大板**；**单方块**粉碎，不加基础 AOE、不登记 `aoe` tag；
+  去大锤的 0.4 挖掘惩罚、耐久 ×4.0；**显示名「碎矿锤」**（英文 Crushing Hammer），
+  物品 id **保留 `ex_nihilo_hammer`**（测试世界旧锤仍可用）；材料染色 + 16 个常用强化 overlay，
+  流体罐/染色/粘液覆层外观暂不做。
 - **项目名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；mod id `exnihilosatellitium`，
   Java 包 `com.kaifengcrt.exnihilosatellitium`，资源命名空间 `exnihilosatellitium`（2026-10-28）。
 - **许可证 MIT**（2026-10-27 从 ARR 转）；Forge MDK 仍 LGPL-2.1，见 [THIRD-PARTY.md](../THIRD-PARTY.md)。
@@ -346,10 +356,11 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 ## 踩过的坑
 
+（改代码前先看）
+
 - **可选兼容类不能挂 `@EventBusSubscriber`**：`TinkersClient` 一旦带注解，FML 在没有匠魂的
   客户端也会加载它，类里的 TiC 引用直接让游戏崩在 `common_setup`。正确做法是核心在
   “客户端 + 模组在场”时反射调用 compat 的 `register(modBus)`，已改。
-（改代码前先看）
 
 - **ForgeGradle 卡 `Checking server connections`**：加 `-Dnet.minecraftforge.gradle.check.certs=false`。
 - **直连 TLS 失败（libraries.minecraft.net / repo.maven TLS handshake）**：缓存已齐时用 `--offline` 构建/启动。
