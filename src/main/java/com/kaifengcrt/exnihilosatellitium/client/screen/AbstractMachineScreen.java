@@ -84,6 +84,11 @@ public abstract class AbstractMachineScreen<T extends AbstractMachineMenu>
     @Override
     protected void renderBg(final GuiGraphics graphics, final float partialTick,
                             final int mouseX, final int mouseY) {
+        // 1.20.1's AbstractContainerScreen#render does NOT call renderBackground()
+        // (1.21.1 moved it into render() instead); every vanilla container screen
+        // calls it from its own renderBg. Without this the machine panel sits on
+        // the world with no dimming.
+        this.renderBackground(graphics);
         this.drawBackground(graphics);
         MachineGui.drawGhosts(graphics, this.menu, this.leftPos, this.topPos);
         this.drawGauges(graphics);

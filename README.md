@@ -20,7 +20,7 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.3.2.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.4.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
 
 1. 装好 Forge 47.4.x（Java 17），把 jar 放进 `mods/`。
 2. 可选：**JEI**（配方查询，`runClient -PdevMods` 时从 `libs/` 加载）、**Jade**（方块信息）、
@@ -32,7 +32,7 @@
    AE2 的赛特斯石英粉 / 水晶由筛沙直接获得；ER 的黄铀 / 铅矾 / 蓝锥矿走三档矿链；
    BambooMod 的树苗 / 竹笋 / 作物 / 宝石由泥土与砂砾筛出；DE 的龙尘由粉碎末地石筛出）。
 
-1.3.2 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
+1.4.0 的完整内容与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术栈
 
@@ -60,7 +60,7 @@
 - [x] M7 JEI / 配置 / 数据生成
 - [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 插件 + 自动输出
 - [ ] M8 与「月光魔法」联动
-- [x] M9 发布（1.3.2 已打 tag；CurseForge / Modrinth 上传待所有者）
+- [x] M9 发布（1.4.0 已打 tag；CurseForge / Modrinth 上传待所有者）
 
 ## 文档
 
