@@ -1,4 +1,4 @@
-# 技术债清单（2026-11-09 第二轮审计）
+# 技术债清单（2026-11-09 第二轮审计，2026-11-10 更新）
 
 > 范围：`src/main/java`（156 个文件 / 16.9k 行）、`src/main/resources`、`src/generated`、
 > `scripts/`、`build.gradle`、`.github/workflows`、两个分支的 `common/` 差异、文档数字。
@@ -13,9 +13,9 @@
 - **1 个 P0（已修并实测通过）**：`1.21.1` 的木钩/骨钩在 2026-11-08 的 DE 锤提交（`16c78bb`）
   后不再掉耐久；2026-11-09 恢复 `wearMainHand` 的通用可损坏物品判断，并在开发服上
   用 FakePlayer + `gameMode.destroyBlock` 实测：木钩/骨钩/木锤各 `damage=1`，创造钩 0（见 #47）。
-- **3 个 P1 流程问题（#48–#50 已修，待首次 GitHub 运行确认）**：CI 的
-  `[materials] loaded 12 entries` 断言按当前材料表必红（#48）；CI 不跑 core/data 守卫、
-  也不跑 PR（#49）；1.20.1 分支与 `main` 的 `common/` 已实质漂移，且分支没有守卫（#51）。
+- **P1 流程问题**：CI 的 `[materials] loaded 12 entries` 断言按当前材料表必红（#48）、
+  CI 不跑 core/data 守卫也不跑 PR（#49）、1.20.1 分支与 `main` 的 `common/` 已实质漂移
+  且分支没有守卫（#51）。**#48–#50 已修，2026-11-10 push 首跑通过；#51 仍待处理。**
 - **最大重构点**：6 份几乎同构的表加载器（~2.2k 行，含 6 个空壳 reload listener）与
   `BarrelBlockEntity` 单类 1097 行的多状态机（#66/#67）。
 - **最大性能点**：机器每 tick `setChanged` + 全槽扫描（#54）、升级查询在 BER 每帧分配/排序
@@ -27,7 +27,7 @@
 |---|---|
 | `./gradlew build --offline` | ✅ BUILD SUCCESSFUL（2026-11-09） |
 | `./gradlew test --offline` | ⚠️ `compileTestJava NO-SOURCE` / `test NO-SOURCE`（零测试） |
-| CI 工作流本地校验 | ✅ Ruby YAML 解析 + `bash -n` + Python `py_compile`；materials 断言用假日志验过 14 通过 / 12 失败；**未在 GitHub 首跑** |
+| CI 工作流首跑 | ✅ 2026-11-10 [run 42840322972](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/actions/runs/42840322972)：Texture/Core/Data/Wiki/Compile/Headless smoke 全绿；materials 动态断言通过 |
 | 服务端钩子耐久探针（临时命令，已删） | ✅ `FakePlayer` + `gameMode.destroyBlock`：木钩 / 骨钩 / 木锤各 `damage=1`，创造模式钩 `damage=0`；探针类已从源码删除，jar 内无残留 |
 | `python3 scripts/check-textures.py` | ✅ 307 models / 116 blockstates / 190 textures |
 | `python3 scripts/check-core-imports.py` | ✅ 0 known leak(s) |
@@ -63,9 +63,9 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
 
 | # | 问题 | 证据 | 影响 | 建议 |
 |---|---|---|---|---|
-| 48 | **CI 的 materials 断言写死 12** — **2026-11-09 已修，待首次运行确认** | 旧 `.github/workflows/neo-spike.yml:57` 断言 `[materials] loaded 12 entries`；当前 `materials.json` 有 26 条，其中 12 条 `gems` 在无模组时被 `OreMaterials.java:109-113` 跳过 → CI 环境实际是 **14**。现在 smoke 步骤用 Python 从 `materials.json` 计算期望值（enabled 非 gem + 无条件 gem），再和日志里的 `[materials] loaded N entries` 比较 | 旧断言让 `build` 工作流在 smoke 步骤必红；失败后还会走 `ci-logs` 强推（#50） | 已按「从表计算」修；本地用假日志验过：14 通过、12 失败。后续新增/禁用材料不需要再改 CI |
-| 49 | **CI 不跑 core/data 守卫，也没有 PR 触发** — **2026-11-09 已修，待首次运行确认** | 旧文件 `:29-32` 只跑 `check-textures` / `check-wiki`；`on:` 只有 `workflow_dispatch` + `push: main`（`:3-6`）。现已加 `check-core-imports.py` / `check-data-paths.py` 两步，并加 `pull_request`（`src/**`、`scripts/**`、`build.gradle`、`gradle**` 等路径） | AGENTS §2 要求的两道守卫现在会在 PR 上执行；PR 不再能把坏数据路径/核心 import 合进 main | 已修；`runServer` 改用 `setsid` 启到独立进程组，结束时 `kill -- -PID` 整组回收，`pkill` 只留作兜底（首轮 #28） |
-| 50 | **CI 失败会强推 `ci-logs`，且权限过大** — **2026-11-09 已修，待首次运行确认** | 旧文件 `:8-9` `contents: write`；`:60-70` 失败时 `git push -f origin ci-logs`。现在 `permissions: contents: read`，删除 publish 步骤，失败日志改 `actions/upload-artifact@v4`（`server-log`） | 一次失败不再改写远端分支；`ci-logs` 不会继续堆积；工作流只读仓库 + 上传 artifact | 已修；远端既有的 `ci-logs` 分支需要所有者手动删除 |
+| 48 | **CI 的 materials 断言写死 12** — **2026-11-10 已修并首跑通过** | 旧 `.github/workflows/neo-spike.yml:57` 断言 `[materials] loaded 12 entries`；当前 `materials.json` 有 26 条，其中 12 条 `gems` 在无模组时被 `OreMaterials.java:109-113` 跳过 → CI 环境实际是 **14**。现在 smoke 步骤用 Python 从 `materials.json` 计算期望值（enabled 非 gem + 无条件 gem），再和日志里的 `[materials] loaded N entries` 比较 | 旧断言让 `build` 工作流在 smoke 步骤必红；失败后还会走 `ci-logs` 强推（#50） | 已按「从表计算」修；2026-11-10 首跑 smoke 通过。后续新增/禁用材料不需要再改 CI |
+| 49 | **CI 不跑 core/data 守卫，也没有 PR 触发** — **2026-11-10 已修；push 首跑通过，PR 触发待首个 PR** | 旧文件 `:29-32` 只跑 `check-textures` / `check-wiki`；`on:` 只有 `workflow_dispatch` + `push: main`（`:3-6`）。现已加 `check-core-imports.py` / `check-data-paths.py` 两步，并加 `pull_request`（`src/**`、`scripts/**`、`build.gradle`、`gradle**` 等路径） | AGENTS §2 要求的两道守卫现在会在 PR 上执行；PR 不再能把坏数据路径/核心 import 合进 main | 已修；`runServer` 改用 `setsid` 启到独立进程组，结束时 `kill -- -PID` 整组回收，`pkill` 只留作兜底（首轮 #28）；首跑 headless smoke 正常退出 |
+| 50 | **CI 失败会强推 `ci-logs`，且权限过大** — **2026-11-10 已修并首跑通过** | 旧文件 `:8-9` `contents: write`；`:60-70` 失败时 `git push -f origin ci-logs`。现在 `permissions: contents: read`，删除 publish 步骤，失败日志改 `actions/upload-artifact@v4`（`server-log`） | 一次失败不再改写远端分支；`ci-logs` 不会继续堆积；工作流只读仓库 + 上传 artifact | 已修；首跑中 artifact 上传为 skipped（成功时不上传），权限未阻碍任何步骤；远端既有的 `ci-logs` 分支需要所有者手动删除 |
 | 51 | **1.20.1 分支与 main 的 core 已漂移，分支没有守卫** | `diff -rq` 两分支 `common/`：39 个文件不同。真实差异不止 API：分支 `common/material/OreMaterials.java` 直接 `import net.minecraftforge.fml.ModList`（绕过 `common/platform/Platform`）；分支 `common/table/CustomizationOverlay.java` 缺少 `DataPackJson.modLoaded(payload)` 过滤；分支 `scripts/` 没有 `check-core-imports.py` / `check-data-paths.py` / `check-wiki.py`；1.1.2 的钩子耐久修复在分支仍在（主线 #47 已另行修复） | 「core 可整包复制、只重写 platform」的契约已经名存实亡；每次修 bug 都要手工移植，且分支可以静默违反自己的架构 | ① 分支补上三个守卫（至少 core-imports）；② 加 `scripts/check-branch-sync.py`：对「可复制 core 文件清单」做哈希对比，允许白名单（platform 相关）并列出真实漂移；③ 发布检查单里跑一次 |
 | 52 | **零自动化测试，状态机/表解析全靠人肉**（首轮 #37） | `src/test` 目录存在但为空；`build.gradle` 无 test 依赖；`./gradlew test` → `NO-SOURCE` | #47 正是单测能抓住的回归；7 张表的解析/patch/overlay 与桶状态机都是纯逻辑，却只能靠 RCON/进游戏 | 先加纯 Java JUnit 5（不启动 MC）：`TableBuilder` 的 add/remove/replace/conflict；把各 loader 的 `parseDrops`/`keysFor` 提成包内可见的静态函数后测边界；状态机拆分（#66）后补 `BarrelState` 迁移表。CI 跑 `./gradlew test` |
 | 53 | **core 纯度守卫的覆盖范围与文档承诺不一致** | `scripts/check-core-imports.py` 的 `CORE_DIRS` 只含 11 个包 + `MachineBlockEntity.java`；`common/blockentity`、`common/block`、`common/item`、`common/event`、`common/network` 不在扫描内，而这些文件大量 import NeoForge：`BarrelBlockEntity.java:39-43`、`CrucibleBlock.java:26`、`PorcelainBucketItem.java:24`、`CapabilityEvents.java`。AGENTS §2 却写「core 层（数据表/掷表/**状态机**）不得 import NeoForge/Forge」 | 新贡献者会以为 BE/状态机是可移植 core，实际 1.20.1 重写了它们；守卫的「0 leak」只证明了一个更窄的事实 | 建议**收窄文档承诺**为「表/掷表/overlay 核心 + `MachineBlockEntity` 状态机」，在 `docs/porting.md` 写明 BE/block/item 属于每版重写层；若确实想覆盖 BE，需要先把 `FluidTank`/`FluidUtil` 包进 platform 门面，成本远大于收益 |
@@ -111,9 +111,9 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
 
 1. **#47（P0，已完成）**：代码已修、开发服实测通过（木钩/骨钩/木锤 `damage=1`，创造钩 0），
    `status.md` 已改回 ✅；后续用 #52 的单测防回归。
-2. **#48/#49/#50（P1，已修待首跑）**：CI 断言已改为从 `materials.json` 计算、补了两个守卫、
-   加了 PR 触发、日志改 artifact；下一步是首次 GitHub 运行确认（以及删除远端旧的 `ci-logs`）。
-   这一步完成后 #47 这类回归至少能在 main 之前被看到。
+2. **#48/#49/#50（P1，已完成）**：CI 断言已改为从 `materials.json` 计算、补了两个守卫、
+   加了 PR 触发、日志改 artifact；2026-11-10 push 首跑全绿，PR 触发待第一个 PR。
+   远端旧的 `ci-logs` 分支需要所有者手动删除。
 3. **#51/#53（P1，1–2 天）**：分支补 core-imports 守卫 + `check-branch-sync.py`；
    把 AGENTS/porting 的「core」定义收窄到实际可复制的范围。
 4. **#54/#55/#57（P2 性能，先基准）**：用 20 台机器/50 个桶/一片侵染树叶做服务端 tick 对比，

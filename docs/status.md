@@ -1,6 +1,6 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-09
+> 最后更新：2026-11-10
 > 先看这 25 行；批次叙事在 [history.md](history.md)，架构/取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
@@ -37,7 +37,7 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 （主线 AE2+ER+DE 133，1.20.1 全装 + Bamboo 175）；以上再装末影接口各再 **+1**（134 / 176）。
 锤表 55 基础 / 79 全装（装 ER 88）；装 DE **+3**（58 / 82 / 91）；桶 18（装 Thermal）/
 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
-**下一步**：CI 首跑（#48–#50 已修）→ 商店上传 → 画面/手感验收 → P4 JEI 同步 →
+**下一步**：CI 收尾（首跑已过；删除旧 `ci-logs` 分支）→ 商店上传 → 画面/手感验收 → P4 JEI 同步 →
 P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）。
 
 ## 当前批次（材质锤 + DE 锤，2026-11-08）
@@ -397,7 +397,7 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | `check-textures.py` | ✅ | 主线 307 模型 / 116 blockstate / 190 纹理（2026-11-09 复跑）；分支数字待分支复跑；无 `minecraft:item/*` |
 | `check-data-paths.py` | ✅ | 1.21.1：297 recipes / 75 loot / 75 tags（2026-11-09 复跑）；1.20.1 用 `--target 1.20.1` 验过 |
 | `check-wiki.py` | ✅ | 8 页 / 8 译文 / 91 链接 / 74 JSON / 8 nav（2026-11-09 复跑） |
-| CI 工作流 | ⚠️ | 2026-11-09 修：materials 断言改为从 `materials.json` 计算、补 `check-core-imports` / `check-data-paths`、加 PR 触发、失败日志改 artifact、`contents: read`；YAML/shell/Python 语法本地校验通过，**未在 GitHub 首跑**（#48–#50） |
+| CI 工作流 | ✅ | 2026-11-10 首跑通过（[run 42840322972](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/actions/runs/42840322972)）：materials 动态断言、core/data/wiki 守卫、compile、headless smoke 全绿；日志走 artifact，`contents: read`，不再强推 `ci-logs` |
 | 数据表 JSON | ✅ | 7 输入筛表 119（基表；装末影接口 +1、装 ER +9、装 DE +1）、55 锤（装 ER +9、装 DE +3）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
@@ -441,10 +441,9 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 >
 > **2026-11-09 第二轮技术债审计**：[tech-debt.md](tech-debt.md)。P0 #47 已修并实测通过；
-> P1 #48–#50 已修待 CI 首跑，#51（1.20.1 分支守卫/漂移）仍待处理。
+> P1 #48–#50 已修，2026-11-10 首跑通过；#51（1.20.1 分支守卫/漂移）仍待处理。
 
-1. **CI 首跑与收尾**：#48–#50 已改（断言动态化、补 core/data 守卫、PR 触发、artifact、只读权限），
-   等首次 GitHub 运行确认；远端旧 `ci-logs` 分支需要所有者手动删除。
+1. **CI 收尾**：2026-11-10 首跑已全绿（run 42840322972）；只剩远端旧 `ci-logs` 分支需要所有者手动删除。
 2. **材质锤验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；1.20.1 用
    `-PtechMods` 验 3 把 Bamboo 宝石锤的注册与合成。
 3. **1.3.2 商店收尾**：版本号/日期确认、tag `v1.3.2` / `v1.3.2-1.20.1` 已打；
