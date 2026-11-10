@@ -1,19 +1,16 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-09
+> 最后更新：2026-11-10
 > 先看这 20 行；批次叙事在 [history.md](history.md)，设计与取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
 
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.3.2 已发**（tag `v1.3.2-1.20.1`）；1.0.0–1.3.2 的商店上传待所有者。
-**当前批次（匠魂可改造锤，2026-11-09，仅 1.20.1）**：新增 `ex_nihilo_hammer`（碎矿锤）——
-匠魂装配站用 **锤头 + 坚韧手柄 + 2 大板** 做成的真正匠魂工具，继承材料属性 / 特性 / 强化槽，
-掉落走同一张锤表；不装匠魂时物品与数据全部不存在。
-上一批（材质锤 + DE 锤，2026-11-08）：9 把金属锤 + 3 把 Bamboo 宝石锤 + 3 把 DE 锤——
-锡/铝/锌/铜 256、银 320、铅 384、镍 448、锇 512、铂 1920；樱/枫/银杏统一 2048；
-DE 双足飞龙/神龙/混沌继承 DE 模块，走聚合装置升级链，无耐久消耗。
-未发布，版本号待定。
+**1.4.0 已发**（tag `v1.4.0-1.20.1`，2026-11-10）；1.0.0–1.3.2 的商店上传待所有者。
+**当前版本（1.4.0，2026-11-10）**：**材质锤 + 匠魂碎矿锤**——9 把金属锤 + 3 把 Bamboo 宝石锤 +
+3 把 DE 锤（21 把）；`ex_nihilo_hammer`（碎矿锤）是真正的匠魂 3 可改造工具，材料属性 / 特性 /
+强化槽全走匠魂，掉落走同一张锤表；叶绿素三种碎矿可直接熔成 `tinkers_thinking:molten_chlorophyte`。
+同时修掉机器 GUI 不压暗、非 `HammerItem` 的锤白嫖耐久两处问题。
 上一批（1.3.2，2026-11-05）：**木桶修复**——满桶右键堆肥材料不再把方块放到桶顶；
 新增物品 `BarrelItemHandler`（槽 0 堆肥输入 / 槽 1 泥土·固体输出），补上物品 + 流体 capability。
 上一批（1.3.1，2026-11-05）：**深板岩石子 + 末影接口起步**——泥土 50% × 3-5 深板岩石子
@@ -33,7 +30,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 锤表 88（全装 +ER；装 DE 91）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
 
-## 当前批次（匠魂可改造锤，2026-11-09，仅 1.20.1）
+## 1.4.0（2026-11-10）
 
 - **物品**：`exnihilosatellitium:ex_nihilo_hammer`（显示名 **碎矿锤**；id 保留，测试世界里已有
   旧 id 的锤子）。不是自有 `HammerItem`，
@@ -66,19 +63,24 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
   layered item，不会刷未知 loader 错误；另补了 `*_tconstruct_unknown` 别名图给裸物品模型。
 - **兼容**：自动锤机器也接受它；`MachineBlockEntity` 对非能量锤改为走 `damageTool()`，
   否则会白嫖（机器不触发 TiC 的 `damageAnimated`，只扣原始耐久）。
+- **叶绿素熔炼（2026-11-10）**：`tinkers_thinking` 自带 `molten_chlorophyte`；
+  破碎 / 粉碎 / 粉末叶绿素矿各 **45 mB**（600°C，`time: 26`）直接熔成熔融叶绿，
+  不必再压成矿块 → 熔炉 → compound。矿块本身仍只走熔炉路线。
+- **机器 GUI 压暗（2026-11-10）**：1.20.1 的 `AbstractContainerScreen#render` 不画背景，
+  机器界面在 `renderBg` 开头补 `renderBackground(graphics)`，打开时世界按原版渐变变暗。
 - **验证**：`build` + `check-textures.py`（313 模型 / 209 纹理）+ 主线
-  `check-data-paths.py --target 1.20.1`（197 recipes / 10 tags）通过；`runServer -PtinkersMods`
-  日志 `Loaded 46 tool definitions` / `24 station slot layouts`，定义 `dataLoaded=true`、
-  布局命中、合成配方 `exnihilosatellitium:tools/building/ex_nihilo_hammer` 存在；
+  `check-data-paths.py --target 1.20.1`（200 recipes / 10 tags，generated 198 / 75 / 71）通过；
+  `runServer -PtinkersMods` 日志 `Loaded 46 tool definitions` / `24 station slot layouts`，
+  定义 `dataLoaded=true`、布局命中、合成配方 `exnihilosatellitium:tools/building/ex_nihilo_hammer` 存在；
   RCON `summon item` 正常。临时 FakePlayer 探针（铁头 + 木柄 + 2 铁板）：耐久 1000 / 速度 6.0 /
   攻击 6.75，特性 `magnetic` + `cultivated` + `smite`；破坏砂砾掉 **沙子** 且 `Damage=1`。
   客户端已开（`-PdevMods -PtinkersMods`）：装配站造出 **木碎矿锤**（240 耐久 / 5.05 攻击），
   tooltip 显示 `培植 IV` + `亡灵杀手 I` + 我们的一行说明；强化页可正常装「自动烧炼」；
   创造栏里不同材料的锤头/手柄颜色明显不同（木、铁/钴/玛玉灵等）。强化 overlay 已接入
   （`smite` 默认就有，创造栏的锤子应该都能看到那枚淡黄十字），但**还没逐个强化目视**；
-  **JEI 工具页 / 左键手感**也未单独验。
+  **JEI 工具页 / 左键手感 / 叶绿素实际熔化**也未单独验。
 
-## 上一批（材质锤 + DE 锤，2026-11-08）
+## 1.4.0 其它内容（材质锤 + DE 锤，2026-11-08）
 
 - **9 把金属锤**：锡 / 铝 / 锌 / 铜 256、银 320、铅 384、镍 448、锇 512、铂 1920；
   `ModItems.METAL_HAMMERS` 从 `materials.json` 生成，配方 head 走 `forge:ingots/<id>`，
@@ -289,26 +291,28 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
 | 匠魂锤（1.20.1） | ✅ / ⚠️ | 真装 TConstruct 3.12.1 + Mantle 1.11.117：46 tool definitions / 24 station layouts；定义 `dataLoaded=true`、布局命中、`tool_building` 配方存在；临时 FakePlayer 探针铁头+木柄+2 铁板：1000 耐久 / 6.0 速度 / 6.75 攻击、`magnetic`+`cultivated`+`smite`，砂砾→沙子且 `Damage=1`；build + 纹理 + data 守卫通过。客户端已看装配站 / 强化页 / tooltip / 材质染色（创造栏多材质锤颜色不同）；无匠魂客户端启动正常（模型走 fallback，无 unknown loader）；强化 overlay 已接入但未逐个目视；JEI 工具页 / 手感未单独验 |
+| 机器 GUI 压暗（1.20.1） | ✅ | 1.4.0：`AbstractMachineScreen#renderBg` 先调 `renderBackground`；作者实机确认打开机器界面时世界变暗 |
+| 叶绿素碎矿熔炼（1.20.1） | ⚠️ | 3 条 `tconstruct:melting`（broken/crushed/powdered 各 45 mB，600°C，`time: 26`，`tinkers_thinking:molten_chlorophyte`）；build + data 守卫通过；**未在游戏里实际熔化过** |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
-| `./gradlew build` | ✅ | 2026-11-04：`BUILD SUCCESSFUL`（`--offline`，Java 17） |
-| `check-textures.py` | ✅ | 297 模型 / 116 blockstate / 167 纹理；七个子模型只引用 vanilla block 贴图 |
+| `./gradlew build` | ✅ | 2026-11-10：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.0） |
+| `check-textures.py` | ✅ | 313 模型 / 116 blockstate / 209 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装 + ER + BambooMod：`[materials] 25`、`[sieve] 7 inputs / 173 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |
 | P1 守卫 | ⚠️ | 分支只跑 build + 纹理；`common/table` 的 core 守卫在主线跑 |
-| TiT 阿迪特 / 叶绿素 | ✅ | 22 entries；`ardite → tinkers_thinking:ardite_ingot`、`chlorophyll → chlorophyte_compound`；RCON 熔炉通过；缺 TiT 静默跳过 |
+| TiT 阿迪特 / 叶绿素 | ✅ | 22 entries；`ardite → tinkers_thinking:ardite_ingot`、`chlorophyll → chlorophyte_compound`；RCON 熔炉通过；缺 TiT 静默跳过；1.4.0 加 3 条叶绿素碎矿熔炼（见上一行） |
 | AE2 赛特斯 / 陨石粉 | ✅ | 141 → 145 drops；RCON sand 含 crystal 0.16667 / dust 0.08333 / sky_dust 0.0625，gravel 含 sky_dust；缺 AE2 时 141、无 unknown |
 | Extreme Reactors | ✅ | ER 2.0.84 + ZeroCore 2.1.45 真装：`[materials] 25`、`[sieve] 154`、`[hammer] 88`；`yellorium` 1/8、`anglesite`/`benitoite` 各 1/64；RCON 三种矿块熔炉分别出 ER 锭 / 铅矾 / 蓝锥矿，`RecipesUsed` 指向 `*_smelting_bigreactors`；手筛/JEI 未目视 |
 | BambooMod 资源 | ✅ | BambooMod 0.6.2 真装：`[sieve] 173`（+19，泥土/草各 8、砂砾 3）；RCON 泥土 32 / 砂砾 31 含 4 树苗 + 竹笋 + 3 作物 + 3 宝石；`/setblock` 树苗/竹笋成功；堆肥靠现有 leaves/saplings 标签；手筛/生长/JEI 未测 |
 | Mek / Thermal / Create / IE | ✅ | 锭候选与矿砾熔炼 6/6、IE 五锭、Create 锌 + 12 条 crushing；多方块未跑 |
-| Tinkers 钴 / 种子 / 熔炼 | ✅ | 钴 → `tconstruct:cobalt_ingot`；两个黏液草种子条件注册；92 条匠魂熔炼 + 2 条铸造（共 94）加载无报错（含 ER yellorium 10） |
+| Tinkers 钴 / 种子 / 熔炼 | ✅ | 钴 → `tconstruct:cobalt_ingot`；两个黏液草种子条件注册；95 条匠魂熔炼 + 2 条铸造（共 97）加载无报错（含 ER yellorium 10 + 叶绿素 3） |
 | M10 机器 | ✅ | 电动/内能 × 筛/锤、插件、漏斗、自动输出 RCON 全过；JEI 箭头点击已修 |
 | 桶 / 堆肥 / 固化 | ✅ | RCON：堆肥成土、满桶固化、牛奶史莱姆、比较器/雨水 |
 | 坩埚 / 巫水 / 瓷桶 | ✅ | 39+9 表、篝火/熔炉速率、巫水发酵与转化、瓷桶 capability |
 | 蚕 / 人偶 | ✅ | 侵染进度/扩散、8 种人偶（含热力 2 只、村民）生成与和平掉落 RCON 验过 |
 | 热力人偶 | ✅ / ⚠️ | `[barrel] 18`、dump 两条规则（`thermal:blitz` / `thermal:blizz`，和平 `thermal:*_rod`）、`/summon` 两物品通过；配方经 `/reload` 解析探测；合成 / 右键 / JEI 未实测 |
 | 村民 / 蜂蜜 | ✅ / ⚠️ | 两个新物品 `/summon` 正常、配方由 datagen 生成；data merge 验证 30 秒换液、蜜蜂生成（`PersistenceRequired`）；流体有 source block + 桶，桶内改四面盒渲染；脑白金已改为 `EntityInteract`（免 Shift）；真实右键 / 玻璃瓶抽取 / JEI 未测 |
-| 客户端画面 | ⚠️ | 最近一次客户端冒烟停在 2026-11-02；新物品/流体、热力人偶、TiT/AE2 物品、JEI 页未目视 |
+| 客户端画面 | ✅ / ⚠️ | 1.4.0 机器 GUI 压暗已由作者实机确认；其余新物品/流体、热力人偶、TiT/AE2 物品、自动输出抽屉、JEI 页仍未目视 |
 | 合成 / 右键手感 | ⚠️ | 全部配方 JSON 已加载，但没有玩家逐项实测 |
 
 ## 下一步（按价值排序）

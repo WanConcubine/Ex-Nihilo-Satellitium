@@ -272,12 +272,14 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 ### 匠魂熔炼（Tinkers' Construct 3，1.20.1）
 
 **路径**：`data/exnihilosatellitium/recipes/smeltery/melting/<material>/<stage>.json`，
-14 种金属材料 × 6 形态 = 84 条（含阿迪特）。7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）不写匠魂熔炼，
+14 种金属材料 × 6 形态 = 84 条（含阿迪特），再加叶绿素 3 条碎矿（2026-11-10）。
+7 种模组矿物（氟石/磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石）不写匠魂熔炼，
 因为 Tinkers 没有对应熔融液体。
 **例外：ER 的 yellorium** 用 ER 自带的 `forge:yellorium` 流体（不新增流体）：
 碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 mB、ER 块 810 mB（8 条熔炼），再加锭/块 2 条铸造
 （结果指向 `forge:ingots/yellorium` / `forge:storage_blocks/yellorium`）。10 条都带
-`tconstruct` + `bigreactors` 条件；anglesite / benitoite 仍不写（没有对应流体）。合计 92 条熔炼 + 2 条铸造（94 条匠魂配方）。
+`tconstruct` + `bigreactors` 条件；anglesite / benitoite 仍不写（没有对应流体）。合计 **95 条熔炼 + 2 条铸造**
+（**97 条**匠魂配方；含叶绿素 3 条）。
 
 ```json
 {
@@ -297,7 +299,11 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 - 阿迪特：Tinkers 3.12.1 本体已移除，改由**工匠巧思**（`tinkers_thinking`，只有 1.20.1）提供
   `forge:molten_ardite`，所以 84 条熔炼里包含阿迪特（碎矿 45 mB / 矿块 180 mB、950°C）。
   我们筛的是**自己的** `ardite_broken`（碎下界岩 1%，砂砾/沙子/尘土不出），矿块熔成 TiT 的锭。
-  叶绿素是 `gems`，没有熔融液体，不写熔炼。
+- 叶绿素（2026-11-10）：工匠巧思提供 `tinkers_thinking:molten_chlorophyte`（流体标签同名，
+  600°C；TiT 自己的锭是 90 mB / 53 ticks）。我们的三种碎矿 broken / crushed / powdered
+  各 **45 mB**、`time: 26`，带 `tinkers_thinking` 条件；矿块（ore_gravel / ore_sand / ore_dust）
+  仍走熔炉 → `chlorophyte_compound`（90 mB），不重复写矿块熔炼。主线 1.21.1 没有 TiT，
+  整组不注册。
 - 应用能源 2（`ae2`，两版）：不新增材料，直接给筛沙补丁 `sieve/sand_ae2.json`
   （根级 `"mod": "ae2"` + `"patch": true`）：`ae2:certus_quartz_crystal` **1/6**、
   `ae2:certus_quartz_dust` **1/12**；没装 AE2 时整文件跳过，基表仍是 116 条。

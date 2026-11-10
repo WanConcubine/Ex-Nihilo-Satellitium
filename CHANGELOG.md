@@ -1,59 +1,94 @@
 # 更新记录
 
-## 未发布 — 匠魂可改造锤（2026-11-09，仅 1.20.1）
+## 1.4.0 — 2026-11-10（材质锤 / 匠魂碎矿锤 / 修复）
 
-### 新增
+### 中文
 
-- **碎矿锤（`ex_nihilo_hammer`）**：真正的匠魂 3 可改造工具。装配站用 **锤头 + 坚韧手柄 +
-  2 大板** 合成；材料属性、材料特性、强化槽、耐久、破损动画全部走匠魂；钴 / 阿迪特 / 玛玉灵
-  等都能做头。
-- **同一张锤表**：实现 `HammerTool`，命中砂砾 / 沙子 / 尘土 / 矿石碎块等锤表方块时，掉落与
-  自有锤完全一致；其它方块正常挖掘。单方块判定，不登记匠魂的 `aoe` tag，也不加基础 3×3。
-- **属性**：耐久 ×4.0（铁头 1000）、挖掘速度 = 头部材料（铁头 6.0）、攻击 6.75、
-  1 能力 + 2 升级槽、自带 `smite` 1。
-- **条件注册**：`src/tinkers/java` 可选 source set（TConstruct + Mantle 在 `libs/` 才编译），
-  运行时按 `tconstruct` 门控；不装匠魂时物品与数据都不存在。`-PtinkersMods` 可单独启动验证。
-- **贴图 / 模型**：`art/items/tools/crushing_hammer_parts.py` 把铁锤底图拆成灰度 head / handle
-  部件图；模型走 `exnihilosatellitium:tool`，装匠魂时由 TiC 按部件材料染色，没装匠魂时回退为
-  分层物品模型。
+#### 新增
 
-- **强化外观**：加了 `modifier_maps` + 16 个常用强化的 overlay（急速 / 发光 / 火焰 / 强化 /
-  钻石 / 绿宝石 / 下界合金 / 亡灵杀手 / 自动烧炼 / 幸运 / 丝触 / 经验 / 不毁 / 斩首 / 磁力 /
-  坏死）；`crushing_hammer_overlays.py` 可复现。
+- **9 把金属材质锤**：锡 / 铝 / 锌 / 铜 **256**、银 **320**、铅 **384**、镍 **448**、锇 **512**、
+  铂 **1920**。以 64 为基数，钻石 1561 仍是普通材质上限；配方沿用斜形（2 锭 + 2 木棍），
+  head 走 `forge:ingots/<id>`，铜用原版铜锭。
+- **3 把 Bamboo 宝石锤**：樱 / 枫 / 银杏统一 **2048**，仅在装了 BambooMod 0.6.2 时注册，
+  配方带 `forge:mod_loaded` 条件。
+- **3 把龙之进化锤**（装 DE 时）：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`
+  继承 DE 的 `ModularPickaxe`，走聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，
+  8M / 32M / 128M OP），可用 DE 的速度 / AOE / 能量模块；不消耗耐久，走 DE 能量（256/次）。
+  3D cube 模型（左右锤头 + 发光核心 + 长柄）。
+- **匠魂碎矿锤（`ex_nihilo_hammer`）**：真正的匠魂 3 可改造工具。装配站用 **锤头 + 坚韧手柄 +
+  2 大板** 合成；材料属性 / 材料特性 / 强化槽 / 耐久 / 破损动画全部走匠魂，钴 / 阿迪特 /
+  玛玉灵等都能做头。命中锤表方块时掉落与自有锤一致，其余方块正常挖掘；单方块判定，不登记
+  `aoe`。自带 16 个强化 overlay（急速 / 发光 / 火焰 / 强化 / 钻石 / 绿宝石 / 下界合金 /
+  亡灵杀手 / 自动烧炼 / 幸运 / 丝触 / 经验 / 不毁 / 斩首 / 磁力 / 坏死）。
+- **叶绿素碎矿直接熔炼**：破碎 / 粉碎 / 粉末叶绿素矿各 **45 mB** 熔成工匠巧思的
+  `tinkers_thinking:molten_chlorophyte`（600°C，`time: 26`），不用先压成矿块再熔 compound。
 
-### 修复
+#### 修复
 
-- **非 `HammerItem` 的锤不再白嫖耐久**：1.20.1 的 `ToolEvents#onBreak` 取消原版破坏后，
-  现在通过 `HammerTool#wear` 统一扣耐久；匠魂锤覆写为 TiC 的 `ToolDamageUtil.damageAnimated`，
-  强化 / 粘液覆层 / 破损动画都生效。自动锤机器对非能量锤也改为扣耐久。
+- **非 `HammerItem` 的锤不再白嫖耐久**：`ToolEvents#onBreak` 取消原版破坏后统一走
+  `HammerTool#wear`；匠魂锤覆写为 `ToolDamageUtil.damageAnimated`（强化 / 粘液覆层 /
+  破损动画都生效）。自动锤机器对非能量锤也改为扣耐久。
+- **机器 GUI 没有压暗**：1.20.1 的 `AbstractContainerScreen#render` 不会自动画背景，
+  机器界面只在 `renderBg` 里贴面板图，打开时直接盖在世界上。现在先调
+  `renderBackground(graphics)` 再画面板，世界按原版渐变压暗。
 
-### 说明
-
-- 仅 1.20.1：匠魂 3 没有官方 1.21.1 构建；主线不加这个物品。
-- 客户端已看装配站 / 强化页 / tooltip（木锤 240 耐久、5.05 攻击、培植 IV + 亡灵杀手 I）；
-  JEI 工具页与左键手感未单独验。服务端已用临时 FakePlayer 探针验证“砂砾 → 沙子 + `Damage=1`”。
-
-
-## 未发布 — 材质锤（2026-11-08）
-
-### 新增
-
-- **9 把金属锤**：锡 / 铝 / 锌 / 铜 **256**、银 **320**、铅 **384**、镍 **448**、锇 **512**、
-  铂 **1920**；配方 head 走 `forge:ingots/<id>`，铜用原版铜锭。
-- **3 把 Bamboo 宝石锤**：樱 / 枫 / 银杏统一 **2048**，按 `bamboomod` 条件注册；配方手写
-  `forge:mod_loaded` 条件。BambooMod 0.6.2 本身没有宝石锤，这三把是用它的三种宝石做的自有锤。
-- **贴图**：由主线 `art/items/tools/hammer_variants.py` 生成后复制；金属复用矿链五阶调色板，
-  宝石用 BambooMod 宝石采样色。
-- **3 把 DE 锤（仅装 DE 时）**：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer` 继承
-  DE 的 `ModularPickaxe`，走聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，
-  8M / 32M / 128M OP），可用 DE 模块；不消耗耐久。3D cube 模型 + 256/次能量消耗。
-
-### 说明
+#### 说明
 
 - **钴 / 阿迪特不做锤**：转匠魂工具路线；**铀不做锤**：放射性。三者的矿链 / 筛表保留。
-- **只加耐久**：`tier` 仍只是排序元数据，不改变锤表与挖掘速度；创造栏 / JEI catalyst
-  遍历 `HAMMERS`。
-- 未发布，版本号待定；未进游戏验合成 / 耐久 / JEI。
+- **普通材质锤只加耐久**：`tier` 仍只是排序元数据，不改变锤表与挖掘速度；创造栏 / JEI
+  catalyst 遍历 `HAMMERS`。DE 锤额外走能量与模块。
+- 装 DE 时共 **21 把锤**（6 基础 + 9 金属 + 3 宝石 + 3 DE），不装 DE **18 把**；
+  装了匠魂再 +1（碎矿锤）。匠魂配方合计 **95 条熔炼 + 2 条铸造**。
+- 仅 1.20.1：BambooMod 与匠魂 3 都没有官方 1.21.1 构建，主线不加这两组物品。
+
+### English
+
+#### New
+
+- **9 metal hammers**: tin / aluminium / zinc / copper **256**, silver **320**, lead **384**,
+  nickel **448**, osmium **512**, platinum **1920** durability. Durability is based on 64;
+  diamond (1561) remains the normal-material cap. Recipes keep the diagonal shape
+  (2 ingots + 2 sticks) with the head on `forge:ingots/<id>`; copper uses vanilla copper.
+- **3 Bamboo gem hammers**: sakura / maple / ginkgo at **2048** durability, registered only
+  when BambooMod 0.6.2 is installed, with a `forge:mod_loaded` condition.
+- **3 Draconic Evolution hammers** (with DE installed): `wyvern_hammer` / `draconic_hammer` /
+  `chaotic_hammer` extend DE's `ModularPickaxe` and follow the fusion-crafting upgrade chain
+  (diamond → wyvern → draconic → chaotic, 8M / 32M / 128M OP). They accept DE speed / AOE /
+  energy modules, do not consume durability and run on DE energy (256 per use); models are 3D
+  cubes (two heads, glowing core, long handle).
+- **Tinkers' Construct crushing hammer (`ex_nihilo_hammer`)**: a real Tinkers 3 modifiable tool,
+  built at the Tinkers station from **hammer head + tough handle + 2 large plates**. Material
+  stats, traits, modifier slots, durability and the broken animation all come from Tinkers;
+  cobalt / ardite / manyullyn heads all work. Hitting a hammer-table block drops exactly what our
+  own hammers drop; everything else mines normally. It is single-block (no `aoe` tag) and ships
+  16 modifier overlays (haste, glowing, fiery, reinforced, diamond, emerald, netherite, smite,
+  auto-smelt, fortune, silk touch, experienced, unbreakable, severing, magnetic, necrotic).
+- **Chlorophyll ore pieces melt directly**: broken / crushed / powdered chlorophyll each yield
+  **45 mB** of Tinkers' Thinking's `tinkers_thinking:molten_chlorophyte` (600 °C, `time: 26`),
+  so you no longer have to press them into ore blocks and smelt them into compound first.
+
+#### Fixes
+
+- **Hammers that are not `HammerItem`s no longer skip durability**: `ToolEvents#onBreak` now routes
+  every blocked vanilla break through `HammerTool#wear`; the Tinkers hammer overrides it with
+  `ToolDamageUtil.damageAnimated`, so modifiers, overslime and the broken animation all apply.
+  The automatic hammer machine also damages non-energy hammers now.
+- **Machine GUIs had no screen dim**: 1.20.1's `AbstractContainerScreen#render` does not draw the
+  background itself, and the machine screen only blitted its panel, so it sat directly on the
+  world. It now calls `renderBackground(graphics)` before the panel, giving the vanilla gradient.
+
+#### Notes
+
+- **No cobalt / ardite hammers**: they go through the Tinkers route. **No uranium hammer**:
+  radioactive. Their ore chains and sieve entries stay.
+- **Metal hammers only add durability**: `tier` is still ordering metadata and does not change the
+  hammer table or mining speed; the creative tab / JEI catalyst iterate `HAMMERS`. DE hammers
+  additionally use energy and modules.
+- With DE installed there are **21 hammers** (6 base + 9 metal + 3 gem + 3 DE), **18** without DE;
+  with Tinkers installed, one more (the crushing hammer). Tinkers recipes total
+  **95 melting + 2 casting**.
+- 1.20.1 only: neither BambooMod nor Tinkers 3 has an official 1.21.1 build, so the mainline does
+  not ship these two groups.
 
 ## 1.3.2 — 2026-11-05（木桶修复）
 
