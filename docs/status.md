@@ -37,7 +37,8 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 （主线 AE2+ER+DE 133，1.20.1 全装 + Bamboo 175）；以上再装末影接口各再 **+1**（134 / 176）。
 锤表 55 基础 / 79 全装（装 ER 88）；装 DE **+3**（58 / 82 / 91）；桶 18（装 Thermal）/
 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
-**下一步**：商店上传 → 画面/手感验收 → P4 JEI 同步 → P3 状态机拆分（见文末「下一步」）。
+**下一步**：CI 首跑（#48–#50 已修）→ 商店上传 → 画面/手感验收 → P4 JEI 同步 →
+P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）。
 
 ## 当前批次（材质锤 + DE 锤，2026-11-08）
 
@@ -391,11 +392,12 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 | 1.3.1 发布 | ✅ | 两版 `mod_version=1.3.1`；tag `v1.3.1` / `v1.3.1-1.20.1`；jar 版本与 sha 见 [release-1.3.1.md](release-1.3.1.md)（按 tag 重建，见文内说明） |
 | 1.3.2 发布 | ✅ | 两版 `mod_version=1.3.2`；tag `v1.3.2` / `v1.3.2-1.20.1`；jar 版本与 sha 见 [release-1.3.2.md](release-1.3.2.md) |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
-| 木/骨钩耐久（1.21.1） | ✅ | 同一路径实测 `damage=1`；该线未改代码 |
+| 木/骨钩耐久（1.21.1） | ✅ | 2026-11-09 修复后服务端实测：`FakePlayer` + `ServerPlayerGameMode#destroyBlock` 破坏橡树树叶，木钩 / 骨钩各 `damage=1`，木锤 `damage=1`，创造模式钩 `damage=0`（临时探针命令，已删除）；修复前该路径因 `wearMainHand` 只认 `HammerItem` 不会扣耐久 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
-| `check-textures.py` | ✅ | 主线 295 模型 / 116 blockstate / 171 纹理；分支 297 / 116 / 167；无 `minecraft:item/*` |
-| `check-data-paths.py` | ✅ | 1.21.1：285 recipes / 75 loot / 75 tags；1.20.1 用 `--target 1.20.1` 验过 |
-| `check-wiki.py` | ✅ | 7 页 / 7 译文 / 52 链接 / 74 JSON / 7 nav |
+| `check-textures.py` | ✅ | 主线 307 模型 / 116 blockstate / 190 纹理（2026-11-09 复跑）；分支数字待分支复跑；无 `minecraft:item/*` |
+| `check-data-paths.py` | ✅ | 1.21.1：297 recipes / 75 loot / 75 tags（2026-11-09 复跑）；1.20.1 用 `--target 1.20.1` 验过 |
+| `check-wiki.py` | ✅ | 8 页 / 8 译文 / 91 链接 / 74 JSON / 8 nav（2026-11-09 复跑） |
+| CI 工作流 | ⚠️ | 2026-11-09 修：materials 断言改为从 `materials.json` 计算、补 `check-core-imports` / `check-data-paths`、加 PR 触发、失败日志改 artifact、`contents: read`；YAML/shell/Python 语法本地校验通过，**未在 GitHub 首跑**（#48–#50） |
 | 数据表 JSON | ✅ | 7 输入筛表 119（基表；装末影接口 +1、装 ER +9、装 DE +1）、55 锤（装 ER +9、装 DE +3）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
@@ -437,19 +439,25 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 
 > 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
+>
+> **2026-11-09 第二轮技术债审计**：[tech-debt.md](tech-debt.md)。P0 #47 已修并实测通过；
+> P1 #48–#50 已修待 CI 首跑，#51（1.20.1 分支守卫/漂移）仍待处理。
 
-1. **材质锤验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；1.20.1 用
+1. **CI 首跑与收尾**：#48–#50 已改（断言动态化、补 core/data 守卫、PR 触发、artifact、只读权限），
+   等首次 GitHub 运行确认；远端旧 `ci-logs` 分支需要所有者手动删除。
+2. **材质锤验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；1.20.1 用
    `-PtechMods` 验 3 把 Bamboo 宝石锤的注册与合成。
-2. **1.3.2 商店收尾**：版本号/日期确认、tag `v1.3.2` / `v1.3.2-1.20.1` 已打；
+3. **1.3.2 商店收尾**：版本号/日期确认、tag `v1.3.2` / `v1.3.2-1.20.1` 已打；
    CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
-3. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
+4. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器、村民人偶 / 脑白金 / 糖水链 / 蜜蜂 / 热力人偶；清单见「交接清单」。
-4. **P4 客户端 JEI 同步 + fixture CI**：专用服客户端 JEI 目前只读本地镜像/数据包。
-5. **P3 状态机拆分**：`BarrelState` 等纯类 + 第一批 JUnit（P2 之后才有意义）。
-6. **工程收尾**：advancement 树、CI、零测试（tech-debt P3 #37）；M8 月光魔法联动占位。
-7. **更多 supported mods**：AE2 充能赛特斯 / 天石粉（若所有者要）、TiT 其它矿（锆/锆石）、
+5. **P4 客户端 JEI 同步 + fixture CI**：专用服客户端 JEI 目前只读本地镜像/数据包。
+6. **P3 状态机拆分**：`BarrelState` 等纯类 + 第一批 JUnit（tech-debt #66/#52）。
+7. **工程收尾**：advancement 树、零测试（tech-debt #52）、1.20.1 分支守卫（#51）；
+   M8 月光魔法联动占位。
+8. **更多 supported mods**：AE2 充能赛特斯 / 天石粉（若所有者要）、TiT 其它矿（锆/锆石）、
    IE 1.21.1、其它科技模组；按 [data-format.md](data-format.md) §8 加候选/补丁（只接基础资源）。
-8. **修 1.20.1 分支筛表钴差异**：沙/砂砾/尘土各缺 1 条 1/64（基表 116 vs 119），
+9. **修 1.20.1 分支筛表钴差异**：沙/砂砾/尘土各缺 1 条 1/64（基表 116 vs 119），
    决定是补生成器还是手工对齐。
 
 ## 已拍板的决策
