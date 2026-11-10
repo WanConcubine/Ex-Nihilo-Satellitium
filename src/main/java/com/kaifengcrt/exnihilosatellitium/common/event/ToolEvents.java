@@ -124,14 +124,6 @@ public final class ToolEvents {
         }
     }
 
-    /**
-     * Wear the tool the player is actually holding.
-     *
-     * <p>{@link BlockDropsEvent#getTool()} is a <em>copy</em> taken by
-     * {@code ServerPlayerGameMode}; damaging it would be lost. The real stack is
-     * the player's main hand. The item check guards against the hand changing
-     * between the break and this event.</p>
-     */
     /** A hammer needs either durability (plain) or its per-use energy. */
     private static boolean canUseHammer(final Player player, final ItemStack stack) {
         if (!(stack.getItem() instanceof HammerTool hammer)) {
@@ -158,12 +150,25 @@ public final class ToolEvents {
         }
     }
 
+    /**
+     * Wear the tool the player is actually holding.
+     *
+     * <p>{@link BlockDropsEvent#getTool()} is a <em>copy</em> taken by
+     * {@code ServerPlayerGameMode}; damaging it would be lost. The real stack is
+     * the player's main hand. The item check guards against the hand changing
+     * between the break and this event.</p>
+     *
+     * <p>Both durability hammers and crooks reach this method; energy hammers are
+     * diverted to {@link #consumeEnergy} by the caller. Keep the test on
+     * "damageable" rather than on a concrete item class, or a tool added later
+     * silently becomes unbreakable (the 1.21.1 crook regression).</p>
+     */
     private static void wearMainHand(final Player player, final ItemStack eventTool) {
         if (player.isCreative()) {
             return;
         }
         final ItemStack held = player.getMainHandItem();
-        if (held.getItem() instanceof HammerItem && held.getItem() == eventTool.getItem()) {
+        if (held.isDamageableItem() && held.getItem() == eventTool.getItem()) {
             held.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
         }
     }
