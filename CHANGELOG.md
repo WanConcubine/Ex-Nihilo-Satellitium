@@ -1,30 +1,66 @@
 # 更新记录
 
-## 未发布 — 材质锤（2026-11-08）
+## 1.4.0 — 2026-11-10（材质锤 / 龙之进化锤 / 修复）
 
-### 新增
+### 中文
 
-- **9 把金属材质锤（两版）**：锡 / 铝 / 锌 / 铜 **256**、银 **320**、铅 **384**、镍 **448**、
-  锇 **512**、铂 **1920**。以 64 为基数，钻石 1561 仍是普通材质上限；配方沿用斜形
-  （2 锭 + 2 木棍），head 走 `c:ingots/<id>`（1.20.1 `forge:ingots/<id>`），铜用原版铜锭。
-- **3 把 Bamboo 宝石锤（仅 1.20.1）**：樱 / 枫 / 银杏统一 **2048**，按 `bamboomod` 条件注册；
-  配方手写 `forge:mod_loaded(bamboomod)`。BambooMod 0.6.2 本身没有宝石锤，这三把是用它的
-  三种宝石做的自有锤。
-- **贴图**：`art/items/tools/hammer_variants.py` 从铁锤 / 钻石锤底图换头色；金属复用矿链
-  五阶调色板，宝石用 BambooMod 宝石采样色（不复制像素）。
-- **3 把龙之进化锤（仅装 DE 时）**：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`
+#### 新增
+
+- **9 把金属材质锤**：锡 / 铝 / 锌 / 铜 **256**、银 **320**、铅 **384**、镍 **448**、锇 **512**、
+  铂 **1920**。以 64 为基数，钻石 1561 仍是普通材质上限；配方沿用斜形（2 锭 + 2 木棍），
+  head 走 `c:ingots/<id>`（1.20.1 为 `forge:ingots/<id>`），铜用原版铜锭。
+- **3 把龙之进化锤**（装 DE 时）：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`
   继承 DE 的 `ModularPickaxe`，走聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，
-  8M / 32M / 128M OP），可用 DE 的速度 / AOE / 能量模块；不消耗耐久。**3D cube 模型**
-  （左右锤头 + 发光核心 + 长柄），不是平面图标。
-- **DE 锤能量**：`HammerTool.energyPerUse()` 统一接口；DE 锤 256/次（DE 配置 `-99` 哨兵
-  回退到 256）。手锤和自动锤都扣电，空电停机；模块 GUI / 能量模块可用。
+  8M / 32M / 128M OP），可用 DE 的速度 / AOE / 能量模块；不消耗耐久，走 DE 能量（256/次）。
+  3D cube 模型（左右锤头 + 发光核心 + 长柄）。
 
-### 说明
+#### 修复
+
+- **木钩 / 骨钩恢复消耗耐久**：`ToolEvents#wearMainHand` 曾被限制为只处理 `HammerItem`，
+  导致 1.21.1 的木钩 / 骨钩打树叶时耐久永远是满的。现在任何可损坏的手持工具都会扣耐久；
+  能量锤仍走 `consumeEnergy`。服务端 FakePlayer 探针（木钩 / 骨钩 / 木锤各 `damage=1`，
+  创造模式 `0`）已通过。
+
+#### 说明
 
 - **钴 / 阿迪特不做锤**：转匠魂工具路线；**铀不做锤**：放射性。三者的矿链 / 筛表保留。
-- **普通材质锤只加耐久**：`tier` 仍只是排序元数据，不改变锤表与挖掘速度；创造栏 / JEI catalyst
-  改为遍历 `HAMMERS`。DE 锤额外走能量与模块。
-- 未发布，版本号待定；DE 锤的模型 / 模块 GUI / 手锤与自动锤能量已由作者实机确认。
+- **普通材质锤只加耐久**：`tier` 仍只是排序元数据，不改变锤表与挖掘速度；创造栏 / JEI
+  catalyst 遍历 `HAMMERS`。DE 锤额外走能量与模块。
+- 装 DE 时共 **18 把锤**（6 基础 + 9 金属 + 3 DE），不装 DE **15 把**。
+- Bamboo 宝石锤与匠魂碎矿锤只在 1.20.1 线（BambooMod / Tinkers 3 没有官方 1.21.1 构建）。
+
+### English
+
+#### New
+
+- **9 metal hammers**: tin / aluminium / zinc / copper **256**, silver **320**, lead **384**,
+  nickel **448**, osmium **512**, platinum **1920** durability. Durability is based on 64;
+  diamond (1561) remains the normal-material cap. Recipes keep the diagonal shape
+  (2 ingots + 2 sticks) with the head on `c:ingots/<id>` (`forge:ingots/<id>` on 1.20.1);
+  copper uses vanilla copper.
+- **3 Draconic Evolution hammers** (with DE installed): `wyvern_hammer` / `draconic_hammer` /
+  `chaotic_hammer` extend DE's `ModularPickaxe` and follow the fusion-crafting upgrade chain
+  (diamond → wyvern → draconic → chaotic, 8M / 32M / 128M OP). They accept DE speed / AOE /
+  energy modules, do not consume durability and run on DE energy (256 per use); models are 3D
+  cubes (two heads, glowing core, long handle).
+
+#### Fixes
+
+- **Wooden / bone crooks lose durability again**: `ToolEvents#wearMainHand` had been restricted to
+  `HammerItem`s, so on 1.21.1 crooks never wore out when breaking leaves. Any damageable held tool
+  now takes wear; energy hammers still go through `consumeEnergy`. Verified on the dev server with
+  a FakePlayer probe (wood crook / bone crook / wooden hammer each `damage=1`, creative `0`).
+
+#### Notes
+
+- **No cobalt / ardite hammers**: they go through the Tinkers route. **No uranium hammer**:
+  radioactive. Their ore chains and sieve entries stay.
+- **Metal hammers only add durability**: `tier` is still ordering metadata and does not change the
+  hammer table or mining speed; the creative tab / JEI catalyst iterate `HAMMERS`. DE hammers
+  additionally use energy and modules.
+- With DE installed there are **18 hammers** (6 base + 9 metal + 3 DE), **15** without DE.
+- Bamboo gem hammers and the Tinkers crushing hammer are 1.20.1-only (no official 1.21.1 builds of
+  BambooMod / Tinkers 3).
 
 ## 1.3.2 — 2026-11-05（木桶修复）
 
