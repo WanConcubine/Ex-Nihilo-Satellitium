@@ -329,12 +329,17 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 
 | 文件 | 作用 |
 |---|---|
-| `data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json` | 工具定义：部件只有 `hammer_head`(0.5) + `tough_handle` 两件（2026-11-11 起；原先还有 2×`large_plate`）、`default_materials` 同长度、`base_stats` / `multiply_stats`、强化槽、`smite` 1、`pickaxe_dig`、有效方块 tag |
+| `data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json` | 工具定义：部件只有 `hammer_head` + `tough_handle` 两件（2026-11-11 起；原先还有 2×`large_plate` 和头部的 0.5 `scale`）、`default_materials` 同长度、`base_stats` / `multiply_stats`、强化槽、`smite` 1、`pickaxe_dig` / `shovel_dig`、有效方块 tag |
 | `data/exnihilosatellitium/tinkering/station_layouts/ex_nihilo_hammer.json` | 装配站 2 个输入槽（锤头、坚韧手柄）的位置与图标；`conditions` 带 `forge:mod_loaded(tconstruct)`；槽位顺序必须与工具定义的部件顺序一致 |
 | `data/exnihilosatellitium/recipes/tools/building/ex_nihilo_hammer.json` | `tconstruct:tool_building` 配方，`result` 指向本物品 |
+| `data/exnihilosatellitium/recipes/tools/modifiers/chain.json` | `tconstruct:modifier` 强化配方：4 燧石 + 1 铁锭 → `exnihilosatellitium:chain`（I–III，占 1 个升级槽）；带 `forge:mod_loaded(tconstruct)` |
 | `data/tconstruct/tags/items/modifiable/**` | 6 个追加文件，把物品接入 `harvest` / `multipart` / `durability` / `melee/primary` / `broad`（不登记 `aoe`，见下） |
 | `assets/exnihilosatellitium/tinkering/modifiers/sprites/ex_nihilo_hammer.json` | 强化外观：16 个 modifier id → overlay 贴图；模型里的 `modifier_maps` 指向它 |
 
+- **连锁的数值不在 JSON 里**：`HammerTool#chainLimit` 决定一次粉碎最多多打几块——
+  匠魂锤读 `exnihilosatellitium:chain` 的等级（每级 16 块），DE 锤读 AOE 模块的 `AOEData`
+  （16 × AOE 级）；要改每级块数得改 Java 常量（`TinkersTools.CHAIN_BLOCKS_PER_LEVEL` /
+  `DEHammerItem.CHAIN_BLOCKS_PER_AOE`）。只连锁同一种方块，每块照常扣耐久 / 能量。
 - 工具定义 JSON 没有 `conditions`（匠魂的 loader 只读已注册的定义）；不装匠魂时核心不会注册
   这个定义，整个 JSON 被忽略。配方与布局有 `forge:mod_loaded` 条件，不会报 unknown item。
 - 强化外观同样是匠魂的数据：`modifier_maps` 指向我们的 sprite map，再指向

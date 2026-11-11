@@ -2,6 +2,7 @@ package com.kaifengcrt.exnihilosatellitium.common.event;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
+import com.kaifengcrt.exnihilosatellitium.common.hammer.ChainMining;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.item.CrookItem;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
@@ -81,16 +82,18 @@ public final class ToolEvents {
             }
             // No drop-replacement event on 1.20.1: take the break over completely.
             event.setCanceled(true);
-            level.removeBlock(pos, false);
-            level.levelEvent(2001, pos, Block.getId(state));
-            for (final ItemStack result : HammerRolls.roll(state, 0, level.random)) {
-                Block.popResource(level, pos, result);
-            }
-            if (!player.isCreative()) {
-                if (hammer.energyPerUse() > 0) {
-                    MachineHooks.extractItemEnergy(tool, hammer.energyPerUse());
-                } else {
-                    hammer.wear(player, tool);
+            crush(level, player, tool, hammer, pos, state);
+            final int chain = hammer.chainLimit(tool);
+            if (chain > 0) {
+                for (final BlockPos next : ChainMining.collect(level, pos, state, chain)) {
+                    if (tool.isEmpty() || !canUseHammer(player, tool)) {
+                        break;
+                    }
+                    final BlockState nextState = level.getBlockState(next);
+                    if (HammerRecipes.ruleFor(nextState) == null) {
+                        continue;
+                    }
+                    crush(level, player, tool, hammer, next, nextState);
                 }
             }
             return;
@@ -113,6 +116,24 @@ public final class ToolEvents {
             if (!player.isCreative()) {
                 tool.hurtAndBreak(1, player,
                         broken -> broken.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+            }
+        }
+    }
+
+    /** One crush: remove the block, roll the table, then charge the tool. */
+    private static void crush(final ServerLevel level, final Player player, final ItemStack tool,
+                              final HammerTool hammer, final BlockPos pos,
+                              final BlockState state) {
+        level.removeBlock(pos, false);
+        level.levelEvent(2001, pos, Block.getId(state));
+        for (final ItemStack result : HammerRolls.roll(state, 0, level.random)) {
+            Block.popResource(level, pos, result);
+        }
+        if (!player.isCreative()) {
+            if (hammer.energyPerUse() > 0) {
+                MachineHooks.extractItemEnergy(tool, hammer.energyPerUse());
+            } else {
+                hammer.wear(player, tool);
             }
         }
     }

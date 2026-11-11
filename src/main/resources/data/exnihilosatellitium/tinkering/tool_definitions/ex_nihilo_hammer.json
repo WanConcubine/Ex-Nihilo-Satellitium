@@ -3,10 +3,7 @@
     {
       "type": "tconstruct:part_stats",
       "parts": [
-        {
-          "item": "tconstruct:hammer_head",
-          "scale": 0.5
-        },
+        "tconstruct:hammer_head",
         "tconstruct:tough_handle"
       ],
       "primary_part": 0
@@ -57,7 +54,8 @@
     {
       "type": "tconstruct:tool_actions",
       "tool_actions": [
-        "pickaxe_dig"
+        "pickaxe_dig",
+        "shovel_dig"
       ]
     },
     {

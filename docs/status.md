@@ -8,9 +8,9 @@
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.4.1 已构建**（2026-11-11，1.20.1 线；tag `v1.4.1-1.20.1` 与商店上传待所有者）；
 1.0.0–1.3.2 的商店上传也待所有者。
-**当前版本（1.4.1，2026-11-11）**：**匠魂碎矿锤配方**——装配站从「锤头 + 手柄 + 2 大板」改成
-**1 锤头 + 1 坚韧手柄**，不再和匠魂大锤同款；`tool_definitions` / `default_materials` /
-装配站布局一起减到两件，耐久倍率没调。
+**当前版本（1.4.1，2026-11-11）**：**匠魂碎矿锤三件事**——装配站改成 **1 锤头 + 1 坚韧手柄**
+（不再和大锤同款）；砂砾 / 沙子 / 尘土按头部材料速度挖（不再空手速度）；新增强化
+`exnihilosatellitium:chain`（连锁 I–III，每级 16 块），DE 锤装 AOE 模块后也连锁。
 上一版（1.4.0，2026-11-10）：**材质锤 + 匠魂碎矿锤**——9 把金属锤 + 3 把 Bamboo 宝石锤 +
 3 把 DE 锤（21 把）；`ex_nihilo_hammer`（碎矿锤）是真正的匠魂 3 可改造工具，材料属性 / 特性 /
 强化槽全走匠魂，掉落走同一张锤表；叶绿素三种碎矿可直接熔成 `tinkers_thinking:molten_chlorophyte`。
@@ -39,15 +39,21 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 - **匠魂碎矿锤配方（所有者要求）**：装配站从「锤头 + 坚韧手柄 + 2×大板」改成
   **1 锤头 + 1 坚韧手柄**，不再和匠魂大锤同款。
 - **数据**：`tinkering/tool_definitions/ex_nihilo_hammer.json` 的 `part_stats.parts` 与
-  `default_materials` 都减到 2 项；`tinkering/station_layouts/ex_nihilo_hammer.json` 删掉两个
-  `large_plate` 输入槽（剩下的槽位顺序仍是锤头→手柄，必须和定义一致）。
-- **属性不变**：`base_stats` / `multiply_stats` / 强化槽 / 特性 / `pickaxe_dig` 都没动；
-  耐久仍 ×4.0，但基础耐久只剩头和手柄（大板原本各按 0.25 计入），同材料会低于四件配方。
-  要补耐久就调 `multiply_stats`。
-- **验证**：`build` + 纹理守卫 + 主线 `check-data-paths.py --target 1.20.1` 通过；
-  `runServer -PtinkersMods` 启动仍是 `Loaded 46 tool definitions` / `24 station slot layouts`、
-  无解析错误（同一份数据上一轮也过了一次 `/reload`），日志 `version 1.4.0 -> 1.4.1`。
-  **装配站两槽的实机画面、造出来的耐久还没复测**。
+  `default_materials` 都减到 2 项、头部去掉 0.5 缩放、`tool_actions` 加 `shovel_dig`；
+  `tinkering/station_layouts/ex_nihilo_hammer.json` 删掉两个 `large_plate` 输入槽；
+  新增 `recipes/tools/modifiers/chain.json`（`tconstruct:modifier`）。
+- **挖掘速度（2026-11-11）**：`HammerTool#breakSpeed` 之前对匠魂锤返回 0，砂砾 / 沙子这类
+  `mineable/shovel` 方块上工具不算“有效”，于是按空手 1.0 走。现在返回头部材料自己的
+  挖掘速度（铁头 6.0）；去掉头部 0.5 缩放后耐久也回到 1000（铁头）。
+- **连锁（2026-11-11）**：核心 `ChainMining.collect` 做同类方块六面 BFS，
+  `HammerTool#chainLimit` 决定上限；`ToolEvents` 在锤表方块被粉碎后逐块结算（每块 1 耐久 /
+  一次能量）。匠魂锤靠新强化 `exnihilosatellitium:chain`（I–III，每级 16 块，装配站
+  4 燧石 + 1 铁锭）；DE 锤靠 DE 的 AOE 模块（16 × AOE 级）。
+- **验证**：`build` + 纹理守卫 + 主线 `check-data-paths.py --target 1.20.1`（201 / 198 / 75 / 71）
+  通过；`runServer -PtinkersMods` 启动 46 tool definitions / 24 station layouts、无解析错误，
+  `chain` 静态强化注册成功、`tconstruct:modifier` 配方加载成功；临时 FakePlayer 探针
+  （已删）铁头 + 木柄：速度 6.0 / 耐久 1000，连锁 0 级 1 块、I 级 17 块、II 级 33 块，
+  夹一块沙子会停。**装配站应用强化、DE 实机连锁、JEI 强化页还没看**。
 
 ## 1.4.0（2026-11-10）
 
@@ -300,7 +306,10 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 - [ ] **TiT / AE2**：草方块筛出叶绿素碎矿、碎下界岩筛出阿迪特碎矿；沙筛出赛特斯水晶/粉；
       两条 AE2 掉落在 JEI 筛子页可见。
 - [ ] **匠魂锤**：装配站放下锤头 / 坚韧手柄 → 合成碎矿锤；材料属性 / 特性
-      与强化槽显示；左键砂砾掉沙子、耐久 −1；装 JEI 看 TiC 自己的工具页。
+      与强化槽显示；左键砂砾掉沙子、耐久 −1、速度跟锤头材料走（1.4.1 修）；
+      装配站用 4 燧石 + 1 铁锭应用「连锁」，再锤一条砂砾看连锁；装 JEI 看强化配方页。
+- [ ] **DE 锤连锁**：给 DE 锤装 AOE（范围）模块，锤砂砾 / 沙子看是否连锁；
+      没装模块时不应连锁。
 
 ## 验证状态
 
@@ -309,11 +318,11 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| 匠魂锤（1.20.1） | ✅ / ⚠️ | 真装 TConstruct 3.12.1 + Mantle 1.11.117：46 tool definitions / 24 station layouts；定义 `dataLoaded=true`、布局命中、`tool_building` 配方存在；1.4.0 的四件配方探针（铁头+木柄+2 铁板）：1000 耐久 / 6.0 速度 / 6.75 攻击、`magnetic`+`cultivated`+`smite`，砂砾→沙子且 `Damage=1`；build + 纹理 + data 守卫通过。客户端已看装配站 / 强化页 / tooltip / 材质染色（创造栏多材质锤颜色不同）；无匠魂客户端启动正常（模型走 fallback，无 unknown loader）；强化 overlay 已接入但未逐个目视；JEI 工具页 / 手感未单独验。**1.4.1 改成 1 锤头 + 1 手柄后**：`runServer -PtinkersMods` 启动 + `/reload` 仍是 `Loaded 46 tool definitions` / `24 station slot layouts`、无解析错误；**装配站两槽手感与耐久未复测** |
+| 匠魂锤（1.20.1） | ✅ / ⚠️ | 真装 TConstruct 3.12.1 + Mantle 1.11.117：46 tool definitions / 24 station layouts、`tconstruct:modifier` 配方加载无错；`exnihilosatellitium:chain` 静态强化注册成功；FakePlayer 探针（临时命令，已删，铁头 + 木柄）：挖掘速度 **6.0**、最大耐久 **1000**；连锁 0 级 1 块 / 1 耐久、I 级 17 块 / 17 耐久、II 级 33 块 / 33 耐久，中间夹沙子会停在沙子前；build + 纹理守卫 + data 守卫通过。更早的装配站 / 强化页 / tooltip / 材质染色已由作者目视；**未做**：装配站里应用连锁强化的画面、DE 锤装 AOE 模块的实机连锁、JEI 强化配方页 |
 | 机器 GUI 压暗（1.20.1） | ✅ | 1.4.0：`AbstractMachineScreen#renderBg` 先调 `renderBackground`；作者实机确认打开机器界面时世界变暗 |
 | 叶绿素碎矿熔炼（1.20.1） | ⚠️ | 3 条 `tconstruct:melting`（broken/crushed/powdered 各 45 mB，600°C，`time: 26`，`tinkers_thinking:molten_chlorophyte`）；build + data 守卫通过；**未在游戏里实际熔化过** |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
-| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.1；jar 982 KB / `17287ed4…`） |
+| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.1；jar 986 KB / `502c38a3…`） |
 | `check-textures.py` | ✅ | 313 模型 / 116 blockstate / 209 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装 + ER + BambooMod：`[materials] 25`、`[sieve] 7 inputs / 173 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |

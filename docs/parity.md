@@ -101,7 +101,7 @@
 | 黄铀 / 铅矾 / 蓝锥矿（过筛获得） | 极限反应堆 Extreme Reactors 2.x（`bigreactors`） | 1.20.1 接入 ER 2.0.84 + ZeroCore 2.1.45：`yellorium` 1/8、`anglesite` / `benitoite` 各 1/64；三条走 `gems` 门控，三档矿链 → 熔成 ER 锭/晶体；RCON 熔炉三种产物验证；yellorite/uranium 双 tag，Mek/IE/Create 铀矿处理可磨 | ✅（真装；手筛待实测） |
 | 橡胶树苗（过筛 + 可堆肥） | MFR | 1.20.1 无 MFR | ⏸ 等模组 |
 | 自然（Natura）树苗 / 灌木 | 自然 | 无 1.20.1 | ⏸ 等模组 |
-| 匠魂可改造锤（碎矿锤） | 匠魂 3（`tconstruct`，仅 1.20.1） | `ex_nihilo_hammer`：`ModifiableItem` + `HammerTool`，装配站用 1 锤头 + 1 坚韧手柄合成（2026-11-11 去掉了大锤同款的两块大板）；材料 / 特性 / 强化槽 / 耐久全走匠魂；命中锤表方块掉同一张表；单方块，不登记 AOE tag | ✅（服务端探针；装配站/JEI 待目视；两件配方待复测） |
+| 匠魂可改造锤（碎矿锤） | 匠魂 3（`tconstruct`，仅 1.20.1） | `ex_nihilo_hammer`：`ModifiableItem` + `HammerTool`，装配站用 1 锤头 + 1 坚韧手柄合成（2026-11-11 去掉了大锤同款的两块大板）；材料 / 特性 / 强化槽 / 耐久全走匠魂；锤表方块按锤头材料速度挖（1.4.1 修）；新增强化 `exnihilosatellitium:chain` 连锁；DE 锤装 AOE 模块也连锁；命中锤表方块掉同一张表 | ✅（探针：6.0 速度 / 1000 耐久 / 连锁 17、33 块；装配站应用强化、DE 实机、JEI 待目视） |
 | 匠魂强化：自有锤 / 钩 traits | 匠魂 | 自有锤 / 钩没有做成匠魂工具；匠魂路线改由 `ex_nihilo_hammer` 承接（材料特性 + smite + 强化槽） | ⏸ 非目标 |
 
 ### 2.4 暂不复刻（原版强绑定已死模组）

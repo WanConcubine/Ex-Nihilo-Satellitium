@@ -2,7 +2,8 @@
 
 > 状态：**已构建；tag `v1.4.1-1.20.1` 与 CurseForge / Modrinth 上传待所有者。**
 > 版本号：`1.4.1`；本文件是 **1.20.1 / Forge 47.4** 线，1.21.1 线这一版没有代码改动。
-> 性质：**配方调整**——匠魂碎矿锤改成 1 锤头 + 1 坚韧手柄，不再照抄大锤。
+> 性质：**匠魂碎矿锤调整**——装配站改成 1 锤头 + 1 坚韧手柄、修复砂砾/沙子挖掘速度、
+> 新增匠魂「连锁」强化并让 DE 范围模块也能连锁碎矿方块。
 > 上一版：1.4.0（2026-11-10）。
 > tag：`v1.4.1-1.20.1`（待打）。
 
@@ -10,11 +11,12 @@
 
 | 线 | 加载器 | jar | 大小 | sha256 |
 |---|---|---|---|---:|
-| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.4.1.jar` | 982 KB | `17287ed41b6be74d49feb62122c6c6e92db1cf80d4f1300357a8fa984a05e4b9` |
+| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.4.1.jar` | 986 KB | `502c38a331f2ae31166556f5ce31c26896fdf35d93ed97910c791be04e71920c` |
 
 jar 包含 `LICENSE`、`THIRD-PARTY.md`、`icon.png`、`META-INF/mods.toml`，以及可选的
 `compat/tconstruct/*`（匠魂 source set）；`mods.toml` 里的 `version="1.4.1"` 已核对。
-产物构建于 2026-11-11（Java 17 / ForgeGradle 6）。
+产物构建于 2026-11-11（Java 17 / ForgeGradle 6）。jar 的 sha256 取自本次最终构建；
+ForgeGradle 重新打包会写入新的时间戳，重建出来的 sha 不会相同。
 
 ## 本版内容（相对 1.4.0）
 
@@ -23,42 +25,61 @@ jar 包含 `LICENSE`、`THIRD-PARTY.md`、`icon.png`、`META-INF/mods.toml`，�
 - **匠魂碎矿锤（`ex_nihilo_hammer`）不再和匠魂大锤同款**：装配站从「锤头 + 坚韧手柄 + 2 大板」
   改成 **1 锤头 + 1 坚韧手柄**。工具定义的部件列表、`default_materials` 与装配站输入槽
   一起减到两件（两块 `large_plate` 删掉）。
-- 材料属性 / 特性 / 强化槽 / 掉落表不变；耐久倍率也没调，所以同材料锤子的基础耐久只剩头和手柄，
-  会比四件配方低（大板原本各按 0.25 计入基础耐久）。
+- **挖掘速度**：砂砾 / 沙子 / 尘土这些 `mineable/shovel` 方块以前按空手速度挖（工具不算“有效”）。
+  `HammerTool#breakSpeed` 现在对锤表方块返回头部材料的挖掘速度（铁头 6.0）；头部部件的
+  0.5 缩放也去掉，耐久回到 1.4.0 四件时的水平（铁头约 1000）。
+- **连锁挖掘**：
+  - 匠魂锤：新增强化 `exnihilosatellitium:chain`（I–III），装配站用 4 燧石 + 1 铁锭应用
+    （1 个升级槽），每级多连锁 16 块。
+  - 龙之进化锤：装 DE 的 **AOE（范围）模块**后同样连锁；DE 自己的 AOE 会跳过镐子挖不动的
+    方块（砂砾 / 沙子），正好交给我们的锤表。
+  - 只连锁同一种方块、六面相连；每块扣 1 点耐久 / 一次能量；上限 16 × 等级（匠魂）或
+    16 × AOE 级（DE），搜索上限 1024 格。
 
 ### 数据
 
 - `tinkering/tool_definitions/ex_nihilo_hammer.json`：`part_stats.parts` 4 → 2，
-  `default_materials` 4 → 2。
+  `default_materials` 4 → 2，头部去掉 `scale`，`tool_actions` 增加 `shovel_dig`。
 - `tinkering/station_layouts/ex_nihilo_hammer.json`：输入槽 4 → 2（锤头 → 手柄，顺序与定义一致）。
-- 其余数据表未动：`src/main/resources` 200 recipes / 10 tags；generated 198 recipes /
+- 新增 `recipes/tools/modifiers/chain.json`（`tconstruct:modifier`，`forge:mod_loaded` 条件）。
+- 其余数据表未动：`src/main/resources` 201 recipes / 10 tags；generated 198 recipes /
   75 loot tables / 71 tags。
 
 ## 验证
 
 - `./gradlew build --offline` 通过（Java 17）。
 - `check-textures.py` 通过：313 模型 / 116 blockstate / 209 纹理。
-- 主线 `check-data-paths.py --target 1.20.1`：两个资源根都通过。
-- 服务端 `runServer -PtinkersMods` 启动：`Loaded 46 tool definitions` /
-  `24 station slot layouts`，无解析错误（同一份数据在上一轮也过了一次 `/reload`）；
-  日志里 `exnihilosatellitium (version 1.4.0 -> 1.4.1)`，`mods.toml` 的 `version="1.4.1"` 已核对。
-- **未做**：装配站两槽的实机画面、造出来的耐久复测、JEI 工具页。
+- 主线 `check-data-paths.py --target 1.20.1`：两个资源根都通过（201 / 198 / 75 / 71）。
+- 服务端 `runServer -PtinkersMods` 启动 + `/reload`：`Loaded 46 tool definitions` /
+  `24 station slot layouts`，无解析错误。
+- 服务端 FakePlayer 探针（临时命令，已删除）：铁头 + 木柄碎矿锤速度 **6.0**、最大耐久
+  **1000**；连锁 0 级 1 块 / 1 耐久，I 级 17 块 / 17 耐久，II 级 33 块 / 33 耐久；
+  中间夹一块沙子时停在沙子前。
+- **未做**：装配站应用强化的画面、DE 锤实机装模块连锁、JEI 强化配方页。
 
 ## 商店更新日志（可直接粘贴）
 
 **中文**：
 
-> 1.4.1 调整：
+> 1.4.1 调整（仅 1.20.1 有实际改动；1.21.1 只同步版本号）：
 > - 匠魂碎矿锤的装配站配方改成**1 锤头 + 1 坚韧手柄**（之前和匠魂大锤一样，还要 2 块大板）。
-> - 材料属性 / 特性 / 强化槽 / 掉落都不变；因为去掉了两块大板，同材料耐久会比以前低一些。
+> - 修复碎矿锤挖砂砾 / 沙子 / 尘土时按空手速度的问题，现在按锤头材料的挖掘速度走。
+> - 新增强化**连锁 I–III**（装配站：4 燧石 + 1 铁锭），一次粉碎连带打碎相连的同类方块，
+>   每级多 16 块。
+> - 龙之进化锤装上 DE 的**范围（AOE）模块**后，也能对砂砾 / 沙子等碎矿方块连锁。
+> - 材料属性 / 特性 / 掉落不变；1.21.1 线与 1.4.0 相同。
 
 **English**：
 
-> 1.4.1 changes:
+> 1.4.1 changes (1.20.1 only; the 1.21.1 build just shares the version number):
 > - The Tinkers' Construct crushing hammer now needs **1 hammer head + 1 tough handle** at the
 >   Tinker Station (it used to copy the sledge hammer and also take 2 large plates).
-> - Material stats, traits, modifier slots and drops are unchanged; with the plates gone, the
->   same materials give somewhat less durability.
+> - Fixed gravel / sand / dust being mined at bare-hand speed; the hammer now uses its head
+>   material's mining speed.
+> - New **Chain I–III** modifier (Tinker Station: 4 flint + 1 iron ingot): one crush also breaks
+>   connected blocks of the same kind, +16 blocks per level.
+> - The Draconic Evolution hammer chains the same blocks once DE's **AOE module** is installed.
+> - Material stats, traits and drops are unchanged; the 1.21.1 line matches 1.4.0.
 
 ## 发布前检查
 

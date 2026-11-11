@@ -38,6 +38,18 @@ public interface HammerTool {
     }
 
     /**
+     * How many extra connected blocks one crush may take (0 = no chain).
+     *
+     * <p>The plain hammers and the machine never chain. The optional
+     * integration hammers borrow their own progression system: the Tinkers'
+     * hammer needs our {@code exnihilosatellitium:chain} modifier and the
+     * Draconic Evolution hammer needs DE's AOE module installed.</p>
+     */
+    default int chainLimit(final ItemStack stack) {
+        return 0;
+    }
+
+    /**
      * Pays one point of durability after a successful crush.
      *
      * <p>1.20.1 has no drop-replacement event, so {@code ToolEvents} cancels

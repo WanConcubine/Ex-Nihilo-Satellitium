@@ -394,5 +394,10 @@
   "tooltip.exnihilosatellitium.fortune_upgrade": "Adds %s extra independent roll(s)",
   "tooltip.exnihilosatellitium.fortune_upgrade.stack": "Each extra stack reduces the proc chance by 20% and adds 25% energy use",
   "tooltip.exnihilosatellitium.speed_upgrade": "Sifts and crushes %s× faster",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Each extra stack reduces the effect by 20% and adds 25% energy use"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Each extra stack reduces the effect by 20% and adds 25% energy use",
+  "modifier.exnihilosatellitium.chain": "Chain",
+  "modifier.exnihilosatellitium.chain.flavor": "One swing, one vein.",
+  "modifier.exnihilosatellitium.chain.description": "Crushing gravel, sand, dust and ore chunks also breaks connected blocks of the same kind; +16 blocks per level.",
+  "modifier.exnihilosatellitium.chain.2": "Chain II",
+  "modifier.exnihilosatellitium.chain.3": "Chain III"
 }
