@@ -9,14 +9,15 @@
 #### 新增（1.20.1）
 
 - **大地黏液草种子**：`earth_slime_grass_seeds`（装匠魂才有），泥土 / 草方块各 **2%** 筛出；
-  右键泥土 / 草方块 → `tconstruct:earth_earth_slime_grass`。
+  右键泥土 / 草方块 → `tconstruct:earth_vanilla_slime_grass`。
 - **黏液泥土筛表**：`sieve/{earth,sky,ender}_slime_dirt.json`，10% 出同种匠魂树苗、
   25% 出同种黏液球（大地那档是原版 `minecraft:slime_ball`）。
 
 #### 变更（1.20.1）
 
-- **种子改种黏液草变体**：三种种子现在种 `tconstruct:<type>_<type>_slime_grass`，挖掉掉
-  `<type>_slime_dirt`（原来的 vanilla 变体只掉原版泥土）；空岛第一次有黏液泥土来源。
+- **黏液草额外掉黏液泥土**：种子仍然种 `*_vanilla_slime_grass`（原途径不变）；
+  `LootTableLoadEvent` 给它的掉落表**追加**一份同种 `<type>_slime_dirt`，
+  **原有 `minecraft:dirt` 保留**，匠魂文件不改。空岛第一次有黏液泥土来源。
 
 #### 修复（1.20.1）
 
@@ -37,15 +38,16 @@
 #### New (1.20.1)
 
 - **Earthslime grass seeds**: `earth_slime_grass_seeds` (only with Tinkers), **2%** from dirt /
-  grass blocks; right-click dirt / grass to grow `tconstruct:earth_earth_slime_grass`.
+  grass blocks; right-click dirt / grass to grow `tconstruct:earth_vanilla_slime_grass`.
 - **Slime dirt sifting**: `sieve/{earth,sky,ender}_slime_dirt.json` - 10% for the matching
   Tinkers sapling, 25% for the matching slime ball (earth uses vanilla slime balls).
 
 #### Changed (1.20.1)
 
-- **The seeds grow the slime-typed grass**: `tconstruct:<type>_<type>_slime_grass`, which drops
-  `<type>_slime_dirt` when mined (the vanilla-soil variant only drops plain dirt). This is the
-  skyblock's first slime-soil source.
+- **The slime grass drops slime dirt too**: the seeds still grow `*_vanilla_slime_grass`
+  (the original path is untouched); a `LootTableLoadEvent` hook appends the matching
+  `<type>_slime_dirt` to that block's table, so the original `minecraft:dirt` drop stays and
+  TiC's files are untouched. This is the skyblock's first slime-soil source.
 
 #### Fixes (1.20.1)
 
