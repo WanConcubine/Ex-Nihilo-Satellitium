@@ -7,29 +7,13 @@
           "item": "tconstruct:hammer_head",
           "scale": 0.5
         },
-        "tconstruct:tough_handle",
-        {
-          "item": "tconstruct:large_plate",
-          "scale": 0.25
-        },
-        {
-          "item": "tconstruct:large_plate",
-          "scale": 0.25
-        }
+        "tconstruct:tough_handle"
       ],
       "primary_part": 0
     },
     {
       "type": "tconstruct:default_materials",
       "materials": [
-        {
-          "type": "tconstruct:random",
-          "tier": 1
-        },
-        {
-          "type": "tconstruct:random",
-          "tier": 1
-        },
         {
           "type": "tconstruct:random",
           "tier": 1

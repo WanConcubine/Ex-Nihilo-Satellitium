@@ -329,8 +329,8 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 
 | 文件 | 作用 |
 |---|---|
-| `data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json` | 工具定义：部件 `hammer_head`(0.5) + `tough_handle` + 2×`large_plate`(0.25)、`base_stats` / `multiply_stats`、强化槽、`smite` 1、`pickaxe_dig`、有效方块 tag |
-| `data/exnihilosatellitium/tinkering/station_layouts/ex_nihilo_hammer.json` | 装配站 4 个输入槽的位置与图标；`conditions` 带 `forge:mod_loaded(tconstruct)` |
+| `data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json` | 工具定义：部件只有 `hammer_head`(0.5) + `tough_handle` 两件（2026-11-11 起；原先还有 2×`large_plate`）、`default_materials` 同长度、`base_stats` / `multiply_stats`、强化槽、`smite` 1、`pickaxe_dig`、有效方块 tag |
+| `data/exnihilosatellitium/tinkering/station_layouts/ex_nihilo_hammer.json` | 装配站 2 个输入槽（锤头、坚韧手柄）的位置与图标；`conditions` 带 `forge:mod_loaded(tconstruct)`；槽位顺序必须与工具定义的部件顺序一致 |
 | `data/exnihilosatellitium/recipes/tools/building/ex_nihilo_hammer.json` | `tconstruct:tool_building` 配方，`result` 指向本物品 |
 | `data/tconstruct/tags/items/modifiable/**` | 6 个追加文件，把物品接入 `harvest` / `multipart` / `durability` / `melee/primary` / `broad`（不登记 `aoe`，见下） |
 | `assets/exnihilosatellitium/tinkering/modifiers/sprites/ex_nihilo_hammer.json` | 强化外观：16 个 modifier id → overlay 贴图；模型里的 `modifier_maps` 指向它 |

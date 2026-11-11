@@ -726,10 +726,14 @@ AOE / 能量未目视。
   让强化 / 粘液覆层 / 耐久倍率 / 破损广播都生效。普通锤走默认的 `hurtAndBreak`。
 
 **工具定义**（`data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json`）：
-- 部件与匠魂大锤一致：`hammer_head`（0.5）+ `tough_handle` + `large_plate`（0.25）×2；
-  这样钴 / 阿迪特 / 玛玉灵锤头直接复用匠魂的铸造与材料。
+- 部件：`hammer_head`（0.5）+ `tough_handle`，**只有两件**——2026-11-11 所有者指出装配站配方
+  和匠魂大锤一模一样，要求改成 1 坚韧手柄 + 1 锤头，于是去掉两块 `large_plate`；
+  `default_materials` 与装配站布局的输入槽同步减到 2 个。
+- 部件比例、`base_stats`、`multiply_stats` 没动：耐久仍 ×4.0，但基础耐久只剩头和手柄，
+  同材料会低于此前四件配方（少了两块大板各 0.25 那份），这是简化配方的直接结果，
+  要补偿就调 `multiply_stats`。
 - 去掉了大锤的 `mining_speed ×0.4`：本工具没有基础 3×3，单方块速度按头部材料算（铁头 6.0），
-  否则会比自有铁锤还慢。耐久仍 ×4.0，保持“大锤级”耐久。
+  否则会比自有铁锤还慢。
 - 1 能力 + 2 升级槽，自带 `tconstruct:smite` 1；`pickaxe_dig` + `mineable/pickaxe` 有效；
   不加 `box_aoe`；锤表方块的破坏由我们接管，AOE 强化只对非锤表方块生效，所以不登记
   `modifiable/aoe`，保持单方块。

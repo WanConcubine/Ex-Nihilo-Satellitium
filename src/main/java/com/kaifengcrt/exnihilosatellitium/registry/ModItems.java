@@ -354,8 +354,8 @@ public final class ModItems {
 
     /**
      * Optional Tinkers' Construct hammer. A real TiC modifiable tool (built at
-     * the Tinker Station from a hammer head, a tough handle and two large
-     * plates), registered only while {@code tconstruct} is loaded. It is kept
+     * the Tinker Station from a hammer head and a tough handle), registered
+     * only while {@code tconstruct} is loaded. It is kept
      * out of the plain creative-tab loop because a bare TiC tool has no
      * materials; {@link #acceptTinkersCreative} asks TiC for material variants.
      */
