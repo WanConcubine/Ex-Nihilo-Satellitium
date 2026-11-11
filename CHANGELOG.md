@@ -1,5 +1,78 @@
 # 更新记录
 
+## 1.4.2 — 2026-11-11（黏液草 / 匠魂树苗 / 连锁图标）
+
+> 1.20.1 内容更新；没有新增玩法表结构。1.21.1 线本版无代码改动。
+
+### 中文
+
+#### 新增
+
+- **大地黏液草种子**：`earth_slime_grass_seeds`（装匠魂才有），泥土 / 草方块各 **2%** 筛出；
+  右键泥土 / 草方块 → `tconstruct:earth_earth_slime_grass`。碧空 / 末影两种原本就有。
+- **黏液泥土筛表**：`sieve/{earth,sky,ender}_slime_dirt.json`，根级 `"mod": "tconstruct"`；
+  每种黏液泥土 **10%** 出同种匠魂树苗、**25%** 出同种黏液球
+  （大地那档是原版 `minecraft:slime_ball`，匠魂没有 earth slime ball）。
+
+#### 变更
+
+- **种子改种黏液草变体**：三种种子现在种 `tconstruct:<type>_<type>_slime_grass`（原来是
+  `*_vanilla_slime_grass`）。黏液草挖掉掉 `<type>_slime_dirt`，而 vanilla 变体只掉原版泥土；
+  这样空岛第一次有黏液泥土来源，再拿去过筛拿树苗。
+
+#### 修复
+
+- **连锁强化图标**：补 `assets/exnihilosatellitium/tinkering/modifier_icons.json` 和 16×16
+  图标，强化工作台 / JEI 里不再是空图标（1.4.1 漏的）。
+
+#### 数据
+
+- 筛子：装匠魂 **10 输入 / 183 掉落**（1.4.1 是 7 / 175；+3 输入、+8 掉落）；
+  无匠魂仍是 7 / 116。
+
+#### 验证
+
+- `build`、`check-textures.py`（315 模型 / 213 纹理）、`check-data-paths.py --target 1.20.1`
+  通过；`-PtechMods -PdeMods` 服务端 `[sieve] loaded 10 inputs, 183 drops`、无未知物品。
+- RCON：`setblock tconstruct:sky_sky_slime_grass` 能放住；`/loot ... mine` 该方块掉落
+  `tconstruct:sky_slime_dirt`（大地 / 末影同理，同一套匠魂掉落表）。
+- **未做**：黏液泥土实际手筛、树苗生长、JEI 页面。
+
+### English
+
+#### New
+
+- **Earthslime grass seeds**: `earth_slime_grass_seeds` (only with Tinkers), **2%** from dirt /
+  grass blocks; right-click dirt / grass to grow `tconstruct:earth_earth_slime_grass`.
+- **Slime dirt sifting**: `sieve/{earth,sky,ender}_slime_dirt.json` (root `"mod": "tconstruct"`);
+  each slime dirt gives a **10%** chance of the matching Tinkers sapling and **25%** of the
+  matching slime ball (earth uses vanilla `minecraft:slime_ball`).
+
+#### Changed
+
+- **The seeds now grow the slime-typed grass**: `tconstruct:<type>_<type>_slime_grass` instead of
+  `*_vanilla_slime_grass`. Mining the slime-typed block drops `<type>_slime_dirt` (the vanilla
+  variant only drops plain dirt), which finally gives skyblock a slime-soil source to sift.
+
+#### Fixes
+
+- **Chain modifier icon**: added `assets/exnihilosatellitium/tinkering/modifier_icons.json` and a
+  16x16 icon, so the modifier worktable / JEI no longer show a blank icon (missed in 1.4.1).
+
+#### Data
+
+- Sieve: **10 inputs / 183 drops** with Tinkers (was 7 / 175; +3 inputs, +8 drops); still 7 / 116
+  without Tinkers.
+
+#### Verification
+
+- `build`, `check-textures.py` (315 models / 213 textures) and
+  `check-data-paths.py --target 1.20.1` pass; the `-PtechMods -PdeMods` server logs
+  `[sieve] loaded 10 inputs, 183 drops` with no unknown items.
+- RCON: `setblock tconstruct:sky_sky_slime_grass` stays in place and its loot table drops
+  `tconstruct:sky_slime_dirt`.
+- **Not done**: actually sifting slime dirt in game, sapling growth, the JEI page.
+
 ## 1.4.1 — 2026-11-11（匠魂碎矿锤：配方 / 速度 / 连锁）
 
 > 只动匠魂碎矿锤与两把联动锤：没有新增物品，也不改任何玩法数据表结构。1.21.1 线本版无代码改动。

@@ -119,6 +119,11 @@
       "mod": "tconstruct"
     },
     {
+      "item": "exnihilosatellitium:earth_slime_grass_seeds",
+      "chance": 0.02,
+      "mod": "tconstruct"
+    },
+    {
       "item": "exnihilosatellitium:ender_slime_grass_seeds",
       "chance": 0.01,
       "mod": "tconstruct"

@@ -403,5 +403,6 @@
   "item.exnihilosatellitium.chain_mining_module": "Chain Module",
   "module_type.exnihilosatellitium.chain_mining": "Chain Mining",
   "module.exnihilosatellitium.chain_mining.blocks": "Chain limit: %s blocks",
-  "module.exnihilosatellitium.chain_mining.blocks.info": "One crush also breaks connected blocks of the same kind"
+  "module.exnihilosatellitium.chain_mining.blocks.info": "One crush also breaks connected blocks of the same kind",
+  "item.exnihilosatellitium.earth_slime_grass_seeds": "Earthslime Grass Seeds"
 }

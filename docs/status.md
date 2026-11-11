@@ -6,13 +6,13 @@
 ## 一句话
 
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.4.1 已发**（tag `v1.4.1-1.20.1`，2026-11-11 构建、打 tag 并推送；CurseForge / Modrinth 上传待所有者）；
+**1.4.2 已发**（tag `v1.4.2-1.20.1`，2026-11-11 构建、打 tag 并推送；CurseForge / Modrinth 上传待所有者）；
 1.0.0–1.3.2 的商店上传也待所有者。
-**当前版本（1.4.1，2026-11-11）**：**匠魂碎矿锤三件事**——装配站改成 **1 锤头 + 1 坚韧手柄**
-（不再和大锤同款）；砂砾 / 沙子 / 尘土按头部材料速度挖（不再空手速度）；新增强化
-`exnihilosatellitium:chain`（连锁 I–III，每级 16 块，锤头有锁链 overlay），DE 锤用专属
-连锁模块 `chain_mining_module`（一次 32 块）。
-上一版（1.4.0，2026-11-10）：**材质锤 + 匠魂碎矿锤**——9 把金属锤 + 3 把 Bamboo 宝石锤 +
+**当前版本（1.4.2，2026-11-11）**：**黏液草与匠魂树苗**——补齐**大地黏液草种子**；三种种子
+改种 `<type>_<type>_slime_grass`，挖掉掉黏液泥土；黏液泥土过筛出同种匠魂树苗（10%）+ 黏液球。
+上一版（1.4.1，2026-11-11）：匠魂碎矿锤配方（1 锤头 + 1 手柄）、砂砾/沙子按锤头速度、
+连锁强化 + 锁链 overlay、DE 专属连锁模块 `chain_mining_module`。
+更早（1.4.0，2026-11-10）：**材质锤 + 匠魂碎矿锤**——9 把金属锤 + 3 把 Bamboo 宝石锤 +
 3 把 DE 锤（21 把）；`ex_nihilo_hammer`（碎矿锤）是真正的匠魂 3 可改造工具，材料属性 / 特性 /
 强化槽全走匠魂，掉落走同一张锤表；叶绿素三种碎矿可直接熔成 `tinkers_thinking:molten_chlorophyte`。
 同时修掉机器 GUI 不压暗、非 `HammerItem` 的锤白嫖耐久两处问题。
@@ -29,11 +29,28 @@
 **联动**：26 种材料（14 金属 + 12 矿物；ER 的 yellorium 与 DE 的 draconium 走 `gems` 门控）；
 Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 / BambooMod /
 末影接口（Ender IO，beta）全部可选。
-**当前表尺**：筛子 7 输入 / 116 掉落（无科技模组；沙/砂砾/尘土比主线少 3 条钴，历史差异）；
-装末影接口 +1（117）；+AE2 120；全装 +TiT 142、再加 AE2 146；装 ER 各 +9（151 / 155）；
-装 BambooMod +19（全装 174）；**装龙之进化 +1**（全装 + Bamboo 175）；再装末影接口各再 +1。
+**当前表尺**：筛子 7 输入 / 116 掉落（无科技模组；装匠魂 **+3 输入 +8 掉落** = 10 / 124；
+沙/砂砾/尘土比主线少 3 条钴，历史差异）；装末影接口 +1（117）；+AE2 120；
+全装 +TiT 150、再加 AE2 154；装 ER 各 +9（159 / 163）；**装 BambooMod +19**
+（全装 182）；**装龙之进化 +1**（全装 + Bamboo 183）；再装末影接口各再 +1。
 锤表 88（全装 +ER；装 DE 91）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
+
+## 1.4.2（2026-11-11）
+
+- **大地黏液草种子**：`earth_slime_grass_seeds`（条件物品，装匠魂才有），泥土 / 草方块各 2%
+  筛出；右键泥土 / 草方块 → `tconstruct:earth_earth_slime_grass`。碧空 / 末影两种原本就有。
+- **种子改种黏液草**：三种种子现在都种 `tconstruct:<type>_<type>_slime_grass`（原来是
+  `*_vanilla_slime_grass`）。黏液草挖掉掉 `<type>_slime_dirt`——这是空岛第一条黏液泥土来源。
+- **黏液泥土筛表**：`sieve/{earth,sky,ender}_slime_dirt.json`，根级 `mod: tconstruct`，
+  每张 10% 出同种匠魂树苗、25% 出同种黏液球（大地那档用原版 `minecraft:slime_ball`，
+  匠魂没有 earth slime ball）。
+- **连锁图标**：补 `assets/exnihilosatellitium/tinkering/modifier_icons.json` +
+  16×16 `gui/modifiers/chain.png`，强化工作台 / JEI 不再空图标（1.4.1 漏的）。
+- **验证**：`build`、纹理守卫（315 模型 / 213 纹理）、data 守卫通过；`-PtechMods -PdeMods`
+  服务端 `[sieve] 10 inputs, 183 drops`；`-PtinkersMods` 下 `[sieve] 10 inputs, 128 drops`；
+  RCON 验证 `sky_sky_slime_grass` 能放住、掉落表给 `tconstruct:sky_slime_dirt`。
+  **黏液泥土实际手筛、树苗生长、JEI 页面还没进游戏看**。
 
 ## 1.4.1（2026-11-11）
 
@@ -328,8 +345,8 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 | 机器 GUI 压暗（1.20.1） | ✅ | 1.4.0：`AbstractMachineScreen#renderBg` 先调 `renderBackground`；作者实机确认打开机器界面时世界变暗 |
 | 叶绿素碎矿熔炼（1.20.1） | ⚠️ | 3 条 `tconstruct:melting`（broken/crushed/powdered 各 45 mB，600°C，`time: 26`，`tinkers_thinking:molten_chlorophyte`）；build + data 守卫通过；**未在游戏里实际熔化过** |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
-| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.1；jar 995 KB / `cc496420…`） |
-| `check-textures.py` | ✅ | 314 模型 / 116 blockstate / 211 纹理；七个子模型只引用 vanilla block 贴图 |
+| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.2；jar 997 KB / `c688d9d8…`） |
+| `check-textures.py` | ✅ | 315 模型 / 116 blockstate / 213 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装 + ER + BambooMod：`[materials] 25`、`[sieve] 7 inputs / 173 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |

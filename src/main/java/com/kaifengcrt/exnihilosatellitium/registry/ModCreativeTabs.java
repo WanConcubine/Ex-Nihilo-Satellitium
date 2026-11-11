@@ -65,6 +65,9 @@ public final class ModCreativeTabs {
                 if (ModItems.SKY_SLIME_GRASS_SEEDS != null) {
                     output.accept(ModItems.SKY_SLIME_GRASS_SEEDS.get());
                 }
+                if (ModItems.EARTH_SLIME_GRASS_SEEDS != null) {
+                    output.accept(ModItems.EARTH_SLIME_GRASS_SEEDS.get());
+                }
                 if (ModItems.ENDER_SLIME_GRASS_SEEDS != null) {
                     output.accept(ModItems.ENDER_SLIME_GRASS_SEEDS.get());
                 }

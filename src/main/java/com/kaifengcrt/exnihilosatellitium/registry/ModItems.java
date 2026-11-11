@@ -269,16 +269,21 @@ public final class ModItems {
             ITEMS.register("ancient_spores", () -> new AncientSporesItem(new Item.Properties()));
 
     /**
-     * Tinkers-only grass seeds. Right-click a vanilla grass block to turn it into
-     * Tinkers' slime grass. Both fields stay {@code null} when Tinkers is absent,
-     * so the items do not exist in that profile at all.
+     * Tinkers-only grass seeds. Right-click vanilla dirt / grass to grow the
+     * matching slime grass. The slime-typed variant is used on purpose: mining it
+     * (no silk touch) drops the matching {@code tconstruct:<type>_slime_dirt},
+     * which is the only skyblock source of slime soil. All three fields stay
+     * {@code null} when Tinkers is absent.
      */
     public static final RegistryObject<Item> SKY_SLIME_GRASS_SEEDS =
             registerTinkersGrassSeeds("sky_slime_grass_seeds",
-                    "tconstruct:sky_vanilla_slime_grass");
+                    "tconstruct:sky_sky_slime_grass");
+    public static final RegistryObject<Item> EARTH_SLIME_GRASS_SEEDS =
+            registerTinkersGrassSeeds("earth_slime_grass_seeds",
+                    "tconstruct:earth_earth_slime_grass");
     public static final RegistryObject<Item> ENDER_SLIME_GRASS_SEEDS =
             registerTinkersGrassSeeds("ender_slime_grass_seeds",
-                    "tconstruct:ender_vanilla_slime_grass");
+                    "tconstruct:ender_ender_slime_grass");
 
     /**
      * Nether-tree start: crushing netherrack drops these spores, and right-clicking

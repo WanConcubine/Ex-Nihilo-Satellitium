@@ -1,0 +1,14 @@
+{
+  "mod": "tconstruct",
+  "input": "tconstruct:earth_slime_dirt",
+  "outputs": [
+    {
+      "item": "tconstruct:earth_slime_sapling",
+      "chance": 0.1
+    },
+    {
+      "item": "minecraft:slime_ball",
+      "chance": 0.25
+    }
+  ]
+}
