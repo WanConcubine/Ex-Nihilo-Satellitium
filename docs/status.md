@@ -1,14 +1,17 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-10
+> 最后更新：2026-11-11
 > 先看这 25 行；批次叙事在 [history.md](history.md)，架构/取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
 
 **双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
 （`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.4.0 已发布**（两条线 tag：`v1.4.0` / `v1.4.0-1.20.1`）；1.0.0–1.3.2 的商店上传待所有者。
-**当前版本（1.4.0，2026-11-10）**：**9 把金属锤 + 3 把龙之进化锤**——锡/铝/锌/铜 256、
+**1.4.1 已构建**（2026-11-11，两条线 version 已改；tag `v1.4.1` / `v1.4.1-1.20.1` 与商店上传
+待所有者）；1.0.0–1.3.2 的商店上传也待所有者。
+**当前版本（1.4.1，2026-11-11）**：**版本对齐**——1.21.1 线没有代码改动；1.20.1 的匠魂碎矿锤
+装配站从「锤头 + 手柄 + 2 大板」改成 **1 锤头 + 1 坚韧手柄**，属性 / 耐久倍率没动。
+上一版（1.4.0，2026-11-10）：**9 把金属锤 + 3 把龙之进化锤**——锡/铝/锌/铜 256、
 银 320、铅 384、镍 448、锇 512、铂 1920；DE 双足飞龙/神龙/混沌走聚合装置升级链，可装 DE 模块；
 同时修掉 1.21.1 木钩 / 骨钩不掉耐久。Bamboo 宝石锤与匠魂碎矿锤只在 1.20.1 线。
 上一批（1.3.2，2026-11-05）：**木桶修复**——满桶右键堆肥材料不再把方块放到桶顶；
@@ -38,6 +41,16 @@ Mek+Thermal+AE2 153）；1.20.1 装 BambooMod **+19**（全装 174）；装龙�
 16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
 **下一步**：CI 收尾（首跑已过；删除旧 `ci-logs` 分支）→ 商店上传 → 画面/手感验收 → P4 JEI 同步 →
 P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）。
+
+## 1.4.1（2026-11-11）
+
+- **1.21.1 线：无代码改动**。本版只为和 1.20.1 线版本号一致；jar 与 1.4.0 只有版本号不同。
+- **1.20.1 线（改在 `1.20.1-forge` 分支）**：匠魂碎矿锤装配站从「锤头 + 坚韧手柄 + 2 大板」
+  改成 **1 锤头 + 1 坚韧手柄**；工具定义部件 / `default_materials` / 装配站输入槽一起减到两件，
+  属性与耐久倍率没动（同材料耐久会比四件时低）。
+- **验证**：两版 `./gradlew build --offline` + `check-textures.py`（主线 307 模型 / 116
+  blockstate / 190 纹理）通过；1.20.1 服务端 `-PtinkersMods` 46 tool definitions /
+  24 station layouts，无解析错误。装配站实机与耐久未复测。
 
 ## 1.4.0（2026-11-10）
 
@@ -385,7 +398,7 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | 三路径 P1–P3 | ✅ | TableBuilder/overlay、KubeJS 2101+2001、CraftTweaker 21+14；两版七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致 |
 | P1 生命周期/失败隔离 | ✅ | 重复提交去重、空 payload 拒绝、server stop 清 overlay；坏 overlay 只 warning、坏数据包保留旧快照 |
 | P1 core 守卫 | ✅ | `check-core-imports.py` → `0 known leak(s)`，`common/table` 已纳入扫描 |
-| `./gradlew build` | ✅ | 2026-11-04 两版 `BUILD SUCCESSFUL`（`--offline`） |
+| `./gradlew build` | ✅ | 2026-11-11 两版 `BUILD SUCCESSFUL`（`--offline`，1.4.1） |
 | 1.0.0 发布 | ✅ | 两版 `mod_version=1.0.0`；tag `v1.0.0` / `v1.0.0-1.20.1`；jar 版本与 sha 见 [release-1.0.0.md](release-1.0.0.md) |
 | 1.1.0 发布 | ✅ | 两版 `mod_version=1.1.0`；tag `v1.1.0` / `v1.1.0-1.20.1`；jar 版本与 sha 见 [release-1.1.0.md](release-1.1.0.md) |
 | 1.1.1 发布 | ✅ | 两版 `mod_version=1.1.1`；tag `v1.1.1` / `v1.1.1-1.20.1`；jar 版本与 sha 见 [release-1.1.1.md](release-1.1.1.md) |
@@ -397,7 +410,7 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | 木/骨钩耐久（1.21.1） | ✅ | 2026-11-09 修复后服务端实测：`FakePlayer` + `ServerPlayerGameMode#destroyBlock` 破坏橡树树叶，木钩 / 骨钩各 `damage=1`，木锤 `damage=1`，创造模式钩 `damage=0`（临时探针命令，已删除）；修复前该路径因 `wearMainHand` 只认 `HammerItem` 不会扣耐久 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
-| `check-textures.py` | ✅ | 主线 307 模型 / 116 blockstate / 190 纹理（2026-11-09 复跑）；分支数字待分支复跑；无 `minecraft:item/*` |
+| `check-textures.py` | ✅ | 主线 307 模型 / 116 blockstate / 190 纹理（2026-11-11 复跑）；分支数字待分支复跑；无 `minecraft:item/*` |
 | `check-data-paths.py` | ✅ | 1.21.1：297 recipes / 75 loot / 75 tags（2026-11-09 复跑）；1.20.1 用 `--target 1.20.1` 验过 |
 | `check-wiki.py` | ✅ | 8 页 / 8 译文 / 91 链接 / 74 JSON / 8 nav（2026-11-09 复跑） |
 | CI 工作流 | ✅ | 2026-11-10 首跑通过（[run 42840322972](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/actions/runs/42840322972)）：materials 动态断言、core/data/wiki 守卫、compile、headless smoke 全绿；日志走 artifact，`contents: read`，不再强推 `ci-logs` |
@@ -447,10 +460,11 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 > P1 #48–#50 已修，2026-11-10 首跑通过；#51（1.20.1 分支守卫/漂移）仍待处理。
 
 1. **CI 收尾**：2026-11-10 首跑已全绿（run 42840322972）；只剩远端旧 `ci-logs` 分支需要所有者手动删除。
-2. **1.4.0 实机验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；主线另看 3 把 DE 锤的
-   聚合合成 / AOE；1.20.1 用 `-PtechMods` 验 Bamboo 宝石锤、匠魂碎矿锤与叶绿素熔化。
-3. **1.4.0 商店收尾**：tag `v1.4.0` / `v1.4.0-1.20.1` 已打；
-   CurseForge / Modrinth 上传、README 下载链接（需要所有者操作）。
+2. **1.4.x 实机验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；主线另看 3 把 DE 锤的
+   聚合合成 / AOE；1.20.1 用 `-PtechMods` 验 Bamboo 宝石锤、匠魂碎矿锤（1.4.1 改成两件配方，
+   装配站与耐久待复测）与叶绿素熔化。
+3. **1.4.1 商店收尾**：两版 `mod_version=1.4.1` 已构建；tag `v1.4.1` / `v1.4.1-1.20.1`
+   尚未打，CurseForge / Modrinth 上传与 README 下载链接也需要所有者操作。
 4. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器、村民人偶 / 脑白金 / 糖水链 / 蜜蜂 / 热力人偶；清单见「交接清单」。
 5. **P4 客户端 JEI 同步 + fixture CI**：专用服客户端 JEI 目前只读本地镜像/数据包。
