@@ -1,0 +1,14 @@
+{
+  "mod": "tconstruct",
+  "input": "tconstruct:sky_slime_dirt",
+  "outputs": [
+    {
+      "item": "tconstruct:sky_slime_sapling",
+      "chance": 0.1
+    },
+    {
+      "item": "tconstruct:sky_slime_ball",
+      "chance": 0.25
+    }
+  ]
+}

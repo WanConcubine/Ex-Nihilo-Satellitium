@@ -318,6 +318,15 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
   进 `forge:raw_materials/yellorium`（及根 tag）。这样 Mekanism `enriching` / IE crusher / Create crushing
   这类按 `forge:ores/uranium` 取矿的机器能磨我们的矿，输出对方的铀粉（与 ER 原矿一致）。
   这是「碎料不进 raw_materials」规则的唯一例外。
+- 匠魂（`tconstruct`，仅 1.20.1）：不新增材料，但补了黏液链。
+  - **黏液草种子**：`sky_/earth_/ender_slime_grass_seeds`（条件物品，装匠魂才注册）；泥土 /
+    草方块各 2% / 2% / 1%；右键泥土 / 草方块 → `tconstruct:<type>_<type>_slime_grass`。
+  - **黏液草挖掉出黏液泥土**：`<type>_<type>_slime_grass` 的掉落表是匠魂自己的
+    （`tconstruct:blocks/<type>_<type>_slime_grass` → `<type>_slime_dirt`），我们只负责把种子
+    种成这个变体；`*_vanilla_slime_grass` 仍然掉原版泥土，别混。
+  - **黏液泥土筛表**：`sieve/{earth,sky,ender}_slime_dirt.json`，根级 `"mod": "tconstruct"`；
+    每张 10% 出同种 `tconstruct:<type>_slime_sapling`、25% 出同种黏液球
+    （大地用 `minecraft:slime_ball`，匠魂没有 earth slime ball）。
 - BambooMod（`bamboomod`，仅 1.20.1）：不新增材料。`sieve/dirt.json` / `sieve/grass_block.json`
   各加 8 条（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），`sieve/gravel.json` 加 3 条宝石
   （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过。

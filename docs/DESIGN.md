@@ -789,3 +789,22 @@ DE 侧用临时探针验证：模块在 DE 注册表、物品与配方加载、D
 （木、铁、钴、玛玉灵等）；无匠魂客户端也能正常启动（模型走 fallback，不报 unknown loader）。
 强化 overlay 已接入 16 个（`smite` 默认就在，创造栏锤头应有淡黄十字），但未逐个强化目视。
 JEI 工具页 / 左键手感未单独验。
+
+## 黏液草与匠魂树苗（2026-11-11，1.4.2，仅 1.20.1）
+
+**问题**：匠魂的黏液树需要黏液泥土当土；而我们原来的黏液草种子种的是
+`*_vanilla_slime_grass`，那是「长在原版泥土上的黏液草」，挖掉只掉原版泥土——空岛永远拿不到
+黏液泥土，也就永远没有匠魂树苗。
+
+**做法**：
+- 三种种子（碧空 / **新补的大地** / 末影）改种 `tconstruct:<type>_<type>_slime_grass`。它是
+  `SlimeGrassBlock`，没有 `canSurvive` 限制，能直接立在原版泥土上；而它的掉落表
+  （匠魂自己的 `tconstruct:blocks/<type>_<type>_slime_grass`）掉的是 `<type>_slime_dirt`。
+  我们不改别人的掉落表，只负责把种子种成这个变体。
+- 黏液泥土不再只能靠世界生成：**筛**。`sieve/{earth,sky,ender}_slime_dirt.json` 根级
+  `mod: tconstruct`，10% 出同种 `tconstruct:<type>_slime_sapling`、25% 出同种黏液球；
+  大地那档用原版 `minecraft:slime_ball`（匠魂没有 earth slime ball，earth 黏液就是原版绿黏液）。
+- 循环：堆肥 → 泥土 → 筛出种子 → 种黏液草 → 挖出黏液泥土 → 筛出树苗 → 种在黏液泥土上。
+  每层都有消耗，但每一层都可再生。
+
+**边界**：血 / 灵浆（blood / ichor）没有对应的「泥土」方块，本批不做；没有树苗条目。
