@@ -1,6 +1,6 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-10
+> 最后更新：2026-11-11
 > 先看这 20 行；批次叙事在 [history.md](history.md)，设计与取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
@@ -11,6 +11,8 @@
 3 把 DE 锤（21 把）；`ex_nihilo_hammer`（碎矿锤）是真正的匠魂 3 可改造工具，材料属性 / 特性 /
 强化槽全走匠魂，掉落走同一张锤表；叶绿素三种碎矿可直接熔成 `tinkers_thinking:molten_chlorophyte`。
 同时修掉机器 GUI 不压暗、非 `HammerItem` 的锤白嫖耐久两处问题。
+**未发版改动（2026-11-11）**：碎矿锤装配站配方改成 **1 锤头 + 1 坚韧手柄**（不再照抄大锤的
+2 大板）；耐久倍率没动，等下一次开服复测。
 上一批（1.3.2，2026-11-05）：**木桶修复**——满桶右键堆肥材料不再把方块放到桶顶；
 新增物品 `BarrelItemHandler`（槽 0 堆肥输入 / 槽 1 泥土·固体输出），补上物品 + 流体 capability。
 上一批（1.3.1，2026-11-05）：**深板岩石子 + 末影接口起步**——泥土 50% × 3-5 深板岩石子
@@ -34,9 +36,10 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 - **物品**：`exnihilosatellitium:ex_nihilo_hammer`（显示名 **碎矿锤**；id 保留，测试世界里已有
   旧 id 的锤子）。不是自有 `HammerItem`，
-  而是 TiC 的 `ModifiableItem` 子类 + `HammerTool`；装配站用 **锤头 + 坚韧手柄 + 2×大板**
-  （大锤同款部件）合成，钴 / 阿迪特 / 玛玉灵等匠魂材料都能做头。
-- **属性**：部件比例与匠魂大锤一致（头 0.5、板各 0.25、手柄），耐久 ×4.0；但**去掉大锤的
+  而是 TiC 的 `ModifiableItem` 子类 + `HammerTool`；装配站用 **1 锤头 + 1 坚韧手柄** 合成
+  （2026-11-11 所有者要求，不再和大锤同款），钴 / 阿迪特 / 玛玉灵等匠魂材料都能做头。
+- **属性**：头（0.5）+ 手柄两个部件，耐久 ×4.0；**去掉大板后耐久只剩头和手柄两份**
+  （大板原本各按 0.25 计入），同材料会低于四件配方，倍率没另调。**去掉大锤的
   0.4 挖掘惩罚**，单方块速度 = 头部材料速度（铁头 6.0），因为本工具没有基础 3×3；
   攻击 1.35 倍 + 基础 3.0；强化槽 1 能力 / 2 升级；自带 `tconstruct:smite` 1。
 - **效果**：实现 `HammerTool`，复用 1.20.1 的 `ToolEvents#onBreak` 锤表判定；命中锤表方块时
@@ -72,13 +75,14 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
   `check-data-paths.py --target 1.20.1`（200 recipes / 10 tags，generated 198 / 75 / 71）通过；
   `runServer -PtinkersMods` 日志 `Loaded 46 tool definitions` / `24 station slot layouts`，
   定义 `dataLoaded=true`、布局命中、合成配方 `exnihilosatellitium:tools/building/ex_nihilo_hammer` 存在；
-  RCON `summon item` 正常。临时 FakePlayer 探针（铁头 + 木柄 + 2 铁板）：耐久 1000 / 速度 6.0 /
-  攻击 6.75，特性 `magnetic` + `cultivated` + `smite`；破坏砂砾掉 **沙子** 且 `Damage=1`。
-  客户端已开（`-PdevMods -PtinkersMods`）：装配站造出 **木碎矿锤**（240 耐久 / 5.05 攻击），
-  tooltip 显示 `培植 IV` + `亡灵杀手 I` + 我们的一行说明；强化页可正常装「自动烧炼」；
-  创造栏里不同材料的锤头/手柄颜色明显不同（木、铁/钴/玛玉灵等）。强化 overlay 已接入
-  （`smite` 默认就有，创造栏的锤子应该都能看到那枚淡黄十字），但**还没逐个强化目视**；
-  **JEI 工具页 / 左键手感 / 叶绿素实际熔化**也未单独验。
+  RCON `summon item` 正常。临时 FakePlayer 探针（**旧四件配方**：铁头 + 木柄 + 2 铁板）：
+  耐久 1000 / 速度 6.0 / 攻击 6.75，特性 `magnetic` + `cultivated` + `smite`；
+  破坏砂砾掉 **沙子** 且 `Damage=1`。**改成两件配方后这两组数值未重跑**。
+  客户端已开（`-PdevMods -PtinkersMods`，同样是旧四件配方）：装配站造出 **木碎矿锤**
+  （240 耐久 / 5.05 攻击），tooltip 显示 `培植 IV` + `亡灵杀手 I` + 我们的一行说明；
+  强化页可正常装「自动烧炼」；创造栏里不同材料的锤头/手柄颜色明显不同（木、铁/钴/玛玉灵等）。
+  强化 overlay 已接入（`smite` 默认就有，创造栏的锤子应该都能看到那枚淡黄十字），
+  但**还没逐个强化目视**；**JEI 工具页 / 左键手感 / 叶绿素实际熔化**也未单独验。
 
 ## 1.4.0 其它内容（材质锤 + DE 锤，2026-11-08）
 
@@ -280,7 +284,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
       热改生效（坩埚容量、机器速度/耗电）。
 - [ ] **TiT / AE2**：草方块筛出叶绿素碎矿、碎下界岩筛出阿迪特碎矿；沙筛出赛特斯水晶/粉；
       两条 AE2 掉落在 JEI 筛子页可见。
-- [ ] **匠魂锤**：装配站放下锤头 / 坚韧手柄 / 2 大板 → 合成碎矿锤；材料属性 / 特性
+- [ ] **匠魂锤**：装配站放下锤头 / 坚韧手柄 → 合成碎矿锤；材料属性 / 特性
       与强化槽显示；左键砂砾掉沙子、耐久 −1；装 JEI 看 TiC 自己的工具页。
 
 ## 验证状态
@@ -290,11 +294,11 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 | 项 | 状态 | 证据 / 说明 |
 |---|---|---|
-| 匠魂锤（1.20.1） | ✅ / ⚠️ | 真装 TConstruct 3.12.1 + Mantle 1.11.117：46 tool definitions / 24 station layouts；定义 `dataLoaded=true`、布局命中、`tool_building` 配方存在；临时 FakePlayer 探针铁头+木柄+2 铁板：1000 耐久 / 6.0 速度 / 6.75 攻击、`magnetic`+`cultivated`+`smite`，砂砾→沙子且 `Damage=1`；build + 纹理 + data 守卫通过。客户端已看装配站 / 强化页 / tooltip / 材质染色（创造栏多材质锤颜色不同）；无匠魂客户端启动正常（模型走 fallback，无 unknown loader）；强化 overlay 已接入但未逐个目视；JEI 工具页 / 手感未单独验 |
+| 匠魂锤（1.20.1） | ✅ / ⚠️ | 真装 TConstruct 3.12.1 + Mantle 1.11.117：46 tool definitions / 24 station layouts；定义 `dataLoaded=true`、布局命中、`tool_building` 配方存在；**旧四件配方**探针铁头+木柄+2 铁板：1000 耐久 / 6.0 速度 / 6.75 攻击、`magnetic`+`cultivated`+`smite`，砂砾→沙子且 `Damage=1`；build + 纹理 + data 守卫通过。客户端已看装配站 / 强化页 / tooltip / 材质染色（创造栏多材质锤颜色不同）；无匠魂客户端启动正常（模型走 fallback，无 unknown loader）；强化 overlay 已接入但未逐个目视；JEI 工具页 / 手感未单独验。**2026-11-11 改成 1 锤头 + 1 手柄后**：`runServer -PtinkersMods` 启动 + `/reload` 仍是 `Loaded 46 tool definitions` / `24 station slot layouts`、无解析错误；**装配站两槽手感与耐久未复测** |
 | 机器 GUI 压暗（1.20.1） | ✅ | 1.4.0：`AbstractMachineScreen#renderBg` 先调 `renderBackground`；作者实机确认打开机器界面时世界变暗 |
 | 叶绿素碎矿熔炼（1.20.1） | ⚠️ | 3 条 `tconstruct:melting`（broken/crushed/powdered 各 45 mB，600°C，`time: 26`，`tinkers_thinking:molten_chlorophyte`）；build + data 守卫通过；**未在游戏里实际熔化过** |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
-| `./gradlew build` | ✅ | 2026-11-10：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.0） |
+| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.0） |
 | `check-textures.py` | ✅ | 313 模型 / 116 blockstate / 209 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装 + ER + BambooMod：`[materials] 25`、`[sieve] 7 inputs / 173 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
@@ -331,9 +335,10 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 
 ## 已拍板的决策
 
-- **匠魂可改造锤（2026-11-09，所有者指定）**：只做 1.20.1（匠魂 3 无官方 1.21.1）；
-  装配站用 **锤头 + 坚韧手柄 + 2×大板**；**单方块**粉碎，不加基础 AOE、不登记 `aoe` tag；
-  去大锤的 0.4 挖掘惩罚、耐久 ×4.0；**显示名「碎矿锤」**（英文 Crushing Hammer），
+- **匠魂可改造锤（2026-11-09，所有者指定；2026-11-11 改配方）**：只做 1.20.1（匠魂 3 无官方
+  1.21.1）；装配站用 **1 锤头 + 1 坚韧手柄**（所有者要求，别和大锤同款；原为锤头 + 手柄 + 2 大板）；
+  **单方块**粉碎，不加基础 AOE、不登记 `aoe` tag；去大锤的 0.4 挖掘惩罚、耐久 ×4.0
+  （只按两个部件算，所以同材料耐久比四件时低）；**显示名「碎矿锤」**（英文 Crushing Hammer），
   物品 id **保留 `ex_nihilo_hammer`**（测试世界旧锤仍可用）；材料染色 + 16 个常用强化 overlay，
   流体罐/染色/粘液覆层外观暂不做。
 - **项目名**：`Ex Nihilo: Satellitium` /「无中生有：众星捧月」；mod id `exnihilosatellitium`，
