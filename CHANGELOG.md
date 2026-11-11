@@ -1,5 +1,48 @@
 # 更新记录
 
+## 1.4.1 — 2026-11-11（匠魂碎矿锤配方）
+
+> 只改匠魂碎矿锤的装配站配方：没有新增物品，也不改任何数据表结构。1.21.1 线本版无代码改动。
+
+### 中文
+
+#### 变更
+
+- **匠魂碎矿锤（`ex_nihilo_hammer`）不再和匠魂大锤同款**：装配站从「锤头 + 坚韧手柄 + 2 大板」
+  改成 **1 锤头 + 1 坚韧手柄**。工具定义的部件列表、`default_materials` 与装配站输入槽
+  一起减到两件（少了两块 `large_plate`）。
+- 材料属性 / 特性 / 强化槽 / 掉落表不变；耐久倍率也没调，所以同材料锤子的耐久会低于四件配方
+  （大板原本各按 0.25 计入基础耐久）。
+
+#### 验证
+
+- `./gradlew build --offline`、`check-textures.py`、`check-data-paths.py --target 1.20.1` 通过。
+- 服务端 `runServer -PtinkersMods` 启动：`Loaded 46 tool definitions` /
+  `24 station slot layouts`，无解析错误（同一份数据在上一轮也过了一次 `/reload`）。
+- **未做**：装配站两槽的实机画面、造出来的耐久复测。
+
+### English
+
+#### Changed
+
+- **The Tinkers' Construct crushing hammer (`ex_nihilo_hammer`) is no longer a clone of the
+  sledge hammer**: the Tinker Station build went from *hammer head + tough handle + 2 large
+  plates* to **1 hammer head + 1 tough handle**. The tool definition's part list,
+  `default_materials` and the station layout's input slots all shrank to two parts (the two
+  `large_plate` entries are gone).
+- Material stats, traits, modifier slots and the drop table are unchanged; the durability
+  multiplier was left alone, so a hammer of the same materials now has less durability than the
+  four-part build (the plates used to contribute 0.25 of their durability each).
+
+#### Verification
+
+- `./gradlew build --offline`, `check-textures.py` and `check-data-paths.py --target 1.20.1`
+  pass.
+- Dedicated server with `-PtinkersMods`: `Loaded 46 tool definitions` /
+  `24 station slot layouts`, no parse errors (`/reload` was also run on the same data earlier).
+- **Not done**: the two-slot station screen and the resulting durability have not been checked
+  in game yet.
+
 ## 1.4.0 — 2026-11-10（材质锤 / 匠魂碎矿锤 / 修复）
 
 ### 中文
