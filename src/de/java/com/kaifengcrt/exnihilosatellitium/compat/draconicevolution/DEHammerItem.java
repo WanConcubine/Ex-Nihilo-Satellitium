@@ -3,8 +3,6 @@ package com.kaifengcrt.exnihilosatellitium.compat.draconicevolution;
 import com.brandon3055.brandonscore.api.TechLevel;
 import com.brandon3055.draconicevolution.api.capability.DECapabilities;
 import com.brandon3055.draconicevolution.api.capability.ModuleHost;
-import com.brandon3055.draconicevolution.api.modules.ModuleTypes;
-import com.brandon3055.draconicevolution.api.modules.data.AOEData;
 import com.brandon3055.draconicevolution.init.DEContent;
 import com.brandon3055.draconicevolution.init.EquipCfg;
 import com.brandon3055.draconicevolution.init.TechProperties;
@@ -22,9 +20,6 @@ import net.minecraft.world.item.ItemStack;
  * so DE's energy system is the cost.</p>
  */
 public final class DEHammerItem extends ModularPickaxe implements HammerTool {
-
-    /** Connected blocks per AOE module step (DE reports 1 / 2 / 3). */
-    private static final int CHAIN_BLOCKS_PER_AOE = 16;
 
     private final int tier;
 
@@ -57,10 +52,10 @@ public final class DEHammerItem extends ModularPickaxe implements HammerTool {
     }
 
     /**
-     * DE has no "chain" module; its AOE module is the mining-radius module, so
-     * it doubles as the chain switch. DE's own AOE logic skips blocks the tool
-     * is not the right tool for (gravel / sand on a pickaxe), which is exactly
-     * where our hammer table takes over.
+     * The dedicated {@code exnihilosatellitium:chain_mining} module is the chain
+     * switch. DE's own AOE (mining radius) module is deliberately not used: its
+     * AOE logic skips blocks a pickaxe is not the right tool for, which is
+     * exactly the gravel / sand our hammer table handles.
      */
     @Override
     public int chainLimit(final ItemStack stack) {
@@ -69,8 +64,8 @@ public final class DEHammerItem extends ModularPickaxe implements HammerTool {
         if (host == null) {
             return 0;
         }
-        final AOEData aoe = host.getModuleData(ModuleTypes.AOE, new AOEData(0));
-        return Math.max(0, aoe.aoe()) * CHAIN_BLOCKS_PER_AOE;
+        final ChainData data = host.getModuleData(ChainModule.TYPE, null);
+        return data == null ? 0 : Math.max(0, data.blocks());
     }
 
     @Override

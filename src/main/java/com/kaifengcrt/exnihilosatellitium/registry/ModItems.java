@@ -544,6 +544,44 @@ public final class ModItems {
         ITEMS.register(modBus);
         registerTinkersModifiers(modBus);
         registerTinkersClient(modBus);
+        registerDraconicModules(modBus);
+    }
+
+    /**
+     * Registers the Draconic Evolution chain module. The module lives in DE's
+     * own registry, which DE creates in {@code NewRegistryEvent}; the compat
+     * class attaches to that registry's {@code RegisterEvent}. Reflective so a
+     * build without DE never links the class.
+     */
+    private static void registerDraconicModules(final IEventBus modBus) {
+        if (DE_HAMMERS.isEmpty()) {
+            return;
+        }
+        try {
+            Class.forName(
+                            "com.kaifengcrt.exnihilosatellitium.compat.draconicevolution.DEHammers")
+                    .getMethod("registerModules", IEventBus.class, DeferredRegister.class)
+                    .invoke(null, modBus, ITEMS);
+        } catch (final ReflectiveOperationException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[de] failed to register the chain module", exception);
+        }
+    }
+
+    /** Creative-tab entry for the DE chain module, when DE is loaded. */
+    public static void acceptDraconicCreative(final CreativeModeTab.Output output) {
+        if (DE_HAMMERS.isEmpty()) {
+            return;
+        }
+        try {
+            Class.forName(
+                            "com.kaifengcrt.exnihilosatellitium.compat.draconicevolution.DEHammers")
+                    .getMethod("addCreativeItems", CreativeModeTab.Output.class)
+                    .invoke(null, output);
+        } catch (final ReflectiveOperationException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[de] failed to build the chain module creative entry", exception);
+        }
     }
 
     /**

@@ -16,12 +16,13 @@
   自己的挖掘速度**（铁头 6.0），不再掉到 1.0；同时去掉头部部件 0.5 的缩放，耐久也回到
   1.4.0 四件配方的水平（铁头约 1000）。
 - **连锁挖掘**：
-  - **匠魂锤**：新增强化 `exnihilosatellitium:chain`（连锁 I–III），在装配站用 4 燧石 + 1 铁锭
-    应用（占 1 个升级槽）；每级让一次粉碎多打 **16 块**相连的同类方块。
-  - **龙之进化锤**：装上 DE 的 **AOE（范围）模块**后同样连锁。DE 自己的 AOE 只处理“工具正确”
-    的方块，砂砾 / 沙子会被跳过，正好由我们的锤表接管。
-  - 规则：只连锁**同一种方块**、六面相连，每块照常扣 1 点耐久 / 一次能量；单片上限
-    16 × 等级（匠魂）或 16 × AOE 级（DE），另有 1024 格的搜索上限。
+  - **匠魂锤**：新增强化 `exnihilosatellitium:chain`（连锁 I–III），在装配站用 **4 燧石 +
+    1 铁块**应用（占 1 个升级槽）；每级让一次粉碎多打 **16 块**相连的同类方块。
+    锤身加了**外形变化**：装了连锁后锤头上会出现两节锁链的 overlay。
+  - **龙之进化锤**：新增**专属连锁模块** `exnihilosatellitium:chain_mining_module`
+    （DE 的 `draconicevolution:modules` 注册表、`MINING_TOOL` 分类），装到我们的 DE 锤上
+    后一次粉碎连锁 **32 块**。合成：4 燧石 + 4 铁锭 + 1 个 DE `module_core`。
+  - 规则：只连锁**同一种方块**、六面相连，每块照常扣 1 点耐久 / 一次能量；搜索上限 1024 格。
 
 #### 验证
 
@@ -30,8 +31,10 @@
   无解析错误；`exnihilosatellitium:chain` 静态强化注册成功、`tconstruct:modifier` 配方加载成功。
 - 服务端 FakePlayer 探针（临时命令，已删除）：铁头 + 木柄碎矿锤，挖掘速度 **6.0**、
   最大耐久 **1000**；连锁 0 级 1 块 / 1 点耐久，I 级 17 块 / 17 点，II 级 33 块 / 33 点；
-  中间夹一块沙子时在沙子前停下。DE 侧只做了编译与 AOE 数据读取，没有实机装模块测试。
-- **未做**：装配站应用强化的画面、DE 锤实机连锁、JEI 强化配方页。
+  中间夹一块沙子时在沙子前停下。
+- DE 探针（临时命令，已删除）：模块进入 DE 注册表、物品与配方都加载、DE 锤的模块宿主接受
+  该模块；装上后 `chainLimit` 从 0 变成 **32**。
+- **未做**：装配站里应用强化的画面、连锁 overlay 的实机外观、JEI 强化配方页。
 
 ### English
 
@@ -48,14 +51,15 @@
   an iron head).
 - **Chain mining**:
   - **Tinkers' hammer**: a new `exnihilosatellitium:chain` modifier (Chain I–III), applied at the
-    Tinker Station from 4 flint + 1 iron ingot (one upgrade slot); each level adds **16 blocks**
-    of chain to one crush.
-  - **Draconic Evolution hammer**: DE's **AOE module** doubles as the chain switch. DE's own AOE
-    skips blocks the pickaxe is not the right tool for (gravel / sand), which is exactly where our
-    hammer table takes over.
+    Tinker Station from **4 flint + 1 iron block** (one upgrade slot); each level adds
+    **16 blocks** of chain to one crush. The tool model also changes: with the modifier installed
+    the hammer head shows a two-link chain overlay.
+  - **Draconic Evolution hammer**: a dedicated chain module,
+    `exnihilosatellitium:chain_mining_module` (registered in DE's `draconicevolution:modules`
+    registry, `MINING_TOOL` category). With it installed on our DE hammer one crush chains
+    **32 blocks**. Crafted from 4 flint + 4 iron ingots + 1 DE `module_core`.
   - Rules: only the **same block** connected by its six faces; every block still costs one
-    durability point / one energy charge; a crush takes at most 16 × level (Tinkers) or
-    16 × AOE tier (DE), with a 1024-position search cap.
+    durability point / one energy charge; the search is capped at 1024 positions.
 
 #### Verification
 
@@ -67,10 +71,12 @@
 - Server-side FakePlayer probe (temporary command, since removed): iron head + wood handle
   hammer, mining speed **6.0**, max durability **1000**; level 0 takes 1 block / 1 durability,
   level I takes 17 blocks / 17 durability, level II takes 33 blocks / 33 durability, and a sand
-  block in the middle stops the chain. The DE side was only compiled and its AOE data read, not
-  tested with a module installed.
-- **Not done**: the in-game station screen for applying the modifier, chain mining with the DE
-  hammer in game, and the JEI page for the modifier recipe.
+  block in the middle stops the chain.
+- DE probe (temporary command, since removed): the module is present in DE's registry, the item
+  and recipe load, and the DE hammer's module host accepts it; once installed `chainLimit` goes
+  from 0 to **32**.
+- **Not done**: the in-game station screen for applying the modifier, the chain overlay in game,
+  and the JEI page for the modifier recipe.
 
 ## 1.4.0 — 2026-11-10（材质锤 / 匠魂碎矿锤 / 修复）
 

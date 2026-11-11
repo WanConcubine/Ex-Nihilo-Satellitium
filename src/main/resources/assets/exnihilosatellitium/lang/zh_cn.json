@@ -399,5 +399,9 @@
   "modifier.exnihilosatellitium.chain.flavor": "一锤带走一整条矿脉。",
   "modifier.exnihilosatellitium.chain.description": "粉碎砂砾 / 沙子 / 尘土等方块时，连带打碎相连的同类方块；每级多 16 块。",
   "modifier.exnihilosatellitium.chain.2": "连锁 II",
-  "modifier.exnihilosatellitium.chain.3": "连锁 III"
+  "modifier.exnihilosatellitium.chain.3": "连锁 III",
+  "item.exnihilosatellitium.chain_mining_module": "连锁模块",
+  "module_type.exnihilosatellitium.chain_mining": "连锁挖掘",
+  "module.exnihilosatellitium.chain_mining.blocks": "连锁上限：%s 块",
+  "module.exnihilosatellitium.chain_mining.blocks.info": "一次粉碎会连带打碎相连的同类方块"
 }

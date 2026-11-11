@@ -201,5 +201,8 @@ python3 scripts/check-textures.py
   避免裸物品模型刷 “Missing textures”。
 - 部件贴图是**灰度**的，不要直接放彩色图；否则匠魂的 `grey_to_color` 调色板无法正确映射。
 - 强化 overlay 是**彩色**小图案（不是灰度），按锤头位置画在 16×16 透明画布上；生成器
-  `art/items/tools/crushing_hammer_overlays.py`，目前 16 个常用强化（急速/发光/火焰/强化/
-  钻石/绿宝石/下界合金/亡灵杀手/自动烧炼/幸运/丝触/经验/不毁/斩首/磁力/坏死）。
+  `art/items/tools/crushing_hammer_overlays.py`，目前 17 个（急速/发光/火焰/强化/钻石/绿宝石/
+  下界合金/亡灵杀手/自动烧炼/幸运/丝触/经验/不毁/斩首/磁力/坏死，加上 1.4.1 的**连锁**
+  `chain`：锤头上一段钢色 + 金色的两节锁链）。装了 `exnihilosatellitium:chain` 才会画出来。
+- DE 连锁模块物品 `chain_mining_module` 是自绘 16×16：深色模块底 + 深色边框 + 三节由白到金
+  的锁链，`models/item/chain_mining_module.json` 走 vanilla `item/generated`；不引用 DE 的贴图。

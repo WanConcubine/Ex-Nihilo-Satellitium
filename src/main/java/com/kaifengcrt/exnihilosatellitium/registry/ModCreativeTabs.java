@@ -41,6 +41,7 @@ public final class ModCreativeTabs {
                     }
                 });
                 ModItems.acceptTinkersCreative(output);
+                ModItems.acceptDraconicCreative(output);
                 ModItems.CROOKS.forEach(crook -> output.accept(crook.get()));
                 output.accept(ModItems.INFESTED_LEAVES.get());
                 output.accept(com.kaifengcrt.exnihilosatellitium.common.item.InfestedLeavesBlockItem

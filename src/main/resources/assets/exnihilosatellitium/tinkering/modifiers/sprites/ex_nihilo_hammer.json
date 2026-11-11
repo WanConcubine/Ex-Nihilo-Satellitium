@@ -50,6 +50,9 @@
     },
     "tconstruct:necrotic": {
       "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/necrotic"
+    },
+    "exnihilosatellitium:chain": {
+      "texture": "exnihilosatellitium:item/ex_nihilo_hammer/modifiers/chain"
     }
   }
 }

@@ -748,10 +748,13 @@ AOE / 能量未目视。
   行为由 `chainLimit` 读 `ToolStack#getModifiers().getLevel` 决定，每级 16 块；注册走
   `ModifierDeferredRegister`（TiC 的正式第三方入口），配方是 `tconstruct:modifier`
   （4 燧石 + 1 铁锭，占 1 个升级槽），核心反射 `TinkersTools#registerModifiers`。
-- **DE 锤**：DE 没有“连锁”模块，它的 **AOE（范围）模块**本身就是挖矿半径模块，直接当开关；
-  `DEHammerItem#chainLimit` 通过 `DECapabilities.MODULE_HOST_CAPABILITY` 读 `AOEData`，
-  16 × AOE 级。DE 自己的 AOE 会用 `isCorrectToolForDrops` 过滤，砂砾 / 沙子本来就被跳过，
-  两边不会重复处理同一块。
+- **DE 锤**：注册了一个**专属模块** `exnihilosatellitium:chain_mining_module`——DE 自己的
+  AOE（范围）模块只处理“镐子正确”的方块，砂砾 / 沙子会被 `isCorrectToolForDrops` 过滤掉，
+  所以才单做一个。模块进 DE 的 `draconicevolution:modules` 注册表（DE 用
+  `NewRegistryEvent` 建表，我们挂它自己的 `RegisterEvent`），分类 `MINING_TOOL`——DE 给所有
+  `IModularMiningTool` 宿主自动加这个分类，所以我们的 DE 锤能装。`ChainData` 记录连锁块数
+  （固定 32），`DEHammerItem#chainLimit` 通过 `DECapabilities.MODULE_HOST_CAPABILITY` 读它。
+  合成 4 燧石 + 4 铁锭 + 1 个 `module_core`，不跟 DE 后期模块比价。
 - **上限**：`MAX_VISITED = 1024`，防止坏数据包把一次点击变成全图扫描。
 
 **构建**：TConstruct 没有官方 1.21.1，所以只有 1.20.1 分支。`src/tinkers/java` 是可选 source set，
@@ -780,7 +783,8 @@ AOE / 能量未目视。
 配方加载无错、`exnihilosatellitium:chain` 静态强化注册成功；临时 FakePlayer 探针
 （铁头 + 木柄，两件配方）得到 **6.0 速度 / 1000 耐久**；连锁 0 级 1 块 / 1 耐久、
 I 级 17 块 / 17 耐久、II 级 33 块 / 33 耐久，中间夹一块沙子会停在沙子前。
-DE 侧只做了编译和 AOE 数据读取，未实机装模块。客户端已开：装配站造出木锤（240 耐久 / 5.05 攻击），tooltip 的 `培植 IV` + `亡灵杀手 I` +
+DE 侧用临时探针验证：模块在 DE 注册表、物品与配方加载、DE 锤宿主接受该模块，装上后
+`chainLimit` 0 → 32；实机装模块的画面未看。客户端已开：装配站造出木锤（240 耐久 / 5.05 攻击），tooltip 的 `培植 IV` + `亡灵杀手 I` +
 我们的说明行都正常，强化页可装自动烧炼；创造栏里不同材料的锤头/手柄颜色明显不同
 （木、铁、钴、玛玉灵等）；无匠魂客户端也能正常启动（模型走 fallback，不报 unknown loader）。
 强化 overlay 已接入 16 个（`smite` 默认就在，创造栏锤头应有淡黄十字），但未逐个强化目视。
