@@ -6,6 +6,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
+import slimeknights.tconstruct.library.modifiers.util.ModifierDeferredRegister;
+import slimeknights.tconstruct.library.modifiers.util.StaticModifier;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
@@ -35,6 +37,19 @@ public final class TinkersTools {
     public static final ResourceLocation ID =
             new ResourceLocation(ExNihiloSatellitium.MOD_ID, "ex_nihilo_hammer");
 
+    /**
+     * Blocks per chain-modifier level. Level 1 already takes 16 blocks, so a
+     * single upgrade is useful on the small gravel veins of a skyblock.
+     */
+    public static final int CHAIN_BLOCKS_PER_LEVEL = 16;
+
+    private static final ModifierDeferredRegister MODIFIERS =
+            ModifierDeferredRegister.create(ExNihiloSatellitium.MOD_ID);
+
+    /** The {@code exnihilosatellitium:chain} upgrade; see {@link ChainModifier}. */
+    public static final StaticModifier<ChainModifier> CHAIN =
+            MODIFIERS.register("chain", ChainModifier::new);
+
     private static final ToolDefinition DEFINITION = ToolDefinition.create(ID);
 
     private static RegistryObject<Item> hammer;
@@ -47,6 +62,15 @@ public final class TinkersTools {
         hammer = items.register(ID.getPath(), () -> new ExNihiloHammerItem(
                 new Item.Properties().stacksTo(1), DEFINITION));
         return List.of(hammer);
+    }
+
+    /**
+     * Registers our modifiers on TiC's mod-event bus. Must run while the mod
+     * event bus is still collecting listeners (the mod constructor); TiC fires
+     * {@code ModifierRegistrationEvent} during common setup.
+     */
+    public static void registerModifiers(final net.minecraftforge.eventbus.api.IEventBus modBus) {
+        MODIFIERS.register(modBus);
     }
 
     /** Client-only colour registration; only called when Tinkers is present. */

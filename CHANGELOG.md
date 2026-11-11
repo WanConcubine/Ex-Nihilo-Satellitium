@@ -1,47 +1,76 @@
 # 更新记录
 
-## 1.4.1 — 2026-11-11（匠魂碎矿锤配方）
+## 1.4.1 — 2026-11-11（匠魂碎矿锤：配方 / 速度 / 连锁）
 
-> 只改匠魂碎矿锤的装配站配方：没有新增物品，也不改任何数据表结构。1.21.1 线本版无代码改动。
+> 只动匠魂碎矿锤与两把联动锤：没有新增物品，也不改任何玩法数据表结构。1.21.1 线本版无代码改动。
 
 ### 中文
 
 #### 变更
 
-- **匠魂碎矿锤（`ex_nihilo_hammer`）不再和匠魂大锤同款**：装配站从「锤头 + 坚韧手柄 + 2 大板」
-  改成 **1 锤头 + 1 坚韧手柄**。工具定义的部件列表、`default_materials` 与装配站输入槽
-  一起减到两件（少了两块 `large_plate`）。
-- 材料属性 / 特性 / 强化槽 / 掉落表不变；耐久倍率也没调，所以同材料锤子的耐久会低于四件配方
-  （大板原本各按 0.25 计入基础耐久）。
+- **装配站配方**：`ex_nihilo_hammer` 从「锤头 + 坚韧手柄 + 2 大板」改成
+  **1 锤头 + 1 坚韧手柄**（不再和匠魂大锤同款）；工具定义部件、`default_materials` 与装配站
+  输入槽一起减到两件。
+- **挖掘速度**：锤砂砾 / 沙子 / 尘土这类 `mineable/shovel` 方块时，之前会回退到空手速度
+  （工具在这些方块上不算“有效”）。现在 `HammerTool#breakSpeed` 对锤表方块返回**头部材料
+  自己的挖掘速度**（铁头 6.0），不再掉到 1.0；同时去掉头部部件 0.5 的缩放，耐久也回到
+  1.4.0 四件配方的水平（铁头约 1000）。
+- **连锁挖掘**：
+  - **匠魂锤**：新增强化 `exnihilosatellitium:chain`（连锁 I–III），在装配站用 4 燧石 + 1 铁锭
+    应用（占 1 个升级槽）；每级让一次粉碎多打 **16 块**相连的同类方块。
+  - **龙之进化锤**：装上 DE 的 **AOE（范围）模块**后同样连锁。DE 自己的 AOE 只处理“工具正确”
+    的方块，砂砾 / 沙子会被跳过，正好由我们的锤表接管。
+  - 规则：只连锁**同一种方块**、六面相连，每块照常扣 1 点耐久 / 一次能量；单片上限
+    16 × 等级（匠魂）或 16 × AOE 级（DE），另有 1024 格的搜索上限。
 
 #### 验证
 
 - `./gradlew build --offline`、`check-textures.py`、`check-data-paths.py --target 1.20.1` 通过。
-- 服务端 `runServer -PtinkersMods` 启动：`Loaded 46 tool definitions` /
-  `24 station slot layouts`，无解析错误（同一份数据在上一轮也过了一次 `/reload`）。
-- **未做**：装配站两槽的实机画面、造出来的耐久复测。
+- 服务端 `runServer -PtinkersMods`：`Loaded 46 tool definitions` / `24 station slot layouts`、
+  无解析错误；`exnihilosatellitium:chain` 静态强化注册成功、`tconstruct:modifier` 配方加载成功。
+- 服务端 FakePlayer 探针（临时命令，已删除）：铁头 + 木柄碎矿锤，挖掘速度 **6.0**、
+  最大耐久 **1000**；连锁 0 级 1 块 / 1 点耐久，I 级 17 块 / 17 点，II 级 33 块 / 33 点；
+  中间夹一块沙子时在沙子前停下。DE 侧只做了编译与 AOE 数据读取，没有实机装模块测试。
+- **未做**：装配站应用强化的画面、DE 锤实机连锁、JEI 强化配方页。
 
 ### English
 
 #### Changed
 
-- **The Tinkers' Construct crushing hammer (`ex_nihilo_hammer`) is no longer a clone of the
-  sledge hammer**: the Tinker Station build went from *hammer head + tough handle + 2 large
-  plates* to **1 hammer head + 1 tough handle**. The tool definition's part list,
-  `default_materials` and the station layout's input slots all shrank to two parts (the two
-  `large_plate` entries are gone).
-- Material stats, traits, modifier slots and the drop table are unchanged; the durability
-  multiplier was left alone, so a hammer of the same materials now has less durability than the
-  four-part build (the plates used to contribute 0.25 of their durability each).
+- **Tinker Station recipe**: `ex_nihilo_hammer` went from *hammer head + tough handle + 2 large
+  plates* to **1 hammer head + 1 tough handle** (no longer a clone of the sledge hammer); the
+  tool definition's part list, `default_materials` and the station layout's input slots all
+  shrank to two parts.
+- **Mining speed**: crushing gravel / sand / dust used to fall back to bare-hand speed because
+  the tool is not "effective" on `mineable/shovel` blocks. `HammerTool#breakSpeed` now returns the
+  **head material's own mining speed** (6.0 for iron) for hammer-table blocks, and the head part
+  no longer carries the 0.5 scale, so durability is back at the 1.4.0 four-part level (~1000 for
+  an iron head).
+- **Chain mining**:
+  - **Tinkers' hammer**: a new `exnihilosatellitium:chain` modifier (Chain I–III), applied at the
+    Tinker Station from 4 flint + 1 iron ingot (one upgrade slot); each level adds **16 blocks**
+    of chain to one crush.
+  - **Draconic Evolution hammer**: DE's **AOE module** doubles as the chain switch. DE's own AOE
+    skips blocks the pickaxe is not the right tool for (gravel / sand), which is exactly where our
+    hammer table takes over.
+  - Rules: only the **same block** connected by its six faces; every block still costs one
+    durability point / one energy charge; a crush takes at most 16 × level (Tinkers) or
+    16 × AOE tier (DE), with a 1024-position search cap.
 
 #### Verification
 
 - `./gradlew build --offline`, `check-textures.py` and `check-data-paths.py --target 1.20.1`
   pass.
 - Dedicated server with `-PtinkersMods`: `Loaded 46 tool definitions` /
-  `24 station slot layouts`, no parse errors (`/reload` was also run on the same data earlier).
-- **Not done**: the two-slot station screen and the resulting durability have not been checked
-  in game yet.
+  `24 station slot layouts`, no parse errors; the `exnihilosatellitium:chain` static modifier
+  registered and the `tconstruct:modifier` recipe loaded.
+- Server-side FakePlayer probe (temporary command, since removed): iron head + wood handle
+  hammer, mining speed **6.0**, max durability **1000**; level 0 takes 1 block / 1 durability,
+  level I takes 17 blocks / 17 durability, level II takes 33 blocks / 33 durability, and a sand
+  block in the middle stops the chain. The DE side was only compiled and its AOE data read, not
+  tested with a module installed.
+- **Not done**: the in-game station screen for applying the modifier, chain mining with the DE
+  hammer in game, and the JEI page for the modifier recipe.
 
 ## 1.4.0 — 2026-11-10（材质锤 / 匠魂碎矿锤 / 修复）
 

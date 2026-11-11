@@ -542,7 +542,28 @@ public final class ModItems {
 
     public static void register(final IEventBus modBus) {
         ITEMS.register(modBus);
+        registerTinkersModifiers(modBus);
         registerTinkersClient(modBus);
+    }
+
+    /**
+     * Registers the TiC {@code chain} modifier. TiC fires its
+     * {@code ModifierRegistrationEvent} in common setup, so the listener has to
+     * be on the mod bus from the constructor. Reflective for the same reason as
+     * the client colours: a build without TConstruct must never link the class.
+     */
+    private static void registerTinkersModifiers(final IEventBus modBus) {
+        if (TINKERS_HAMMERS.isEmpty()) {
+            return;
+        }
+        try {
+            Class.forName("com.kaifengcrt.exnihilosatellitium.compat.tconstruct.TinkersTools")
+                    .getMethod("registerModifiers", IEventBus.class)
+                    .invoke(null, modBus);
+        } catch (final ReflectiveOperationException exception) {
+            ExNihiloSatellitium.LOGGER.error(
+                    "[tinkers] failed to register the chain modifier", exception);
+        }
     }
 
     /**

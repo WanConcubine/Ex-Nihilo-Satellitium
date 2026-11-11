@@ -394,5 +394,10 @@
   "tooltip.exnihilosatellitium.fortune_upgrade": "额外 %s 次独立判定",
   "tooltip.exnihilosatellitium.fortune_upgrade.stack": "每叠加一个生效几率减少20%，且增加25%能量消耗",
   "tooltip.exnihilosatellitium.speed_upgrade": "筛/锤速度 ×%s",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "每叠加一个效果衰减20%，且增加25%能量消耗"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "每叠加一个效果衰减20%，且增加25%能量消耗",
+  "modifier.exnihilosatellitium.chain": "连锁",
+  "modifier.exnihilosatellitium.chain.flavor": "一锤带走一整条矿脉。",
+  "modifier.exnihilosatellitium.chain.description": "粉碎砂砾 / 沙子 / 尘土等方块时，连带打碎相连的同类方块；每级多 16 块。",
+  "modifier.exnihilosatellitium.chain.2": "连锁 II",
+  "modifier.exnihilosatellitium.chain.3": "连锁 III"
 }

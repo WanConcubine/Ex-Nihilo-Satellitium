@@ -13,6 +13,7 @@ import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
 import slimeknights.tconstruct.library.tools.item.ModifiableItem;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -50,10 +51,24 @@ public final class ExNihiloHammerItem extends ModifiableItem implements HammerTo
         return 5;
     }
 
-    /** Use TiC's material mining speed instead of the plain 6.0 hammer floor. */
+    /**
+     * Use TiC's material mining speed instead of the plain 6.0 hammer floor.
+     *
+     * <p>Returning a real value matters for hammer-table blocks that are tagged
+     * {@code mineable/shovel} (gravel, sand, dust): the tool is not "effective"
+     * on those, so vanilla would fall back to bare-hand speed. The event hook
+     * raises the break speed to the head material's stat instead.</p>
+     */
     @Override
     public float breakSpeed(final ItemStack stack) {
-        return 0.0F;
+        return Math.max(1.0F, ToolStack.from(stack).getStats().get(ToolStats.MINING_SPEED));
+    }
+
+    /** One {@code exnihilosatellitium:chain} level takes 16 more connected blocks. */
+    @Override
+    public int chainLimit(final ItemStack stack) {
+        return ToolStack.from(stack).getModifiers().getLevel(TinkersTools.CHAIN.getId())
+                * TinkersTools.CHAIN_BLOCKS_PER_LEVEL;
     }
 
     @Override

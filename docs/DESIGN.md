@@ -726,17 +726,33 @@ AOE / 能量未目视。
   让强化 / 粘液覆层 / 耐久倍率 / 破损广播都生效。普通锤走默认的 `hurtAndBreak`。
 
 **工具定义**（`data/exnihilosatellitium/tinkering/tool_definitions/ex_nihilo_hammer.json`）：
-- 部件：`hammer_head`（0.5）+ `tough_handle`，**只有两件**——2026-11-11 所有者指出装配站配方
-  和匠魂大锤一模一样，要求改成 1 坚韧手柄 + 1 锤头，于是去掉两块 `large_plate`；
+- 部件：`hammer_head` + `tough_handle`，**只有两件**——2026-11-11 所有者指出装配站配方和
+  匠魂大锤一模一样，要求改成 1 坚韧手柄 + 1 锤头，于是去掉两块 `large_plate`；
   `default_materials` 与装配站布局的输入槽同步减到 2 个。
-- 部件比例、`base_stats`、`multiply_stats` 没动：耐久仍 ×4.0，但基础耐久只剩头和手柄，
-  同材料会低于此前四件配方（少了两块大板各 0.25 那份），这是简化配方的直接结果，
-  要补偿就调 `multiply_stats`。
-- 去掉了大锤的 `mining_speed ×0.4`：本工具没有基础 3×3，单方块速度按头部材料算（铁头 6.0），
-  否则会比自有铁锤还慢。
-- 1 能力 + 2 升级槽，自带 `tconstruct:smite` 1；`pickaxe_dig` + `mineable/pickaxe` 有效；
-  不加 `box_aoe`；锤表方块的破坏由我们接管，AOE 强化只对非锤表方块生效，所以不登记
-  `modifiable/aoe`，保持单方块。
+- 头部不再带 `scale`（原为 0.5）：TiC 的 `MaterialStatsModule` 会把 `scale` 乘进耐久 / 攻击 /
+  挖掘速度，0.5 会让铁头只剩 3.0 速度和 500 耐久；去掉后铁头 6.0 速度、1000 耐久，
+  与 1.4.0 四件配方持平。`base_stats` / `multiply_stats` 没动（耐久 ×4.0、攻击 1.35 倍）。
+- 去掉了大锤的 `mining_speed ×0.4`：本工具没有基础 3×3，单方块速度按头部材料算。
+- 1 能力 + 2 升级槽，自带 `tconstruct:smite` 1；`pickaxe_dig` + `shovel_dig`；有效谓词仍是
+  `mineable/pickaxe`；不加 `box_aoe`、不登记 `modifiable/aoe`（锤表方块的破坏由我们接管）。
+
+**挖掘速度（2026-11-11）**：砂砾 / 沙子 / 尘土是 `mineable/shovel` 方块，而工具的有效谓词是
+`mineable/pickaxe`，TiC 的 `getDestroySpeed` 在这些方块上回退到 1.0，手感就是空手。
+`HammerTool#breakSpeed` 现在对锤表方块返回头部材料的 `MINING_SPEED`，`ToolEvents#onBreakSpeed`
+取和当前速度的较大值；普通锤与 DE 锤仍是 6.0 的固定下限。
+
+**连锁挖掘（2026-11-11）**：`HammerTool#chainLimit(stack)` 决定一次粉碎最多额外带几块；
+`ChainMining.collect` 从被锤方块做六面 BFS，只收同一种、且仍有锤表规则的方块；`ToolEvents`
+逐块 `crush`（掉落 / 破坏音效 / 1 点耐久或一次能量），工具损坏或没能量就停。
+- **匠魂锤**：新强化 `exnihilosatellitium:chain`（I–III）。`ChainModifier` 只让强化存在，
+  行为由 `chainLimit` 读 `ToolStack#getModifiers().getLevel` 决定，每级 16 块；注册走
+  `ModifierDeferredRegister`（TiC 的正式第三方入口），配方是 `tconstruct:modifier`
+  （4 燧石 + 1 铁锭，占 1 个升级槽），核心反射 `TinkersTools#registerModifiers`。
+- **DE 锤**：DE 没有“连锁”模块，它的 **AOE（范围）模块**本身就是挖矿半径模块，直接当开关；
+  `DEHammerItem#chainLimit` 通过 `DECapabilities.MODULE_HOST_CAPABILITY` 读 `AOEData`，
+  16 × AOE 级。DE 自己的 AOE 会用 `isCorrectToolForDrops` 过滤，砂砾 / 沙子本来就被跳过，
+  两边不会重复处理同一块。
+- **上限**：`MAX_VISITED = 1024`，防止坏数据包把一次点击变成全图扫描。
 
 **构建**：TConstruct 没有官方 1.21.1，所以只有 1.20.1 分支。`src/tinkers/java` 是可选 source set，
 和 DE 锤同一模式：`libs/` 里有 TConstruct + Mantle 才编译并打进 jar；核心
@@ -760,10 +776,11 @@ AOE / 能量未目视。
 `damageTool()`，否则匠魂锤会在机器里白嫖。机器只扣原始耐久，不触发 TiC 的
 `damageAnimated`（无玩家上下文），这是有意的取舍。
 
-**验证**：`-PtinkersMods` 启动 → 46 tool definitions / 24 station layouts；定义
-`dataLoaded=true`、布局命中、`tool_building` 配方存在；临时 FakePlayer 探针
-（铁头 + 木柄 + 2 铁板）得到 1000 耐久 / 6.0 速度 / 6.75 攻击、`magnetic` + `cultivated` +
-`smite`，破坏砂砾掉沙子且 `Damage=1`。客户端已开：装配站造出木锤（240 耐久 / 5.05 攻击），tooltip 的 `培植 IV` + `亡灵杀手 I` +
+**验证**：`-PtinkersMods` 启动 → 46 tool definitions / 24 station layouts、`tconstruct:modifier`
+配方加载无错、`exnihilosatellitium:chain` 静态强化注册成功；临时 FakePlayer 探针
+（铁头 + 木柄，两件配方）得到 **6.0 速度 / 1000 耐久**；连锁 0 级 1 块 / 1 耐久、
+I 级 17 块 / 17 耐久、II 级 33 块 / 33 耐久，中间夹一块沙子会停在沙子前。
+DE 侧只做了编译和 AOE 数据读取，未实机装模块。客户端已开：装配站造出木锤（240 耐久 / 5.05 攻击），tooltip 的 `培植 IV` + `亡灵杀手 I` +
 我们的说明行都正常，强化页可装自动烧炼；创造栏里不同材料的锤头/手柄颜色明显不同
 （木、铁、钴、玛玉灵等）；无匠魂客户端也能正常启动（模型走 fallback，不报 unknown loader）。
 强化 overlay 已接入 16 个（`smite` 默认就在，创造栏锤头应有淡黄十字），但未逐个强化目视。

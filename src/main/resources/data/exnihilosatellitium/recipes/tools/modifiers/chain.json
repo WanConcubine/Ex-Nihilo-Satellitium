@@ -1,0 +1,39 @@
+{
+  "type": "tconstruct:modifier",
+  "allow_crystal": true,
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "inputs": [
+    {
+      "item": "minecraft:flint"
+    },
+    {
+      "item": "minecraft:flint"
+    },
+    {
+      "item": "minecraft:flint"
+    },
+    {
+      "item": "minecraft:flint"
+    },
+    {
+      "tag": "forge:ingots/iron"
+    }
+  ],
+  "level": {
+    "max": 3
+  },
+  "result": "exnihilosatellitium:chain",
+  "slots": {
+    "upgrades": 1
+  },
+  "tools": [
+    {
+      "item": "exnihilosatellitium:ex_nihilo_hammer"
+    }
+  ]
+}
