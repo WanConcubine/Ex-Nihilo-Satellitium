@@ -11,7 +11,7 @@
 | 线 | 加载器 | jar | 大小 | sha256 |
 |---|---|---|---|---:|
 | `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.4.2.jar` | 948 KB | `a8f2b9236f1fff04b6c263c4265cec9305a92ca64882da4f99a0038441a49047` |
-| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.4.2.jar` | 997 KB | `c688d9d8dae56295fbc578bce9d84b6ecc4558569eb6afeaafc0be6d9e6898d5` |
+| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.4.2.jar` | 1000 KB | `2b1c5812a878de24c0e8ea4dd17fd6b2ff38bdc069312dcf18e9354fde559368` |
 
 两份 jar 都包含 `LICENSE`、`THIRD-PARTY.md`、`icon.png` 和 `META-INF/*mods.toml`；
 `mods.toml` 里的 `version="1.4.2"` 已核对。产物构建于 2026-11-11（主线 Java 21、
@@ -23,9 +23,10 @@
 ### 1.20.1 线（`1.20.1-forge` 分支）
 
 - **大地黏液草种子** `earth_slime_grass_seeds`：泥土 / 草方块各 2% 筛出；右键泥土 / 草方块 →
-  `tconstruct:earth_earth_slime_grass`。
-- **种子改种黏液草变体**：三种种子现在种 `tconstruct:<type>_<type>_slime_grass`，挖掉掉
-  `<type>_slime_dirt`（原来的 `*_vanilla_slime_grass` 只掉原版泥土）——空岛第一条黏液泥土来源。
+  `tconstruct:earth_vanilla_slime_grass`。
+- **黏液草额外掉黏液泥土**：种子仍然种 `*_vanilla_slime_grass`（原途径不变）；
+  `LootTableLoadEvent` 给它的掉落表**追加**一份 `<type>_slime_dirt`，原有 `minecraft:dirt`
+  保留，匠魂文件不改——空岛第一条黏液泥土来源。
 - **黏液泥土筛表** `sieve/{earth,sky,ender}_slime_dirt.json`：10% 出同种匠魂树苗、
   25% 出同种黏液球（大地用原版 `minecraft:slime_ball`）。
 - **连锁强化图标**：补 `tinkering/modifier_icons.json` + 16×16 图标，工作台 / JEI 不再空图标。
@@ -43,8 +44,8 @@
 - `check-data-paths.py --target 1.20.1`（主线脚本跑 1.20.1 资源根）：两个根都通过。
 - 1.20.1 `runServer -PtechMods -PdeMods`：`[sieve] loaded 10 inputs, 183 drops`、
   `[hammer] 91`、`[materials] 26`，无未知物品 / 解析错误；`-PtinkersMods` 单装时 10 / 128。
-- 1.20.1 RCON：`setblock tconstruct:sky_sky_slime_grass` 能放住；`/loot spawn ... mine`
-  该方块掉落 `tconstruct:sky_slime_dirt`；大地 / 末影同一套匠魂掉落表。
+- 1.20.1 RCON：`setblock tconstruct:sky_vanilla_slime_grass` + `/loot spawn ... mine` 得到
+  `minecraft:dirt` + `tconstruct:sky_slime_dirt` 两件（原有泥土没丢）；大地 / 末影同理。
 - **未做**：黏液泥土实际手筛、树苗生长、JEI 筛子页 / 强化图标页面。
 
 ## 商店更新日志（可直接粘贴）
