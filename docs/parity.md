@@ -102,7 +102,7 @@
 | 黄铀 / 铅矾 / 蓝锥矿（过筛获得） | 极限反应堆 Extreme Reactors 2.x（`bigreactors`） | 两版接入：`yellorium` 1/8、`anglesite` / `benitoite` 各 1/64；三条都走 `gems` 门控，三档矿链 → 熔成 `bigreactors:yellorium_ingot` / `anglesite_crystal` / `benitoite_crystal`；石墨仍烧煤，cyanite/blutonium 继续由反应堆产出；yellorite/uranium 双 tag，Mek/IE/Create 铀矿处理可磨 | ✅（两版真装；手筛待实测） |
 | 橡胶树苗（过筛 + 可堆肥） | MFR | 1.20.1 无 MFR | ⏸ 等模组 |
 | 自然（Natura）树苗 / 灌木 | 自然 | 无 1.20.1 | ⏸ 等模组 |
-| 匠魂可改造锤（碎矿锤） | 匠魂 3（仅 1.20.1） | `ex_nihilo_hammer`：`ModifiableItem` + `HammerTool`，装配站锤头 + 坚韧手柄 + 2 大板；材料染色 + 16 个强化 overlay + 材料特性 / 强化槽；掉落走同一张锤表；单方块，不登记 AOE tag | ✅ 1.20.1 / ⏸ 主线（无官方 1.21.1） |
+| 匠魂可改造锤（碎矿锤） | 匠魂 3（仅 1.20.1） | `ex_nihilo_hammer`：`ModifiableItem` + `HammerTool`，装配站 1 锤头 + 1 坚韧手柄（2026-11-11 去掉了大锤同款的两块大板）；材料染色 + 16 个强化 overlay + 材料特性 / 强化槽；掉落走同一张锤表；单方块，不登记 AOE tag | ✅ 1.20.1 / ⏸ 主线（无官方 1.21.1） |
 | 匠魂强化：自有锤 / 钩 traits | 匠魂 | 自有锤 / 钩没有做成匠魂工具；匠魂路线由「碎矿锤」承接 | ⏸ 非目标 |
 
 ### 2.4 暂不复刻（原版强绑定已死模组）
