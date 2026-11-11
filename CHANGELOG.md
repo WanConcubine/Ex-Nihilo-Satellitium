@@ -12,16 +12,19 @@
 - **1.20.1：匠魂碎矿锤（`ex_nihilo_hammer`）不再和匠魂大锤同款**：装配站从
   「锤头 + 坚韧手柄 + 2 大板」改成 **1 锤头 + 1 坚韧手柄**；工具定义的部件列表、
   `default_materials` 与装配站输入槽一起减到两件。
-- 材料属性 / 特性 / 强化槽 / 掉落表不变；耐久倍率也没调，所以同材料锤子的耐久会低于四件配方
-  （大板原本各按 0.25 计入基础耐久）。
+- **1.20.1：修复挖掘速度**：砂砾 / 沙子 / 尘土这类 `mineable/shovel` 方块以前按空手速度挖，
+  现在按锤头材料的挖掘速度（铁头 6.0）；去掉头部 0.5 缩放后耐久回到 1.4.0 的水平（铁头约 1000）。
+- **1.20.1：连锁挖掘**：新增强化 `exnihilosatellitium:chain`（I–III，装配站 4 燧石 + 1 铁锭），
+  一次粉碎连带打碎相连的同类方块，每级多 16 块；DE 锤装上 DE 的 AOE（范围）模块后也连锁。
 - **1.21.1 线**：代码、数据表、贴图都没改，本版只为两条线版本号一致。
 
 #### 验证
 
 - 两版 `./gradlew build --offline` 与 `check-textures.py` 通过。
-- 1.20.1 服务端 `-PtinkersMods`：`Loaded 46 tool definitions` / `24 station slot layouts`，
-  无解析错误。
-- **未做**：装配站两槽的实机画面、造出来的耐久复测。
+- 1.20.1 服务端 `-PtinkersMods`：`Loaded 46 tool definitions` / `24 station slot layouts`、
+  无解析错误；`exnihilosatellitium:chain` 强化注册与配方加载成功；FakePlayer 探针
+  （临时命令，已删）铁头 + 木柄：6.0 速度 / 1000 耐久，连锁 17 / 33 块，夹一块沙子会停。
+- **未做**：装配站应用强化的画面、DE 实机连锁、JEI 强化配方页。
 
 ### English
 
@@ -31,18 +34,24 @@
   the sledge hammer**: the Tinker Station build went from *hammer head + tough handle + 2 large
   plates* to **1 hammer head + 1 tough handle**. The tool definition's part list,
   `default_materials` and the station layout's input slots all shrank to two parts.
-- Material stats, traits, modifier slots and the drop table are unchanged; the durability
-  multiplier was left alone, so a hammer of the same materials now has less durability than the
-  four-part build.
+- **1.20.1: mining speed fixed**: gravel / sand / dust (tags `mineable/shovel`) used to be mined
+  at bare-hand speed; the hammer now uses its head material's mining speed (6.0 for iron).
+  Dropping the head's 0.5 scale also brings durability back to the 1.4.0 level (~1000 for iron).
+- **1.20.1: chain mining**: a new `exnihilosatellitium:chain` modifier (I–III, Tinker Station:
+  4 flint + 1 iron ingot) makes one crush break connected blocks of the same kind, +16 per level;
+  the Draconic Evolution hammer chains the same blocks once DE's AOE module is installed.
 - **The 1.21.1 line has no code changes** in this release; it only shares the version number.
 
 #### Verification
 
 - `./gradlew build --offline` and `check-textures.py` pass on both lines.
 - 1.20.1 server with `-PtinkersMods`: `Loaded 46 tool definitions` /
-  `24 station slot layouts`, no parse errors.
-- **Not done**: the two-slot station screen and the resulting durability have not been checked
-  in game yet.
+  `24 station slot layouts`, no parse errors; the `chain` modifier registered and its recipe
+  loaded; a FakePlayer probe (temporary command, since removed) with an iron head + wood handle
+  measured 6.0 mining speed / 1000 durability and 17 / 33 chained blocks, stopping at a sand
+  block.
+- **Not done**: the in-game station screen for applying the modifier, chain mining with the DE
+  hammer in game, and the JEI page for the modifier recipe.
 
 ## 1.4.0 — 2026-11-10（材质锤 / 龙之进化锤 / 修复）
 
