@@ -1,6 +1,6 @@
 # 1.4.1 发布材料
 
-> 状态：**已构建；tag `v1.4.1` / `v1.4.1-1.20.1` 与 CurseForge / Modrinth 上传待所有者。**
+> 状态：**已构建、打 tag 并推送；CurseForge / Modrinth 上传待所有者操作。**
 > 版本号：`1.4.1`；两条线同版本号，分别对应 1.21.1 与 1.20.1。
 > **性质：配方调整 + 连锁 + 版本对齐**——真正的改动都在 1.20.1 的匠魂碎矿锤（装配站配方、
 > 挖掘速度、连锁强化，DE 锤用 AOE 模块连锁）；
@@ -90,5 +90,5 @@ jar 文件名仍带 MC 版本（`<mod_id>-<mc_version>-<mod_version>.jar`），�
 - [x] `CHANGELOG.md` 的 1.4.1 节（中英双语）
 - [x] README 下载表版本号
 - [x] 两版 `build --offline` + `check-textures.py`
-- [ ] tag `v1.4.1` / `v1.4.1-1.20.1`（所有者）
+- [x] tag `v1.4.1` / `v1.4.1-1.20.1`（已推送）
 - [ ] CurseForge / Modrinth 上传（所有者）
