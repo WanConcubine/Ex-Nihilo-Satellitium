@@ -1,7 +1,9 @@
 package com.kaifengcrt.exnihilosatellitium.compat.draconicevolution;
 
 import com.brandon3055.brandonscore.api.TechLevel;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -25,5 +27,19 @@ public final class DEHammers {
         HAMMERS.add(items.register("chaotic_hammer",
                 () -> new DEHammerItem(TechLevel.CHAOTIC, 9)));
         return List.copyOf(HAMMERS);
+    }
+
+    /** Registers the chain-mining module (item now, module on DE's registry event). */
+    public static void registerModules(final IEventBus modBus,
+                                       final DeferredRegister<Item> items) {
+        ChainModule.register(modBus, items);
+    }
+
+    /** Creative-tab entry for the chain module; no-op when DE is absent. */
+    public static void addCreativeItems(final CreativeModeTab.Output output) {
+        final Item module = ChainModule.item();
+        if (module != null) {
+            output.accept(module);
+        }
     }
 }

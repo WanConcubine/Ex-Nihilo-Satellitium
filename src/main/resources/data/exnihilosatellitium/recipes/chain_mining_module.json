@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "draconicevolution"
+    }
+  ],
+  "key": {
+    "F": {
+      "item": "minecraft:flint"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "M": {
+      "item": "draconicevolution:module_core"
+    }
+  },
+  "pattern": [
+    "FIF",
+    "IMI",
+    "FIF"
+  ],
+  "result": {
+    "item": "exnihilosatellitium:chain_mining_module"
+  }
+}

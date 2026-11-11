@@ -399,5 +399,9 @@
   "modifier.exnihilosatellitium.chain.flavor": "One swing, one vein.",
   "modifier.exnihilosatellitium.chain.description": "Crushing gravel, sand, dust and ore chunks also breaks connected blocks of the same kind; +16 blocks per level.",
   "modifier.exnihilosatellitium.chain.2": "Chain II",
-  "modifier.exnihilosatellitium.chain.3": "Chain III"
+  "modifier.exnihilosatellitium.chain.3": "Chain III",
+  "item.exnihilosatellitium.chain_mining_module": "Chain Module",
+  "module_type.exnihilosatellitium.chain_mining": "Chain Mining",
+  "module.exnihilosatellitium.chain_mining.blocks": "Chain limit: %s blocks",
+  "module.exnihilosatellitium.chain_mining.blocks.info": "One crush also breaks connected blocks of the same kind"
 }

@@ -106,6 +106,15 @@ OVERLAYS: dict[str, list[tuple[int, int, str]]] = {
         (12, 4, "#4DABF7"), (13, 4, "#4DABF7"),
         (12, 5, "#2B8A3E"), (13, 5, "#2B8A3E"),
     ],
+    # two chain links across the head (the exnihilosatellitium:chain upgrade)
+    "chain": [
+        (8, 1, "#C9D6E3"), (9, 1, "#8FA3B8"), (10, 1, "#C9D6E3"),
+        (8, 2, "#8FA3B8"), (10, 2, "#8FA3B8"),
+        (8, 3, "#C9D6E3"), (9, 3, "#8FA3B8"), (10, 3, "#C9D6E3"),
+        (11, 3, "#FFC94A"), (12, 3, "#FFE08A"), (13, 3, "#FFC94A"),
+        (11, 4, "#FFE08A"), (13, 4, "#FFE08A"),
+        (11, 5, "#FFC94A"), (12, 5, "#FFE08A"), (13, 5, "#FFC94A"),
+    ],
     # dark green mark
     "necrotic": [
         (10, 4, "#2B8A3E"), (9, 5, "#1E5E2A"), (11, 5, "#1E5E2A"),
