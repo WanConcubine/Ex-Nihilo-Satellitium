@@ -404,5 +404,6 @@
   "module_type.exnihilosatellitium.chain_mining": "连锁挖掘",
   "module.exnihilosatellitium.chain_mining.blocks": "连锁上限：%s 块",
   "module.exnihilosatellitium.chain_mining.blocks.info": "一次粉碎会连带打碎相连的同类方块",
-  "item.exnihilosatellitium.earth_slime_grass_seeds": "大地黏液草种子"
+  "item.exnihilosatellitium.earth_slime_grass_seeds": "大地黏液草种子",
+  "item.exnihilosatellitium.slime_grass_seeds.tooltip": "右键泥土 / 草方块种出黏液草；挖掉黏液草会掉黏液泥土"
 }
