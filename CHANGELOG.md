@@ -14,8 +14,9 @@
   `default_materials` 与装配站输入槽一起减到两件。
 - **1.20.1：修复挖掘速度**：砂砾 / 沙子 / 尘土这类 `mineable/shovel` 方块以前按空手速度挖，
   现在按锤头材料的挖掘速度（铁头 6.0）；去掉头部 0.5 缩放后耐久回到 1.4.0 的水平（铁头约 1000）。
-- **1.20.1：连锁挖掘**：新增强化 `exnihilosatellitium:chain`（I–III，装配站 4 燧石 + 1 铁锭），
-  一次粉碎连带打碎相连的同类方块，每级多 16 块；DE 锤装上 DE 的 AOE（范围）模块后也连锁。
+- **1.20.1：连锁挖掘**：新增强化 `exnihilosatellitium:chain`（I–III，装配站 4 燧石 + 1 铁块），
+  一次粉碎连带打碎相连的同类方块，每级多 16 块，锤头会多出两节锁链的 overlay；DE 锤新增
+  **专属连锁模块** `chain_mining_module`（4 燧石 + 4 铁锭 + 1 module core），装上后一次连锁 32 块。
 - **1.21.1 线**：代码、数据表、贴图都没改，本版只为两条线版本号一致。
 
 #### 验证
@@ -24,7 +25,9 @@
 - 1.20.1 服务端 `-PtinkersMods`：`Loaded 46 tool definitions` / `24 station slot layouts`、
   无解析错误；`exnihilosatellitium:chain` 强化注册与配方加载成功；FakePlayer 探针
   （临时命令，已删）铁头 + 木柄：6.0 速度 / 1000 耐久，连锁 17 / 33 块，夹一块沙子会停。
-- **未做**：装配站应用强化的画面、DE 实机连锁、JEI 强化配方页。
+  `-PdeMods -PtinkersMods` + DE 探针：连锁模块进注册表、物品与合成加载、DE 锤宿主接受，
+  `chainLimit` 0 → 32。
+- **未做**：装配站应用强化的画面、锁链 overlay 外观、DE 实机装模块、JEI 强化配方页。
 
 ### English
 
@@ -38,8 +41,10 @@
   at bare-hand speed; the hammer now uses its head material's mining speed (6.0 for iron).
   Dropping the head's 0.5 scale also brings durability back to the 1.4.0 level (~1000 for iron).
 - **1.20.1: chain mining**: a new `exnihilosatellitium:chain` modifier (I–III, Tinker Station:
-  4 flint + 1 iron ingot) makes one crush break connected blocks of the same kind, +16 per level;
-  the Draconic Evolution hammer chains the same blocks once DE's AOE module is installed.
+  4 flint + 1 iron block) makes one crush break connected blocks of the same kind, +16 per level,
+  and adds a chain overlay to the hammer head; the Draconic Evolution hammer gets a dedicated
+  chain module (`chain_mining_module`, 4 flint + 4 iron ingots + 1 module core) that chains 32
+  blocks per crush.
 - **The 1.21.1 line has no code changes** in this release; it only shares the version number.
 
 #### Verification

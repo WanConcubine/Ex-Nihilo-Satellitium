@@ -47,11 +47,13 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 - **1.21.1 线：无代码改动**。本版只为和 1.20.1 线版本号一致；jar 与 1.4.0 只有版本号不同。
 - **1.20.1 线（改在 `1.20.1-forge` 分支）**：匠魂碎矿锤装配站从「锤头 + 坚韧手柄 + 2 大板」
   改成 **1 锤头 + 1 坚韧手柄**；砂砾 / 沙子 / 尘土改按锤头材料速度挖（铁头 6.0，耐久回到
-  1000）；新增强化 `exnihilosatellitium:chain`（I–III，每级 16 块）连锁，DE 锤装 AOE 模块也连锁。
+  1000）；新增强化 `exnihilosatellitium:chain`（I–III，每级 16 块，锤头有锁链 overlay），
+  DE 锤用专属模块 `chain_mining_module` 一次连锁 32 块。
 - **验证**：两版 `./gradlew build --offline` + `check-textures.py`（主线 307 模型 / 116
   blockstate / 190 纹理）通过；1.20.1 服务端 `-PtinkersMods` 46 tool definitions /
   24 station layouts、`chain` 强化注册与配方加载成功；FakePlayer 探针 6.0 速度 / 1000 耐久、
-  连锁 17 / 33 块。装配站应用强化、DE 实机连锁未复测。
+  连锁 17 / 33 块；DE 探针：模块进注册表、宿主接受、装上后 32 块。装配站应用强化、锁链
+  overlay 外观与 DE 实机装模块未复测。
 
 ## 1.4.0（2026-11-10）
 
