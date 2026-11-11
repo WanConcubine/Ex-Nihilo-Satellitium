@@ -1,5 +1,68 @@
 # 更新记录
 
+## 1.4.2 — 2026-11-11（黏液草 / 匠魂树苗 / 连锁图标）
+
+> **1.21.1 线本版没有代码改动**，只同步版本号；改动在 1.20.1 线的黏液链与连锁图标。
+
+### 中文
+
+#### 新增（1.20.1）
+
+- **大地黏液草种子**：`earth_slime_grass_seeds`（装匠魂才有），泥土 / 草方块各 **2%** 筛出；
+  右键泥土 / 草方块 → `tconstruct:earth_earth_slime_grass`。
+- **黏液泥土筛表**：`sieve/{earth,sky,ender}_slime_dirt.json`，10% 出同种匠魂树苗、
+  25% 出同种黏液球（大地那档是原版 `minecraft:slime_ball`）。
+
+#### 变更（1.20.1）
+
+- **种子改种黏液草变体**：三种种子现在种 `tconstruct:<type>_<type>_slime_grass`，挖掉掉
+  `<type>_slime_dirt`（原来的 vanilla 变体只掉原版泥土）；空岛第一次有黏液泥土来源。
+
+#### 修复（1.20.1）
+
+- **连锁强化图标**：补 `tinkering/modifier_icons.json` + 16×16 图标，工作台 / JEI 不再空图标。
+
+#### 版本对齐
+
+- **1.21.1 线**：代码、数据表、贴图都没改，本版只为两条线版本号一致（同 1.1.2 的做法）。
+
+#### 验证
+
+- 1.20.1：`build`、纹理守卫（315 模型 / 213 纹理）、data 守卫通过；`-PtechMods -PdeMods`
+  服务端 `[sieve] 10 inputs, 183 drops`、无未知物品；RCON 验证黏液草能放住并掉黏液泥土。
+- **未做**：黏液泥土实际手筛、树苗生长、JEI 页面。
+
+### English
+
+#### New (1.20.1)
+
+- **Earthslime grass seeds**: `earth_slime_grass_seeds` (only with Tinkers), **2%** from dirt /
+  grass blocks; right-click dirt / grass to grow `tconstruct:earth_earth_slime_grass`.
+- **Slime dirt sifting**: `sieve/{earth,sky,ender}_slime_dirt.json` - 10% for the matching
+  Tinkers sapling, 25% for the matching slime ball (earth uses vanilla slime balls).
+
+#### Changed (1.20.1)
+
+- **The seeds grow the slime-typed grass**: `tconstruct:<type>_<type>_slime_grass`, which drops
+  `<type>_slime_dirt` when mined (the vanilla-soil variant only drops plain dirt). This is the
+  skyblock's first slime-soil source.
+
+#### Fixes (1.20.1)
+
+- **Chain modifier icon**: added `tinkering/modifier_icons.json` and a 16x16 icon, so the
+  modifier worktable / JEI no longer show a blank icon.
+
+#### Version alignment
+
+- **The 1.21.1 line has no code changes** in this release; it only shares the version number.
+
+#### Verification
+
+- 1.20.1: `build`, texture guard (315 models / 213 textures) and data guard pass; the
+  `-PtechMods -PdeMods` server logs `[sieve] 10 inputs, 183 drops` with no unknown items; RCON
+  confirms the slime grass block stays and drops slime dirt.
+- **Not done**: actually sifting slime dirt in game, sapling growth, the JEI page.
+
 ## 1.4.1 — 2026-11-11（匠魂碎矿锤配方 / 版本对齐）
 
 > **1.21.1 线本版没有代码改动**，只同步版本号；真正的改动在 1.20.1 线的匠魂碎矿锤。
