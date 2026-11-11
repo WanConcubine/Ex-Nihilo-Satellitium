@@ -404,5 +404,6 @@
   "module_type.exnihilosatellitium.chain_mining": "Chain Mining",
   "module.exnihilosatellitium.chain_mining.blocks": "Chain limit: %s blocks",
   "module.exnihilosatellitium.chain_mining.blocks.info": "One crush also breaks connected blocks of the same kind",
-  "item.exnihilosatellitium.earth_slime_grass_seeds": "Earthslime Grass Seeds"
+  "item.exnihilosatellitium.earth_slime_grass_seeds": "Earthslime Grass Seeds",
+  "item.exnihilosatellitium.slime_grass_seeds.tooltip": "Right-click dirt or grass to grow slime grass; mining it also drops slime dirt"
 }

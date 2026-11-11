@@ -797,10 +797,10 @@ JEI 工具页 / 左键手感未单独验。
 黏液泥土，也就永远没有匠魂树苗。
 
 **做法**：
-- 三种种子（碧空 / **新补的大地** / 末影）改种 `tconstruct:<type>_<type>_slime_grass`。它是
-  `SlimeGrassBlock`，没有 `canSurvive` 限制，能直接立在原版泥土上；而它的掉落表
-  （匠魂自己的 `tconstruct:blocks/<type>_<type>_slime_grass`）掉的是 `<type>_slime_dirt`。
-  我们不改别人的掉落表，只负责把种子种成这个变体。
+- 种子仍然种 `tconstruct:<type>_vanilla_slime_grass`（和匠魂自己的种子一致，原途径不改）。
+  这个方块的掉落表只掉原版泥土，所以 `LootEvents` 在 `LootTableLoadEvent` 里**追加**一个
+  pool，给同种 `<type>_slime_dirt`；原有泥土掉落保留，匠魂的 JSON / 掉落表文件一个都没改。
+  第一块黏液泥土就是「种子 → 黏液草 → 挖掉」这一步。
 - 黏液泥土不再只能靠世界生成：**筛**。`sieve/{earth,sky,ender}_slime_dirt.json` 根级
   `mod: tconstruct`，10% 出同种 `tconstruct:<type>_slime_sapling`、25% 出同种黏液球；
   大地那档用原版 `minecraft:slime_ball`（匠魂没有 earth slime ball，earth 黏液就是原版绿黏液）。

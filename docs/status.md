@@ -8,8 +8,8 @@
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.4.2 已发**（tag `v1.4.2-1.20.1`，2026-11-11 构建、打 tag 并推送；CurseForge / Modrinth 上传待所有者）；
 1.0.0–1.3.2 的商店上传也待所有者。
-**当前版本（1.4.2，2026-11-11）**：**黏液草与匠魂树苗**——补齐**大地黏液草种子**；三种种子
-改种 `<type>_<type>_slime_grass`，挖掉掉黏液泥土；黏液泥土过筛出同种匠魂树苗（10%）+ 黏液球。
+**当前版本（1.4.2，2026-11-11）**：**黏液草与匠魂树苗**——补齐**大地黏液草种子**；我们的
+黏液草挖掉时**额外**掉一份黏液泥土（原泥土掉落保留）；黏液泥土过筛出同种匠魂树苗（10%）+ 黏液球。
 上一版（1.4.1，2026-11-11）：匠魂碎矿锤配方（1 锤头 + 1 手柄）、砂砾/沙子按锤头速度、
 连锁强化 + 锁链 overlay、DE 专属连锁模块 `chain_mining_module`。
 更早（1.4.0，2026-11-10）：**材质锤 + 匠魂碎矿锤**——9 把金属锤 + 3 把 Bamboo 宝石锤 +
@@ -39,9 +39,10 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 ## 1.4.2（2026-11-11）
 
 - **大地黏液草种子**：`earth_slime_grass_seeds`（条件物品，装匠魂才有），泥土 / 草方块各 2%
-  筛出；右键泥土 / 草方块 → `tconstruct:earth_earth_slime_grass`。碧空 / 末影两种原本就有。
-- **种子改种黏液草**：三种种子现在都种 `tconstruct:<type>_<type>_slime_grass`（原来是
-  `*_vanilla_slime_grass`）。黏液草挖掉掉 `<type>_slime_dirt`——这是空岛第一条黏液泥土来源。
+  筛出；右键泥土 / 草方块 → `tconstruct:earth_vanilla_slime_grass`。碧空 / 末影两种原本就有。
+- **黏液草额外掉黏液泥土**：种子仍然种 `*_vanilla_slime_grass`（原途径不变）；
+  `LootEvents` 在 `LootTableLoadEvent` 里给它的掉落表**追加**一份 `<type>_slime_dirt`，
+  原有 `minecraft:dirt` 保留，匠魂文件不改。这是空岛第一条黏液泥土来源。
 - **黏液泥土筛表**：`sieve/{earth,sky,ender}_slime_dirt.json`，根级 `mod: tconstruct`，
   每张 10% 出同种匠魂树苗、25% 出同种黏液球（大地那档用原版 `minecraft:slime_ball`，
   匠魂没有 earth slime ball）。
@@ -49,7 +50,8 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
   16×16 `gui/modifiers/chain.png`，强化工作台 / JEI 不再空图标（1.4.1 漏的）。
 - **验证**：`build`、纹理守卫（315 模型 / 213 纹理）、data 守卫通过；`-PtechMods -PdeMods`
   服务端 `[sieve] 10 inputs, 183 drops`；`-PtinkersMods` 下 `[sieve] 10 inputs, 128 drops`；
-  RCON 验证 `sky_sky_slime_grass` 能放住、掉落表给 `tconstruct:sky_slime_dirt`。
+  RCON 验证 `sky_vanilla_slime_grass` 的 `/loot` 同时给 `minecraft:dirt` 和
+  `tconstruct:sky_slime_dirt`。
   **黏液泥土实际手筛、树苗生长、JEI 页面还没进游戏看**。
 
 ## 1.4.1（2026-11-11）
@@ -345,7 +347,7 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 | 机器 GUI 压暗（1.20.1） | ✅ | 1.4.0：`AbstractMachineScreen#renderBg` 先调 `renderBackground`；作者实机确认打开机器界面时世界变暗 |
 | 叶绿素碎矿熔炼（1.20.1） | ⚠️ | 3 条 `tconstruct:melting`（broken/crushed/powdered 各 45 mB，600°C，`time: 26`，`tinkers_thinking:molten_chlorophyte`）；build + data 守卫通过；**未在游戏里实际熔化过** |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
-| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.2；jar 997 KB / `c688d9d8…`） |
+| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.2；jar 1000 KB / `2b1c5812…`） |
 | `check-textures.py` | ✅ | 315 模型 / 116 blockstate / 213 纹理；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装 + ER + BambooMod：`[materials] 25`、`[sieve] 7 inputs / 173 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |

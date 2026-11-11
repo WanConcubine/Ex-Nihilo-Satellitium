@@ -9,16 +9,18 @@
 #### 新增
 
 - **大地黏液草种子**：`earth_slime_grass_seeds`（装匠魂才有），泥土 / 草方块各 **2%** 筛出；
-  右键泥土 / 草方块 → `tconstruct:earth_earth_slime_grass`。碧空 / 末影两种原本就有。
+  右键泥土 / 草方块 → `tconstruct:earth_vanilla_slime_grass`。碧空 / 末影两种原本就有。
 - **黏液泥土筛表**：`sieve/{earth,sky,ender}_slime_dirt.json`，根级 `"mod": "tconstruct"`；
   每种黏液泥土 **10%** 出同种匠魂树苗、**25%** 出同种黏液球
   （大地那档是原版 `minecraft:slime_ball`，匠魂没有 earth slime ball）。
 
 #### 变更
 
-- **种子改种黏液草变体**：三种种子现在种 `tconstruct:<type>_<type>_slime_grass`（原来是
-  `*_vanilla_slime_grass`）。黏液草挖掉掉 `<type>_slime_dirt`，而 vanilla 变体只掉原版泥土；
-  这样空岛第一次有黏液泥土来源，再拿去过筛拿树苗。
+- **黏液草额外掉一份黏液泥土**：原版土上的黏液草（`*_vanilla_slime_grass`，我们的种子种的
+  那个变体）原来的掉落表只掉原版泥土；现在通过 `LootTableLoadEvent` **追加**一份同种
+  `<type>_slime_dirt`，**原有泥土掉落保留**，匠魂的文件一个都没改。这样空岛第一次有黏液泥土：
+  种子 → 黏液草 → 挖掉（泥土 + 黏液泥土）→ 过筛拿树苗。
+  种子的目标方块保持原样（`*_vanilla_slime_grass`），原途径不变。
 
 #### 修复
 
@@ -34,8 +36,8 @@
 
 - `build`、`check-textures.py`（315 模型 / 213 纹理）、`check-data-paths.py --target 1.20.1`
   通过；`-PtechMods -PdeMods` 服务端 `[sieve] loaded 10 inputs, 183 drops`、无未知物品。
-- RCON：`setblock tconstruct:sky_sky_slime_grass` 能放住；`/loot ... mine` 该方块掉落
-  `tconstruct:sky_slime_dirt`（大地 / 末影同理，同一套匠魂掉落表）。
+- RCON：`setblock tconstruct:sky_vanilla_slime_grass` + `/loot spawn ... mine` 得到
+  `minecraft:dirt` + `tconstruct:sky_slime_dirt` 两件（原有泥土没丢）；大地 / 末影同理。
 - **未做**：黏液泥土实际手筛、树苗生长、JEI 页面。
 
 ### English
@@ -43,7 +45,7 @@
 #### New
 
 - **Earthslime grass seeds**: `earth_slime_grass_seeds` (only with Tinkers), **2%** from dirt /
-  grass blocks; right-click dirt / grass to grow `tconstruct:earth_earth_slime_grass`.
+  grass blocks; right-click dirt / grass to grow `tconstruct:earth_vanilla_slime_grass`.
 - **Slime dirt sifting**: `sieve/{earth,sky,ender}_slime_dirt.json` (root `"mod": "tconstruct"`);
   each slime dirt gives a **10%** chance of the matching Tinkers sapling and **25%** of the
   matching slime ball (earth uses vanilla `minecraft:slime_ball`).
@@ -69,8 +71,8 @@
 - `build`, `check-textures.py` (315 models / 213 textures) and
   `check-data-paths.py --target 1.20.1` pass; the `-PtechMods -PdeMods` server logs
   `[sieve] loaded 10 inputs, 183 drops` with no unknown items.
-- RCON: `setblock tconstruct:sky_sky_slime_grass` stays in place and its loot table drops
-  `tconstruct:sky_slime_dirt`.
+- RCON: `setblock tconstruct:sky_vanilla_slime_grass` + `/loot spawn ... mine` yields both
+  `minecraft:dirt` and `tconstruct:sky_slime_dirt` (the original dirt drop stays).
 - **Not done**: actually sifting slime dirt in game, sapling growth, the JEI page.
 
 ## 1.4.1 — 2026-11-11（匠魂碎矿锤：配方 / 速度 / 连锁）

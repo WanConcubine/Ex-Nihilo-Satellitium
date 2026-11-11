@@ -270,20 +270,20 @@ public final class ModItems {
 
     /**
      * Tinkers-only grass seeds. Right-click vanilla dirt / grass to grow the
-     * matching slime grass. The slime-typed variant is used on purpose: mining it
-     * (no silk touch) drops the matching {@code tconstruct:<type>_slime_dirt},
-     * which is the only skyblock source of slime soil. All three fields stay
-     * {@code null} when Tinkers is absent.
+     * matching slime grass (TiC's "vanilla soil" variant, exactly like TiC's own
+     * seed). Mining that block adds the matching slime dirt through
+     * {@code LootEvents}, which is the skyblock's slime-soil source. All three
+     * fields stay {@code null} when Tinkers is absent.
      */
     public static final RegistryObject<Item> SKY_SLIME_GRASS_SEEDS =
             registerTinkersGrassSeeds("sky_slime_grass_seeds",
-                    "tconstruct:sky_sky_slime_grass");
+                    "tconstruct:sky_vanilla_slime_grass");
     public static final RegistryObject<Item> EARTH_SLIME_GRASS_SEEDS =
             registerTinkersGrassSeeds("earth_slime_grass_seeds",
-                    "tconstruct:earth_earth_slime_grass");
+                    "tconstruct:earth_vanilla_slime_grass");
     public static final RegistryObject<Item> ENDER_SLIME_GRASS_SEEDS =
             registerTinkersGrassSeeds("ender_slime_grass_seeds",
-                    "tconstruct:ender_ender_slime_grass");
+                    "tconstruct:ender_vanilla_slime_grass");
 
     /**
      * Nether-tree start: crushing netherrack drops these spores, and right-clicking

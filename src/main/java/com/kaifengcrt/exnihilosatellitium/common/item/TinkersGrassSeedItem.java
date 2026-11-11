@@ -1,8 +1,10 @@
 package com.kaifengcrt.exnihilosatellitium.common.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -10,10 +12,15 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Tinkers-only grass seed: right-click a vanilla grass block or dirt to turn it
@@ -30,6 +37,13 @@ public class TinkersGrassSeedItem extends Item {
     public TinkersGrassSeedItem(final Properties properties, final String targetBlockId) {
         super(properties);
         this.targetBlockId = targetBlockId;
+    }
+
+    @Override
+    public void appendHoverText(final ItemStack stack, @Nullable final Level level,
+                                final List<Component> tooltip, final TooltipFlag flag) {
+        tooltip.add(Component.translatable("item.exnihilosatellitium.slime_grass_seeds.tooltip")
+                .withStyle(ChatFormatting.GRAY));
     }
 
     @Override
