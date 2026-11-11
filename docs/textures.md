@@ -206,3 +206,7 @@ python3 scripts/check-textures.py
   `chain`：锤头上一段钢色 + 金色的两节锁链）。装了 `exnihilosatellitium:chain` 才会画出来。
 - DE 连锁模块物品 `chain_mining_module` 是自绘 16×16：深色模块底 + 深色边框 + 三节由白到金
   的锁链，`models/item/chain_mining_module.json` 走 vanilla `item/generated`；不引用 DE 的贴图。
+- 强化**图标**（GUI / JEI 里那个，和工具模型 overlay 是两套东西）走匠魂的
+  `assets/<ns>/tinkering/modifier_icons.json`。1.4.1 漏了这张表，所以「连锁」在工作台 / JEI
+  里没有图标；现在补 `exnihilosatellitium:chain → exnihilosatellitium:gui/modifiers/chain`
+  （16×16，三段由钢到金的方链，`textures/gui/modifiers/chain.png`）。
