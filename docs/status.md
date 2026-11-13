@@ -1,6 +1,6 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-11
+> 最后更新：2026-11-13
 > 先看这 20 行；批次叙事在 [history.md](history.md)，设计与取舍在 [DESIGN.md](DESIGN.md)。
 
 ## 一句话
@@ -8,7 +8,10 @@
 **1.20.1 / Forge 47.4.28 / Java 17** 线；M1–M10、datagen 三批、P1/P1.5/P2/P3、数据包 v2 都已完成。
 **1.4.2 已发**（tag `v1.4.2-1.20.1`，2026-11-11 构建、打 tag 并推送；CurseForge / Modrinth 上传待所有者）；
 1.0.0–1.3.2 的商店上传也待所有者。
-**当前版本（1.4.2，2026-11-11）**：**黏液草与匠魂树苗**——补齐**大地黏液草种子**；我们的
+**1.5.0 已发（1.20.1 线，与主线同步）**（tag `v1.5.0-1.20.1`，2026-11-13 构建、打 tag 并推送）。
+**当前版本（1.5.0，2026-11-13）：机器扩容升级**——电动筛/锤新增「扩容升级」插件，每个 +1 页
+（12 格）产物缓存，最多 8 个（9 页）；GUI 输出区下方翻页；IO 仍把全部活动页当作平铺缓存。
+上一版（1.4.2，2026-11-11）：**黏液草与匠魂树苗**——补齐**大地黏液草种子**；我们的
 黏液草挖掉时**额外**掉一份黏液泥土（原泥土掉落保留）；黏液泥土过筛出同种匠魂树苗（10%）+ 黏液球。
 上一版（1.4.1，2026-11-11）：匠魂碎矿锤配方（1 锤头 + 1 手柄）、砂砾/沙子按锤头速度、
 连锁强化 + 锁链 overlay、DE 专属连锁模块 `chain_mining_module`。
@@ -35,6 +38,24 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 （全装 182）；**装龙之进化 +1**（全装 + Bamboo 183）；再装末影接口各再 +1。
 锤表 88（全装 +ER；装 DE 91）/ 55（无模组）；桶 18（全装）/ 16（缺 Thermal）。
 **下一步**：商店上传 → 一次性画面/手感验收 → P4 JEI 同步 → 修钴差异（见文末）。
+
+## 1.5.0（2026-11-13）
+
+- **扩容升级** `capacity_upgrade`：电动筛/锤槽 4 新插件，每个物品 +1 页（12 格）产物缓存，
+  堆叠上限 8（基础 1 页 + 8 = 9 页 / 108 格）；不增加 FE/t。合成：
+  `铁锭 纸 铁锭 / 纸 任意箱子 纸 / 铁锭 纸 铁锭`，箱子用
+  `#exnihilosatellitium:chests`（箱子 / 陷阱箱 / 末影箱）。
+- **产物翻页**：输出 3×4 下方 `< 1/9 >`，只对多页机器显示；客户端先切本地页，再走原版
+  容器按钮通道，由服务端全量重发菜单内容，避免跨页旧缓存错位。
+- **IO 平铺**：漏斗 / 管道 / 自动输出看到全部活动页；页只是 GUI 视图。
+- **缩页回收**：拆掉扩容后高页物品先并回活动页，放不下的掉在机器上方，不会静默消失。
+- **修复**：`insertOutput` 在“先并进半组、后面没有空槽”时会把已并入部分再整份掉出，
+  造成物品复制；现在只掉真正没放下的余量。
+- **验证**：`build`、纹理守卫（316 模型 / 116 blockstate / 214 纹理）、
+  `check-data-paths.py --target 1.20.1`（202 + 199 recipes / 75 loot / 82 tags 合计）通过；
+  RCON 验证 8 扩容时槽 113 物品保留、自动输出与漏斗从槽 100 抽取、锤在基础页塞满后继续
+  往槽 18 产出、拆扩容后槽 113 物品并回槽 6。**GUI 翻页 / 配方实际合成 / JEI 未目视。**
+- **1.21.1 主线**：同版本 `v1.5.0` 已同步发同一功能；两条线版本号重新对齐。
 
 ## 1.4.2（2026-11-11）
 
@@ -347,8 +368,9 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 | 机器 GUI 压暗（1.20.1） | ✅ | 1.4.0：`AbstractMachineScreen#renderBg` 先调 `renderBackground`；作者实机确认打开机器界面时世界变暗 |
 | 叶绿素碎矿熔炼（1.20.1） | ⚠️ | 3 条 `tconstruct:melting`（broken/crushed/powdered 各 45 mB，600°C，`time: 26`，`tinkers_thinking:molten_chlorophyte`）；build + data 守卫通过；**未在游戏里实际熔化过** |
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
-| `./gradlew build` | ✅ | 2026-11-11：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.4.2；jar 1000 KB / `2b1c5812…`） |
-| `check-textures.py` | ✅ | 315 模型 / 116 blockstate / 213 纹理；七个子模型只引用 vanilla block 贴图 |
+| `./gradlew build` | ✅ | 2026-11-13：`BUILD SUCCESSFUL`（`--offline`，Java 17，1.5.0；jar 1007 KB / `50678cbc…`） |
+| 1.5.0 发布 | ✅ | `mod_version=1.5.0`；tag `v1.5.0-1.20.1` 与主线 `v1.5.0` 同步；jar 版本 / 大小 / sha 见 [release-1.5.0.md](release-1.5.0.md) |
+| `check-textures.py` | ✅ | 316 模型 / 116 blockstate / 214 纹理（2026-11-13 扩容升级后）；七个子模型只引用 vanilla block 贴图 |
 | datagen 三批 | ✅ | `ModRecipes` 143 条；71 blockstate + 29 方块模型 + 157 物品模型；`written: 0` 幂等 |
 | 数据表加载 | ✅ | 全装 + ER + BambooMod：`[materials] 25`、`[sieve] 7 inputs / 173 drops`、`[hammer] 88`、`[barrel] 18`（缺 Thermal 16）、`[compost] 67`、`[crucible] 39/9` |
 | 三路径 P1–P3 | ✅ | 七张表 add/remove/replace/`dump`；`/reload` 前后 dump 逐字节一致；KJS 2001 + CT 14 生效 |
@@ -373,8 +395,8 @@ Mek / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进
 1. **匠魂锤收尾**：逐个强化看 overlay 位置/大小（急速 / 发光 / 钻石 / 自动烧炼等），
    决定要不要补流体罐/装桶；再看 JEI 工具页与左键手感；如果决定连 id 改成
    `crushing_hammer`，要接受测试世界旧锤失效。
-2. **1.3.2 商店收尾 + 匠魂批次版本号**：`v1.3.2-1.20.1` 已发；CurseForge / Modrinth
-   上传待所有者；匠魂批次未发布，版本号待定。
+2. **1.5.0 商店收尾**：`v1.5.0-1.20.1` 与主线 `v1.5.0` 已推送；CurseForge / Modrinth
+   上传待所有者。1.3.2 / 1.4.x 的旧包上传也仍待所有者。
 3. **一次性进游戏验收 M1.5–M10**：桶/筛/锤/钩/坩埚/巫水/瓷桶/蚕/人偶（含热力两只、村民）+
    糖水链/养蜂、四台机器、自动输出抽屉、BER 动画、JEI 页面、TiT/AE2 实际筛出。
 4. **修分支筛表钴差异**：沙/砂砾/尘土各补 1 条 1/64（或补 `generate_sieve_assets.py`），

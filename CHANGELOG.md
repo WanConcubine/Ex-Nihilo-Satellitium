@@ -1,5 +1,37 @@
 # 更新记录
 
+## 1.5.0 — 2026-11-13（机器扩容升级）
+
+> 1.20.1 线功能更新；与 1.21.1 主线 `v1.5.0` 同版本、同功能。没有新增玩法表结构。
+
+### 中文
+
+- **扩容升级**（`capacity_upgrade`）：电动筛 / 电动锤的槽 4 新插件；每个物品增加 1 页
+  （12 格）产物缓存，堆叠上限 8（9 页 / 108 格）。
+- **产物翻页**：输出 3×4 下方新增 `< 1/9 >`，只对多页机器显示；拆掉扩容后高页物品并回
+  活动页或掉在机器上方，不会丢失。
+- **IO 不分页**：漏斗 / 管道 / 自动输出看到全部活动页拼成的平铺缓存。
+- **合成**：铁锭 / 纸 / 铁锭 + 纸 / 任意箱子 / 纸 + 铁锭 / 纸 / 铁锭；箱子走
+  `#exnihilosatellitium:chests`（箱子 / 陷阱箱 / 末影箱）。
+- **修复**：机器输出在“先并进半组、后面没有空槽”时会把已并入部分再整份掉出（复制）；
+  现在只掉真正没放下的余量。
+- **验证**：`build` + 纹理 / data 守卫通过；RCON 验证 9 页读写、自动输出与漏斗从第 9 页抽取、
+  基础页满后继续往第 2 页产出、缩页回收。**GUI 翻页和实际合成未目视。**
+
+### English
+
+- **Expansion Upgrade** (`capacity_upgrade`): slot-4 plugin for the electric sieve / hammer;
+  each item adds one 12-slot output page, stack limit 8 (9 pages / 108 slots).
+- **Output paging**: `< 1/9 >` under the 3x4 grid when a machine has more than one page;
+  removing the upgrade merges high pages back or drops the overflow above the machine.
+- **Flat IO**: hoppers, pipes and auto output see every active page as one flat buffer.
+- **Recipe**: iron ingot / paper / iron ingot, paper / any chest / paper, iron ingot / paper /
+  iron ingot; "any chest" is `#exnihilosatellitium:chests`.
+- **Fix**: output duplication when a stack was partly merged and then ran out of space.
+- **Verified**: build plus texture / data guards; RCON covers 9 pages, page-9 extraction,
+  page-2 production with a full base page, and page-removal recovery. GUI paging and the actual
+  crafting were not visually checked.
+
 ## 1.4.2 — 2026-11-11（黏液草 / 匠魂树苗 / 连锁图标）
 
 > 1.20.1 内容更新；没有新增玩法表结构。1.21.1 线本版无代码改动。

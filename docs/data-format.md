@@ -486,3 +486,48 @@ Provider：`compat/jade/BarrelComponentProvider.java`；只读已同步的 BE，
 
 1.20.1 分支目前没有客户端表镜像 / 网络同步：单人 / 局域网 JEI 读服务端表；
 专用服客户端看不到服务端数据包，JEI 只能显示内置内容（和主线同一边界）。
+
+## 11. 自动化机器与扩容页（1.20.1，2026-11-13）
+
+四台机器没有自己的玩法 JSON：直接读 `sieve/*.json` / `hammer/*.json`，判定入口是
+`SieveRolls` / `HammerRolls`。
+
+### NBT 键
+
+| 键 | 类型 | 含义 |
+|---|---|---|
+| `Items` | list | 全部槽位；1.20.1 物品用 `{Slot: byte, id, Count: byte, tag?}` |
+| `Work` | int | 当前这一件的进度（tick） |
+| `Active` | boolean | 是否正在工作 |
+| `Energy` | int | 电动版内部 FE；内能版没有 |
+| `BurnHalfTicks` | int | 内能版剩余燃料（半 tick；煤 1600 tick = 3200） |
+| `BurnHalfTotal` | int | 当前燃料总量 |
+| `AutoOutput` | boolean | 自动输出总开关，缺键 = 关 |
+| `OutputMask` | int | 自动输出面，位号 = `Direction.get3DDataValue()`；缺键默认 1（底面） |
+
+### 槽位与页
+
+- `0` 工具、`1` 输入；电动 `2` 速度、`3` 时运、`4` 扩容、`5` 预留；内能 `2` 燃料。
+- 电动输出基础页 `6..17`，第 2 页 `18..29`，……第 9 页 `102..113`；电动物理库存 114 格，
+  内能 15 格。槽 4 的每个 `capacity_upgrade` +1 页（最多 8 个 / 9 页），不增加 FE/t。
+- 超出活动页的 NBT 物品会在下一次 tick 并回活动页或掉在机器上方；不会静默消失。
+- `MachineItemHandler#getSlots()` = `outputSlotEnd()`（输入侧 + 全部活动页）；
+  漏斗 / 管道 / 自动输出看到的是平铺列表，不读取页号。GUI 页号不持久化。
+
+### 测试命令
+
+```mcfunction
+forceload add 0 0
+setblock 0 120 0 exnihilosatellitium:electric_hammer
+data merge block 0 120 0 {Energy:48000, Items:[
+  {Slot:0b, id:"exnihilosatellitium:iron_hammer", Count:1b},
+  {Slot:1b, id:"minecraft:cobblestone", Count:64b},
+  {Slot:4b, id:"exnihilosatellitium:capacity_upgrade", Count:8b},
+  {Slot:113b, id:"minecraft:diamond", Count:1b}]}
+data get block 0 120 0 Items
+# 拆掉扩容：槽 113 的钻石应并回活动页或掉在机器上方
+data remove block 0 120 0 Items[{Slot:4b}]
+```
+
+- 1.20.1 的 `Count` 是 byte，写 `count` 会得到空物品（与 1.21.1 不同）。
+- `OutputMask` 位或：`1` 下 / `2` 上 / `4` 北 / `8` 南 / `16` 西 / `32` 东。

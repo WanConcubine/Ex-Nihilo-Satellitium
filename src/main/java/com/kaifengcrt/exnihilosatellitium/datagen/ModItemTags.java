@@ -66,6 +66,9 @@ public final class ModItemTags extends ItemTagsProvider {
             }
         }
 
+        // "Any chest" for the capacity upgrade; extendable by other mods.
+        this.tag(ModTags.Items.CHESTS).add(Items.CHEST, Items.TRAPPED_CHEST, Items.ENDER_CHEST);
+
         final var compostable = this.tag(ModTags.Items.COMPOSTABLE);
         compostable.addTag(ItemTags.SAPLINGS);
         compostable.addTag(ItemTags.LEAVES);

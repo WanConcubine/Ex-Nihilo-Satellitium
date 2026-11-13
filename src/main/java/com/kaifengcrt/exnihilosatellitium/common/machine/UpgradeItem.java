@@ -11,9 +11,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * Speed / fortune upgrade. The tier is baked into the item (I = 1, II = 2,
- * III = 3); the machine only looks at the best tier it finds, so four copies of
- * speed I are the same as one speed I.
+ * Speed / fortune / capacity upgrade. The tier is baked into the item
+ * (I = 1, II = 2, III = 3); the machine only looks at the best tier it finds,
+ * so four copies of speed I are the same as one speed I. Capacity is the
+ * exception where the stack count is the whole effect: each item adds one
+ * output page.
  */
 public class UpgradeItem extends Item {
 
@@ -48,17 +50,23 @@ public class UpgradeItem extends Item {
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level,
                                 final List<Component> tooltip, final TooltipFlag flag) {
-        if (this.type == UpgradeType.SPEED) {
-            tooltip.add(Component.translatable("tooltip.exnihilosatellitium.speed_upgrade",
-                    String.format(java.util.Locale.ROOT, "%.1f", speedMultiplier(this.tier)))
-                    .withStyle(ChatFormatting.GRAY));
-            tooltip.add(Component.translatable("tooltip.exnihilosatellitium.speed_upgrade.stack")
-                    .withStyle(ChatFormatting.DARK_GRAY));
-        } else {
-            tooltip.add(Component.translatable("tooltip.exnihilosatellitium.fortune_upgrade", this.tier)
-                    .withStyle(ChatFormatting.GRAY));
-            tooltip.add(Component.translatable("tooltip.exnihilosatellitium.fortune_upgrade.stack")
-                    .withStyle(ChatFormatting.DARK_GRAY));
+        switch (this.type) {
+            case SPEED -> {
+                tooltip.add(Component.translatable("tooltip.exnihilosatellitium.speed_upgrade",
+                        String.format(java.util.Locale.ROOT, "%.1f", speedMultiplier(this.tier)))
+                        .withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.translatable("tooltip.exnihilosatellitium.speed_upgrade.stack")
+                        .withStyle(ChatFormatting.DARK_GRAY));
+            }
+            case FORTUNE -> {
+                tooltip.add(Component.translatable("tooltip.exnihilosatellitium.fortune_upgrade", this.tier)
+                        .withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.translatable("tooltip.exnihilosatellitium.fortune_upgrade.stack")
+                        .withStyle(ChatFormatting.DARK_GRAY));
+            }
+            case CAPACITY -> tooltip.add(
+                    Component.translatable("tooltip.exnihilosatellitium.capacity_upgrade")
+                            .withStyle(ChatFormatting.GRAY));
         }
     }
 }

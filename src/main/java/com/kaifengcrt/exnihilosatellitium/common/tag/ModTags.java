@@ -36,6 +36,14 @@ public final class ModTags {
         public static final TagKey<Item> COMPOSTABLE =
                 ItemTags.create(ResourceLocation.fromNamespaceAndPath(ExNihiloSatellitium.MOD_ID, "compostable"));
 
+        /**
+         * "Any chest" for the capacity upgrade recipe: chest, trapped chest and
+         * ender chest. A tag (instead of three recipe variants) also lets a mod
+         * add its own chest without touching our recipe.
+         */
+        public static final TagKey<Item> CHESTS =
+                ItemTags.create(ResourceLocation.fromNamespaceAndPath(ExNihiloSatellitium.MOD_ID, "chests"));
+
         private Items() {
         }
     }
