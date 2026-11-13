@@ -23,30 +23,50 @@ public class MachineItemHandler implements IItemHandlerModifiable {
 
     @Override
     public int getSlots() {
-        return this.inventory.getContainerSize();
+        // Only the live pages are exposed. The physical inventory pre-allocates
+        // all eight possible pages, so this count changes with the capacity
+        // upgrade; pipes still just see one flat list of output slots.
+        return this.owner.outputSlotEnd();
     }
 
     @Override
     public ItemStack getStackInSlot(final int slot) {
+        if (slot < 0 || slot >= this.getSlots()) {
+            return ItemStack.EMPTY;
+        }
         return this.inventory.getItem(slot);
     }
 
     @Override
     public void setStackInSlot(final int slot, final ItemStack stack) {
+        if (slot < 0 || slot >= this.getSlots()) {
+            return;
+        }
         this.inventory.setItem(slot, stack);
     }
 
     @Override
     public int getSlotLimit(final int slot) {
-        if (this.owner.kind() == MachineKind.HAMMER
-                && slot == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
-            return 1;
+        if (slot < 0 || slot >= this.getSlots()) {
+            return 0;
+        }
+        if (this.owner.isElectric()) {
+            if (this.owner.kind() == MachineKind.HAMMER
+                    && slot == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
+                return 1;
+            }
+            if (slot == MachineBlockEntity.CAPACITY_SLOT) {
+                return MachineBlockEntity.MAX_CAPACITY_PAGES;
+            }
         }
         return Math.min(64, this.inventory.getMaxStackSize());
     }
 
     @Override
     public boolean isItemValid(final int slot, final ItemStack stack) {
+        if (slot < 0 || slot >= this.getSlots()) {
+            return false;
+        }
         return this.inventory.canPlaceItem(slot, stack);
     }
 

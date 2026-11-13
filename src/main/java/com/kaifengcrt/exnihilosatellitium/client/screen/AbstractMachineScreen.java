@@ -4,6 +4,8 @@ import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBloc
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.AbstractMachineMenu;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -30,7 +32,16 @@ public abstract class AbstractMachineScreen<T extends AbstractMachineMenu>
     public static final int PROGRESS_W = 24;
     public static final int PROGRESS_H = 16;
 
+    private static final int PAGE_Y = 74;
+    private static final int PAGE_BUTTON_W = 12;
+    private static final int PAGE_BUTTON_H = 14;
+    private static final int PAGE_PREV_X = 99;
+    private static final int PAGE_NEXT_X = 157;
+    private static final int PAGE_LABEL_X = 134;
+
     private final MachineOutputPanel outputPanel;
+    private Button prevPageButton;
+    private Button nextPageButton;
 
     protected AbstractMachineScreen(final T menu, final Inventory playerInventory,
                                     final Component title) {
@@ -48,6 +59,34 @@ public abstract class AbstractMachineScreen<T extends AbstractMachineMenu>
     protected void init() {
         super.init();
         this.outputPanel.init();
+        // Small page arrows under the 3x4 output grid. They stay hidden until
+        // the machine actually has more than the base page.
+        this.prevPageButton = this.addRenderableWidget(Button
+                .builder(Component.literal("<"), button -> this.turnPage(-1))
+                .bounds(this.leftPos + PAGE_PREV_X, this.topPos + PAGE_Y,
+                        PAGE_BUTTON_W, PAGE_BUTTON_H)
+                .build());
+        this.prevPageButton.setTooltip(Tooltip.create(
+                Component.translatable("gui.exnihilosatellitium.page.prev")));
+        this.nextPageButton = this.addRenderableWidget(Button
+                .builder(Component.literal(">"), button -> this.turnPage(1))
+                .bounds(this.leftPos + PAGE_NEXT_X, this.topPos + PAGE_Y,
+                        PAGE_BUTTON_W, PAGE_BUTTON_H)
+                .build());
+        this.nextPageButton.setTooltip(Tooltip.create(
+                Component.translatable("gui.exnihilosatellitium.page.next")));
+    }
+
+    /** Switches the local view at once, then sends the absolute page to the server. */
+    private void turnPage(final int delta) {
+        final int target = this.menu.page() + delta;
+        if (target < 0 || target >= this.menu.pages()) {
+            return;
+        }
+        this.menu.setPage(target);
+        if (this.minecraft != null && this.minecraft.gameMode != null) {
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, target);
+        }
     }
 
     @Override
@@ -92,12 +131,23 @@ public abstract class AbstractMachineScreen<T extends AbstractMachineMenu>
         this.drawBackground(graphics);
         MachineGui.drawGhosts(graphics, this.menu, this.leftPos, this.topPos);
         this.drawGauges(graphics);
+        if (this.menu.pages() > 1) {
+            graphics.drawCenteredString(this.font,
+                    Component.translatable("gui.exnihilosatellitium.page.label",
+                            this.menu.page() + 1, this.menu.pages()),
+                    this.leftPos + PAGE_LABEL_X, this.topPos + PAGE_Y + 3, 0x404040);
+        }
         this.outputPanel.renderBackground(graphics);
     }
 
     @Override
     public void render(final GuiGraphics graphics, final int mouseX, final int mouseY,
                        final float partialTick) {
+        final boolean paged = this.menu.pages() > 1;
+        this.prevPageButton.visible = paged;
+        this.nextPageButton.visible = paged;
+        this.prevPageButton.active = paged && this.menu.page() > 0;
+        this.nextPageButton.active = paged && this.menu.page() < this.menu.pages() - 1;
         super.render(graphics, mouseX, mouseY, partialTick);
         this.renderTooltip(graphics, mouseX, mouseY);
         MachineGui.drawStatus(graphics, this.font, this.menu,
