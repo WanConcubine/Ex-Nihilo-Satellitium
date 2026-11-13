@@ -257,10 +257,14 @@ public final class ModItems {
             registerUpgrade("fortune_upgrade_2", UpgradeType.FORTUNE, 2);
     public static final DeferredHolder<Item, Item> FORTUNE_UPGRADE_3 =
             registerUpgrade("fortune_upgrade_3", UpgradeType.FORTUNE, 3);
+    /** One item = one extra output page; the stack itself is the page count. */
+    public static final DeferredHolder<Item, Item> CAPACITY_UPGRADE =
+            registerUpgrade("capacity_upgrade", UpgradeType.CAPACITY, 1);
 
     public static final List<DeferredHolder<Item, Item>> UPGRADES = List.of(
             SPEED_UPGRADE_1, SPEED_UPGRADE_2, SPEED_UPGRADE_3,
-            FORTUNE_UPGRADE_1, FORTUNE_UPGRADE_2, FORTUNE_UPGRADE_3);
+            FORTUNE_UPGRADE_1, FORTUNE_UPGRADE_2, FORTUNE_UPGRADE_3,
+            CAPACITY_UPGRADE);
 
     public static final DeferredHolder<Item, Item> WOOD_MESH =
             ITEMS.register("wood_mesh", () -> new MeshItem(new Item.Properties().stacksTo(1).durability(10), 1));

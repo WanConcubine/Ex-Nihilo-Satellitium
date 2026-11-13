@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.datagen;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterial;
 import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
+import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlocks;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
@@ -458,6 +459,18 @@ public final class ModRecipes extends RecipeProvider {
                 .define('F', ModItems.FORTUNE_UPGRADE_2.get())
                 .unlockedBy("has_fortune_upgrade_2", has(ModItems.FORTUNE_UPGRADE_2.get()))
                 .save(out, id("fortune_upgrade_3"));
+
+        // Capacity: one item = one output page, so the recipe itself is a single
+        // craftable upgrade rather than a three-tier chain.
+        ShapedRecipeBuilder.shaped(MISC, ModItems.CAPACITY_UPGRADE.get())
+                .pattern("IPI")
+                .pattern("PCP")
+                .pattern("IPI")
+                .define('I', Items.IRON_INGOT)
+                .define('P', Items.PAPER)
+                .define('C', ModTags.Items.CHESTS)
+                .unlockedBy("has_chest", has(ModTags.Items.CHESTS))
+                .save(out, id("capacity_upgrade"));
     }
 
     // ----------------------------------------------------------------- dolls

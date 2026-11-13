@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "tag": "exnihilosatellitium:chests"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "PCP",
+    "IPI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "exnihilosatellitium:capacity_upgrade"
+  }
+}
