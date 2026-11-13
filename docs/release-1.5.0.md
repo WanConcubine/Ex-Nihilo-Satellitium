@@ -1,7 +1,7 @@
 # 1.5.0 发布材料
 
 > 状态：**已构建、打 tag 并推送；CurseForge / Modrinth 上传待所有者操作。**
-> 版本号：`1.5.0`，**仅 1.21.1 主线**；1.20.1 线仍停在 `1.4.2`，扩容升级尚未移植。
+> 版本号：`1.5.0`；两条线同版本、同功能（`v1.5.0` / `v1.5.0-1.20.1`）。
 > **性质：功能更新**——新增机器产物缓存扩容升级与 GUI 翻页；顺手修复输出合并时的复制 bug。
 > 上一版：1.4.2（2026-11-11，1.20.1 线内容 / 1.21.1 版本对齐）。
 
@@ -10,9 +10,10 @@
 | 线 | 加载器 | jar | 大小 | sha256 |
 |---|---|---|---|---:|
 | `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.5.0.jar` | 954 KB（977269 B） | `bc06c41f52e3e26f3bf0184cf1d7a094ee44181daacb14e894864754dc783ff6` |
+| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.5.0.jar` | 1007 KB（1030832 B） | `50678cbcacd93ef35ec8d05f9de7c4a428faf5a97ab53da291a69cce1ee80304` |
 
 jar 包含 `LICENSE`、`THIRD-PARTY.md`、图标、`META-INF/neoforge.mods.toml`（`version="1.5.0"`），
-以及新的 `capacity_upgrade` 配方 / 标签 / 模型 / 贴图。产物构建于 2026-11-13（Java 21）。
+以及新的 `capacity_upgrade` 配方 / 标签 / 模型 / 贴图。两份产物均构建于 2026-11-13（主线 Java 21，1.20.1 Java 17）。
 jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha 不会相同。
 
 ## 本版内容（相对 1.4.2）
@@ -33,14 +34,16 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 
 ## 验证
 
-- `./gradlew build --offline`：主线 1.5.0 通过。
-- `check-textures.py`：308 模型 / 116 blockstate / 191 纹理。
+- `./gradlew build --offline`：主线 1.5.0、1.20.1 1.5.0 都通过。
+- `check-textures.py`：主线 308 模型 / 116 blockstate / 191 纹理；1.20.1 316 / 116 / 214。
 - `check-core-imports.py`：通过。
-- `check-data-paths.py`：298 recipes / 75 loot / 76 tags。
+- `check-data-paths.py`：主线 298 recipes / 75 loot / 76 tags；1.20.1 两个资源根 202 + 199 recipes / 75 loot / 82 tags。
 - `check-wiki.py`：8 页 / 8 译文 / 91 链接 / 74 JSON / 8 nav。
 - RCON：8 扩容时第 9 页槽 113 物品保留；自动输出与漏斗都能从第 9 页槽 100 抽取；
   基础页 `6..17` 塞满后机器继续往槽 18–20 产出；拆扩容后槽 113 物品并回槽 6；
   基础页仍满时高页产物弹出且机器停机。
+- 1.20.1 RCON：8 扩容时槽 113 物品保留、自动输出 / 漏斗从槽 100 抽取、
+  电动锤基础页塞满后槽 18 产出砂砾、拆扩容后槽 113 物品并回槽 6。
 - **未目视**：GUI 翻页按钮 / 页标签、工作台实际合成、JEI 页面；客户端只确认了
   Mekanism 加载与机器资源无缺失报错。
 
@@ -48,7 +51,7 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 
 **中文**：
 
-> 1.5.0（1.21.1）新增「扩容升级」：装进电动筛 / 电动锤的第 4 个插件槽，每个增加 1 页
+> 1.5.0（1.21.1 / 1.20.1）新增「扩容升级」：装进电动筛 / 电动锤的第 4 个插件槽，每个增加 1 页
 > （12 格）产物缓存，最多 8 个（9 页）；输出区下方可翻页查看。漏斗、管道和自动输出
 > 仍然把全部页当作一份平铺缓存。拆掉升级时高页物品会并回或掉出，不会丢失。
 > 合成：铁锭 / 纸 / 铁锭 + 纸 / 任意箱子 / 纸 + 铁锭 / 纸 / 铁锭。
@@ -56,7 +59,7 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 
 **English**：
 
-> 1.5.0 (1.21.1) adds the **Expansion Upgrade**: install it in the electric sieve / hammer's
+> 1.5.0 (1.21.1 / 1.20.1) adds the **Expansion Upgrade**: install it in the electric sieve / hammer's
 > 4th plugin slot; each item adds one 12-slot output page, up to 8 (9 pages total), and the
 > output grid can be paged. Hoppers, pipes and auto output still see every page as one flat
 > buffer. Removing the upgrade merges high pages back or drops the overflow instead of
@@ -66,10 +69,10 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 
 ## 发布前检查
 
-- [x] 主线 `mod_version=1.5.0`
+- [x] 两条线 `mod_version=1.5.0`
 - [x] `CHANGELOG.md` 的 1.5.0 节（中英双语）
 - [x] README 下载表版本号
 - [x] 主线 `build --offline` + 纹理 / core / data / wiki 守卫
-- [x] tag `v1.5.0`（已推送）
+- [x] tag `v1.5.0` / `v1.5.0-1.20.1`（已推送）
 - [ ] CurseForge / Modrinth 上传（所有者）
-- [ ] 1.20.1 线移植扩容升级（后续批次）
+- [x] 1.20.1 线同步扩容升级

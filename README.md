@@ -22,7 +22,7 @@
 | 版本 | 加载器 | 文件 |
 |---|---|---|
 | 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.5.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
-| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.4.2.jar`（由 `1.20.1-forge` 分支构建；扩容升级尚未移植） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.5.0.jar`（由 `1.20.1-forge` 分支构建） |
 
 1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
 2. 把 jar 放进 `mods/`。
@@ -64,7 +64,7 @@
 - [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运/扩容插件（9 页产物缓存可翻页；服务端已验证，GUI 待验收）
 - [x] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 接管标签 / 掉落表 / 143 条配方 + 74 blockstate + 201 模型；语言仍手写）
 - [ ] M8 与「月光魔法」联动
-- [x] M9 发布（1.5.0 主线已打 tag `v1.5.0`；1.20.1 线仍为 1.4.2；CurseForge / Modrinth 上传待所有者）
+- [x] M9 发布（1.5.0 两线已打 tag `v1.5.0` / `v1.5.0-1.20.1`；CurseForge / Modrinth 上传待所有者）
 
 ## 文档
 
