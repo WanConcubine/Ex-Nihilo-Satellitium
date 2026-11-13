@@ -71,10 +71,16 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     public static final int FUEL_SLOT = 2;
     public static final int UPGRADE_SLOT_START = 2;
     public static final int UPGRADE_SLOTS = 4;
+    /** Speed, fortune, capacity; the fourth slot stays reserved. */
+    public static final int CAPACITY_SLOT = UPGRADE_SLOT_START + 2;
+    /** One output page is the original 3x4 buffer. */
     public static final int OUTPUT_SLOTS = 12;
+    /** At most eight capacity items, each adding one page on top of the base page. */
+    public static final int MAX_CAPACITY_PAGES = 8;
+    public static final int MAX_OUTPUT_PAGES = 1 + MAX_CAPACITY_PAGES;
 
-    private static final int ELECTRIC_OUTPUT_START = UPGRADE_SLOT_START + UPGRADE_SLOTS;
-    private static final int FUEL_OUTPUT_START = FUEL_SLOT + 1;
+    public static final int ELECTRIC_OUTPUT_START = UPGRADE_SLOT_START + UPGRADE_SLOTS;
+    public static final int FUEL_OUTPUT_START = FUEL_SLOT + 1;
     private static final double MAX_STACK = 64.0D;
 
     /** One bit per {@link Direction#get3DDataValue()}; the auto-output target faces. */
@@ -91,6 +97,8 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
     private int burnHalfTicks;
     private int burnHalfTotal;
     private boolean active;
+    /** Last active output end seen by the server tick; drives page removal cleanup. */
+    private int activeOutputEnd = -1;
 
     /** Auto-output configuration: master switch plus the faces to push into. */
     private boolean autoOutput;
@@ -101,8 +109,23 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
                                  final BlockState state, final boolean electric) {
         super(type, pos, state);
         this.electric = electric;
-        this.inventory = new MachineInventory(this, electric ? 18 : 15);
+        this.inventory = new MachineInventory(this, maxInventorySize(electric));
         this.energy = electric ? new MachineEnergyBuffer(ConfigValues.machineEnergyCapacity()) : null;
+    }
+
+    /** Physical slot index where the active output buffer starts. */
+    public static int outputStart(final boolean electric) {
+        return electric ? ELECTRIC_OUTPUT_START : FUEL_OUTPUT_START;
+    }
+
+    /**
+     * Largest possible inventory: every capacity page pre-allocated. Keeping the
+     * array fixed means adding/removing a capacity upgrade never has to resize
+     * the container (which would invalidate menu slots and pipe handlers);
+     * {@link #outputSlotEnd()} decides which pages are actually live.
+     */
+    public static int maxInventorySize(final boolean electric) {
+        return outputStart(electric) + OUTPUT_SLOTS * (electric ? MAX_OUTPUT_PAGES : 1);
     }
 
     // ------------------------------------------------------------------ state
@@ -182,9 +205,33 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         return list;
     }
 
-    /** Number of installed upgrade items (0..4); drives the FE surcharge. */
+    /** Number of installed speed/fortune upgrades; drives the FE surcharge. */
     public int upgradeCount() {
         return this.upgradesOf(UpgradeType.SPEED).size() + this.upgradesOf(UpgradeType.FORTUNE).size();
+    }
+
+    /** Installed capacity items, clamped to the eight-page maximum. */
+    public int capacityUpgradeCount() {
+        if (!this.electric) {
+            return 0;
+        }
+        int count = 0;
+        for (int i = 0; i < UPGRADE_SLOTS; i++) {
+            final ItemStack stack = this.inventory.getItem(UPGRADE_SLOT_START + i);
+            if (stack.getItem() instanceof UpgradeItem upgrade
+                    && upgrade.type() == UpgradeType.CAPACITY) {
+                count += stack.getCount();
+            }
+        }
+        return Math.min(MAX_CAPACITY_PAGES, count);
+    }
+
+    /**
+     * Pages currently visible to the player. Fuel machines have no upgrade slots
+     * and therefore always stay at the base page.
+     */
+    public int outputPages() {
+        return 1 + this.capacityUpgradeCount();
     }
 
     /**
@@ -235,11 +282,17 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
 
 
     public int outputSlotStart() {
-        return this.electric ? ELECTRIC_OUTPUT_START : FUEL_OUTPUT_START;
+        return outputStart(this.electric);
     }
 
+    /** First slot past the currently active output pages. */
     public int outputSlotEnd() {
-        return this.outputSlotStart() + OUTPUT_SLOTS;
+        return this.outputSlotStart() + OUTPUT_SLOTS * this.outputPages();
+    }
+
+    /** First slot past every page the block entity can ever hold. */
+    public int maxOutputSlotEnd() {
+        return this.outputSlotStart() + OUTPUT_SLOTS * (this.electric ? MAX_OUTPUT_PAGES : 1);
     }
 
     // ---------------------------------------------------------- auto output
@@ -312,12 +365,46 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         }
     }
 
-    // ---------------------------------------------------------------- ticking
+    /**
+     * When a capacity upgrade is pulled out, the pages above the new end stop
+     * being addressable by the GUI, pipes and auto output. Anything still in
+     * them is merged back into the remaining pages first; only the overflow is
+     * dropped above the machine, so removing the upgrade never voids items.
+     *
+     * <p>Runs on every server tick but only scans after the active end changes
+     * (including the first tick after load, which also cleans up hand-edited
+     * {@code Items} NBT).</p>
+     */
+    private void trimInactiveOutputPages() {
+        final int activeEnd = this.outputSlotEnd();
+        final int previousEnd = this.activeOutputEnd;
+        this.activeOutputEnd = activeEnd;
+        if (previousEnd >= 0 && activeEnd >= previousEnd) {
+            return;
+        }
+        boolean changed = false;
+        for (int slot = activeEnd; slot < this.maxOutputSlotEnd(); slot++) {
+            final ItemStack stack = this.inventory.getItem(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            final ItemStack remainder = this.insertOutput(stack.copy());
+            this.inventory.setItem(slot, ItemStack.EMPTY);
+            if (!remainder.isEmpty() && this.level != null) {
+                Block.popResource(this.level, this.worldPosition.above(), remainder);
+            }
+            changed = true;
+        }
+        if (changed) {
+            this.setChanged();
+        }
+    }
 
     public void serverTick() {
         if (this.level == null || this.level.isClientSide) {
             return;
         }
+        this.trimInactiveOutputPages();
         this.relocateInvalidSlotItems();
         if (this.autoOutput && ++this.ejectCounter >= EJECT_INTERVAL) {
             this.ejectCounter = 0;
@@ -408,8 +495,9 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         this.consumeToolUse();
 
         for (final ItemStack stack : outputs) {
-            if (!this.insertOutput(stack)) {
-                Block.popResource(this.level, this.worldPosition.above(), stack);
+            final ItemStack remainder = this.insertOutput(stack);
+            if (!remainder.isEmpty()) {
+                Block.popResource(this.level, this.worldPosition.above(), remainder);
             }
         }
         if (this.autoOutput) {
@@ -546,30 +634,38 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         return false;
     }
 
-    /** Merges into the output buffer; {@code false} when every output slot is full. */
-    private boolean insertOutput(final ItemStack stack) {
-        ItemStack remaining = stack;
+    /**
+     * Merges into the active output pages and returns whatever did not fit.
+     * Existing stacks are topped up first so a page boundary can never leave a
+     * half stack in front of an empty slot.
+     */
+    private ItemStack insertOutput(final ItemStack stack) {
+        final ItemStack remaining = stack.copy();
         for (int slot = this.outputSlotStart(); slot < this.outputSlotEnd(); slot++) {
             final ItemStack existing = this.inventory.getItem(slot);
-            if (existing.isEmpty()) {
-                this.inventory.setItem(slot, remaining);
-                return true;
+            if (existing.isEmpty() || !ItemStack.isSameItemSameComponents(existing, remaining)) {
+                continue;
             }
-            if (ItemStack.isSameItemSameComponents(existing, remaining)) {
-                final int limit = Math.min(existing.getMaxStackSize(), (int) MAX_STACK);
-                final int room = limit - existing.getCount();
-                if (room > 0) {
-                    final int moved = Math.min(room, remaining.getCount());
-                    existing.grow(moved);
-                    remaining.shrink(moved);
-                    this.inventory.setItem(slot, existing);
-                    if (remaining.isEmpty()) {
-                        return true;
-                    }
-                }
+            final int limit = Math.min(existing.getMaxStackSize(), (int) MAX_STACK);
+            final int room = limit - existing.getCount();
+            if (room <= 0) {
+                continue;
+            }
+            final int moved = Math.min(room, remaining.getCount());
+            existing.grow(moved);
+            remaining.shrink(moved);
+            this.inventory.setItem(slot, existing);
+            if (remaining.isEmpty()) {
+                return ItemStack.EMPTY;
             }
         }
-        return remaining.isEmpty();
+        for (int slot = this.outputSlotStart(); slot < this.outputSlotEnd(); slot++) {
+            if (this.inventory.getItem(slot).isEmpty()) {
+                this.inventory.setItem(slot, remaining);
+                return ItemStack.EMPTY;
+            }
+        }
+        return remaining;
     }
 
     // ------------------------------------------------------------ slot rules
@@ -589,17 +685,16 @@ public class MachineBlockEntity extends BlockEntity implements MenuProvider, Con
         }
         if (this.electric) {
             // one slot per upgrade type: speed in slot 2, fortune in slot 3,
-            // slots 4/5 are reserved for future upgrade types.
+            // capacity in slot 4; slot 5 is reserved for a future type.
             if (!(stack.getItem() instanceof UpgradeItem upgrade)) {
                 return false;
             }
-            if (slot == UPGRADE_SLOT_START) {
-                return upgrade.type() == UpgradeType.SPEED;
-            }
-            if (slot == UPGRADE_SLOT_START + 1) {
-                return upgrade.type() == UpgradeType.FORTUNE;
-            }
-            return false;
+            return switch (slot) {
+                case UPGRADE_SLOT_START -> upgrade.type() == UpgradeType.SPEED;
+                case UPGRADE_SLOT_START + 1 -> upgrade.type() == UpgradeType.FORTUNE;
+                case CAPACITY_SLOT -> upgrade.type() == UpgradeType.CAPACITY;
+                default -> false;
+            };
         }
         if (slot == FUEL_SLOT) {
             return stack.getBurnTime(RecipeType.SMELTING) > 0;

@@ -21,8 +21,8 @@
 
 | 版本 | 加载器 | 文件 |
 |---|---|---|
-| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.4.2.jar`（`./gradlew build` 产物在 `build/libs/`） |
-| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.4.2.jar`（由 `1.20.1-forge` 分支构建） |
+| 1.21.1 | NeoForge 21.1.x | `exnihilosatellitium-1.21.1-1.5.0.jar`（`./gradlew build` 产物在 `build/libs/`） |
+| 1.20.1 | Forge 47.4.x | `exnihilosatellitium-1.20.1-1.4.2.jar`（由 `1.20.1-forge` 分支构建；扩容升级尚未移植） |
 
 1. 装好对应加载器（NeoForge 21.1.x / Forge 47.4.x，Java 21 / Java 17）。
 2. 把 jar 放进 `mods/`。
@@ -35,7 +35,7 @@
    **工匠巧思（Tinkers' Thinking）**（金属锭/匠魂熔炼/两种矿石）。
    所有联动都是可选的，没装就回退自有物品。
 
-1.4.2 的改动与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
+1.5.0 的改动与已知限制见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术栈
 
@@ -61,10 +61,10 @@
 - [x] M4 坩埚 + 热源（19 熔点 / 9 热源、容量/熔料/热源倍率可配、Creatio 模型、熔料/流体显示、Jade、JEI 两页；待验收）
 - [x] M5 矿粒 / 粉碎矿 / 冶炼（熔炼成锭已通；锤子降档已接，待验收）
 - [x] M6 瓷桶 / 巫水 / 蚕丝 / 娃娃（服务端已验证，画面待验收）
-- [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运插件（服务端已验证，GUI 待验收）
+- [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运/扩容插件（9 页产物缓存可翻页；服务端已验证，GUI 待验收）
 - [x] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 接管标签 / 掉落表 / 143 条配方 + 74 blockstate + 201 模型；语言仍手写）
 - [ ] M8 与「月光魔法」联动
-- [x] M9 发布（1.4.2 已打 tag `v1.4.2` / `v1.4.2-1.20.1`；CurseForge / Modrinth 上传待所有者）
+- [x] M9 发布（1.5.0 主线已打 tag `v1.5.0`；1.20.1 线仍为 1.4.2；CurseForge / Modrinth 上传待所有者）
 
 ## 文档
 

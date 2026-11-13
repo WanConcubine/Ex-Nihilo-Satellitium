@@ -1,6 +1,8 @@
 package com.kaifengcrt.exnihilosatellitium.common.machine.menu;
 
 import com.kaifengcrt.exnihilosatellitium.common.machine.MachineKind;
+import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeItem;
+import com.kaifengcrt.exnihilosatellitium.common.machine.UpgradeType;
 import com.kaifengcrt.exnihilosatellitium.common.machine.block.MachineBlock;
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineInventory;
@@ -75,6 +77,11 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
     protected final boolean electric;
     protected final MachineKind kind;
 
+    private final PagedOutputContainer outputView;
+    private final int machineSlotCount;
+    /** Current output page; the server owns the value and clients mirror it. */
+    private int page;
+
     protected AbstractMachineMenu(final MenuType<?> type, final int id,
                                   final Inventory playerInventory,
                                   final MachineBlockEntity owner, final MachineKind kind,
@@ -84,10 +91,15 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
         this.electric = electric;
         this.kind = kind;
         this.machine = owner != null ? owner.getInventory()
-                : new SimpleContainer(electric ? 18 : 15);
+                : new SimpleContainer(MachineBlockEntity.maxInventorySize(electric));
         this.data = playerInventory.player.level().isClientSide
                 ? new SimpleContainerData(MachineBlockEntity.DATA_COUNT)
                 : (owner != null ? owner : new SimpleContainerData(MachineBlockEntity.DATA_COUNT));
+        this.outputView = new PagedOutputContainer(this.machine,
+                MachineBlockEntity.outputStart(electric), MachineBlockEntity.OUTPUT_SLOTS,
+                this::page);
+        this.machineSlotCount = MachineBlockEntity.outputStart(electric)
+                + MachineBlockEntity.OUTPUT_SLOTS;
 
         this.addSlot(new MachineSlot(this.machine, MachineBlockEntity.TOOL_SLOT, 26, TOOL_Y));
         this.addSlot(new MachineSlot(this.machine, MachineBlockEntity.INPUT_SLOT, 26, INPUT_Y));
@@ -101,11 +113,11 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
             this.addSlot(new MachineSlot(this.machine, MachineBlockEntity.FUEL_SLOT, 26, LOWER_Y));
         }
 
-        // 3 rows x 4 columns = 12 output slots.
-        final int outputStart = electric ? 6 : 3;
+        // 3 rows x 4 columns = 12 visible output slots; the view maps them onto
+        // the current page of the machine's flat output buffer.
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 4; column++) {
-                this.addSlot(new MachineSlot(this.machine, outputStart + row * 4 + column,
+                this.addSlot(new MachineSlot(this.outputView, row * 4 + column,
                         OUTPUT_X + column * 18, OUTPUT_Y + row * 18));
             }
         }
@@ -135,8 +147,63 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
         return this.kind;
     }
 
+    /** Number of output pages; 1 without capacity upgrades. */
+    public int pages() {
+        if (this.owner != null) {
+            return this.owner.outputPages();
+        }
+        if (!this.electric) {
+            return 1;
+        }
+        // The block entity should always be present on the client; keep a
+        // fallback for the one tick where the menu exists before the chunk has
+        // delivered its block entity.
+        final ItemStack capacity = this.machine.getItem(MachineBlockEntity.CAPACITY_SLOT);
+        if (capacity.getItem() instanceof UpgradeItem upgrade
+                && upgrade.type() == UpgradeType.CAPACITY) {
+            return 1 + Math.min(MachineBlockEntity.MAX_CAPACITY_PAGES, capacity.getCount());
+        }
+        return 1;
+    }
+
+    /** Clamped current page, so removing a capacity upgrade never leaves a stale page. */
+    public int page() {
+        final int max = Math.max(0, this.pages() - 1);
+        if (this.page < 0) {
+            this.page = 0;
+        } else if (this.page > max) {
+            this.page = max;
+        }
+        return this.page;
+    }
+
+    public void setPage(final int page) {
+        this.page = Math.max(0, Math.min(page, Math.max(0, this.pages() - 1)));
+    }
+
+    /**
+     * Page buttons use the vanilla container-button channel: the client updates
+     * its own page immediately for responsiveness and sends the absolute page;
+     * the server validates it, stores the same page and re-sends the whole menu
+     * content through the paged view. A full resync (instead of a diff) is
+     * required because the client's cached slots for the target page may be
+     * older than the slot indices the diff compares against.
+     */
+    @Override
+    public boolean clickMenuButton(final Player player, final int id) {
+        if (this.owner == null || !this.owner.stillValid(player)) {
+            return false;
+        }
+        if (id < 0 || id >= this.pages()) {
+            return false;
+        }
+        this.page = id;
+        this.sendAllDataToRemote();
+        return true;
+    }
+
     public int machineSlotCount() {
-        return this.machine.getContainerSize();
+        return this.machineSlotCount;
     }
 
     /**
@@ -158,6 +225,9 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
             }
             if (index == MachineBlockEntity.UPGRADE_SLOT_START + 1) {
                 return new ItemStack(ModItems.FORTUNE_UPGRADE_1.get());
+            }
+            if (index == MachineBlockEntity.CAPACITY_SLOT) {
+                return new ItemStack(ModItems.CAPACITY_UPGRADE.get());
             }
             return ItemStack.EMPTY;
         }
@@ -185,6 +255,9 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
         if (this.electric) {
             if (index == MachineBlockEntity.UPGRADE_SLOT_START) {
                 return Component.translatable("gui.exnihilosatellitium.slot.speed_only");
+            }
+            if (index == MachineBlockEntity.CAPACITY_SLOT) {
+                return Component.translatable("gui.exnihilosatellitium.slot.capacity_only");
             }
             return Component.translatable(this.kind == MachineKind.HAMMER
                     ? "gui.exnihilosatellitium.slot.fortune_only_1"
@@ -214,7 +287,7 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
         }
         final ItemStack stack = slot.getItem();
         final ItemStack copy = stack.copy();
-        final int machineSlots = this.machine.getContainerSize();
+        final int machineSlots = this.machineSlotCount;
         if (index < machineSlots) {
             if (!this.moveItemStackTo(stack, machineSlots, this.slots.size(), true)) {
                 return ItemStack.EMPTY;

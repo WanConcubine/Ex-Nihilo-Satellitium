@@ -6,6 +6,8 @@ import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBloc
 import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.kaifengcrt.exnihilosatellitium.common.machine.menu.ElectricMachineMenu;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -41,6 +43,15 @@ public class ElectricMachineScreen extends AbstractContainerScreen<ElectricMachi
     private static final int PROGRESS_W = 24;
     private static final int PROGRESS_H = 16;
     private static final int OUTPUT_TAB_Y = 72;
+    private static final int PAGE_Y = 74;
+    private static final int PAGE_BUTTON_W = 12;
+    private static final int PAGE_BUTTON_H = 14;
+    private static final int PAGE_PREV_X = 99;
+    private static final int PAGE_NEXT_X = 157;
+    private static final int PAGE_LABEL_X = 134;
+
+    private Button prevPageButton;
+    private Button nextPageButton;
 
     public ElectricMachineScreen(final ElectricMachineMenu menu, final Inventory playerInventory,
                                  final Component title) {
@@ -61,6 +72,34 @@ public class ElectricMachineScreen extends AbstractContainerScreen<ElectricMachi
                 () -> this.menu.data().get(MachineBlockEntity.DATA_AUTO_OUTPUT) != 0,
                 Component.translatable("gui.exnihilosatellitium.output.button"),
                 button -> this.openOutputConfig()));
+        // Small page arrows under the 3x4 output grid. They stay hidden until
+        // the machine actually has more than the base page.
+        this.prevPageButton = this.addRenderableWidget(Button
+                .builder(Component.literal("<"), button -> this.turnPage(-1))
+                .bounds(this.leftPos + PAGE_PREV_X, this.topPos + PAGE_Y,
+                        PAGE_BUTTON_W, PAGE_BUTTON_H)
+                .build());
+        this.prevPageButton.setTooltip(Tooltip.create(
+                Component.translatable("gui.exnihilosatellitium.page.prev")));
+        this.nextPageButton = this.addRenderableWidget(Button
+                .builder(Component.literal(">"), button -> this.turnPage(1))
+                .bounds(this.leftPos + PAGE_NEXT_X, this.topPos + PAGE_Y,
+                        PAGE_BUTTON_W, PAGE_BUTTON_H)
+                .build());
+        this.nextPageButton.setTooltip(Tooltip.create(
+                Component.translatable("gui.exnihilosatellitium.page.next")));
+    }
+
+    /** Switches the local view at once, then sends the absolute page to the server. */
+    private void turnPage(final int delta) {
+        final int target = this.menu.page() + delta;
+        if (target < 0 || target >= this.menu.pages()) {
+            return;
+        }
+        this.menu.setPage(target);
+        if (this.minecraft != null && this.minecraft.gameMode != null) {
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, target);
+        }
     }
 
     /** Opens the auto-output config as a layer, so this menu stays open. */
@@ -79,6 +118,12 @@ public class ElectricMachineScreen extends AbstractContainerScreen<ElectricMachi
                             final int mouseX, final int mouseY) {
         graphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         MachineGui.drawGhosts(graphics, this.menu, this.leftPos, this.topPos);
+        if (this.menu.pages() > 1) {
+            graphics.drawCenteredString(this.font,
+                    Component.translatable("gui.exnihilosatellitium.page.label",
+                            this.menu.page() + 1, this.menu.pages()),
+                    this.leftPos + PAGE_LABEL_X, this.topPos + PAGE_Y + 3, 0x404040);
+        }
 
         final int ticks = Math.max(1, this.menu.data().get(MachineBlockEntity.DATA_TICKS));
         final int work = this.menu.data().get(MachineBlockEntity.DATA_WORK);
@@ -114,6 +159,11 @@ public class ElectricMachineScreen extends AbstractContainerScreen<ElectricMachi
     @Override
     public void render(final GuiGraphics graphics, final int mouseX, final int mouseY,
                        final float partialTick) {
+        final boolean paged = this.menu.pages() > 1;
+        this.prevPageButton.visible = paged;
+        this.nextPageButton.visible = paged;
+        this.prevPageButton.active = paged && this.menu.page() > 0;
+        this.nextPageButton.active = paged && this.menu.page() < this.menu.pages() - 1;
         super.render(graphics, mouseX, mouseY, partialTick);
         this.renderTooltip(graphics, mouseX, mouseY);
         MachineGui.drawStatus(graphics, this.font, this.menu,

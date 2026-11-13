@@ -960,7 +960,7 @@ overlay 队列（`CustomizationOverlay`）。P1 只通过 OP 命令暴露，用�
 这样同一份 fixture 走 JSON 与走 overlay 的 dump 才能逐字节一致；这是 P2/P3 的验收方法。
 
 
-## 15. M10 自动化机器（2026-11-01）
+## 15. M10 自动化机器（2026-11-01，2026-11-13 扩容页）
 
 四台机器**没有自己的 JSON 表**：它们直接读 `sieve/*.json` 与 `hammer/*.json`，判定函数是
 `SieveRolls` / `HammerRolls`。因此改掉落表 = 改原有 JSON，机器自动跟随。
@@ -969,7 +969,7 @@ overlay 队列（`CustomizationOverlay`）。P1 只通过 OP 命令暴露，用�
 
 | 键 | 类型 | 含义 |
 |---|---|---|
-| `Items` | list | 全部槽位；每项 `{Slot: byte, id, count, components?}`（3×4 输出后电动 18 格 / 内能 15 格） |
+| `Items` | list | 全部槽位；每项 `{Slot: byte, id, count, components?}`（电动物理库存 114 格 = 6 输入侧 + 9 页 × 12；内能 15 格） |
 | `Work` | int | 当前这一件的进度（tick）；满 `ticksPerOperation` 归零并产出 |
 | `Active` | boolean | 是否正在工作；变化时服务端 `sendBlockUpdated`，客户端 BER/粒子用 |
 | `Energy` | int | 电动版内部 FE；内能版没有这个键 |
@@ -978,12 +978,18 @@ overlay 队列（`CustomizationOverlay`）。P1 只通过 OP 命令暴露，用�
 | `AutoOutput` | boolean | 自动输出总开关；默认 `false`（缺键 = 关） |
 | `OutputMask` | int | 自动输出面：每个面一位，位号 = `Direction.get3DDataValue()`（下 0 / 上 1 / 北 2 / 南 3 / 西 4 / 东 5）；缺键时默认 1（底面） |
 
-- 槽位：`0` 工具（筛网 / 锤）、`1` 输入；电动 `2..5` 插件、`6..14` 输出；内能 `2` 燃料、`3..11` 输出。
+- 槽位：`0` 工具（筛网 / 锤）、`1` 输入；电动 `2` 速度、`3` 时运、`4` 扩容、`5` 预留，
+  输出基础页 `6..17`；内能 `2` 燃料、输出 `3..14`。
+- **扩容页**：槽 4 的扩容物品每个 +1 页（12 格），堆叠上限 8；总页数 1..9。
+  第 2 页 `18..29`，……第 9 页 `102..113`；超出活动页的 NBT 物品会在下一次 tick 被并回
+  活动页或掉在机器上方（`trimInactiveOutputPages`），不会静默消失。
+- **IO 平铺**：`MachineItemHandler#getSlots()` = `outputSlotEnd()`，即“输入侧 + 全部活动页”；
+  漏斗 / 管道 / 自动输出看到的是平铺列表，不读取页号。GUI 页号只在菜单里，重新打开回到第 1 页。
 - 机器记录的 `Work` 在断电/断料时归零（不做半程存档）。
 
 ### 自动输出
 
-- `AutoOutput` 打开后，每完成一次操作立刻把输出 12 格推进 `OutputMask` 点亮的面；
+- `AutoOutput` 打开后，每完成一次操作立刻把**全部活动页**推进 `OutputMask` 点亮的面；
   另有 20 tick 的重试，邻居满了再清空也能补推。邻居拒收的余量留在输出格。
 - 掩码只影响自动弹出；`ItemHandler.BLOCK` 不受影响，漏斗/管道仍可从任意面抽输出格。
 - `AutoOutput=true` 且 `OutputMask=0`：GUI 提交（`setOutputConfig`）会回退为底面，
@@ -1026,6 +1032,21 @@ data get block 0 120 0
 - **必须在 `forceload` 的区块里测**（没有玩家时，普通区块的 BE 不 tick）。
 - 管道验证：机器下方放漏斗只会抽到输出格；上方漏斗可以把料补进输入格。
 
+扩容（RCON）：
+
+```mcfunction
+# 8 个扩容 = 9 页；槽 113 是第 9 页最后一格
+data merge block 0 120 0 {Items:[
+  {Slot:4b, id:"exnihilosatellitium:capacity_upgrade", count:8},
+  {Slot:113b, id:"minecraft:diamond", count:1}]}
+# 读回去应保留 Slot:113b；拆掉扩容后再读，钻石应并回活动页或掉在机器上方
+data remove block 0 120 0 Items[{Slot:4b}]
+```
+
+- `/data merge` 写 `Items` 会整表替换；只想改槽 4 用 `data remove ... Items[{Slot:4b}]`
+  或 `data modify` 定位。
+- 扩容不写额外 NBT：页数完全由槽 4 的物品数量推导，读档后同样生效。
+
 自动输出（RCON）：
 
 ```mcfunction
@@ -1043,7 +1064,7 @@ data merge block 0 120 0 {AutoOutput:0b}
 
 | 能力 | 电动 | 内能 |
 |---|---|---|
-| `ItemHandler.BLOCK` | 输入/工具/插件格可插，输出 12 格只抽不放 | 同左（输出 12 格只抽不放） |
+| `ItemHandler.BLOCK` | 输入/工具/插件格可插，输出活动页只抽不放（槽数随扩容变化） | 同左（固定 1 页 12 格只抽不放） |
 | `EnergyStorage.BLOCK` | `MachineEnergy`（只进不出） | `null`（没有能力） |
 
 ## 16. 版本相关的数据目录（P2，2026-11-01）

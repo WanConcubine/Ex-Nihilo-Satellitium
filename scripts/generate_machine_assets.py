@@ -9,6 +9,7 @@ Outputs (all overwritten, deterministic):
   assets/exnihilosatellitium/textures/block/{electric_sieve,electric_hammer,
       fuel_sieve,fuel_hammer}.png            32x32
   assets/exnihilosatellitium/textures/item/{speed,fortune}_upgrade_{1,2,3}.png
+  assets/exnihilosatellitium/textures/item/capacity_upgrade.png
   assets/exnihilosatellitium/textures/gui/{electric_machine,fuel_machine,
       energy_fill,fuel_fill,energy_icon,fuel_icon,arrow_track,arrow_fill,
       output_config}.png
@@ -134,6 +135,30 @@ def upgrade_texture(kind: str, tier: int) -> Image.Image:
         for index in range(tier):
             draw.point((3 + index * 2, 3), fill=GOLD)
         pips(draw, tier, GOLD)
+    return img
+
+
+def capacity_texture() -> Image.Image:
+    """Iron-bound chest with an upward arrow: one more output page."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    # chest body
+    draw.rectangle((2, 6, 13, 14), fill=RUST_DARK)
+    draw.rectangle((3, 7, 12, 13), fill=BROWN)
+    draw.rectangle((3, 7, 12, 8), fill=(154, 104, 60))
+    draw.line((3, 12, 12, 12), fill=RUST_DARK)
+    # iron straps + rivets
+    for x in (3, 12):
+        draw.line((x, 7, x, 13), fill=PLATE_DARK)
+    draw.point((3, 7), fill=BOLT)
+    draw.point((12, 7), fill=BOLT)
+    # gold latch
+    draw.rectangle((7, 8, 8, 11), fill=GOLD)
+    draw.point((7, 10), fill=(146, 112, 44))
+    # page-up arrow
+    draw.line((8, 1, 8, 4), fill=CYAN_LIGHT)
+    draw.line((6, 3, 8, 1), fill=CYAN_LIGHT)
+    draw.line((10, 3, 8, 1), fill=CYAN_LIGHT)
     return img
 
 
@@ -506,6 +531,9 @@ def main() -> None:
             name = f"{kind}_upgrade_{tier}"
             upgrade_texture(kind, tier).save(
                 ASSETS / "textures" / "item" / f"{name}.png")
+
+    capacity_texture().save(
+        ASSETS / "textures" / "item" / "capacity_upgrade.png")
 
     machine_side_32(fuel=False).save(
         ASSETS / "textures" / "block" / "machine_frame_side_electric.png")
