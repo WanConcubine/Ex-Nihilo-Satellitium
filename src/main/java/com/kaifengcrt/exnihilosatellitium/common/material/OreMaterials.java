@@ -5,8 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.ModList;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -209,6 +209,6 @@ public final class OreMaterials {
     }
 
     private static boolean isModLoaded(final String mod) {
-        return ModList.get() != null && ModList.get().isLoaded(mod);
+        return Platform.isModLoaded(mod);
     }
 }

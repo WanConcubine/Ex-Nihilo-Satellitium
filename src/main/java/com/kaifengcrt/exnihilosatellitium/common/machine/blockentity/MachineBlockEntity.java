@@ -1,7 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.common.machine.blockentity;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
-import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
+import com.kaifengcrt.exnihilosatellitium.platform.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.common.item.HammerTool;
 import com.kaifengcrt.exnihilosatellitium.common.item.MeshItem;
 import com.kaifengcrt.exnihilosatellitium.common.machine.HammerRolls;

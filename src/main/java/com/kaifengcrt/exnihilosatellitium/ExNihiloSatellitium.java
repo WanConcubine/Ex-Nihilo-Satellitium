@@ -1,6 +1,6 @@
 package com.kaifengcrt.exnihilosatellitium;
 
-import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
+import com.kaifengcrt.exnihilosatellitium.platform.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.kaifengcrt.exnihilosatellitium.compat.MoonlightCompat;
 import com.kaifengcrt.exnihilosatellitium.platform.ForgeModProbe;

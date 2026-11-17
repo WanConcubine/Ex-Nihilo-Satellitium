@@ -1,4 +1,4 @@
-package com.kaifengcrt.exnihilosatellitium.common.config;
+package com.kaifengcrt.exnihilosatellitium.platform.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

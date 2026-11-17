@@ -1,6 +1,6 @@
 package com.kaifengcrt.exnihilosatellitium.common.blockentity;
 
-import com.kaifengcrt.exnihilosatellitium.common.config.ExConfig;
+import com.kaifengcrt.exnihilosatellitium.platform.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.tag.ModTags;
