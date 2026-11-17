@@ -259,7 +259,7 @@ crucible_heat 9。→ 单包足够，**不需要分页**；等表涨到 ~100 KB 
 #64 已修：镜像目录从 `TableId.java` 派生，`verifyTableMirror` 接进 `check` | S2 | 改一条数据包条目 → 客户端 JEI 显示新值；
 截断快照（模拟失败）时日志 WARN 且 JEI 仍有旧数据 |
 | S4a 数据包 fixture（CI） | ✅ 已做（2026-11-17）：`scripts/check-fixture.py` + `scripts/rcon.py` + `scripts/fixtures/datapack`，CI 作业 `fixture-datapack`；装 fixture → `/reload` → 断言 `exnihilo dump sieve` 行 | 无（独立完成） | 实测：fixture 行出现；把 chance 改成 0.25 → 失败；恢复 → 通过 |
-| S4b 脚本 fixture | 同一 fixture 分别用 KJS / CT 写，dump 与数据包版逐字节一致（P3 已手工验过一次） | S4a + CI 里有对应运行时 jar | 同 S4a；jar 缺失时**跳过**而不是失败 |
+| S4b 脚本 fixture | ✅ 已做（2026-11-17）：`scripts/fixtures/scripts` 里 KJS / CT 各一条；`check-fixture.py --scripts` 断言三行；CI 作业先拉 KubeJS / Rhino / CraftTweaker 运行时 jar | S4a + 运行时 jar | 实测三行同时通过；把 KJS 的 chance 改成 0.45 → 只有 KJS 行缺失并失败 |
 | S5 文档校验 | ✅ 第一步已做（2026-11-17）：`check-wiki-json.py` 校验 id 格式 / `chance` 0..1 / `min<=max` / `amount` 非负，接进 CI；**语义校验**（与 Java loader 一致，含未知字段）仍待 S4a 的 fixture | S4a | 已做：坏示例能红（`diamond` 缺命名空间、`chance 1.5` 都报错） |
 
 **未决（需要 Owner 定）**

@@ -178,6 +178,20 @@ jobs:
           echo "eula=true" > run/eula.txt
           printf 'online-mode=false\nlevel-type=flat\nspawn-protection=0\nenable-rcon=true\nrcon.password=eni\nrcon.port=25575\n' > run/server.properties
 
+      - name: Fetch script mods (KubeJS / Rhino / CraftTweaker)
+        run: |
+          set -euo pipefail
+          mkdir -p run/mods
+          # CraftTweaker is already fetched into libs/ by compileJava (build.gradle);
+          # KubeJS and Rhino come from Modrinth's maven with the versions pinned in
+          # gradle.properties for the compileOnly dependency.
+          ./gradlew compileJava --no-daemon -q
+          cp libs/crafttweaker/*.jar run/mods/crafttweaker.jar
+          curl -fsSL -o run/mods/kubejs.jar \
+            "https://api.modrinth.com/maven/maven/modrinth/kubejs/2101.7.2-build.348/kubejs-2101.7.2-build.348.jar"
+          curl -fsSL -o run/mods/rhino.jar \
+            "https://api.modrinth.com/maven/maven/modrinth/rhino/2101.2.7-build.81%2BRhino-1.21/rhino-2101.2.7-build.81%2BRhino-1.21.jar"
+
       - name: Start server
         run: |
           set -u
@@ -188,8 +202,8 @@ jobs:
           done
           grep -q 'Done (' /tmp/fixture-server.log
 
-      - name: Datapack fixture
-        run: python3 scripts/check-fixture.py
+      - name: Three-path fixture (datapack + KubeJS + CraftTweaker)
+        run: python3 scripts/check-fixture.py --scripts
 
       - name: Stop server
         if: always()
