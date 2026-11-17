@@ -302,7 +302,7 @@ Thermal 时生效（本地目前只有 1.20.1 版），主线没装就按基线�
 ## 下一步（按价值排序）
 
 > 自定义三路径：P1 + P1.5 + P2（KubeJS）+ P3（CraftTweaker）两版都已完成；
-> 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**（2026-11-17：P4 的实施拆分已写进 roadmap，含快照体积实测与 4 个未决点）。
+> 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**（2026-11-17：P4 的实施拆分已写进 roadmap，含快照体积实测；镜像保留为兜底（决定 C），#64 由 `verifyTableMirror` 修掉）。
 >
 > **2026-11-09 第二轮技术债审计**：[tech-debt.md](tech-debt.md)。P0 #47 已修并实测通过；
 > P1 #48–#50 已修，2026-11-10 首跑通过；**#51/#53 已于 2026-11-17 完成**（见下）。

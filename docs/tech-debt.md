@@ -88,7 +88,7 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
 | 61 | **「锤子的时运槽只能放 1 个」规则重复三处** | `MachineBlockEntity.upgradesOf`（`:173-175`）、`AbstractMachineMenu.MachineSlot.getMaxStackSize`（`:62-68`）、`MachineItemHandler.getSlotLimit`（`:43-48`）各自判断 `kind()==HAMMER && slot==UPGRADE_SLOT_START+1` | 改槽位/规则时容易漏一处，GUI、管道、逻辑行为分叉 | 抽 `MachineBlockEntity.slotLimit(slot)` / `isUpgradeSlotValid` 单一入口，三处都调它 |
 | 62 | **datagen 漂移没有自动检查** | `docs/status.md:347-348` 要求手工 `runData` 后看 `git status`；CI 没有 | 手写资源/生成资源会悄悄不一致，直到有人跑 datagen | CI 加一步 `./gradlew runData --offline` + `git diff --exit-code src/generated`（或单独的 datagen job） |
 | 63 | **构建期联网下载 CraftTweaker** | `build.gradle:29-45`：`downloadCraftTweaker` 在 `compileJava` 前用 `URL.withInputStream` 抓 jar，无校验和，缓存到 `libs/`（gitignored）；失败/半截文件会留下坏缓存 | 离线/镜像环境构建不稳定；构建不可复现；供应链上没有完整性校验 | 优先修 BlameJared 仓库解析（Gradle 原生依赖）；不行就把 jar 放进带 sha256 的 `libs/` 并由脚本校验；至少校验文件大小/zip 完整性 |
-| 64 | **`processResources` 手列 7 个数据目录** | `build.gradle:151-172` 逐目录 `from(...)`；新增第 8 张表要手工记得加 | 新表在专用服客户端 JEI 里静默缺失（数据在 `data/`，客户端只读 `assets/`） | 用循环遍历一个常量列表，或直接镜像 `data/exnihilosatellitium/{sieve,barrel,...}` 的父目录（注意排除 `recipe/loot_table/tags` 等 vanilla 目录） |
+| 64 | **`processResources` 手列 7 个数据目录** | ✅ 2026-11-17 已修：目录从 `TableId.java` 派生，`verifyTableMirror` 接进 `check`；删掉镜像目录能被构建拦下 | 原先新增第 8 张表要手工记得加，漏了就在专用服客户端 JEI 静默缺失 | 保持派生实现，不要再把手写清单加回来 |
 | 65 | **文档数字漂移** | `docs/status.md:396` 写「295 模型 / 171 纹理」「check-wiki 7 页 / 52 链接」，实际是 307/190 与 8 页/91 链接（同文件 `:62` 的当前批数字又与之矛盾）；`CrucibleRecipes.java:32-34` 说 `solid` 只用于文档/校验，实际 `CrucibleBlockEntity` 用它算容量与产出比（`docs/data-format.md:739-741` 才是对的） | 交接时按旧数字判断回归；读者被 javadoc 误导 | 每次守卫输出变化时同步 status 的「验证状态」；`solid` 的 javadoc 改成「熔料体积，参与容量与产出比」 |
 
 ## P3：重构机会与清理
@@ -108,8 +108,9 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
 | 76 | **桶的堆肥产物硬编码泥土**（首轮 #44） | `BarrelBlockEntity.getOutputStack():322-328`、`extractDirt():548-552` 直接 `new ItemStack(Items.DIRT)`；`compost` JSON 只有分值 | classic 只有泥土，可接受；但要做「堆肥 → 其它产物」联动就得改代码。要么在文档写死边界，要么给 `compost` 文件加可选 `result` |
 | 77 | **`check-textures.py` 不查 data JSON 引用的存在性**（首轮 #35 的剩余部分） | 脚本只查 models/blockstates/textures；recipe/loot 里写错 id 仍能过 | 可选：把 `check-data-paths.py` 扩成「引用的物品/方块必须存在」，但需要 registry 快照，成本较高；至少对 `sieve/hammer` 的 `result/item` 做静态 id 存在性检查 |
 | 78 | **`SieveBlockEntity.setMesh` 公共 API 不校验 / MeshItem tier 无上限**（首轮 #43） | `:54-59` 只 `copyWithCount(1)`；`MeshItem` 的 tier 由常量决定，未来脚本/数据驱动时容易写出 `MESH=99` | 拆状态机时把 `setMesh`/`setContents` 收成包内可见，或加 `tier` 范围校验 |
-| 79 | **「数据表镜像进 assets」是已接受的债**（首轮 #36） | `processResources` 复制 7 个目录；专用服客户端 JEI 只能读内置镜像（P4 路线） | 保持现状可以，但 #64 的目录列表要和新增表同步；P4 做客户端 JEI 同步时一并去掉镜像 |
+| 79 | **「数据表镜像进 assets」按设计保留**（首轮 #36；2026-11-17 决定 C） | `processResources` 从 `data/` 复制（目录已从 TableId 派生）；专用服客户端 JEI 在登录前只能读它 | 数据包/脚本的改动不会反映到镜像——由 P4 快照同步覆盖；镜像只做「没快照」时的兜底 | 不要删：JEI 在客户端启动时就注册配方。保留兜底 + 兜底时 WARN（P4 S3） |
 | 80 | **桶的流体匹配仍是 `Fluid ==`**（首轮 #17 的剩余部分） | `BarrelBlockEntity.tank.fill` 的凝固判断（`:103-104`）与 `BarrelRecipes.resultForFluid`（`:130-137`）比较 `Fluid` 实例；`normalizeFluid` 只用在「桶上方流体」路径（`:607-617`），`tank.fill` 未归一 | 正常桶/管道只给 still 流体，所以当前不炸；若某个模组管道把 flowing 灌进空桶，后续凝固规则全部匹配不到，表现为「满桶但没反应」 | 在 `fill` 开头把 `FlowingFluid` 归一成 source（或统一用 `FluidStack.isSameFluid`），并给一条「flowing 灌入仍能凝固」的服务端测试 |
+| 81 | **1.20.1 分支的 JEI 在专用服客户端没有数据** | 分支 `CommonEvents` 只注册 `new SieveReloadListener(false)`，没有 clientView 监听；`build.gradle` 也没有 assets 镜像（对比 main 的 `processResources`） | 集成服正常（静态表共享）；连专用服时 `all()` 回落到空的 `clientTable`，JEI 分类为空 | 与 main 同一套修法：先补 assets 镜像（从 TableId 派生），P4 快照落地后再接同步 |
 
 ## 建议的修复/重构顺序
 
@@ -141,7 +142,7 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
   `enabled:false`）；#29（`mod_description` 已是 1.21.1）；#39（datagen 接管 tags/loot/
   recipes/blockstates/models）；#31（status 的堆肥标签行已随数据更新）。
 - **已过时**：#46（`materials.json` 现在用 `source` 字段，文档明确标 ❌ 不参与逻辑，不再算债）。
-- **已接受、不再作为债**：#36（数据镜像进 assets，P4 再动）；#45 的「无 item handler」部分
+- **已接受、不再作为债**：#36/#79（数据镜像进 assets：按设计保留为兜底，见 roadmap P4 决定 C）；#45 的「无 item handler」部分
   （`BarrelItemHandler`/`MachineItemHandler` 已接）。
 - **首轮遗留、本轮合并进新编号**：#15/#16 → #57/#56；#17 → #80；#25/#26/#27/#28 → #49/#50；
   #30 → #65；#32/#33 → #74；#35 → #77；#37 → #52；#38 → #75；#40 → #72；

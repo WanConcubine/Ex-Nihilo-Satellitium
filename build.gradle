@@ -148,27 +148,32 @@ tasks.withType(ProcessResources).configureEach {
 // The client resource manager only exposes assets/. Mirror the data tables into
 // assets/ so JEI can read them when the client is connected to a dedicated server
 // (the data/ copy stays the single source of truth for server-side behaviour).
+//
+// The mirror list is derived from TableId.java instead of being hand-written
+// (tech-debt #64): adding a table can no longer silently skip the mirror.
+def tableIdSource = file('src/main/java/com/kaifengcrt/exnihilosatellitium/common/table/TableId.java')
+def tableIds = []
+tableIdSource.readLines('UTF-8').each { line ->
+    def match = line =~ /^\s{4}[A-Z_]+\("([a-z_]+)"\)/
+    if (match.find()) {
+        tableIds << match.group(1)
+    }
+}
+if (tableIds.isEmpty()) {
+    throw new GradleException("TableId.java: no table ids parsed; the JEI mirror would ship empty")
+}
+
 tasks.named('processResources', ProcessResources).configure {
-    from('src/main/resources/data/exnihilosatellitium/sieve') {
-        into 'assets/exnihilosatellitium/sieve'
+    doFirst {
+        def missing = tableIds.findAll { !file("src/main/resources/data/exnihilosatellitium/${it}").isDirectory() }
+        if (!missing.isEmpty()) {
+            throw new GradleException("data/exnihilosatellitium: missing table dir(s) ${missing} (TableId.java)")
+        }
     }
-    from('src/main/resources/data/exnihilosatellitium/barrel') {
-        into 'assets/exnihilosatellitium/barrel'
-    }
-    from('src/main/resources/data/exnihilosatellitium/compost') {
-        into 'assets/exnihilosatellitium/compost'
-    }
-    from('src/main/resources/data/exnihilosatellitium/crucible_melt') {
-        into 'assets/exnihilosatellitium/crucible_melt'
-    }
-    from('src/main/resources/data/exnihilosatellitium/crucible_heat') {
-        into 'assets/exnihilosatellitium/crucible_heat'
-    }
-    from('src/main/resources/data/exnihilosatellitium/hammer') {
-        into 'assets/exnihilosatellitium/hammer'
-    }
-    from('src/main/resources/data/exnihilosatellitium/crook') {
-        into 'assets/exnihilosatellitium/crook'
+    tableIds.each { tableId ->
+        from("src/main/resources/data/exnihilosatellitium/${tableId}") {
+            into "assets/exnihilosatellitium/${tableId}"
+        }
     }
 
     // Release hygiene: the datagen hash cache is bookkeeping, not content, and
@@ -176,6 +181,29 @@ tasks.named('processResources', ProcessResources).configure {
     exclude '.cache/**'
     from(rootProject.file('LICENSE'))
     from(rootProject.file('THIRD-PARTY.md'))
+}
+
+// Build-time check (#64): the JEI assets mirror must contain exactly the
+// TableId directories. Deriving the list above removes the manual step; this
+// task catches a hand-edited loop or a stale output dir.
+tasks.register('verifyTableMirror') {
+    group = 'verification'
+    description = 'Fails when the JEI assets mirror is missing a TableId directory (#64).'
+    dependsOn tasks.named('processResources')
+    doLast {
+        def mirrorRoot = layout.buildDirectory.dir('resources/main/assets/exnihilosatellitium').get().asFile
+        def mirrored = mirrorRoot.isDirectory()
+                ? mirrorRoot.listFiles().findAll { it.isDirectory() }*.name as Set
+                : ([] as Set)
+        def missing = tableIds.findAll { !(it in mirrored) }
+        if (!missing.isEmpty()) {
+            throw new GradleException("JEI mirror is missing table dir(s) ${missing}; see processResources (#64)")
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn 'verifyTableMirror'
 }
 
 tasks.named('jar', Jar).configure {
