@@ -235,13 +235,42 @@ KJS 脚本与 datapack fixture 的七张表 dump 逐字节一致；不带 `-Pkjs
 
 ### P4 — 客户端同步 + 自动守卫
 
-- 表快照网络包（login + reload）；
-- 专用服 JEI 读同步表；
-- `check-customization.py` fixture harness；
-- 文档生成/校验接入 CI。
+**问题（2026-11-17 调研）。** 客户端只加载 `assets/`，所以构建期用 `processResources` 把 7 个
+`data/` 目录复制成 `assets/` 镜像（`build.gradle:151-172`，tech-debt #36 / #79），客户端注册表
+再从镜像重建（`SieveRegistry.load(manager, clientView)`、`Tables.rebuildAll(clientView)`）。后果：
 
-**验收：** 专用服客户端 JEI 与服务端 `/exnihilo dump` 一致；
-三路径 fixture 在 CI 里跑。
+1. 服务器用数据包 / KJS / CT 改表后，专用服客户端的 JEI 仍显示**打包时**的镜像——JEI 在骗人，
+   而三路径是产品目标；
+2. 镜像目录是手工列的（#64），新增第 8 张表漏加一行就**静默缺页**。
+
+**目标：** 专用服客户端 JEI 与服务端 `/exnihilo dump` 一致，进而删掉镜像。
+
+**已量到的数据**（`data/exnihilosatellitium` 全开文件口径，2026-11-17）：**406 条记录 /
+25.9 KB 紧凑 JSON**——sieve 160、hammer 91、compost 67、crucible_melt 39、crook 22、barrel 18、
+crucible_heat 9。→ 单包足够，**不需要分页**；等表涨到 ~100 KB 再谈。
+
+**实施拆分（按依赖顺序；不排时间）**
+
+| 步骤 | 内容 | 依赖 | 验收 |
+|---|---|---|---|
+| S1 快照序列化 | `TableSnapshot`（core）：从 7 张表导出条目 + schema 版本；字节化与网络解耦 | `TableDump` / `TableBuilder` | 同一份表：快照 → 文本，与 `/exnihilo dump` 逐条一致 |
+| S2 传输 | `playToClient` payload：登录后、以及每次 reload 完成（`TagsUpdatedEvent` 之后）广播；**集成服跳过**（客户端共享静态表） | S1、`ModNetwork` 先例 | 专用服客户端日志收到 N 条；`all()` 非空且与服务器 dump 一致 |
+| S3 JEI 换源 + 删镜像 | 客户端注册表改由快照填充；删 `processResources` 的 7 段 `from(...)`（连带 #64 手工清单） | S2 | 改一条数据包条目 → 客户端 JEI 显示新值；无镜像时标题界面行为见未决 1 |
+| S4a 数据包 fixture（CI） | CI 服务器 + `run/world/datapacks/` fixture + RCON 跑 `exnihilo dump` + 与 golden 文本 diff | 无（可独立先做） | CI 绿；故意改一条 fixture 能红 |
+| S4b 脚本 fixture | 同一 fixture 分别用 KJS / CT 写，dump 与数据包版逐字节一致（P3 已手工验过一次） | S4a + CI 里有对应运行时 jar | 同 S4a；jar 缺失时**跳过**而不是失败 |
+| S5 文档校验 | wiki 里的 JSON 示例喂给同一套校验；可选从表结构生成字段表 | S4a | 新增一条守卫，坏示例能红 |
+
+**未决（需要 Owner 定）**
+
+1. 删掉镜像后，**标题界面 / 未进服时** JEI 没有数据（现在有镜像）。选项：接受空白 / 保留镜像作
+   离线兜底 / 只在集成服读镜像。
+2. **JEI 刷新语义**：API 里有 `IRecipeManager#addRecipes`，但**没有 `removeRecipes`**；
+   `IAdvancedRegistration#addTypedRecipeManagerPlugin` + `IRecipeManagerPlugin` 可做动态查询。
+   登录首次同步用哪种、`/reload` 后怎么避免重复注册，要对着 JEI 19 运行时验一次。
+3. `compost` 的**标签交互预测**（§8 问题 5）是否也走快照。
+
+**验收：** 专用服客户端 JEI 与服务端 `/exnihilo dump` 一致——自动部分为「快照与 dump 等价」断言，
+目视部分为专用服客户端看一次并记进 `status.md` 验证表；三路径 fixture 在 CI 里跑。
 
 ### P5（可选）— 材料表外置
 
