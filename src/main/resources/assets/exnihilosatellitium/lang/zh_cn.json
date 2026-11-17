@@ -350,6 +350,7 @@
   "jade.exnihilosatellitium.barrel.ready": "泥土已就绪（右键取出）",
   "jade.exnihilosatellitium.barrel.solid": "%s（右键取出）",
   "jade.exnihilosatellitium.barrel.timer": "成型中：还需 %s 秒",
+  "jade.exnihilosatellitium.barrel.transform": "转化：%s → %s",
   "jade.exnihilosatellitium.crucible.empty": "空",
   "jade.exnihilosatellitium.crucible.heat": "热源速度：%s mB/t",
   "jade.exnihilosatellitium.crucible.melting": "熔料：%s，剩余 %s mB",
