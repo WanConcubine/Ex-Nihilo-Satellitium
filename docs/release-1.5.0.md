@@ -49,23 +49,41 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 
 ## 商店更新日志（可直接粘贴）
 
-**中文**：
+**中文**
 
-> 1.5.0（1.21.1 / 1.20.1）新增「扩容升级」：装进电动筛 / 电动锤的第 4 个插件槽，每个增加 1 页
-> （12 格）产物缓存，最多 8 个（9 页）；输出区下方可翻页查看。漏斗、管道和自动输出
-> 仍然把全部页当作一份平铺缓存。拆掉升级时高页物品会并回或掉出，不会丢失。
-> 合成：铁锭 / 纸 / 铁锭 + 纸 / 任意箱子 / 纸 + 铁锭 / 纸 / 铁锭。
-> 同时修复机器输出合并时可能复制物品的问题。
+> **1.5.0 — 机器扩容升级（1.21.1 / 1.20.1 同版本）**
+>
+> 新增「扩容升级」：装进电动筛 / 电动锤的第 4 个插件槽。每个升级 +1 页（12 格）产物缓存，
+> 最多叠 8 个，共 9 页；输出区下方出现 `< 1/9 >` 翻页。
+>
+> - 漏斗 / 管道 / 自动输出仍然把全部页当成一份平铺缓存，不需要理解「页」；
+> - 拆掉升级时，高页里的物品先并回活动页，放不下的掉在机器上方，不会消失；
+> - 内能机器没有插件槽，保持 1 页；扩容不增加耗电。
+>
+> 合成：铁锭 / 纸 / 铁锭 ＋ 纸 / 任意箱子 / 纸 ＋ 铁锭 / 纸 / 铁锭
+> （任意箱子 = 箱子 / 陷阱箱 / 末影箱）。
+>
+> 修复：机器输出在「先并进半组、后面没有空槽」时会把已并入的部分再掉出一份（物品复制）；
+> 现在只掉真正没放下的余量。
 
-**English**：
+**English**
 
-> 1.5.0 (1.21.1 / 1.20.1) adds the **Expansion Upgrade**: install it in the electric sieve / hammer's
-> 4th plugin slot; each item adds one 12-slot output page, up to 8 (9 pages total), and the
-> output grid can be paged. Hoppers, pipes and auto output still see every page as one flat
-> buffer. Removing the upgrade merges high pages back or drops the overflow instead of
-> voiding it. Recipe: iron ingot / paper / iron ingot, paper / any chest / paper,
-> iron ingot / paper / iron ingot. Also fixes a machine output duplication bug when a stack
-> was partly merged and then ran out of space.
+> **1.5.0 — Machine output expansion (1.21.1 / 1.20.1, same version)**
+>
+> Adds the **Expansion Upgrade** for the electric sieve and hammer's 4th plugin slot.
+> Each upgrade adds one 12-slot output page; you can stack 8, for 9 pages total.
+> A `< 1/9 >` control appears under the output grid.
+>
+> - Hoppers, pipes and auto output still see every page as one flat buffer — no need to think in pages.
+> - Removing the upgrade merges high pages back into the active pages; anything that does not fit
+>   drops above the machine instead of vanishing.
+> - Fuel machines have no plugin slot and stay on one page; the upgrade adds no energy cost.
+>
+> Recipe: iron ingot / paper / iron ingot, paper / any chest / paper,
+> iron ingot / paper / iron ingot (any chest = chest / trapped chest / ender chest).
+>
+> Fix: machine output could duplicate items when a stack was partly merged into an existing stack
+> and then ran out of empty slots; only the true remainder is dropped now.
 
 ## 发布前检查
 
