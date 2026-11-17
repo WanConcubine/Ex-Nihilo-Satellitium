@@ -255,12 +255,25 @@ crucible_heat 9。→ 单包足够，**不需要分页**；等表涨到 ~100 KB 
 |---|---|---|---|
 | S1 快照序列化 | ✅ 已做（2026-11-17）：`TableSnapshot` 导出 7 张表 + schema 版本；`TableDump.lines(table, clientView)` 可渲染客户端视图 | `TableDump` / `TableBuilder` | 专用服实测：快照 → JSON → codec → 重建后，**358 行与服务器 dump 逐行一致** |
 | S2 传输 | `playToClient` payload：登录后、以及每次 reload 完成（`TagsUpdatedEvent` 之后）广播；**集成服跳过**（客户端共享静态表） | S1、`ModNetwork` 先例 | 专用服客户端日志收到 N 条；`all()` 非空且与服务器 dump 一致 |
-| S3 JEI 换源（镜像保留为兜底） | 客户端注册表改由快照填充；镜像只在「没收到快照」时使用，兜底时打 WARN。
-#64 已修：镜像目录从 `TableId.java` 派生，`verifyTableMirror` 接进 `check` | S2 | 改一条数据包条目 → 客户端 JEI 显示新值；
-截断快照（模拟失败）时日志 WARN 且 JEI 仍有旧数据 |
+| S3 JEI 换源（镜像保留为兜底） | **数据侧已通、界面侧未验**：客户端 `applyClientView()` 已能重建（服务端自检 358 行一致）；
+镜像降级为兜底 + WARN 尚未实现；JEI 刷新语义未确认 | S2 | 见下方「客户端验收清单」；未通过前不标完成 |
 | S4a 数据包 fixture（CI） | ✅ 已做（2026-11-17）：`scripts/check-fixture.py` + `scripts/rcon.py` + `scripts/fixtures/datapack`，CI 作业 `fixture-datapack`；装 fixture → `/reload` → 断言 `exnihilo dump sieve` 行 | 无（独立完成） | 实测：fixture 行出现；把 chance 改成 0.25 → 失败；恢复 → 通过 |
 | S4b 脚本 fixture | ✅ 已做（2026-11-17）：`scripts/fixtures/scripts` 里 KJS / CT 各一条；`check-fixture.py --scripts` 断言三行；CI 作业先拉 KubeJS / Rhino / CraftTweaker 运行时 jar | S4a + 运行时 jar | 实测三行同时通过；把 KJS 的 chance 改成 0.45 → 只有 KJS 行缺失并失败 |
 | S5 文档校验 | ✅ 第一步已做（2026-11-17）：`check-wiki-json.py` 校验 id 格式 / `chance` 0..1 / `min<=max` / `amount` 非负，接进 CI；**语义校验**（与 Java loader 一致，含未知字段）仍待 S4a 的 fixture | S4a | 已做：坏示例能红（`diamond` 缺命名空间、`chance 1.5` 都报错） |
+
+**客户端验收清单（S2 投递 + S3 界面；需要一台能进游戏的客户端）**
+
+2026-11-17 在开发机上试过 `runServer` + `runClient --quickPlayMultiplayer 127.0.0.1:25565`：
+客户端能起（LWJGL/OpenAL 正常、镜像表加载 7 表），但**连接约 2 秒后即断开**
+（服务端 `Dev lost connection: Disconnected`，客户端日志无异常），因此下面第 3–5 步没有验成。
+
+1. `./gradlew runServer`（RCON 已配），等 `Done (`；
+2. 另开终端 `./gradlew runClient`，手动进入 `localhost`；
+3. 客户端日志应出现 `[snapshot] applied N file(s) from the server`（S2 投递）；
+4. 改一条数据包或脚本 → 服务端 `/reload` → 客户端日志应再次出现 `applied`；
+   打开 JEI 看该表分类是否出现新条目（S3 结论）；
+5. 若 JEI 不刷新：记录客户端启动时与刷新后的 `[jei] registered N sieve recipes`，
+   再决定用 `IRecipeManager#addRecipes`（无 `remove`，可能重复）还是 `IRecipeManagerPlugin`。
 
 **未决（需要 Owner 定）**
 
