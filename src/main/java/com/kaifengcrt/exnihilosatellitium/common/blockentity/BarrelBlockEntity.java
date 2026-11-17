@@ -180,6 +180,11 @@ public class BarrelBlockEntity extends BlockEntity {
         return this.compostProgress;
     }
 
+    /** Witch-water fermentation progress, 0..{@link #COMPOST_TICKS}. */
+    public int getSporeProgress() {
+        return this.sporeProgress;
+    }
+
     public int getCompostTicks() {
         return this.compostTicks;
     }

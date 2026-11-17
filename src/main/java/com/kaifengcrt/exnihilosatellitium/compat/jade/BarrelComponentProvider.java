@@ -38,6 +38,13 @@ public enum BarrelComponentProvider implements IBlockComponentProvider {
                     barrel.getTank().getFluid().getDisplayName(), fluid, BarrelBlockEntity.CAPACITY));
         }
 
+        final int spores = barrel.getSporeProgress();
+        if (spores > 0) {
+            final int percent = Math.min(100, spores * 100 / BarrelBlockEntity.COMPOST_TICKS);
+            tooltip.add(Component.translatable("jade.exnihilosatellitium.barrel.spores",
+                    percent, spores, BarrelBlockEntity.COMPOST_TICKS));
+        }
+
         final ItemStack solid = barrel.getSolid();
         if (fluid > 0 && !solid.isEmpty()) {
             final BarrelRecipes.Recipe rule = BarrelRecipes.ruleForItem(barrel.getTank().getFluid().getFluid(), solid);
