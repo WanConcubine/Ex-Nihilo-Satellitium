@@ -15,6 +15,9 @@
   `#exnihilosatellitium:chests`（箱子 / 陷阱箱 / 末影箱）。
 - **修复**：机器输出在“先并进半组、后面没有空槽”时会把已并入的部分再整份掉出（复制）；
   现在只掉真正没放下的余量。
+- **Jade 木桶提示**：新增「转化：A → B」一行，按当前流体与桶内物品显示会变成什么
+  （物品 / 流体 / 生物）；**巫水**（沙 → 灵魂沙、树苗 → 深色橡树苗、人偶 → 末影人 / 潜影贝 /
+  僵尸村民）现在也能在提示里看到。
 - **验证**：`build` + 纹理 / core / data / wiki 守卫通过；RCON 验证 9 页读写、自动输出与漏斗
   从第 9 页抽取、基础页满后继续往第 2 页产出、缩页回收与停机。**GUI 翻页和实际合成未目视。**
 
@@ -31,6 +34,9 @@
   iron ingot; "any chest" is `#exnihilosatellitium:chests` (chest, trapped chest, ender chest).
 - **Fix**: machine output could duplicate items when a stack was partly merged into an existing
   stack and then ran out of empty slots; only the true remainder is dropped now.
+- **Jade barrel tooltip**: a new "Turns into: A → B" line shows what the current fluid and
+  barrel item will produce (item, fluid or mob). **Witch water** reactions (sand -> soul sand,
+  sapling -> dark oak sapling, dolls -> enderman / shulker / zombie villager) are now visible too.
 - **Verified**: `build` and the texture / core / data / wiki guards pass; RCON covers 9-page
   read/write, auto output and hopper extraction from page 9, production into page 2 while the
   base page is full, and page-removal recovery / shutdown. **The GUI paging and the actual

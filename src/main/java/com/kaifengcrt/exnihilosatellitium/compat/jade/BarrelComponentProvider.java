@@ -1,9 +1,13 @@
 package com.kaifengcrt.exnihilosatellitium.compat.jade;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.blockentity.BarrelBlockEntity;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -32,6 +36,15 @@ public enum BarrelComponentProvider implements IBlockComponentProvider {
         if (fluid > 0) {
             tooltip.add(Component.translatable("jade.exnihilosatellitium.barrel.fluid",
                     barrel.getTank().getFluid().getHoverName(), fluid, BarrelBlockEntity.CAPACITY));
+        }
+
+        final ItemStack solid = barrel.getSolid();
+        if (fluid > 0 && !solid.isEmpty()) {
+            final BarrelRecipes.Recipe rule = BarrelRecipes.ruleForItem(barrel.getTank().getFluid().getFluid(), solid);
+            if (rule != null) {
+                tooltip.add(Component.translatable("jade.exnihilosatellitium.barrel.transform",
+                        solid.getHoverName(), resultName(rule)));
+            }
         }
 
         if (barrel.isCooking()) {
@@ -64,6 +77,17 @@ public enum BarrelComponentProvider implements IBlockComponentProvider {
             tooltip.add(Component.translatable("jade.exnihilosatellitium.barrel.timer",
                     (ticks + 19) / 20));
         }
+    }
+
+    /** Result of the current fluid + solid reaction, for the tooltip line. */
+    private static Component resultName(final BarrelRecipes.Recipe rule) {
+        if (rule.resultFluid() != null) {
+            return new FluidStack(rule.resultFluid(), 1).getHoverName();
+        }
+        if (rule.entity() != null) {
+            return BuiltInRegistries.ENTITY_TYPE.get(rule.entity()).getDescription();
+        }
+        return rule.result().getHoverName();
     }
 
     @Override

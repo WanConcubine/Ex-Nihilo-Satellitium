@@ -9,11 +9,11 @@
 
 | 线 | 加载器 | jar | 大小 | sha256 |
 |---|---|---|---|---:|
-| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.5.0.jar` | 954 KB（977269 B） | `bc06c41f52e3e26f3bf0184cf1d7a094ee44181daacb14e894864754dc783ff6` |
-| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.5.0.jar` | 1007 KB（1030832 B） | `50678cbcacd93ef35ec8d05f9de7c4a428faf5a97ab53da291a69cce1ee80304` |
+| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.5.0.jar` | 990895 B | `887ef2bda3cd423aae335fca480f3a54e70d49c71a95053372bf1863615de754` |
+| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.5.0.jar` | 1090870 B | `bf9b52feff7775f1784e04595fc9c598ddd71e03bf53df6b773c9682480308ea` |
 
 jar 包含 `LICENSE`、`THIRD-PARTY.md`、图标、`META-INF/neoforge.mods.toml`（`version="1.5.0"`），
-以及新的 `capacity_upgrade` 配方 / 标签 / 模型 / 贴图。两份产物均构建于 2026-11-13（主线 Java 21，1.20.1 Java 17）。
+以及新的 `capacity_upgrade` 配方 / 标签 / 模型 / 贴图。两份产物为 2026-11-17 重新构建（加入 Jade 木桶转化提示；主线 Java 21，1.20.1 Java 17）。
 jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha 不会相同。
 
 ## 本版内容（相对 1.4.2）
@@ -30,6 +30,9 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 - **修复**：`insertOutput` 在“先并进半组、后面没有空槽”时会把已并入部分再整份掉出，
   造成物品复制；现在只掉真正没放下的余量。
 - **说明**：内能机器没有插件槽，保持 1 页；扩容不增加 FE/t 消耗。
+- **Jade 木桶提示**：新增「转化：A → B」，按当前流体与桶内物品显示结果（物品 / 流体 / 生物）；
+  巫水的物品/生物转化（沙子 → 灵魂沙、树苗 → 深色橡树苗、人偶 → 末影人 / 潜影贝 / 僵尸村民）
+  现在能在 Jade 里看到。
 - **开发环境**：主线 `run/mods` 增加 Mekanism 10.7.19 + Generators，便于给机器充电。
 
 ## 验证
@@ -65,6 +68,9 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 >
 > 修复：机器输出在「先并进半组、后面没有空槽」时会把已并入的部分再掉出一份（物品复制）；
 > 现在只掉真正没放下的余量。
+>
+> Jade 的木桶提示新增「转化」行：显示当前流体 + 桶内物品会变成什么——巫水（沙子 → 灵魂沙、
+> 树苗 → 深色橡树苗、人偶 → 末影人 / 潜影贝 / 僵尸村民）现在也能直接看到。
 
 **English**
 
@@ -84,6 +90,9 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 >
 > Fix: machine output could duplicate items when a stack was partly merged into an existing stack
 > and then ran out of empty slots; only the true remainder is dropped now.
+>
+> The Jade barrel tooltip now shows a "Turns into" line for the current fluid and item,
+> including witch water (sand -> soul sand, sapling -> dark oak sapling, dolls -> mobs).
 
 ## 发布前检查
 
