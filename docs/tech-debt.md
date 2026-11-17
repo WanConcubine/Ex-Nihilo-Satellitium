@@ -110,7 +110,7 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
 | 78 | **`SieveBlockEntity.setMesh` 公共 API 不校验 / MeshItem tier 无上限**（首轮 #43） | `:54-59` 只 `copyWithCount(1)`；`MeshItem` 的 tier 由常量决定，未来脚本/数据驱动时容易写出 `MESH=99` | 拆状态机时把 `setMesh`/`setContents` 收成包内可见，或加 `tier` 范围校验 |
 | 79 | **「数据表镜像进 assets」按设计保留**（首轮 #36；2026-11-17 决定 C） | `processResources` 从 `data/` 复制（目录已从 TableId 派生）；专用服客户端 JEI 在登录前只能读它 | 数据包/脚本的改动不会反映到镜像——由 P4 快照同步覆盖；镜像只做「没快照」时的兜底 | 不要删：JEI 在客户端启动时就注册配方。保留兜底 + 兜底时 WARN（P4 S3） |
 | 80 | **桶的流体匹配仍是 `Fluid ==`**（首轮 #17 的剩余部分） | `BarrelBlockEntity.tank.fill` 的凝固判断（`:103-104`）与 `BarrelRecipes.resultForFluid`（`:130-137`）比较 `Fluid` 实例；`normalizeFluid` 只用在「桶上方流体」路径（`:607-617`），`tank.fill` 未归一 | 正常桶/管道只给 still 流体，所以当前不炸；若某个模组管道把 flowing 灌进空桶，后续凝固规则全部匹配不到，表现为「满桶但没反应」 | 在 `fill` 开头把 `FlowingFluid` 归一成 source（或统一用 `FluidStack.isSameFluid`），并给一条「flowing 灌入仍能凝固」的服务端测试 |
-| 81 | **1.20.1 分支的 JEI 在专用服客户端没有数据** | 分支 `CommonEvents` 只注册 `new SieveReloadListener(false)`，没有 clientView 监听；`build.gradle` 也没有 assets 镜像（对比 main 的 `processResources`） | 集成服正常（静态表共享）；连专用服时 `all()` 回落到空的 `clientTable`，JEI 分类为空 | 与 main 同一套修法：先补 assets 镜像（从 TableId 派生），P4 快照落地后再接同步 |
+| 81 | **1.20.1 分支的 JEI 在专用服客户端没有数据** — ✅ 2026-11-17 已修 | 分支原先只注册 `new SieveReloadListener(false)`，`build.gradle` 也没有 assets 镜像；现在镜像从 `TableId.java` 派生，`ClientEvents` 注册 6 个 clientView 监听，`verifyTableMirror` 接进 `check` | 集成服一直正常（静态表共享）；连专用服时曾回落到空的 `clientTable`，JEI 分类为空 | 分支 `processResources` + `verifyTableMirror` + `compileJava` 已验证；P4 快照落地后再接同步 |
 
 ## 建议的修复/重构顺序
 

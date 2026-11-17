@@ -249,7 +249,7 @@ KJS 脚本与 datapack fixture 的七张表 dump 逐字节一致；不带 `-Pkjs
 25.9 KB 紧凑 JSON**——sieve 160、hammer 91、compost 67、crucible_melt 39、crook 22、barrel 18、
 crucible_heat 9。→ 单包足够，**不需要分页**；等表涨到 ~100 KB 再谈。
 
-**实施拆分（按依赖顺序；不排时间）**
+**实施拆分（提案，未定；2026-11-17 由 agent 起草，按依赖顺序、不排时间）**
 
 | 步骤 | 内容 | 依赖 | 验收 |
 |---|---|---|---|
