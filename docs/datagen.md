@@ -9,7 +9,11 @@
 > `-Dexnihilosatellitium.datagen=true`（`build.gradle` 已配）。`gems` 材料在普通游戏里
 > 只在对应模组加载时注册；datagen 必须强制看到它们才能生成物品/方块模型、可选的 `c:ores`
 > 标签和带 `mod_loaded` 条件的 2×2 配方。手动从 IDE 跑 datagen 时也要加这个属性。
-> 当前：164 条生成配方、72 张掉落表（7 种 `gems` 矿块由 `SelfDropBlock` 掉自身）、58 个标签。
+> 当时：164 条生成配方、72 张掉落表（7 种 `gems` 矿块由 `SelfDropBlock` 掉自身）、58 个标签。
+>
+> **2026-11-14**：本文数字是 2026-11-03 datagen 迁移后的快照，别拿它当现状。当前数字跑
+> `python3 scripts/check-data-paths.py`（现为 298 recipes / 75 loot / 76 tags）与
+> `scripts/table-sizes.py`；要改生成器再回来对 §4 的比对清单。
 
 ## 1. 现状
 
@@ -31,7 +35,7 @@
 - 旧的手写 `data/**/tags/**`、`data/**/loot_table(s)/**`、133 条手写配方、244 个
   blockstate/model JSON 已删除。
 - `scripts/check-data-paths.py` 会同时扫 `src/main/resources` 和 `src/generated/resources`，
-  当前输出 `200 recipes, 72 loot tables, 44 tags`（200 = 143 条 base 生成 + 57 条手写：
+  当时输出 `200 recipes, 72 loot tables, 44 tags`（200 = 143 条 base 生成 + 57 条手写：
   45 条候选变体 + 12 条 `create:crushing`，见 §3.3）。
 
 ## 2. 范围与状态
@@ -195,7 +199,7 @@ datagen 里 `ItemStack` 必须指向**已注册**的 `Item`，而这些模组不
    否则 `OreMaterials` 解析到对方锭、生成直接失败，对方的 datagen provider 还会污染输出树。
 
 - `port_data.py` 仍可用：`--source src/main/resources src/generated/resources` 合并读，
-  当前产物 **176 recipe / 69 loot / 41 tag / 126 other**，`check-data-paths --target 1.20.1` 通过。
+  当时产物 **176 recipe / 69 loot / 41 tag / 126 other**，`check-data-paths --target 1.20.1` 通过。
 
 ## 6. 环境与命令
 

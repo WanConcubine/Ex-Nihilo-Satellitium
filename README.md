@@ -54,15 +54,15 @@
 - [x] 基础内容：`porcelain`（瓷土，自绘贴图）、`barrel`（橡木木桶）
 - [x] M1 木桶：堆肥→泥土（1000 分制，数值以 Omnia 1.10.2 为主、原版 1.7.10 校验；桶保留，右键取出）、1000 mB 流体、比较器、14×16 内缩模型、vanilla-sampled 贴图
 - [x] M1 材质变体：云杉/白桦/丛林/金合欢/深色橡木木桶 + 石桶，共享 BE 与行为
-- [x] M1.5 桶内转化：水+熔岩→圆石、熔岩+水→黑曜石、木桶拒热（石桶可装熔岩）、接雨水、熔岩掺红石/荧石（巫水/人偶/粘土未做）
+- [x] M1.5 桶内转化：水+熔岩→圆石、熔岩+水→黑曜石、木桶拒热（石桶可装熔岩）、接雨水、熔岩掺红石/荧石
 - [x] M2 筛子 + 筛网 + 数据驱动掉落（JEI 展示输入/掉落/概率；4 碎块 → 矿方块 → 熔炼成锭）
 - [x] 桶的 JEI：桶内转化（`barrel/*.json`）+ 堆肥（`compost/*.json`）两个分类，七种桶都可查
 - [x] M3 锤子 + 钩子（6 基础锤 + 9 材质锤 + 装 DE 的 3 把聚合锤，1.20.1 另 3 把 Bamboo 宝石锤 / 2 钩 / 尘土 / 蚕动画 / 熟蚕 / 粘土 / 锤钩 JEI；待验收）
-- [x] M4 坩埚 + 热源（19 熔点 / 9 热源、容量/熔料/热源倍率可配、Creatio 模型、熔料/流体显示、Jade、JEI 两页；待验收）
+- [x] M4 坩埚 + 热源（39 熔点（19 固体 + 20 树叶 / 树苗）/ 9 热源、容量/熔料/热源倍率可配、Creatio 模型、熔料/流体显示、Jade、JEI 两页；待验收）
 - [x] M5 矿粒 / 粉碎矿 / 冶炼（熔炼成锭已通；锤子降档已接，待验收）
 - [x] M6 瓷桶 / 巫水 / 蚕丝 / 娃娃（服务端已验证，画面待验收）
 - [x] M10 自动化：电动 / 内能 × 自动筛 / 自动锤 + 速度/时运/扩容插件（9 页产物缓存可翻页；服务端已验证，GUI 待验收）
-- [x] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 接管标签 / 掉落表 / 143 条配方 + 74 blockstate + 201 模型；语言仍手写）
+- [x] M7 配置 / 数据生成（JEI 七个分类 + config 已齐；datagen 接管标签 / 掉落表 / 配方 / blockstate / 模型；语言仍手写）
 - [ ] M8 与「月光魔法」联动
 - [x] M9 发布（1.5.0 两线已打 tag `v1.5.0` / `v1.5.0-1.20.1`；CurseForge / Modrinth 上传待所有者）
 
@@ -72,6 +72,9 @@
 - [docs/tech-debt.md](docs/tech-debt.md) —— 技术债/潜在风险审计（P0–P3）
 - [docs/DESIGN.md](docs/DESIGN.md) —— 原则、架构、里程碑、M1–M10 实现记录
 - [docs/data-format.md](docs/data-format.md) —— 堆肥/筛子 JSON、材料表、NBT、命令、JEI
+- [docs/history.md](docs/history.md) —— 历史批次叙事（1.4.2 及更早，按版本倒序）
+- [docs/parity.md](docs/parity.md) —— 复刻对照表（经典项 / Ex Astris）
+- [docs/porting.md](docs/porting.md) —— 1.20.1 / 1.21.1 分层与移植
 - [wiki/](wiki/README.md) —— 玩家向：数据包 / KubeJS / CraftTweaker 自定义配方
 - [docs/customization-roadmap.md](docs/customization-roadmap.md) —— 三路径等价路线图（P1–P4、验收标准）
 - [docs/textures.md](docs/textures.md) —— 纹理路线、引用规则、检查脚本

@@ -470,9 +470,9 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - 服务端与客户端各读一次：服务端用于结算，客户端用于 JEI。客户端的资源管理器只暴露
   `assets/`，所以 `processResources` 会把本目录镜像到 `assets/exnihilosatellitium/sieve/`；
   **仓库里只改 `data/` 这一份**，构建时自动复制。
-- 当前有 **7 个输入、142 掉落**（1.20.1 全装 Mek+Thermal+Create+IE+Tinkers+工匠巧思；1.21.1 装
-  Mek+Thermal 时约 140，两版无科技模组分别 119 / 116；**装末影接口时两版各 +1**，
-  **装 AE2 时两版各 +4**，**装 Extreme Reactors 时两版各 +9**）：`gravel` / `sand` / `dirt` / `dust` /
+- 当前 **7 个输入**：无联动基线 119（1.20.1 116），各模组增量（末影接口 +1、AE2 +4、
+  Extreme Reactors +9 等）与「全开」数字见 [status.md](status.md) 的「表尺」（`scripts/table-sizes.py`）。
+  七个输入是 `gravel` / `sand` / `dirt` / `dust` /
   `grass_block`，以及 M6 加的
   **方块** `crushed_netherrack` / `crushed_end_stone`（锤下界岩 / 末地石得到）；`dust` 输入是 M3 的通用尘土方块，
   `dirt` 是空岛农业起点（种子/作物 + **草种子** + 甜浆果 + **9 种树苗**（橡木 8% / 白桦 4% /
@@ -521,7 +521,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 - **BambooMod（`bamboomod`，仅 1.20.1）**：`sieve/dirt.json` / `sieve/grass_block.json` 各 8 条
   （4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），`sieve/gravel.json` 3 条宝石
   （银杏/枫/樱各 1/64）；每条都带 `"mod": "bamboomod"`，没装时在查物品前跳过，基表仍是
-  119 / 116，装 BambooMod 时 1.20.1 全装 +19（泥土 8 / 草 8 / 砂砾 3）。
+  119 / 116，装 BambooMod 时 1.20.1 +19（泥土 8 / 草 8 / 砂砾 3）。
   它的树叶/树苗/竹笋已在 `#minecraft:leaves` / `#minecraft:saplings`，堆肥由现有标签覆盖。
 - **ER 矿石识别（例外）**：ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和
   `c:ores/uranium`；我们的 yellorium 矿块也进这两个 tag（块 + 物品），`yellorium_broken`

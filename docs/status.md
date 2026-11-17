@@ -1,56 +1,38 @@
 # 当前状态（交接卡）
 
-> 最后更新：2026-11-13
-> 先看这 25 行；批次叙事在 [history.md](history.md)，架构/取舍在 [DESIGN.md](DESIGN.md)。
+> 最后更新：2026-11-14 · 当前版本 **1.5.0**（双线）
+> 本文件只写「现在停在哪 / 怎么验的 / 下一步」。1.5.0 之前的批次叙事在 [history.md](history.md)，
+> 架构与取舍在 [DESIGN.md](DESIGN.md)。表尺用 `python3 scripts/table-sizes.py` 生成，不要手抄。
 
 ## 一句话
 
-**双版本目标**：主线 **Minecraft 1.21.1 / NeoForge 21.1.x**（`main`）+ **1.20.1 / Forge 47.4**
-（`1.20.1-forge` 分支）；M1–M10、M7 datagen、P1/P1.5/P2/P3、数据包 v2 都已完成。
-**1.4.2 已发布**（两条线 tag `v1.4.2` / `v1.4.2-1.20.1`，2026-11-11 构建、打 tag 并推送）；
-1.0.0–1.3.2 的商店上传待所有者。
-**1.5.0 已发布**（两条线 tag `v1.5.0` / `v1.5.0-1.20.1`，2026-11-13 构建、打 tag 并推送）；
-两条线版本号重新对齐。
-**当前版本（1.5.0，2026-11-13）：扩容升级**——电动筛/锤新增第 7 个插件物品「扩容升级」，
-每个物品 +1 页（12 格）产物缓存，最多叠 8 个（9 页）；GUI 输出区下方 `< 1/9 >` 翻页。
-管道 / 漏斗 / 自动输出**不需要知道页**：它们看到的是全部活动页拼成的平铺输出缓存。
-燃料机器没有插件槽，保持 1 页。合成：铁锭/纸/铁锭 + 纸/任意箱子/纸 + 铁锭/纸/铁锭。
-**上一版（1.4.2，2026-11-11）**：**版本对齐**——1.21.1 线没有代码改动；1.20.1 补了
-**大地黏液草种子**、我们的黏液草挖掉时**额外**掉**黏液泥土**、黏液泥土可筛出**匠魂树苗**，
-外加连锁强化图标。
-上一版（1.4.1，2026-11-11）：1.20.1 的匠魂碎矿锤改成 1 锤头 + 1 坚韧手柄、按锤头速度挖、
-连锁强化 + 锁链 overlay、DE 专属连锁模块。
-更早（1.4.0，2026-11-10）：**9 把金属锤 + 3 把龙之进化锤**——锡/铝/锌/铜 256、
-银 320、铅 384、镍 448、锇 512、铂 1920；DE 双足飞龙/神龙/混沌走聚合装置升级链，可装 DE 模块；
-同时修掉 1.21.1 木钩 / 骨钩不掉耐久。Bamboo 宝石锤与匠魂碎矿锤只在 1.20.1 线。
-上一批（1.3.2，2026-11-05）：**木桶修复**——满桶右键堆肥材料不再把方块放到桶顶；
-新增物品 `BarrelItemHandler`（槽 0 堆肥输入 / 槽 1 泥土·固体输出），1.20.1 补上物品 + 流体
-capability（1.21.1 流体原有）。
-上一批（1.3.1，2026-11-05）：**深板岩石子 + 末影接口（Ender IO）起步**——泥土 50% × 3-5
-深板岩石子（4 → 深板岩圆石）；尘土 2% 出 `enderio:grains_of_infinity`（末影接口 1.20.1/1.21.1
-的「无限粉」，`mod` 门控）；不新增基岩粉物品、不写「粉 → 基岩」配方。
-上一批（2026-11-04 深夜）：**龙之进化（DE）联动**——`draconium` 龙尘材料（两版），
-粉碎末地石 1/8 单源 → 破碎龙矿 → 矿块 → 靠 DE 的 `c:ores/draconium` 熔成龙锭；
-不碰觉醒龙 / 混沌碎片。
-上一批（1.2.0）：**内容更新**——Extreme Reactors（两版）、BambooMod（仅 1.20.1）、
-骨粉 / 烈焰粉筛出物、ER 矿块标签与匠魂 yellorium 熔炼/铸造。
-**联动**：26 种材料（14 金属 + 12 矿物；ER 三条与 DE 的 draconium 走 `gems` 门控）；
-Mekanism / Thermal / Create / IE / Tinkers / TiT / AE2 / Extreme Reactors / 龙之进化 /
-BambooMod（仅 1.20.1）/ 末影接口（Ender IO，两版 beta）全部可选，缺失即降级；
-核心门面 P1 与三路径（数据包 / KubeJS / CraftTweaker）已完成。
-**匠魂可改造锤（2026-11-09）只在 1.20.1 线**：`ex_nihilo_hammer`（显示名 **碎矿锤** /
-Crushing Hammer）是真正的匠魂 3 工具——材料染色 + 16 个强化 overlay + 材料特性 / 强化槽，
-掉落仍走我们的锤表；Tinkers 3 没有官方 1.21.1 构建，主线不加这个物品。
-**当前表尺**：筛子 7 输入 / 119 掉落（无科技模组；1.20.1 116，缺 3 条钴历史差异；
-1.20.1 装匠魂 +3 输入 +8 掉落）；装末影接口各 **+1**（120 / 117）；+AE2 123 / 120；
-1.20.1 全装 +TiT 150、再加 AE2 154；主线 Mek+Thermal 140、+AE2 144；
-装 Extreme Reactors 各 **+9**（159 / 163，主线 Mek+Thermal+AE2 153）；1.20.1 装 BambooMod
-**+19**（全装 182）；装龙之进化各 **+1**（主线 AE2+ER+DE 133，1.20.1 全装 + Bamboo 183）；
-以上再装末影接口各再 **+1**（134 / 184）。
-锤表 55 基础 / 79 全装（装 ER 88）；装 DE **+3**（58 / 82 / 91）；桶 18（装 Thermal）/
-16（缺 Thermal）、堆肥 67、坩埚 39 熔点 / 9 热源。
-**下一步**：CI 收尾（首跑已过；删除旧 `ci-logs` 分支）→ 商店上传 → 画面/手感验收 → P4 JEI 同步 →
-P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）。
+**双版本**：主线 **1.21.1 / NeoForge 21.1**（`main`）+ **1.20.1 / Forge 47.4**（`1.20.1-forge`，
+worktree `../Ex-Nihilo-Satellitium-1.20.1`）；M1–M10、datagen、三路径 P1–P3、数据包 v2 都已完成。
+
+**1.5.0 已发布**（tag `v1.5.0` / `v1.5.0-1.20.1`，2026-11-13 构建、打 tag 并推送）：电动筛 / 电动锤
+新增第 7 个插件「扩容升级」，每件 +1 页（12 格）产物缓存、堆叠 8（共 9 页）；管道 / 漏斗 / 自动输出
+只看平铺的活动页。**下一版尚未开始**；剩下的是商店上传（所有者）、画面 / 手感验收、CI 旧 `ci-logs`
+分支清理、P4 JEI 同步。
+
+**上一版 1.4.2**（2026-11-11）只为版本对齐，内容改动全在 1.20.1 线（大地黏液草种子、黏液泥土 →
+匠魂树苗）。1.4.1 / 1.4.0 及更早的批次细节见 [history.md](history.md)。
+
+## 表尺（唯一出处）
+
+2026-11-14 重算，口径写在 `scripts/table-sizes.py` 头部；加条目 / 改门控后重跑它，别手算。
+主线基线 **7 输入 / 119 掉落**，1.20.1 基线 **116**（少 3 条钴：沙 / 砂砾 / 尘土各 1/64）。
+
+| 表 | 主线 | 1.20.1 | 模组增量 |
+|---|---:|---:|---|
+| 筛表 | 119 | 116 | 热力 +18、ER +9、AE2 +4、Mekanism +3、末影接口 +1、龙之进化 +1；匠魂 +4（1.20.1 +12）、工匠巧思 +1；BambooMod 仅 1.20.1 +19 |
+| 锤表 | 55 | 55 | 热力 +18、ER +9、Mekanism +3、工匠巧思 +3、龙之进化 +3 |
+| 钩表 | 10 | 10 | — |
+| 桶表 | 16 | 16 | 热力 +2（狂风 / 暴雪人偶） |
+| 堆肥 | 67（含 12 个标签） | 67 | — |
+| 坩埚 | 39 熔点 / 9 热源 | 39 / 9 | — |
+
+「全开」= 基线 + 全部增量：筛表 160 / 184，锤表 91 / 91。这是理论值；热力的增量只在装了
+Thermal 时生效（本地目前只有 1.20.1 版），主线没装就按基线算。
 
 ## 1.5.0（2026-11-13）
 
@@ -77,201 +59,6 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
   214 纹理）+ data 守卫，并用电动锤 RCON 验证基础页塞满后槽 18 产出砂砾。
   **GUI 翻页、配方实际合成、JEI 未目视。**
 
-## 1.4.2（2026-11-11）
-
-- **1.21.1 线：无代码改动**。本版只为和 1.20.1 线版本号一致。
-- **1.20.1 线（改在 `1.20.1-forge` 分支）**：补**大地黏液草种子**；种子照旧种
-  `*_vanilla_slime_grass`，但通过 `LootTableLoadEvent` 给它的掉落表**追加**一份
-  `<type>_slime_dirt`（原泥土掉落保留）；新增 `sieve/{earth,sky,ender}_slime_dirt.json`
-  （10% 树苗 / 25% 黏液球）；补连锁强化图标。
-- **验证**：1.20.1 `build` + 纹理守卫（315 模型 / 213 纹理）+ data 守卫通过；
-  `-PtechMods -PdeMods` 服务端 `[sieve] 10 inputs, 183 drops`、无未知物品；RCON 验证
-  `sky_sky_slime_grass` 放得住且掉落 `sky_slime_dirt`。手筛 / 生长 / JEI 未看。
-
-## 1.4.1（2026-11-11）
-
-- **1.21.1 线：无代码改动**。本版只为和 1.20.1 线版本号一致；jar 与 1.4.0 只有版本号不同。
-- **1.20.1 线（改在 `1.20.1-forge` 分支）**：匠魂碎矿锤装配站从「锤头 + 坚韧手柄 + 2 大板」
-  改成 **1 锤头 + 1 坚韧手柄**；砂砾 / 沙子 / 尘土改按锤头材料速度挖（铁头 6.0，耐久回到
-  1000）；新增强化 `exnihilosatellitium:chain`（I–III，每级 16 块，锤头有锁链 overlay），
-  DE 锤用专属模块 `chain_mining_module` 一次连锁 32 块。
-- **验证**：两版 `./gradlew build --offline` + `check-textures.py`（主线 307 模型 / 116
-  blockstate / 190 纹理）通过；1.20.1 服务端 `-PtinkersMods` 46 tool definitions /
-  24 station layouts、`chain` 强化注册与配方加载成功；FakePlayer 探针 6.0 速度 / 1000 耐久、
-  连锁 17 / 33 块；DE 探针：模块进注册表、宿主接受、装上后 32 块。装配站应用强化、锁链
-  overlay 外观与 DE 实机装模块未复测。
-
-## 1.4.0（2026-11-10）
-
-- **9 把金属锤（两版都做）**：锡 / 铝 / 锌 / 铜 256，银 320、铅 384、镍 448、锇 512、铂 1920。
-  耐久以 64 为基数；**钻石 1561 仍是普通材质上限**，铂 1920 接近下界合金 2031。
-- **3 把 Bamboo 宝石锤（仅 1.20.1）**：樱 / 枫 / 银杏统一 **2048**，按 `bamboomod` 条件注册。
-  BambooMod 0.6.2 本身没有宝石锤，这三把是我们用它三种宝石做的自有锤。
-- **3 把龙之进化锤**：`wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`，装 DE 时注册；
-  走 DE 聚合装置升级链（钻石锤 → 双足飞龙 → 神龙 → 混沌，8M / 32M / 128M OP），
-  继承 DE 的模块网格 / 能量 / 速度 / AOE 模块与模块 GUI；不消耗耐久，走 DE 能量。
-- **DE 锤模型**：不是平面图标，而是 3D cube 模型（左右锤头 + 中间发光核心 + 长柄 + 柄尾），
-  每个面用 `textures/item/de_hammer/*` 分区贴图，自定义 GUI / 手持 display。
-- **DE 锤能量**：`HammerTool.energyPerUse()` 统一接口；DE 锤返回 `EquipCfg.energyHarvest`
-  （DE 配置的 -99 哨兵回退到 256）。手锤和自动锤都扣能量；空电时手锤不触发锤表、机器停机。
-  服务端扣完必须 `broadcastChanges()`，否则客户端能量条/提示不刷新。
-- **修复：木钩 / 骨钩恢复耐久**：`ToolEvents#wearMainHand` 曾被限制为只处理 `HammerItem`，
-  1.21.1 的木钩 / 骨钩打树叶时耐久永远是满的。现在任何可损坏的手持工具都会扣耐久；
-  能量锤仍走 `consumeEnergy`。服务端 FakePlayer 探针：木钩 / 骨钩 / 木锤各 `damage=1`，
-  创造模式 `0`。
-- **不做**：钴 / 阿迪特转匠魂工具路线；铀因放射性不做锤。三者在 `materials.json` 里的矿链保留。
-- **实现**：`ModItems.METAL_HAMMERS` 从 `materials.json` 生成（材料 disabled 时锤子一起消失）；
-  配方走 `c:ingots/<id>`（1.20.1 用 `forge:ingots/<id>`），铜用原版铜锭；
-  宝石锤配方手写 `forge:mod_loaded(bamboomod)`；DE 锤在可选的 `src/de/java` source set 里继承
-  `ModularPickaxe`，由反射在 DE 在场时注册/接能力，配方是 DE `fusion_crafting`（带 `mod_loaded` 门）；
-  贴图由 `art/items/tools/hammer_variants.py` 从铁/钻石锤底图换色；创造栏与 JEI catalyst 遍历 `HAMMERS`。
-- **数字**：主线无 DE 15 把锤（6 基础 + 9 金属）、装 DE 18 把；307 模型 / 190 纹理 / 297 配方；
-  1.20.1 18 把锤（+3 宝石），数字见分支验证。
-- **验证**：两版 `build` + 守卫通过；主线真装 DE 后 3 把 DE 锤注册、模块 GUI / 能量模块可用，
-  手锤与自动锤均按 256/次扣电、空电停机，**作者实机确认通过**；聚合实际合成 / AOE / JEI 仍未目视。
-
-## 上一批（1.3.1，深板岩 / 末影接口起步）
-
-- **深板岩石子**（无条件）：`sieve/dirt.json` 泥土 **50% × 3-5** 个；4 个 → `minecraft:cobbled_deepslate`
-  （2×2），熔炉烧成 `minecraft:deepslate`。草方块表**不加**（`generate_sieve_assets.py` 明确过滤）。
-  用途：1.20.1 的「原始合金炉」要 6 个深板岩；1.21.1 的深板岩火焰合成也要它。
-- **末影接口（Ender IO）起步**：`sieve/dust_enderio.json`（根级 `mod: enderio` + `patch`）——
-  尘土 **2%** 出 `enderio:grains_of_infinity`（1.20.1/1.21.1 的「无限粉」；1.12.2 的
-  「基岩粉 / 基岩粉块」在 6.x / 8.x 已不存在）。**不新增基岩粉物品、不写「粉 → 基岩」配方**；
-  该物品在 Ender IO 自己的虚空框架 / 电容 / 无限杆配方里使用。
-- **脑白金提示**：`BrainPlatinumItem#appendHoverText` + `item.exnihilosatellitium.brain_platinum.tooltip`
-  （中英双语），文字「对傻子村民使用使其变为普通村民」；1.3.1 发布内容。
-- **数字**：基表 118 → **119**（1.20.1 115 → **116**）；装 Ender IO 各 **+1**（120 / 117）。
-  纹理/模型 **295 / 171**（分支 **297 / 167**），配方 **285**；`check-data-paths` 285 recipes /
-  75 loot / 75 tags。
-- **验证**：两版 `./gradlew build --offline` + `check-textures.py` 通过；主线
-  `check-core-imports.py` / `check-data-paths.py` 通过。**未进游戏筛过**、未看 tooltip，JEI 未目视。
-
-## 当前批次（1.3.2，木桶修复）
-
-- **满桶右键堆肥不再放方块**：可堆肥物品始终被视为「已处理」——`canUse` 对任意可堆肥物品返回
-  true；满桶 / 有流体时 `use()` 返回 `CONSUME`，客户端预测也按已处理走。树叶不再被放到桶顶。
-- **管道（物品）**：新增 `BarrelItemHandler`：槽 0 堆肥输入（插入即计分）、槽 1 泥土 / 固体产物输出。
-  1.21.1 在 `CapabilityEvents` 注册 `Capabilities.ItemHandler.BLOCK`；1.20.1 在 BE
-  `getCapability` 返回 `ForgeCapabilities.ITEM_HANDLER`。
-- **管道（流体）**：1.21.1 原有 `FluidHandler.BLOCK` 保留；1.20.1 补
-  `ForgeCapabilities.FLUID_HANDLER`（tank）。堆肥进行中 / 有固体 / 有泥土时仍拒绝输入，这是状态互斥。
-- **验证**：两版 `build` 通过；**未进游戏**测右键拦截 / 管道（没有装管道模组），JEI 未目视。
-
-## 上一批（2026-11-04 深夜，龙之进化）
-
-- **材料**：`materials.json` 新增 `draconium`（`gems`，`draconicevolution` 门控，tier `rare`、
-  rarity 64、颜色 `8A5CF5`）；DE 不在场时整条不注册，基表 118 / 115 不变。
-- **入口**：`sieve/crushed_end_stone_draconicevolution.json`（根级 `mod` + `patch`）——
-  **粉碎末地石 1/8** 出 `draconium_broken`；`generate_sieve_assets.py` 把它加进 `SINGLE_SOURCE`，
-  重跑不会漏进砂砾 / 沙 / 尘土三张常规表。
-- **链条**：4 破碎 → `draconium_ore_gravel` → DE 的 `c:ores/draconium`
-  （1.20.1 `forge:ores/draconium`）熔成 `draconicevolution:draconium_ingot`；
-  锤表 3 条（矿砾→粉碎 4–6、矿砂→粉末 4–6、矿尘→自身）全带 `mod` 门。
-  **不写** `*_smelting_draconicevolution.json`，避免同一输入在 JEI 里出现两条相同配方。
-- **不碰终局**：觉醒龙（4 龙块 + 6 龙核 + 龙心）与混沌碎片（混沌守卫）保持 DE 原样。
-- **贴图基底**：破碎龙矿的石壳走 `STONE_PALETTES["draconium"] = END_STONE`（末地石淡黄），
-  不是默认灰石——单源材料必须按来源方块换基底。
-- **数字**：主线 AE2+ER+DE `[sieve] 132`（+1）、`[hammer] 67`（+3）、`[materials] 18`；
-  1.20.1 全装 + Bamboo + DE `[sieve] 174`（+1）、`[hammer] 91`（+3）、`[materials] 26`。
-- **验证**：两版真装 DE + Brandons Core + CodeChicken Lib；RCON 熔炉把
-  `draconium_ore_sand` 熔成 `draconicevolution:draconium_ingot`（主线两轮、分支一轮）；
-  手筛与 JEI 未目视。
-
-## 1.2.0（2026-11-04）
-
-### 骨粉 / 烈焰粉
-
-- **骨粉**：`dust` 新增 `minecraft:bone_meal` 20%（经典 Ex Nihilo 尘土 1/5），
-  瓷土与菌岩催菌不再只靠骷髅掉落。
-- **烈焰粉**：`sand` 新增 `minecraft:blaze_powder` 3%；碎下界岩 6% 保留为更高产的第二来源，
-  酿造 / 末影之眼 / 愤怒人偶多一条来源。
-- **数字**：基表 116 → 118（1.20.1 113 → 115）；AE2 120 → 122 / 117 → 119；
-  主线 Mek+Thermal 137 → 139；1.20.1 全装 +TiT 139 → 141、+AE2 143 → 145。
-- **验证**：两版 JSON 解析 / `build` / 纹理守卫通过，分支数据用主线
-  `check-data-paths.py --target 1.20.1` 验过；未进游戏手筛，JEI 未目视。
-
-### Extreme Reactors（两版）
-
-- **三条材料**：`yellorium`（1/8，common）、`anglesite` / `benitoite`（各 1/64，rare）。
-  三条都走 `gems` 门控：只在 `bigreactors` 在场时注册，没装 ER 时基表/物品/方块完全不出现；
-  装 ER 时筛表 +9、锤表 +9。
-- **获取**：三档矿链（碎/粉/砂 → 4 合 1 矿块 → 熔炉）熔成 `bigreactors:yellorium_ingot` /
-  `anglesite_crystal` / `benitoite_crystal`；石墨仍由煤烧，cyanite/blutonium 等继续由反应堆产出，
-  不做筛源。
-- **匠魂（1.20.1）**：yellorium 碎/粉/砂 45 mB、矿块 180 mB、ER 锭 90 / 块 810，
-  铸造回 ER 锭/块；用 ER 自带的 `forge:yellorium` 流体，共 10 条，不新增流体。
-- **矿石识别（补齐）**：ER 的 `yellorite_ore` 同时登记在 `c:ores/yellorite` 和 `c:ores/uranium`；
-  我们的 yellorium 矿块现在同样进这两个 tag（块 + 物品），`yellorium_broken` 进
-  `c:raw_materials/yellorium`（及根 tag）。Mekanism 的 `enriching`、IE 的 crusher 等按
-  `c:ores/uranium`（1.21.1）/ `forge:ores/uranium`（1.20.1）取矿的机器因此能磨我们的矿，
-  输出与 ER 原矿一致（对方的铀粉，不是 yellorium）。
-- **验证**：两版真装 ER + ZeroCore；1.20.1 全装 `[materials] loaded 25`、`[sieve] 154 drops`，
-  主线 AE2+ER `[sieve] 131 drops`；RCON 熔炉三种产物均出，
-  `RecipesUsed` 指向 `*_ore_*_smelting_bigreactors`；手筛与 JEI 未目视。
-- **版本**：1.20.1 用 ER 2.0.84 + ZeroCore 2.1.45；1.21.1 用 ER 2.4.9 + ZeroCore 2.4.9。
-
-### BambooMod（仅 1.20.1）
-
-- BambooMod 0.6.2 只有 1.20.1 Forge 构建，接在 `1.20.1-forge` 分支；主线不加载。
-- `sieve/dirt.json` / `grass_block.json` 各 +8（4 树苗 2%、竹笋 4%、米种 5%、豆 4%、番茄 4%），
-  `sieve/gravel.json` +3 宝石（银杏/枫/樱各 1/64）；全部 `mod: bamboomod` 门控，
-  没装时整条跳过，基表 118/115 不变；1.20.1 全装 `[sieve] 173`。
-- 堆肥不新增 JSON：它的树叶/树苗/竹笋已在 `#minecraft:leaves` / `#minecraft:saplings`，
-  现有标签 + `compost/default.json` 已按 125 分处理。
-- 验证：分支真装 0.6.2，`[sieve] 173`、`[hammer] 88`；RCON 泥土 32 / 砂砾 31 含新条目，
-  树苗/竹笋 `/setblock` 成功；手筛、树苗生长与 JEI 未目视。
-
-## 当前批次（2026-11-04 晚，1.1.2 Bug 修复）
-
-- **1.20.1 木钩 / 骨钩不掉耐久**：`common/event/ToolEvents#onBreak` 的 crook 分支只添加
-  钩子表掉落，漏了 `hurtAndBreak`。现在非创造模式、且方块确实有钩子表时，对实际手持的
-  钩子扣 1 点；耐久耗尽走正常损坏回调。
-- **1.21.1 无需改代码**：`BlockDropsEvent` → `wearMainHand` 一直正常；服务端实测
-  `damage=1`，本版只是同步版本号。
-- **验证**：1.20.1 服务端 FakePlayer + `gameMode.destroyBlock`，木/骨钩各 `damage=1`
-  （修复前 0）；两版 `build` + 纹理守卫通过。
-- **性质**：纯 bug 修复，没有新增玩法、数据表或贴图改动。
-
-## 上一批（2026-11-04 晚，1.1.1 视觉修正）
-
-- **木桶堆肥**：`BarrelBlockEntity` 记录 `CompostItems`（物品 + 实际计入点数）；
-  客户端 `ItemTint` 采样物品图标平均色（树叶等灰度贴图乘 `ItemColors` 植被色），
-  `BarrelRenderer` 用原版泥土方块模型 + `TintVertexConsumer` 按点数加权混色；
-  腐熟计时中 tint 淡回纯白，成土后显示原版泥土色。
-- **坩埚熔料**：`CrucibleRenderer` 用 `renderSingleBlock` 画被熔方块的真实模型；
-  木坩埚（`isWooden()`）在固体未熔完时始终显示熔料，不再中途切成水盒。
-- **成土时间**：`COMPOST_TICKS` 1000 → 600（30 秒），JEI 提示同步。
-- **证据**：两条线 dev client 截图（[1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png)）：
-  腐肉红褐 / 树叶绿 / 50-50 黄褐 / 成土原版泥土色；木坩埚显示树叶方块。
-- **清理**：删除不再使用的 `textures/block/barrel_compost.png`。
-
-## 上一批（2026-11-04 下午，村民 / 脑白金 / 蜂蜜 / 蜜蜂）
-
-- **村民人偶**（`villager_doll`）：8 个绿宝石围一圈普通人偶；巫水满桶 + 右键 → 僵尸村民，
-  和平模式掉腐肉，桶恢复空桶。是第 8 只人偶。
-- **脑白金**（`brain_platinum`）：鸡蛋 4 + 糖 4 + 绿宝石 1（`ese / sMs / ese`）；
-  右键**傻子村民**转成普通（无职业）村民，消耗 1 个，成功音效 + 绿色粒子。
-- **糖水 → 浓缩蜂蜜汁**（两个可放置流体，有 source block + 桶）：
-  - 满水桶 + 糖 → 糖水；满糖水桶 + 蒲公英黄 → 30 秒（600 tick）后变浓缩蜂蜜汁；
-  - 满/不满的浓缩蜂蜜汁桶 + 玻璃瓶 → 扣 250 mB、给蜂蜜瓶（`drain` 规则，不要求满桶）；
-  - 桶里有任意数量浓缩蜂蜜汁时，每 100 tick 有 1/6 概率在 6 格内生成 1 只蜜蜂，附近上限 5 只。
-- **蜂箱**：3 木板 / 3 蜂蜜瓶 / 3 木板 → 原版 `minecraft:beehive`（工作台）。
-- **AE2 陨石粉**：`ae2:sky_dust` 加入沙（1/16）与砂砾（1/16）补丁；AE2 掉落 118 → 120。
-- **实现要点**：`BarrelRecipes.Recipe` 增加 `resultFluid` / `delayTicks` / `drain`；
-  `BarrelBlockEntity` 增加延迟换液状态机（NBT `PendingFluidFrom/To/Ticks`）、
-  玻璃瓶抽取和蜂蜜养蜂；JEI 用流体槽显示流体产出并标注延迟/抽取量，Jade 显示「转化中」。
-- **贴图**：村民人偶用现有 64×64 轮廓（翠绿）；脑白金是 16×16 蓝色礼盒 + 金丝带。
-- **验证**：见下方验证表。
-
-## 历史批次（详细见 [history.md](history.md)）
-
-- **2026-11-03 晚**：工匠巧思（TiT）阿迪特 / 叶绿素 + 应用能源 2（AE2）赛特斯石英。
-- **2026-11-03**：数据包 v2（标签/mod 门/补丁）、末影蛋糕、三路径 P1/P1.5/P2/P3、
-  Mekanism 氟石 + Thermal 六种矿物链。
-- **2026-11-02**：M7 datagen 第二/三批、科技模组锭接入、泥土筛石子 + Create 粉碎桥。
-- **2026-11-01**：1.20.1 分支 M2–M10、P1 薄门面、P2 数据管线、M6 六刀、M10 自动化。
-
 ## 功能现状
 
 ### 桶 / 堆肥 / 筛子
@@ -283,10 +70,9 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
   7 条人偶规则（熔岩+愤怒→烈焰人、巫水+诡异→末影人、巫水+漂浮→潜影贝、水+守卫者→守卫者、
   **熔岩+狂风→狂风人、水+暴雪→暴雪人**，后两条只在 Thermal 在场时出现；**巫水+村民人偶→僵尸村民**）；
   糖水 / 蜂蜜 3 条（水+糖→糖水、糖水+蒲公英黄 30 秒→浓缩蜂蜜汁、玻璃瓶抽 250 mB→蜂蜜瓶）。
-- 筛子 7 输入 / 119 掉落（无科技模组：砂砾 / 沙 / 泥土 / 尘土 / 草方块 / 粉碎下界岩 / 粉碎末地石）；
-  **装末影接口 +1**（尘土 2% 无限粉）；+AE2 123 / 120（沙、砂砾各 1/16 陨石粉）；
-  1.20.1 全装 +TiT 142、再加 AE2 146；主线 Mek+Thermal 140、+AE2 144；
-  **装龙之进化 +1**（粉碎末地石 1/8 破碎龙矿）。三档筛网只影响耐久。
+- 筛子 7 输入 / 119 掉落（无联动：砂砾 / 沙 / 泥土 / 尘土 / 草方块 / 粉碎下界岩 / 粉碎末地石）；
+  各模组增量见上面「表尺」（末影接口尘土 2% 无限粉、AE2 沙 / 砂砾各 1/16 陨石粉、
+  龙之进化粉碎末地石 1/8 破碎龙矿）。三档筛网只影响耐久。
 - 矿物链：26 种材料（14 金属 + 12 矿物；ER 三条与 DE 的 draconium 走 `gems` 门控）；
   4 碎块 → 矿方块 → 熔炼成锭/对方矿物；
   锤矿砾/矿砂掉 4–6、粉尘掉自身。`gems` 材料只在对应模组在场时注册。
@@ -316,6 +102,9 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
   装 DE 另有 3 把聚合锤（双足飞龙/神龙/混沌，模块 + 能量，无耐久消耗）；
   1.20.1 另有 3 把 Bamboo 宝石锤（樱/枫/银杏 2048，`bamboomod` 条件注册）。
   金/钻石工作台，下界合金锻造台；材质锤沿用同一斜形配方，DE 锤走聚合装置。
+- **匠魂碎矿锤**（`ex_nihilo_hammer`，仅 1.20.1）：真正的匠魂 3 工具——材料染色 + 16 个强化
+  overlay + 材料特性 / 强化槽，掉落仍走我们的锤表；装配站 1 锤头 + 1 坚韧手柄，另有连锁强化
+  `exnihilosatellitium:chain`（I–III，每级 16 块）。主线不加（Tinkers 3 没有 1.21.1 构建）。
 - **只有左键破坏**（无右键）；`HarvestCheck` + `BreakSpeed` 6.0 让锤表方块可收获且不慢；
   创造模式用 `BlockEvent.BreakEvent` 补掉落；耐久扣真实主手栈。
 - 木/骨钩；骨钩叶表概率 ×1.5；蚕已接 M6（右键树叶 → 侵染树叶 → 线）。
@@ -323,7 +112,7 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 ### 坩埚（M4）
 
 - 瓷土（粘土球+骨粉）→ 7 瓷土合未烧制坩埚 → 熔炉烧成坩埚。
-- 19 条熔点：圆石/石头/砂砾/花岗岩/闪长岩/安山岩（含磨制、深板岩、凝灰岩、方解石）250 mB，
+- 19 条固体熔点（另有 20 条树叶 / 树苗，共 39）：圆石/石头/砂砾/花岗岩/闪长岩/安山岩（含磨制、深板岩、凝灰岩、方解石）250 mB，
   下界岩 1000 mB，雪块 500 mB 水，冰 1000 mB 水，沙子/红沙/尘土 100 mB。
 - 熔料体积 = 产出量（1:1）；默认熔料上限 2000 mB（8 块圆石）。
 - 热源必须在正下方；`lit=true` 区分点燃/熄灭的熔炉、篝火。
@@ -402,7 +191,7 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
   `crucible.heatSpeedMultiplier`，运行时读取。
 - `machine.ticksPerOperation` / `energyPerTick` / `energyCapacity` / `burnPerOperation`（M10）。
 - JEI 分类：`sieve`、`barrel`、`barrel_compost`、`hammer`、`crook`、`crucible`、`crucible_heat`；
-  锤子页隐藏“粉尘→自身”的 no-op 规则（玩法 47，展示 35）。
+  锤子页隐藏“粉尘→自身”的 no-op 规则。
 
 ## 交接清单（下次会话先做）
 
@@ -412,6 +201,8 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 - **先跑**：`./gradlew build` + `python3 scripts/check-textures.py` +
   `python3 scripts/check-core-imports.py` + `python3 scripts/check-data-paths.py` +
   `python3 scripts/check-wiki.py`。分支没有后三个脚本，只跑 `build` + 纹理。
+- **表尺**：`python3 scripts/table-sizes.py`（加 `--root ../Ex-Nihilo-Satellitium-1.20.1` 看分支）；
+  文档里的表尺数字只贴它的输出，别手抄。
 - **datagen 自检**：`./gradlew runData --offline` 后 `git status` 应为空；配方比对用
   `python3 scripts/compare-recipes.py`，模型比对用 `python3 scripts/compare-models.py`。
 - **dev 环境**：主线 `run/mods` 有 AE2 + GuideME + ER/ZeroCore + **Mekanism 10.7.19 + Generators**
@@ -435,8 +226,8 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | M1.5 | 水/熔岩凝固、木桶限温 433 K、接雨水、熔岩掺红石/荧石；转化表 JSON 化 | [DESIGN §13/§14](DESIGN.md) |
 | M2 | 筛子 + 三档筛网 + 数据驱动掉落 + JEI；4 碎块 → 矿方块 → 熔炼成锭 | [DESIGN §12](DESIGN.md) |
 | 桶 JEI | `barrel` / `barrel_compost` 两个分类，读同一张 `BarrelRecipes` / `CompostRegistry` | [DESIGN §14](DESIGN.md) |
-| M3 | 6 锤 / 2 钩 / `dust` / 蚕动画 / 熟蚕 / 粘土 / 55 条基础锤表（全装 79）/ 锤钩 JEI | 🚧 待验收（[DESIGN §15–16、§18](DESIGN.md)） |
-| M4 | 坩埚 + 热源；19 熔点 / 9 热源；容量可配；Creatio 模型；熔料/流体显示；Jade；JEI 两页 | 服务端✅ / 画面🚧（[DESIGN §17](DESIGN.md)） |
+| M3 | 6 锤 / 2 钩 / `dust` / 蚕动画 / 熟蚕 / 粘土 / 55 条基础锤表（现全开 91）/ 锤钩 JEI | 🚧 待验收（[DESIGN §15–16、§18](DESIGN.md)） |
+| M4 | 坩埚 + 热源；39 熔点（19 固体 + 20 树叶 / 树苗）/ 9 热源；容量可配；Creatio 模型；熔料/流体显示；Jade；JEI 两页 | 服务端✅ / 画面🚧（[DESIGN §17](DESIGN.md)） |
 | M6 | 巫水 / 古代孢子 / 瓷桶 / 11 种木坩埚 / 12 种木桶 / 蚕 / 5 种人偶 / 筛出物扩充 | 服务端✅ / 画面🚧（[DESIGN §21–26](DESIGN.md)） |
 | M10 | 电动/内能 × 自动筛/自动锤 + 速度/时运/扩容插件 + 自动输出配置；手动与机器共用判定函数 | ✅（GUI/模型/动画作者已验收；自动输出 GUI 待目视）（[DESIGN §27](DESIGN.md)） |
 
@@ -450,7 +241,7 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | 三路径 P1–P3 | ✅ | TableBuilder/overlay、KubeJS 2101+2001、CraftTweaker 21+14；两版七张表 add/remove/replace；`/reload` 前后 dump 逐字节一致 |
 | P1 生命周期/失败隔离 | ✅ | 重复提交去重、空 payload 拒绝、server stop 清 overlay；坏 overlay 只 warning、坏数据包保留旧快照 |
 | P1 core 守卫 | ✅ | `check-core-imports.py` → `0 known leak(s)`，`common/table` 已纳入扫描 |
-| `./gradlew build` | ✅ | 2026-11-13 主线 `1.5.0` `BUILD SUCCESSFUL`（`--offline`）；1.20.1 分支最后一次已验证为 `1.4.2` |
+| `./gradlew build` | ✅ | 2026-11-13 主线 `1.5.0` `BUILD SUCCESSFUL`（`--offline`）；1.20.1 分支 1.5.0 另跑 `build` + 纹理 / data 守卫 |
 | 1.0.0 发布 | ✅ | 两版 `mod_version=1.0.0`；tag `v1.0.0` / `v1.0.0-1.20.1`；jar 版本与 sha 见 [release-1.0.0.md](release-1.0.0.md) |
 | 1.1.0 发布 | ✅ | 两版 `mod_version=1.1.0`；tag `v1.1.0` / `v1.1.0-1.20.1`；jar 版本与 sha 见 [release-1.1.0.md](release-1.1.0.md) |
 | 1.1.1 发布 | ✅ | 两版 `mod_version=1.1.1`；tag `v1.1.1` / `v1.1.1-1.20.1`；jar 版本与 sha 见 [release-1.1.1.md](release-1.1.1.md) |
@@ -463,11 +254,11 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | 木/骨钩耐久（1.20.1） | ✅ | 服务端 FakePlayer + `gameMode.destroyBlock` 破坏橡树树叶：木钩、骨钩各 `damage=1`；修复前为 0 |
 | 木/骨钩耐久（1.21.1） | ✅ | 2026-11-09 修复后服务端实测：`FakePlayer` + `ServerPlayerGameMode#destroyBlock` 破坏橡树树叶，木钩 / 骨钩各 `damage=1`，木锤 `damage=1`，创造模式钩 `damage=0`（临时探针命令，已删除）；修复前该路径因 `wearMainHand` 只认 `HammerItem` 不会扣耐久 |
 | 1.1.1 画面（堆肥混色 / 坩埚树叶） | ✅ | 两版 dev client 临时截图（脚本已删）：腐肉=红褐、树叶=绿、50/50=黄褐、`DirtReady`=原版泥土色；木坩埚 solid 60 / water 50 时显示树叶方块。截图 [images/1.1.1-compost-crucible.png](images/1.1.1-compost-crucible.png) |
-| `check-textures.py` | ✅ | 主线 308 模型 / 116 blockstate / 191 纹理（2026-11-13 扩容升级后复跑）；分支数字待分支复跑；无 `minecraft:item/*` |
+| `check-textures.py` | ✅ | 主线 308 模型 / 116 blockstate / 191 纹理；1.20.1 分支 316 模型 / 214 纹理（均为 2026-11-13 1.5.0 复跑）；无 `minecraft:item/*` |
 | `check-data-paths.py` | ✅ | 1.21.1：298 recipes / 75 loot / 76 tags（2026-11-13 复跑）；1.20.1 用 `--target 1.20.1` 验过 |
 | `check-wiki.py` | ✅ | 8 页 / 8 译文 / 91 链接 / 74 JSON / 8 nav（2026-11-13 复跑） |
 | CI 工作流 | ✅ | 2026-11-10 首跑通过（[run 42840322972](https://github.com/WanConcubine/Ex-Nihilo-Satellitium/actions/runs/42840322972)）：materials 动态断言、core/data/wiki 守卫、compile、headless smoke 全绿；日志走 artifact，`contents: read`，不再强推 `ci-logs` |
-| 数据表 JSON | ✅ | 7 输入筛表 119（基表；装末影接口 +1、装 ER +9、装 DE +1）、55 锤（装 ER +9、装 DE +3）、10 钩、18 桶（缺 Thermal 16）、67 堆肥、39 熔点 / 9 热源；全部可解析 |
+| 数据表 JSON | ✅ | 基线：7 输入 119 筛表、55 锤、10 钩、16 桶（装 Thermal 18）、67 堆肥、39 熔点 / 9 热源；模组增量见「表尺」；全部可解析 |
 | 桶：堆肥 / 流体 / 固化 | ✅ | RCON：苹果+100、树叶+125，满 1000 成土；熔岩/水装填与圆石/黑曜石固化通过 |
 | 桶：牛奶 / 巫水 / 人偶 | ✅ | RCON：牛奶→史莱姆（和平掉粘液球）；巫水发酵与 4 条转化；人偶右键立即生成/掉落 |
 | 木桶：满桶右键 / 管道 | ⚠️ | 可堆肥物品满桶返回 `CONSUME`；新增 `BarrelItemHandler`（0 输入 / 1 输出）+ 两版流体 capability；`build` 通过，**未进游戏**测右键拦截与管道 |
@@ -480,13 +271,13 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | 坩埚：熔点/热源/容量 | ✅ | RCON：19+9 条加载；篝火 0.25 / 熔炉 0.15 / 熄灭 0；容量 8000→3000 热改生效 |
 | 坩埚：显示 / Jade / JEI | ⚠️ | 熔料↔流体切换、Jade 剩余、两页 JEI 未目视 |
 | 筛子：基础表 | ✅ | 2026-11-05 审计：`[sieve] 7 inputs, 119 drops`（无科技模组），含树苗 9 种、竹子、海晶、菌岩孢子、下界合金碎片、**尘土 20% 骨粉**、**沙子 3% / 碎下界岩 6% 烈焰粉**、**泥土 50% × 3-5 深板岩石子** |
-| 筛子：矿物/联动 | ✅ | Mek+Thermal 139；1.20.1 +TiT 141；+AE2 145；主线 +AE2 122；装 ER 各 +9（150 / 154）；RCON 概率与 JSON 一致，无 unknown item |
+| 筛子：矿物/联动 | ✅ | 增量见「表尺」：热力 +18、ER +9、AE2 +4、Mekanism +3、末影接口 / 龙之进化各 +1；RCON 概率与 JSON 一致，无 unknown item |
 | 筛子：草方块 / 泥土 | ✅ | 草方块 = 泥土 24 条（不含深板岩石子）+ 叶绿素碎矿 1%；四种石子 4-6 个 100% 出；泥土另有深板岩石子 50% × 3-5 |
 | 筛子：手筛 / 机器 / JEI | ⚠️ | 实际出货手感、JEI 筛子页未目视（尤其 TiT/AE2 条目） |
 | 锤 / 钩 | ⚠️ | 6 基础锤 / 2 钩、左键唯一路径、耐久与 4–6 掉落逻辑就位；手感与 JEI 未验 |
-| 材质锤（主线） | ⚠️ | 9 把金属锤：`build` + 纹理/数据/核心守卫通过（307 模型 / 190 纹理 / 297 配方）；RCON `summon item` 9/9 注册且名字正确；**未进游戏**验合成、耐久、JEI |
+| 材质锤（主线） | ⚠️ | 9 把金属锤：`build` + 纹理 / 数据 / 核心守卫通过（当前数字见上方守卫行）；RCON `summon item` 9/9 注册且名字正确；**未进游戏**验合成、耐久、JEI |
 | DE 锤（主线） | ✅ | `wyvern_hammer` / `draconic_hammer` / `chaotic_hammer`：真装 DE 3.1.4.633 后三把注册；模块 GUI / 能量模块可用；手锤与自动锤均 256/次扣电、空电停机；作者实机确认。聚合实际合成 / AOE / JEI 未目视 |
-| 材质锤（1.20.1） | ⚠️ | +3 把 Bamboo 宝石锤（2048，条件注册）：`build` + 分支纹理守卫通过（309 模型 / 179 纹理）；`-PtechMods` 真装 BambooMod 后 RCON `summon item` 樱/枫/银杏 + 锡/铜/铂 全部注册；未验合成 / 耐久 / JEI |
+| 材质锤（1.20.1） | ⚠️ | +3 把 Bamboo 宝石锤（2048，条件注册）：`build` + 分支纹理守卫通过（316 模型 / 214 纹理）；`-PtechMods` 真装 BambooMod 后 RCON `summon item` 樱/枫/银杏 + 锡/铜/铂 全部注册；未验合成 / 耐久 / JEI |
 | 矿物链 | ✅ | 4 碎块→矿块→熔炼 RCON 通过；14 金属 + 11 矿物按候选解析；`gems` 缺模组整条不注册（含 ER 三条） |
 | 蚕 / 侵染树叶 | ⚠️ | 进度/扩散 RCON 验过；右键、变白渲染、破坏掉线未目视 |
 | 瓷桶 / 木坩埚 / 人偶 | ⚠️ | 组件/熔化/生成 RCON 验过；舀水/倒液体/11 变种外观未目视 |
@@ -500,11 +291,11 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 | supported mods：Thermal | ✅ | 1.20.1：磷灰石/朱砂/硝石/硫磺/红宝石/蓝宝石 6/6 熔成 `thermal:*`；两只热力人偶的桶规则与物品注册通过 |
 | supported mods：Create / IE | ✅ | Create 锌锭 + 12 条 crushing；IE 五锭候选与 `forge:ores` 标签；多方块未跑 |
 | supported mods：Tinkers / TiT | ✅ | 钴 → `tconstruct:cobalt_ingot`；阿迪特/叶绿素 22 entries、RCON 熔炉两条都通过 |
-| supported mods：AE2 | ✅ | 1.21.1 119→123 / 1.20.1 142→146（+4，含沙/砂砾各 1/16 陨石粉）；RCON sand/gravel 含 `sky_dust 0.0625`；缺 AE2 静默跳过、无 unknown |
+| supported mods：AE2 | ✅ | 1.21.1 119→123 / 1.20.1 116→120（+4，含沙 / 砂砾各 1/16 陨石粉）；RCON sand/gravel 含 `sky_dust 0.0625`；缺 AE2 静默跳过、无 unknown |
 | supported mods：末影接口（Ender IO） | ✅ / ⚠️ | 两版 `sieve/dust_enderio.json`：尘土 2% 出 `enderio:grains_of_infinity`（`mod: enderio` + `patch`，缺 Ender IO 整文件跳过）；`build` + 守卫通过，**未真装 Ender IO 验过**、JEI 未目视；不新增基岩粉物品/基岩合成 |
 | supported mods：Extreme Reactors | ✅ | 1.20.1 ER 2.0.84 / 1.21.1 ER 2.4.9（+ ZeroCore）；yellorium 1/8、anglesite/benitoite 各 1/64 走 `gems` 门控；三档矿链熔成 ER 锭/晶体；RCON 熔炉三种产物 + `RecipesUsed` 验证；手筛/JEI 未目视 |
 | supported mods：龙之进化 | ✅ / ⚠️ | 两版真装 DE 3.1.4.633（1.21.1）+ 3.1.2.621（1.20.1），带 Brandons Core / CodeChicken Lib；主线 AE2+ER+DE `[materials] 18`、`[sieve] 132`、`[hammer] 67`；1.20.1 全装+Bamboo+DE `[materials] 26`、`[sieve] 174`、`[hammer] 91`；RCON 熔炉两版都把 `draconium_ore_sand` / `draconium_ore_dust` 熔成 `draconicevolution:draconium_ingot`；手筛/JEI 未目视 |
-| supported mods：BambooMod（仅 1.20.1） | ✅ | 0.6.2 真装：泥土/草各 +8（树苗/竹笋/作物）、砂砾 +3 宝石，全带 `mod` 门；`[sieve] 173`（+19）；RCON 泥土 32 / 砂砾 31；堆肥靠现有 leaves/saplings 标签；手筛/生长/JEI 未测 |
+| supported mods：BambooMod（仅 1.20.1） | ✅ | 0.6.2 真装：泥土/草各 +8（树苗/竹笋/作物）、砂砾 +3 宝石，全带 `mod` 门；`bamboomod` 共 +19；RCON 泥土 32 / 砂砾 31；堆肥靠现有 leaves/saplings 标签；手筛/生长/JEI 未测 |
 | 客户端画面 | ⚠️ | **1.1.1 的堆肥混色 / 坩埚树叶已在两条线 dev client 目视**；其余（机器 GUI、自动输出抽屉、热力人偶、TiT/AE2 物品与 JEI 页）仍停在 2026-10-31 之后未看 |
 | 旧内容目视 | ⚠️ | 桶/筛比例、木桶竖棱、筛料层、Jade tooltip 等仍待作者确认 |
 
@@ -514,14 +305,21 @@ P3 状态机拆分（见文末「下一步」与 [tech-debt.md](tech-debt.md)）
 > 下一步是 [roadmap](customization-roadmap.md) 的 **P4 客户端 JEI 同步 + fixture CI**。
 >
 > **2026-11-09 第二轮技术债审计**：[tech-debt.md](tech-debt.md)。P0 #47 已修并实测通过；
-> P1 #48–#50 已修，2026-11-10 首跑通过；#51（1.20.1 分支守卫/漂移）仍待处理。
+> P1 #48–#50 已修，2026-11-10 首跑通过；**#51/#53 已于 2026-11-17 完成**（见下）。
+>
+> **2026-11-17：#51/#53 已完成**：新增 `scripts/check-branch-sync.py`，按**条目**比对两版的
+> sieve/hammer/crook/compost/barrel/crucible_*，48 条差异全部写进 `ALLOW` 并带理由
+> （Bamboo +19、黏液泥土链、钴缺口、`c:`↔`forge:`、`grass`→`short_grass`）；注入一条假 diff 能红。
+> 1.20.1 分支补上 `check-core-imports.py`（`KNOWN` 只剩机器 BE 的能力引用），顺手把 `ExConfig`
+> 从 `common/config` 挪到 `platform/config`、`OreMaterials` 改走 `Platform` 门面；分支
+> `compileJava` 通过。CI 加了 `branch-sync` 作业（需要先推送分支）。
 
 1. **CI 收尾**：2026-11-10 首跑已全绿（run 42840322972）；只剩远端旧 `ci-logs` 分支需要所有者手动删除。
-2. **1.4.x / 扩容升级实机验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；主线另看 3 把 DE 锤的
+2. **1.4.x–1.5.0 实机验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；主线另看 3 把 DE 锤的
    聚合合成 / AOE；**扩容升级的工作台合成、输出区翻页按钮、JEI 显示**；1.20.1 用 `-PtechMods` 验
    Bamboo 宝石锤、匠魂碎矿锤（1.4.1 改成两件配方，装配站与耐久待复测）与叶绿素熔化。
-3. **1.5.0 商店收尾**：两条线 `mod_version=1.5.0` 已构建；tag `v1.5.0` / `v1.5.0-1.20.1`
-   已推送，剩下 CurseForge / Modrinth 上传与 README 下载链接（所有者操作）。
+3. **商店上传**：两条线 `mod_version=1.5.0` 已构建、tag 已推送；**1.0.0–1.5.0 的
+   CurseForge / Modrinth 上传全部待所有者**，另有 README 下载链接。
 4. **一次性画面/手感验收 M1.5–M10**：机器 GUI/自动输出抽屉、BER 动画、筛料渲染、
    木桶竖棱、镐挖机器、村民人偶 / 脑白金 / 糖水链 / 蜜蜂 / 热力人偶；清单见「交接清单」。
 5. **P4 客户端 JEI 同步 + fixture CI**：专用服客户端 JEI 目前只读本地镜像/数据包。
@@ -821,5 +619,5 @@ JEI 截图与贴图预览在 `docs/images/`。
   textures 写“美术规则”。
 - 改完功能先回写本文件的验证表，再改 DESIGN 的实现记录；不要把同一份进度抄到多处。
 - 新的“本轮”记录先加在 [DESIGN.md](DESIGN.md) 对应章节，本文件只留一行摘要。
-- **批次叙事不要堆在这里**：只留「当前批次」；上一批/更早的搬运到 [history.md](history.md)，
-  本文件只留一节「历史批次」摘要 + 链接（2026-11-02 整理时搬走过约 250 行）。
+- **批次叙事不要堆在这里**：只留当前版本；上一版/更早的搬运到 [history.md](history.md)。
+  2026-11-02 搬过一次（约 250 行），2026-11-14 又把 1.1.1–1.4.2 的批次搬了过去。
