@@ -47,6 +47,9 @@ jobs:
       - name: Wiki guard
         run: python3 scripts/check-wiki.py
 
+      - name: Wiki JSON guard
+        run: python3 scripts/check-wiki-json.py
+
       - name: Compile
         run: ./gradlew build --no-daemon --stacktrace
 

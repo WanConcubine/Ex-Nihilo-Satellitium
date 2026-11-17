@@ -260,7 +260,7 @@ crucible_heat 9。→ 单包足够，**不需要分页**；等表涨到 ~100 KB 
 截断快照（模拟失败）时日志 WARN 且 JEI 仍有旧数据 |
 | S4a 数据包 fixture（CI） | CI 服务器 + `run/world/datapacks/` fixture + RCON 跑 `exnihilo dump` + 与 golden 文本 diff | 无（可独立先做） | CI 绿；故意改一条 fixture 能红 |
 | S4b 脚本 fixture | 同一 fixture 分别用 KJS / CT 写，dump 与数据包版逐字节一致（P3 已手工验过一次） | S4a + CI 里有对应运行时 jar | 同 S4a；jar 缺失时**跳过**而不是失败 |
-| S5 文档校验 | wiki 里的 JSON 示例喂给同一套校验；可选从表结构生成字段表 | S4a | 新增一条守卫，坏示例能红 |
+| S5 文档校验 | ✅ 第一步已做（2026-11-17）：`check-wiki-json.py` 校验 id 格式 / `chance` 0..1 / `min<=max` / `amount` 非负，接进 CI；**语义校验**（与 Java loader 一致，含未知字段）仍待 S4a 的 fixture | S4a | 已做：坏示例能红（`diamond` 缺命名空间、`chance 1.5` 都报错） |
 
 **未决（需要 Owner 定）**
 
