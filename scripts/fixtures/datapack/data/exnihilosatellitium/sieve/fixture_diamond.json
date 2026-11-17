@@ -1,0 +1,7 @@
+{
+  "input": "minecraft:sand",
+  "patch": true,
+  "outputs": [
+    { "item": "minecraft:diamond", "chance": 0.5 }
+  ]
+}

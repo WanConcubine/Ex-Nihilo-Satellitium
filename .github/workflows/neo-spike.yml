@@ -156,3 +156,49 @@ jobs:
 
       - name: Branch sync guard (main vs 1.20.1)
         run: python3 scripts/check-branch-sync.py --branch branch-1.20.1
+
+  fixture-datapack:
+    # P4 S4a: install a fixture datapack, reload, and assert the dump line.
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Prepare server (RCON on)
+        run: |
+          set -u
+          mkdir -p run
+          echo "eula=true" > run/eula.txt
+          printf 'online-mode=false\nlevel-type=flat\nspawn-protection=0\nenable-rcon=true\nrcon.password=eni\nrcon.port=25575\n' > run/server.properties
+
+      - name: Start server
+        run: |
+          set -u
+          nohup ./gradlew runServer --no-daemon > /tmp/fixture-server.log 2>&1 &
+          for i in $(seq 1 150); do
+            grep -q 'Done (' /tmp/fixture-server.log && break
+            sleep 2
+          done
+          grep -q 'Done (' /tmp/fixture-server.log
+
+      - name: Datapack fixture
+        run: python3 scripts/check-fixture.py
+
+      - name: Stop server
+        if: always()
+        run: python3 scripts/rcon.py stop || true
+
+      - name: Upload server log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixture-server-log
+          path: /tmp/fixture-server.log
+          if-no-files-found: ignore
