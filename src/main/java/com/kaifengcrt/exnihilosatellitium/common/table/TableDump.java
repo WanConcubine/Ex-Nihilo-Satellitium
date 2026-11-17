@@ -13,6 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -31,12 +32,17 @@ public final class TableDump {
     private TableDump() {
     }
 
-    /** Sorted, human-readable lines for one table. */
+    /** Sorted, human-readable lines for one table (server view). */
     public static List<String> lines(final TableId table) {
+        return lines(table, false);
+    }
+
+    /** Same rendering, but from the client-side view (P4 S1/S2 verification). */
+    public static List<String> lines(final TableId table, final boolean clientView) {
         final List<String> lines = new ArrayList<>();
         switch (table) {
             case SIEVE -> {
-                for (final Map.Entry<Item, List<SieveDrop>> entry : SieveRegistry.all().entrySet()) {
+                for (final Map.Entry<Item, List<SieveDrop>> entry : (clientView ? SieveRegistry.clientAll() : SieveRegistry.all()).entrySet()) {
                     final String input = id(entry.getKey());
                     for (final SieveDrop drop : entry.getValue()) {
                         lines.add("sieve " + input + " -> " + id(drop.item()) + " "
@@ -45,14 +51,18 @@ public final class TableDump {
                 }
             }
             case HAMMER -> {
-                for (final Map.Entry<Block, HammerRecipes.Rule> entry : HammerRecipes.all()) {
+                final List<Map.Entry<Block, HammerRecipes.Rule>> hammer =
+                        clientView ? HammerRecipes.clientAll() : HammerRecipes.all();
+                for (final Map.Entry<Block, HammerRecipes.Rule> entry : hammer) {
                     final HammerRecipes.Rule rule = entry.getValue();
                     lines.add("hammer " + id(entry.getKey()) + " -> " + id(rule.item()) + " "
                             + count(rule.min(), rule.max()));
                 }
             }
             case CROOK -> {
-                for (final Map.Entry<Block, List<CrookDrops.Drop>> entry : CrookDrops.all()) {
+                final List<Map.Entry<Block, List<CrookDrops.Drop>>> crook =
+                        clientView ? CrookDrops.clientAll() : CrookDrops.all();
+                for (final Map.Entry<Block, List<CrookDrops.Drop>> entry : crook) {
                     final String input = id(entry.getKey());
                     for (final CrookDrops.Drop drop : entry.getValue()) {
                         lines.add("crook " + input + " -> " + id(drop.item()) + " "
@@ -61,12 +71,12 @@ public final class TableDump {
                 }
             }
             case BARREL -> {
-                for (final BarrelRecipes.Recipe recipe : BarrelRecipes.all()) {
+                for (final BarrelRecipes.Recipe recipe : (clientView ? BarrelRecipes.clientAll() : BarrelRecipes.all())) {
                     lines.add(barrel(recipe));
                 }
             }
             case COMPOST -> {
-                for (final CompostRegistry.Entry entry : CompostRegistry.all()) {
+                for (final CompostRegistry.Entry entry : (clientView ? CompostRegistry.clientAll() : CompostRegistry.all())) {
                     final String key = entry.item() != null
                             ? id(entry.item())
                             : "#" + entry.tag().location();
@@ -74,14 +84,16 @@ public final class TableDump {
                 }
             }
             case CRUCIBLE_MELT -> {
-                for (final CrucibleRecipes.Melt melt : CrucibleRecipes.all()) {
+                final Collection<CrucibleRecipes.Melt> melts =
+                        clientView ? CrucibleRecipes.clientAll() : CrucibleRecipes.all();
+                for (final CrucibleRecipes.Melt melt : melts) {
                     lines.add("crucible_melt " + id(melt.input()) + " -> "
                             + BuiltInRegistries.FLUID.getKey(melt.fluid()) + " "
                             + melt.amount() + " mB (solid " + melt.solidAmount() + ")");
                 }
             }
             case CRUCIBLE_HEAT -> {
-                for (final CrucibleHeat.HeatSource source : CrucibleHeat.all()) {
+                for (final CrucibleHeat.HeatSource source : (clientView ? CrucibleHeat.clientAll() : CrucibleHeat.all())) {
                     lines.add("crucible_heat " + id(source.block()) + properties(source.properties())
                             + " = " + Float.toString(source.speed()) + " mB/t");
                 }

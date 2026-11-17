@@ -12,6 +12,8 @@ import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
 import com.kaifengcrt.exnihilosatellitium.common.network.ModNetwork;
 import com.kaifengcrt.exnihilosatellitium.common.network.TableSnapshotPayload;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableDump;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
 import com.kaifengcrt.exnihilosatellitium.common.table.TableSnapshot;
 import com.kaifengcrt.exnihilosatellitium.common.table.Tables;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
@@ -31,7 +33,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 /**
@@ -80,20 +84,38 @@ public final class CommonEvents {
         // KubeJS scripts run before this event; apply their queued overlay ops now.
         Tables.rebuildAll(false);
 
-        // P4 S1 self-check: the snapshot must contain exactly the records the dump renders.
+        // P4 S1/S2 self-check: capture -> codec -> apply into the client view, then
+        // compare the rendered lines with the server's. On an integrated server the
+        // client shares the static tables, so only a dedicated server runs the apply.
+        final Map<TableId, List<String>> expected = new EnumMap<>(TableId.class);
+        for (final TableId table : TableId.values()) {
+            expected.put(table, TableDump.lines(table));
+        }
         final TableSnapshot snapshot = TableSnapshot.capture();
         final List<String> problems = snapshot.checkCounts();
         final String json = snapshot.toJson().toString();
         final TableSnapshotPayload payload = new TableSnapshotPayload(json);
         final FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         TableSnapshotPayload.STREAM_CODEC.encode(buffer, payload);
-        final TableSnapshotPayload decoded = TableSnapshotPayload.STREAM_CODEC.decode(buffer);
-        if (!json.equals(decoded.json())) {
+        if (!json.equals(TableSnapshotPayload.STREAM_CODEC.decode(buffer).json())) {
             problems.add("payload codec round-trip changed the snapshot");
         }
+        int compared = 0;
+        if (event.getServer().isDedicatedServer()) {
+            snapshot.applyClientView();
+            for (final TableId table : TableId.values()) {
+                final List<String> actual = TableDump.lines(table, true);
+                if (!expected.get(table).equals(actual)) {
+                    problems.add(table.id() + ": client view has " + actual.size()
+                            + " line(s), server has " + expected.get(table).size());
+                }
+                compared += actual.size();
+            }
+        }
         if (problems.isEmpty()) {
-            ExNihiloSatellitium.LOGGER.info("[snapshot] selftest OK: {} file(s), {} chars, codec ok (schema {})",
-                    snapshot.fileCount(), json.length(), TableSnapshot.SCHEMA);
+            ExNihiloSatellitium.LOGGER.info(
+                    "[snapshot] selftest OK: {} file(s), {} chars, codec ok, {} line(s) identical (schema {})",
+                    snapshot.fileCount(), json.length(), compared, TableSnapshot.SCHEMA);
         } else {
             ExNihiloSatellitium.LOGGER.error("[snapshot] selftest mismatch: {}", problems);
         }

@@ -385,4 +385,9 @@ public final class CrookDrops {
         clientSources = List.copyOf(files);
         rebuild(true, true);
     }
+
+    /** Client-side view (server snapshot or the assets mirror); used by the S1/S2 check. */
+    public static List<Map.Entry<Block, List<Drop>>> clientAll() {
+        return List.copyOf(clientTable.entrySet());
+    }
 }

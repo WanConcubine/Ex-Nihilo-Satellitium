@@ -253,7 +253,7 @@ crucible_heat 9。→ 单包足够，**不需要分页**；等表涨到 ~100 KB 
 
 | 步骤 | 内容 | 依赖 | 验收 |
 |---|---|---|---|
-| S1 快照序列化 | `TableSnapshot`（core）：从 7 张表导出条目 + schema 版本；字节化与网络解耦 | `TableDump` / `TableBuilder` | 同一份表：快照 → 文本，与 `/exnihilo dump` 逐条一致 |
+| S1 快照序列化 | ✅ 已做（2026-11-17）：`TableSnapshot` 导出 7 张表 + schema 版本；`TableDump.lines(table, clientView)` 可渲染客户端视图 | `TableDump` / `TableBuilder` | 专用服实测：快照 → JSON → codec → 重建后，**358 行与服务器 dump 逐行一致** |
 | S2 传输 | `playToClient` payload：登录后、以及每次 reload 完成（`TagsUpdatedEvent` 之后）广播；**集成服跳过**（客户端共享静态表） | S1、`ModNetwork` 先例 | 专用服客户端日志收到 N 条；`all()` 非空且与服务器 dump 一致 |
 | S3 JEI 换源（镜像保留为兜底） | 客户端注册表改由快照填充；镜像只在「没收到快照」时使用，兜底时打 WARN。
 #64 已修：镜像目录从 `TableId.java` 派生，`verifyTableMirror` 接进 `check` | S2 | 改一条数据包条目 → 客户端 JEI 显示新值；

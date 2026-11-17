@@ -295,4 +295,9 @@ public final class HammerRecipes {
         clientSources = List.copyOf(files);
         rebuild(true, true);
     }
+
+    /** Client-side view (server snapshot or the assets mirror); used by the S1/S2 check. */
+    public static List<Map.Entry<Block, Rule>> clientAll() {
+        return List.copyOf(clientRecipes.entrySet());
+    }
 }

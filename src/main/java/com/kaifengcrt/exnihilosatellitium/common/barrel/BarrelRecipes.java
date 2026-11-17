@@ -555,4 +555,9 @@ public final class BarrelRecipes {
         clientSources = List.copyOf(files);
         rebuild(true, true);
     }
+
+    /** Client-side view (server snapshot or the assets mirror); used by the S1/S2 check. */
+    public static List<Recipe> clientAll() {
+        return clientRecipes;
+    }
 }

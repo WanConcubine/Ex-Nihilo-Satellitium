@@ -371,4 +371,9 @@ public final class CrucibleHeat {
         clientFiles = List.copyOf(files);
         rebuild(true, true);
     }
+
+    /** Client-side view (server snapshot or the assets mirror); used by the S1/S2 check. */
+    public static List<HeatSource> clientAll() {
+        return clientSources;
+    }
 }
