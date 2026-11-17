@@ -4,9 +4,13 @@
 > 以后再加 1.21.x / 1.22 时只改“平台层”，核心逻辑与数据格式不动。
 > 本文件是移植的总清单；当前状态仍以 [status.md](status.md) 为准。
 
-## 1. 现状（2026-11-01，P1 之后，main）
+## 1. 分层现状（2026-11-01 快照，main）
 
-- `src/main/java` 共 **111 个文件**，其中 **36 个** import `net.neoforged`。
+> 2026-11-14：**core / platform 的分层结论未变**（`check-core-imports.py` 仍是 0 leak），
+> 但下面的文件数、以及“1.20.1 分支已补到 M2”都是旧快照——分支现在是 1.5.0。
+> 当前状态只看 [status.md](status.md)。
+
+- `src/main/java` 共 **155 个文件**，其中 **44 个** import `net.neoforged`（2026-11-17 重测）。
 - **core 已经干净**：`sieve` / `hammer` / `crook` / `compost` / `barrel` / `crucible` /
   `material` / `config` / `platform`（core 门面）以及 `machine` 顶层类 **0 个 NeoForge import**；
   `MachineBlockEntity` 也只经 `MachineHooks` 调能力。`check-core-imports.py` 的 known 已从 4 清零。
@@ -32,7 +36,9 @@
 
 ```
 core/        纯逻辑：数据记录 + JSON 表解析 + 掷表/权重/状态机。
-             只允许 net.minecraft / com.google.gson / java；不得 import net.neoforged。
+             「可复制」的准确含义是**不碰 loader API**（1.21.1 禁 net.neoforged，
+             1.20.1 禁 net.minecraftforge）；原版类可以用——实测 core 包共 import 59 个
+             net.minecraft 类，跨 MC 版本时这些才是真正的移植成本（见 §4）。
              需要平台能力时只走窄门面：ConfigValues / Platform / MachineHooks / GuiLayers。
 platform/    版本胶水：注册、事件、能力、网络、配置 spec、BE 菜单/同步、渲染、compat。
              包名就是 com.kaifengcrt.exnihilosatellitium.platform（与 core 的
@@ -44,6 +50,17 @@ docs/        本文件 + status/parity 的版本标注。
 
 `CORE` 的边界用 `scripts/check-core-imports.py` 守住（新加的 NeoForge import 直接失败，
 已知漏点列在脚本的 `KNOWN` 里，逐项清零）。
+
+两条线各有一个守卫（2026-11-17 起）：
+
+- **core 守卫**：main 禁 `net.neoforged`，1.20.1 分支禁 `net.minecraftforge`
+  （`../Ex-Nihilo-Satellitium-1.20.1/scripts/check-core-imports.py`）。分支的 `KNOWN`
+  只剩 `MachineBlockEntity` 的 6 处能力/能量引用，等 1.20.1 补 P1 后清零；
+  顺带把分支的 `ExConfig`（`ForgeConfigSpec`）从 `common/config` 挪到了 `platform/config`。
+- **分支同步守卫**：`scripts/check-branch-sync.py` 按**条目**比对两版的
+  sieve / hammer / crook / compost / barrel / crucible_*，只允许 `ALLOW` 里写明的差异
+  （Bamboo +19、黏液泥土链、钴缺口、`c:`↔`forge:`、`grass`→`short_grass`）。
+  新增差异直接失败，避免「改了一边忘了另一边」；需要 1.20.1 worktree 在旁边。
 
 ## 3. 重构顺序（按“移植收益 / 工作量”排序）
 

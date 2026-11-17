@@ -7,6 +7,10 @@
 >
 > 状态：`P0` 已坏功能/数据；`P1` 结构性风险，下个批次必须处理；`P2` 性能/工具链；
 > `P3` 重构机会与清理。首轮（2026-10-30）的编号保留，已关闭的折叠到文末，新发现从 #47 起。
+>
+> **2026-11-14 复查**：这是 2026-11-09 的快照，下面证据里的模型 / 配方数字停在 1.4.0。
+> 之后 1.4.1 / 1.4.2 / 1.5.0 已发布；#47 与 #48–#50 保持关闭，#51（分支守卫 / 漂移）仍未动。
+> 当前表尺改用 `scripts/table-sizes.py`，本文件不再跟着改数字。
 
 ## 本轮结论
 
@@ -15,7 +19,7 @@
   用 FakePlayer + `gameMode.destroyBlock` 实测：木钩/骨钩/木锤各 `damage=1`，创造钩 0（见 #47）。
 - **P1 流程问题**：CI 的 `[materials] loaded 12 entries` 断言按当前材料表必红（#48）、
   CI 不跑 core/data 守卫也不跑 PR（#49）、1.20.1 分支与 `main` 的 `common/` 已实质漂移
-  且分支没有守卫（#51）。**#48–#50 已修，2026-11-10 push 首跑通过；#51 仍待处理。**
+  且分支没有守卫（#51）。**#48–#50 已修，2026-11-10 push 首跑通过；#51/#53 已于 2026-11-17 完成。**
 - **最大重构点**：6 份几乎同构的表加载器（~2.2k 行，含 6 个空壳 reload listener）与
   `BarrelBlockEntity` 单类 1097 行的多状态机（#66/#67）。
 - **最大性能点**：机器每 tick `setChanged` + 全槽扫描（#54）、升级查询在 BER 每帧分配/排序
@@ -114,7 +118,7 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
 2. **#48/#49/#50（P1，已完成）**：CI 断言已改为从 `materials.json` 计算、补了两个守卫、
    加了 PR 触发、日志改 artifact；2026-11-10 push 首跑全绿，PR 触发待第一个 PR。
    远端旧的 `ci-logs` 分支需要所有者手动删除。
-3. **#51/#53（P1，1–2 天）**：分支补 core-imports 守卫 + `check-branch-sync.py`；
+3. **#51/#53（P1，已完成 2026-11-17）**：分支补 core-imports 守卫 + `check-branch-sync.py`；
    把 AGENTS/porting 的「core」定义收窄到实际可复制的范围。
 4. **#54/#55/#57（P2 性能，先基准）**：用 20 台机器/50 个桶/一片侵染树叶做服务端 tick 对比，
    再按「setChanged 去抖 → 升级缓存 → 同步降频」的顺序改；#58 用 F3 帧时间/GC 日志确认。
@@ -125,6 +129,9 @@ private static void wearMainHand(final Player player, final ItemStack eventTool)
 7. 其余 P2/P3 按发布节奏穿插（#63/#62/#64 是工具链，适合单独一个 chore 批次）。
 
 ## 已关闭 / 不再成立的条目（相对 2026-10-30 首轮）
+
+- **2026-11-17 关闭 #51/#53**：分支 `check-core-imports.py` 通过（1 known，机器 BE 等 P1）；
+  `check-branch-sync.py` 48 条已知差异全部白名单化（注入假 diff 能红）；两版 core 定义已收窄。
 
 - **已修复并抽查确认**：#9（`getOptional` 统一，未再发现 defaulted `get`）；#10/#11（筛网
   `copyWithCount(1)` 保留 damage、三档 `stacksTo(1)`）；#12（JEI 筛子页改为 7×3 轮转，
