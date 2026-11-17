@@ -10,6 +10,7 @@ import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListen
 import com.kaifengcrt.exnihilosatellitium.common.item.BrainPlatinumItem;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableSnapshot;
 import com.kaifengcrt.exnihilosatellitium.common.table.Tables;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,6 +24,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.bus.api.SubscribeEvent;
+
+import java.util.List;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 /**
@@ -70,6 +73,16 @@ public final class CommonEvents {
         ExNihiloSatellitium.LOGGER.info("[debug] our recipes={} compostable items={}", ours, compostable);
         // KubeJS scripts run before this event; apply their queued overlay ops now.
         Tables.rebuildAll(false);
+
+        // P4 S1 self-check: the snapshot must contain exactly the records the dump renders.
+        final TableSnapshot snapshot = TableSnapshot.capture();
+        final List<String> problems = snapshot.checkCounts();
+        if (problems.isEmpty()) {
+            ExNihiloSatellitium.LOGGER.info("[snapshot] selftest OK: {} file(s), {} chars (schema {})",
+                    snapshot.fileCount(), snapshot.toJson().toString().length(), TableSnapshot.SCHEMA);
+        } else {
+            ExNihiloSatellitium.LOGGER.error("[snapshot] selftest mismatch: {}", problems);
+        }
     }
 
     /**
