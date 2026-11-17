@@ -1,10 +1,13 @@
 package com.kaifengcrt.exnihilosatellitium.common.network;
 
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.common.machine.blockentity.MachineBlockEntity;
+import com.kaifengcrt.exnihilosatellitium.common.table.TableSnapshot;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -22,8 +25,15 @@ public final class ModNetwork {
 
     @SubscribeEvent
     public static void register(final RegisterPayloadHandlersEvent event) {
-        event.registrar(VERSION).playToServer(
-                MachineOutputPayload.TYPE, MachineOutputPayload.STREAM_CODEC, ModNetwork::handleOutputConfig);
+        event.registrar(VERSION)
+                .playToServer(
+                        MachineOutputPayload.TYPE,
+                        MachineOutputPayload.STREAM_CODEC,
+                        ModNetwork::handleOutputConfig)
+                .playToClient(
+                        TableSnapshotPayload.TYPE,
+                        TableSnapshotPayload.STREAM_CODEC,
+                        ModNetwork::handleSnapshot);
     }
 
     private static void handleOutputConfig(final MachineOutputPayload payload,
@@ -42,6 +52,33 @@ public final class ModNetwork {
                 return;
             }
             machine.setOutputConfig(payload.mask(), payload.autoOutput());
+        });
+    }
+
+    /** Sends the current tables to one player (login). */
+    public static void sendSnapshot(final ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player,
+                new TableSnapshotPayload(TableSnapshot.capture().toJson().toString()));
+    }
+
+    /** Re-sends the current tables to everyone (after a server reload). */
+    public static void broadcastSnapshot() {
+        PacketDistributor.sendToAllPlayers(
+                new TableSnapshotPayload(TableSnapshot.capture().toJson().toString()));
+    }
+
+    private static void handleSnapshot(final TableSnapshotPayload payload,
+                                       final IPayloadContext context) {
+        context.enqueueWork(() -> {
+            try {
+                final TableSnapshot snapshot =
+                        TableSnapshot.fromJson(JsonParser.parseString(payload.json()).getAsJsonObject());
+                snapshot.applyClientView();
+                ExNihiloSatellitium.LOGGER.info("[snapshot] applied {} file(s) from the server",
+                        snapshot.fileCount());
+            } catch (final RuntimeException exception) {
+                ExNihiloSatellitium.LOGGER.error("[snapshot] rejected server snapshot", exception);
+            }
         });
     }
 }

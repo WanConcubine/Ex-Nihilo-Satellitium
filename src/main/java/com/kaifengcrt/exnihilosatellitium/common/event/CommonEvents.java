@@ -10,6 +10,8 @@ import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListen
 import com.kaifengcrt.exnihilosatellitium.common.item.BrainPlatinumItem;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
+import com.kaifengcrt.exnihilosatellitium.common.network.ModNetwork;
+import com.kaifengcrt.exnihilosatellitium.common.network.TableSnapshotPayload;
 import com.kaifengcrt.exnihilosatellitium.common.table.TableSnapshot;
 import com.kaifengcrt.exnihilosatellitium.common.table.Tables;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
@@ -21,8 +23,12 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.List;
@@ -77,9 +83,17 @@ public final class CommonEvents {
         // P4 S1 self-check: the snapshot must contain exactly the records the dump renders.
         final TableSnapshot snapshot = TableSnapshot.capture();
         final List<String> problems = snapshot.checkCounts();
+        final String json = snapshot.toJson().toString();
+        final TableSnapshotPayload payload = new TableSnapshotPayload(json);
+        final FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        TableSnapshotPayload.STREAM_CODEC.encode(buffer, payload);
+        final TableSnapshotPayload decoded = TableSnapshotPayload.STREAM_CODEC.decode(buffer);
+        if (!json.equals(decoded.json())) {
+            problems.add("payload codec round-trip changed the snapshot");
+        }
         if (problems.isEmpty()) {
-            ExNihiloSatellitium.LOGGER.info("[snapshot] selftest OK: {} file(s), {} chars (schema {})",
-                    snapshot.fileCount(), snapshot.toJson().toString().length(), TableSnapshot.SCHEMA);
+            ExNihiloSatellitium.LOGGER.info("[snapshot] selftest OK: {} file(s), {} chars, codec ok (schema {})",
+                    snapshot.fileCount(), json.length(), TableSnapshot.SCHEMA);
         } else {
             ExNihiloSatellitium.LOGGER.error("[snapshot] selftest mismatch: {}", problems);
         }
@@ -109,6 +123,20 @@ public final class CommonEvents {
      * queue: without this, leaving a single-player world would carry command/script
      * operations into the next world in the same JVM. Scripts re-submit on load.
      */
+    /**
+     * P4 S2: datapacks sync on join and on {@code /reload}. NeoForge fires this
+     * only once a server packet listener exists, unlike {@code TagsUpdatedEvent},
+     * which also runs during world load before the server is up.
+     */
+    @SubscribeEvent
+    public static void onDatapackSync(final OnDatapackSyncEvent event) {
+        if (event.getPlayer() != null) {
+            ModNetwork.sendSnapshot(event.getPlayer());
+        } else {
+            ModNetwork.broadcastSnapshot();
+        }
+    }
+
     @SubscribeEvent
     public static void onServerStopped(final ServerStoppedEvent event) {
         final int dropped = CustomizationOverlay.clearAll();

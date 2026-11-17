@@ -276,4 +276,10 @@ public final class CrucibleRecipes {
         }
         return new Template(fluid, amount, solid);
     }
+
+    /** P4 S2: replace the client-side view with a snapshot sent by the server. */
+    public static void installSnapshotSources(final List<DataPackJson.Source> files) {
+        clientSources = List.copyOf(files);
+        rebuild(true, true);
+    }
 }

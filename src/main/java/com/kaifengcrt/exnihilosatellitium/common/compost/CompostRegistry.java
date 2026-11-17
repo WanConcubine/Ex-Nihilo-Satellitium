@@ -17,6 +17,7 @@ import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -253,5 +254,15 @@ public final class CompostRegistry {
             }
         }
         return best;
+    }
+
+    /** P4 S2: replace the client-side view with a snapshot sent by the server. */
+    public static void installSnapshotSources(final List<DataPackJson.Source> files) {
+        final Map<ResourceLocation, JsonElement> map = new LinkedHashMap<>();
+        for (final DataPackJson.Source source : files) {
+            map.put(source.id(), source.root());
+        }
+        clientSources = Map.copyOf(map);
+        rebuild(true);
     }
 }

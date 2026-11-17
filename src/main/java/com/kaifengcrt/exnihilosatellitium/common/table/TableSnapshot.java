@@ -7,10 +7,12 @@ import com.kaifengcrt.exnihilosatellitium.common.compost.CompostRegistry;
 import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDrops;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleHeat;
 import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleRecipes;
+import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
 import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipes;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveDrop;
 import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -104,6 +106,29 @@ public final class TableSnapshot {
             }
         }
         return problems;
+    }
+
+    /**
+     * Installs this snapshot into the client-side view. The files are in data
+     * pack shape, so every table reuses the same parser as {@code data/}.
+     */
+    public void applyClientView() {
+        final ResourceLocation id = ResourceLocation.parse("exnihilosatellitium:snapshot");
+        for (final Map.Entry<TableId, List<JsonObject>> entry : this.files.entrySet()) {
+            final List<DataPackJson.Source> sources = new ArrayList<>();
+            for (final JsonObject file : entry.getValue()) {
+                sources.add(new DataPackJson.Source(id, file));
+            }
+            switch (entry.getKey()) {
+                case SIEVE -> SieveRegistry.installSnapshotSources(sources);
+                case HAMMER -> HammerRecipes.installSnapshotSources(sources);
+                case CROOK -> CrookDrops.installSnapshotSources(sources);
+                case BARREL -> BarrelRecipes.installSnapshotSources(sources);
+                case COMPOST -> CompostRegistry.installSnapshotSources(sources);
+                case CRUCIBLE_MELT -> CrucibleRecipes.installSnapshotSources(sources);
+                case CRUCIBLE_HEAT -> CrucibleHeat.installSnapshotSources(sources);
+            }
+        }
     }
 
     private static int records(final TableId table, final List<JsonObject> files) {

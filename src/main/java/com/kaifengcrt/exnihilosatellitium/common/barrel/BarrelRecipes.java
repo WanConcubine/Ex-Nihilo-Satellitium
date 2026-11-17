@@ -549,4 +549,10 @@ public final class BarrelRecipes {
                 "customize:barrel/" + customization.sequence());
         return label == null ? ResourceLocation.tryParse("customize:barrel/0") : label;
     }
+
+    /** P4 S2: replace the client-side view with a snapshot sent by the server. */
+    public static void installSnapshotSources(final List<DataPackJson.Source> files) {
+        clientSources = List.copyOf(files);
+        rebuild(true, true);
+    }
 }
