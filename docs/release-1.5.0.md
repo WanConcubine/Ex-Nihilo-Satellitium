@@ -9,8 +9,8 @@
 
 | 线 | 加载器 | jar | 大小 | sha256 |
 |---|---|---|---|---:|
-| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.5.0.jar` | 990895 B | `887ef2bda3cd423aae335fca480f3a54e70d49c71a95053372bf1863615de754` |
-| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.5.0.jar` | 1090870 B | `bf9b52feff7775f1784e04595fc9c598ddd71e03bf53df6b773c9682480308ea` |
+| `main` | NeoForge 21.1.x / MC 1.21.1 | `build/libs/exnihilosatellitium-1.21.1-1.5.0.jar` | 991009 B | `996ed853e2ecfbb29e24b137edcb363b40bd0a745c3381f9496d48d15a824661` |
+| `1.20.1-forge` | Forge 47.4.x / MC 1.20.1 | `build/libs/exnihilosatellitium-1.20.1-1.5.0.jar` | 1090995 B | `afb8e68469c07029fea2b375441f79b33a520ff2ade12903e866057f23e2abbf` |
 
 jar 包含 `LICENSE`、`THIRD-PARTY.md`、图标、`META-INF/neoforge.mods.toml`（`version="1.5.0"`），
 以及新的 `capacity_upgrade` 配方 / 标签 / 模型 / 贴图。两份产物为 2026-11-17 重新构建（加入 Jade 木桶转化提示；主线 Java 21，1.20.1 Java 17）。
@@ -33,6 +33,7 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 - **Jade 木桶提示**：新增「转化：A → B」，按当前流体与桶内物品显示结果（物品 / 流体 / 生物）；
   巫水的物品/生物转化（沙子 → 灵魂沙、树苗 → 深色橡树苗、人偶 → 末影人 / 潜影贝 / 僵尸村民）
   现在能在 Jade 里看到。
+- **Jade 巫水发酵进度**：满桶水 + 菌丝正在发酵时显示「巫水发酵：X%（进度 / 600）」。
 - **开发环境**：主线 `run/mods` 增加 Mekanism 10.7.19 + Generators，便于给机器充电。
 
 ## 验证
@@ -71,6 +72,7 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 >
 > Jade 的木桶提示新增「转化」行：显示当前流体 + 桶内物品会变成什么——巫水（沙子 → 灵魂沙、
 > 树苗 → 深色橡树苗、人偶 → 末影人 / 潜影贝 / 僵尸村民）现在也能直接看到。
+> 另外，满桶水在菌丝旁发酵成巫水的进度也会直接显示，不用再干等。
 
 **English**
 
@@ -93,6 +95,8 @@ jar 的 sha256 取自本次最终构建；重建会写入新的时间戳，sha �
 >
 > The Jade barrel tooltip now shows a "Turns into" line for the current fluid and item,
 > including witch water (sand -> soul sand, sapling -> dark oak sapling, dolls -> mobs).
+> It also shows the fermentation progress when a full water barrel next to mycelium is turning
+> into witch water.
 
 ## 发布前检查
 
