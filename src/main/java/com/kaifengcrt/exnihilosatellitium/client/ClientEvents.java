@@ -3,7 +3,13 @@ package com.kaifengcrt.exnihilosatellitium.client;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.client.screen.ElectricMachineScreen;
 import com.kaifengcrt.exnihilosatellitium.client.screen.FuelMachineScreen;
+import com.kaifengcrt.exnihilosatellitium.common.barrel.BarrelRecipeReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.compost.CompostReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crook.CrookDropsReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.crucible.CrucibleReloadListener;
+import com.kaifengcrt.exnihilosatellitium.common.hammer.HammerRecipeReloadListener;
 import com.kaifengcrt.exnihilosatellitium.common.item.PorcelainBucketItem;
+import com.kaifengcrt.exnihilosatellitium.common.sieve.SieveReloadListener;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
 import com.kaifengcrt.exnihilosatellitium.registry.ModItems;
 import com.kaifengcrt.exnihilosatellitium.registry.ModMenuTypes;
@@ -13,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,6 +44,22 @@ public final class ClientEvents {
         event.registerBlockEntityRenderer(ModBlockEntities.INFESTED_LEAVES.get(), InfestedLeavesRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ELECTRIC_MACHINE.get(), MachineRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.FUEL_MACHINE.get(), MachineRenderer::new);
+    }
+
+    /**
+     * Client-side table view (#81): a dedicated-server client never sees the
+     * server's data pack, so it reads the assets/ mirror built by
+     * {@code processResources}. Without this the JEI categories are empty
+     * whenever the client is not the integrated server.
+     */
+    @SubscribeEvent
+    public static void registerReloadListeners(final RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(new SieveReloadListener(true));
+        event.registerReloadListener(new BarrelRecipeReloadListener(true));
+        event.registerReloadListener(new CompostReloadListener(true));
+        event.registerReloadListener(new CrucibleReloadListener(true));
+        event.registerReloadListener(new HammerRecipeReloadListener(true));
+        event.registerReloadListener(new CrookDropsReloadListener(true));
     }
 
     /** Item model predicate: the porcelain bucket switches to the filled model. */

@@ -386,6 +386,21 @@ dependencies {
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 // When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
 // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+// JEI on a dedicated-server client can only read assets/, so mirror the data
+// tables there. The list is derived from TableId.java (tech-debt #64/#81) so a
+// new table cannot silently skip the mirror.
+def tableIdSource = file('src/main/java/com/kaifengcrt/exnihilosatellitium/common/table/TableId.java')
+def tableIds = []
+tableIdSource.readLines('UTF-8').each { line ->
+    def match = line =~ /^\s{4}[A-Z_]+\("([a-z_]+)"\)/
+    if (match.find()) {
+        tableIds << match.group(1)
+    }
+}
+if (tableIds.isEmpty()) {
+    throw new GradleException("TableId.java: no table ids parsed; the JEI mirror would ship empty")
+}
+
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
             minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
@@ -400,11 +415,38 @@ tasks.named('processResources', ProcessResources).configure {
         expand replaceProperties + [project: project]
     }
 
+    tableIds.each { tableId ->
+        from("src/main/resources/data/exnihilosatellitium/${tableId}") {
+            into "assets/exnihilosatellitium/${tableId}"
+        }
+    }
+
     // Release hygiene: the datagen hash cache is bookkeeping, not content, and
     // the licence/third-party notices must travel with the jar.
     exclude '.cache/**'
     from(rootProject.file('LICENSE'))
     from(rootProject.file('THIRD-PARTY.md'))
+}
+
+// Build-time check (#64/#81): the JEI mirror must contain every TableId dir.
+tasks.register('verifyTableMirror') {
+    group = 'verification'
+    description = 'Fails when the JEI assets mirror is missing a TableId directory.'
+    dependsOn tasks.named('processResources')
+    doLast {
+        def mirrorRoot = layout.buildDirectory.dir('resources/main/assets/exnihilosatellitium').get().asFile
+        def mirrored = mirrorRoot.isDirectory()
+                ? mirrorRoot.listFiles().findAll { it.isDirectory() }*.name as Set
+                : ([] as Set)
+        def missing = tableIds.findAll { !(it in mirrored) }
+        if (!missing.isEmpty()) {
+            throw new GradleException("JEI mirror is missing table dir(s) ${missing}; see processResources")
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn 'verifyTableMirror'
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
