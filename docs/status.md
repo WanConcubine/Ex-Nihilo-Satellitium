@@ -313,6 +313,17 @@ Thermal 时生效（本地目前只有 1.20.1 版），主线没装就按基线�
 > 1.20.1 分支补上 `check-core-imports.py`（`KNOWN` 只剩机器 BE 的能力引用），顺手把 `ExConfig`
 > 从 `common/config` 挪到 `platform/config`、`OreMaterials` 改走 `Platform` 门面；分支
 > `compileJava` 通过。CI 加了 `branch-sync` 作业（需要先推送分支）。
+>
+> **2026-11-17（晚）：P4 进度**：**S1 快照序列化 ✅**（专用服自检：149 文件 / 24,880 字符 /
+> 358 行与 `/exnihilo dump` 逐行一致）；**S2 同步包 ✅ 代码**（codec 往返 + `/reload` 实测，
+> **真实客户端投递未验**：开发机 `runClient` 连本机服约 2 秒断开、客户端无异常）；
+> **S4a 数据包 fixture ✅**、**S4b 三路径 fixture ✅**（数据包 / KubeJS / CraftTweaker 三行同时
+> 通过；改 KJS 的 chance 后只有那一行缺失并失败）；**S5 结构校验 ✅**、语义校验未做；
+> **S3 数据侧 ✅、界面侧未验**（镜像兜底 + WARN 未实现）。
+>
+> **留给所有者的三件事**：① 推 `main`（本地领先 10 个提交）并让 CI 跑一遍；② 按
+> [roadmap](customization-roadmap.md) 的「客户端验收清单」进一次游戏，确认
+> `[snapshot] applied` 与 JEI 是否刷新；③ 上架（1.0.0–1.5.0 仍全部待传）。
 
 1. **CI 收尾**：2026-11-10 首跑已全绿（run 42840322972）；只剩远端旧 `ci-logs` 分支需要所有者手动删除。
 2. **1.4.x–1.5.0 实机验收**：两版进游戏看 9 把金属锤的合成 / 耐久条 / JEI；主线另看 3 把 DE 锤的
