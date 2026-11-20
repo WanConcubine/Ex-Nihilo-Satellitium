@@ -6,27 +6,28 @@
 
 - **矿物开关**（`ores.hideUnprovided`，默认 `false`）：`materials.json` 里列的候选模组一个都没装时，
   这种矿的整条链（筛 / 锤产出、创造栏条目、JEI 页面）不再出现——例如没装匠魂却筛出钴 / 阿迪特。
-  铁 / 金 / 铜（原版物品）和宝石条目不隐藏；确认没有别的模组提供、只能回退到自有锭的（铂）同样隐藏。
-  **不注销注册**（旧存档安全，`/give` 仍能拿到），改完需重启。
+  铁 / 金 / 铜（原版物品）和宝石条目不隐藏；确认没有别的模组提供、只能回退到自有锭的（铂）默认保留，
+  想连它一起隐藏就把它从 `ores.keep` 里删掉。**不注销注册**（旧存档安全，`/give` 仍能拿到），改完需重启。
 - **验证**：两线 `build` 通过，纹理 / core / data / wiki 守卫通过；1.21.1 开发服开开关后，隐藏集合为
-  `silver_ / nickel_ / platinum_ / aluminum_ / zinc_ / cobalt_ / ardite_`（本机只有 Mekanism 在场，
-  锡 / 铅 / 锇 / 铀 保留），锤表 67 → 46 条规则（7 个材料 × 3 条）；筛表也按前缀剔掉同样的 21 条，
-  绝对条数还叠加了开发服里的 KubeJS patch，所以不直接等于 119 − 21。**JEI 与创造栏未进游戏目视。**
+  `silver_ / nickel_ / aluminum_ / zinc_ / cobalt_ / ardite_`（本机只有 Mekanism 在场，锡 / 铅 / 锇 / 铀
+  保留；铂因默认 `keep` 保留），锤表 67 → 49 条规则（6 个材料 × 3 条）；筛表也按前缀剔掉同样的 18 条，
+  绝对条数还叠加了开发服里的 KubeJS patch，所以不直接等于 119 − 18。**JEI 与创造栏未进游戏目视。**
 
 ### English
 
 - **Ore toggle** (`ores.hideUnprovided`, default `false`): when none of the candidate mods listed in
   `materials.json` is installed, that ore's whole chain (sift/hammer drops, creative-tab entries,
   JEI pages) stops appearing — e.g. cobalt / ardite without Tinkers' Construct. Iron/gold/copper
-  (vanilla items) and the gem entries are unaffected; platinum has no provider at all, so it is
-  hidden too. Registration is left in place (existing worlds stay safe, `/give` still works);
+  (vanilla items) and the gem entries are unaffected; platinum, which no other mod supplies and
+  which is classic content of this mod, is kept by default via `ores.keep` — drop it from that list
+  to hide it as well. Registration is left in place (existing worlds stay safe, `/give` still works);
   restart after changing it.
 - **Verified**: `build` plus the texture / core / data / wiki guards on both lines; with the switch on,
-  the 1.21.1 dev server hid `silver_ / nickel_ / platinum_ / aluminum_ / zinc_ / cobalt_ / ardite_`
-  (only Mekanism was installed, so tin / lead / osmium / uranium stayed) and the hammer table went
-  67 -> 46 rules (7 materials x 3); the sift table dropped the same 21 entries, but its absolute count
-  also includes the dev server's KubeJS patches, so it is not simply 119 - 21. The JEI and
-  creative-tab side is **not** visually verified yet.
+  the 1.21.1 dev server hid `silver_ / nickel_ / aluminum_ / zinc_ / cobalt_ / ardite_` (only Mekanism
+  was installed, so tin / lead / osmium / uranium stayed; platinum stayed via the default `keep`) and
+  the hammer table went 67 -> 49 rules (6 materials x 3); the sift table dropped the same 18 entries,
+  but its absolute count also includes the dev server's KubeJS patches, so it is not simply
+  119 - 18. The JEI and creative-tab side is **not** visually verified yet.
 
 ## 1.5.0 — 2026-11-13（机器扩容升级）
 

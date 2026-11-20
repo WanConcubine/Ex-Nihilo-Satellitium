@@ -71,8 +71,8 @@ public final class OreMaterials {
 
     /**
      * True when {@code material} should stay out of the sift/hammer tables, the
-     * creative tab and JEI: {@code ores.hideUnprovided} is on and no other mod
-     * supplies the material.
+     * creative tab and JEI: {@code ores.hideUnprovided} is on, no other mod
+     * supplies the material, and its id is not listed in {@code ores.keep}.
      *
      * <p>"No other mod supplies it" is exactly {@link OreMaterial#hasOwnProduct()}:
      * {@link #load()} registers {@code <id>_ingot} itself when neither an explicit
@@ -81,11 +81,17 @@ public final class OreMaterials {
      * Tinkers' Construct) and an entry with no provider at all ({@code platinum}).
      * {@code iron} / {@code gold} / {@code copper} point at vanilla items, so they
      * never qualify; gem entries are either skipped at registration or supplied by
-     * a loaded mod. Read the answer once per table rebuild instead of caching it,
-     * so the config stays live.</p>
+     * a loaded mod. {@code ores.keep} protects classic content the mod owns (platinum
+     * by default). Read the answer once per table rebuild instead of caching it, so
+     * the config stays live.</p>
      */
     public static boolean hidden(final OreMaterial material) {
-        return ConfigValues.oresHideUnprovided() && material.hasOwnProduct();
+        return isHidden(material, ConfigValues.oresHideUnprovided(), ConfigValues.oresKeep());
+    }
+
+    private static boolean isHidden(final OreMaterial material, final boolean hide,
+                                    final List<String> keep) {
+        return hide && material.hasOwnProduct() && !keep.contains(material.id());
     }
 
     /**
@@ -94,9 +100,11 @@ public final class OreMaterials {
      * Item)} when filtering a whole table.
      */
     public static Set<String> hiddenPrefixes() {
+        final boolean hide = ConfigValues.oresHideUnprovided();
+        final List<String> keep = ConfigValues.oresKeep();
         final Set<String> out = new LinkedHashSet<>();
         for (final OreMaterial material : all()) {
-            if (hidden(material)) {
+            if (isHidden(material, hide, keep)) {
                 out.add(material.id() + "_");
             }
         }

@@ -1,5 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.common.config;
 
+import java.util.List;
+
 /**
  * Core-facing view of the common config.
  *
@@ -69,5 +71,10 @@ public final class ConfigValues {
 
     public static boolean oresHideUnprovided() {
         return source().oresHideUnprovided();
+    }
+
+    /** Material ids that stay visible even without a provider mod. */
+    public static List<String> oresKeep() {
+        return source().oresKeep();
     }
 }

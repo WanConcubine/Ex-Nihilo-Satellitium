@@ -66,11 +66,13 @@ Thermal 时生效（本地目前只有 1.20.1 版），主线没装就按基线�
   **不注销注册**（旧存档安全，`/give` 仍能拿到），改完要重启。两线都做了，1.20.1 分支顺带补了
   `common/config/{ConfigSource,ConfigValues}` 门面（此前分支只有 `ExConfig` 静态值）。
 - 判定口径：`OreMaterial.hasOwnProduct()` —— 只能回退到本模组自有锭的材料（候选模组一个都没加载，
-  或者像铂这样没有任何候选表）都会被隐藏；铁 / 金 / 铜（原版物品）与宝石条目不受影响。
+  或者像铂这样没有任何候选表）都会被隐藏，**除非 id 写在 `ores.keep`（默认 `["platinum"]`）里**；
+  铁 / 金 / 铜（原版物品）与宝石条目不受影响。
 - 文档：`docs/data-format.md` §8 有完整键表与实现入口；`CHANGELOG.md` 有中英条目。
 - 验证：两线 `build` 通过；1.21.1 开发服开 `hideUnprovided=true` 后隐藏集合为
-  `silver_/nickel_/platinum_/aluminum_/zinc_/cobalt_/ardite_`（本机只有 Mekanism，锡 / 铅 / 锇 / 铀 保留），
-  `[hammer] loaded 46 recipes`（基线 67，7 材料 × 3 条）；筛表同样剔除这 21 条。**JEI / 创造栏未目视**。
+  `silver_/nickel_/aluminum_/zinc_/cobalt_/ardite_`（本机只有 Mekanism，锡 / 铅 / 锇 / 铀 保留；铂因默认
+  `keep` 保留），`[hammer] loaded 49 recipes`（基线 67，6 材料 × 3 条）；筛表同样剔除这 18 条。
+  **JEI / 创造栏未目视**。
 
 ## 功能现状
 

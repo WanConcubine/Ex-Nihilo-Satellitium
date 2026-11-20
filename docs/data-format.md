@@ -451,11 +451,15 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 | 键 | 默认 | 作用 |
 |---|---|---|
 | `ores.hideUnprovided` | `false` | 没有别的模组提供、只能回退自有锭的矿，整条链不再出现 |
+| `ores.keep` | `["platinum"]` | 即使没有模组提供也保持可见的材料 id |
 
 - 判定口径是「本模组只能回退到自己注册的锭」（`OreMaterial.hasOwnProduct()`）：候选模组一个都没装
   （`tin` / `silver` / `lead` / `nickel` / `aluminum` / `osmium` / `zinc` / `cobalt` / `ardite` /
   `uranium`），或者**压根没有候选表**（`platinum`）。打开后这些矿的筛 / 锤产出、创造栏条目和 JEI
-  页面一起消失（无模组时只剩铁 / 金 / 铜）。
+  页面一起消失（无模组时只剩铁 / 金 / 铜），**除非 id 写在 `ores.keep` 里**。
+- `ores.keep` 默认是 `["platinum"]`：铂是本模组自有的经典矿，没有任何外部提供者，不想让它被
+  `hideUnprovided` 顺手删掉就靠这一项。它只影响隐藏规则——注册期就被跳过的宝石条目不会因它回来。
+  写的是 `materials.json` 的 `id`（小写 + 下划线，格式不对的条目会被配置校验拒绝）。
 - `gems` 条目本来就按候选模组跳过注册，不受影响；`iron` / `gold` / `copper` 指向原版物品
   （minecraft 也算「别的模组」），永远保留。
 - **不注销注册**：物品 / 方块仍然存在（旧存档安全，`/give` 还能拿到），只是不再产出和展示。
