@@ -450,13 +450,14 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 | 键 | 默认 | 作用 |
 |---|---|---|
-| `ores.hideUnprovided` | `false` | 候选模组一个都没装的矿，整条链不再出现 |
+| `ores.hideUnprovided` | `false` | 没有别的模组提供、只能回退自有锭的矿，整条链不再出现 |
 
-- 只对**列了候选模组**的条目生效：`tin` / `silver` / `lead` / `nickel` / `aluminum` /
-  `osmium` / `zinc` / `cobalt` / `ardite` / `uranium`。打开后，没装对应模组时这 10 种矿的
-  筛 / 锤产出、创造栏条目和 JEI 页面一起消失（无模组时只剩铁 / 金 / 铜 / 铂）。
-- `gems` 条目本来就按候选模组跳过注册，不受影响；`iron` / `gold` / `copper` 指向原版物品、
-  `platinum` 没有候选表，这两类永远不会被隐藏。
+- 判定口径是「本模组只能回退到自己注册的锭」（`OreMaterial.hasOwnProduct()`）：候选模组一个都没装
+  （`tin` / `silver` / `lead` / `nickel` / `aluminum` / `osmium` / `zinc` / `cobalt` / `ardite` /
+  `uranium`），或者**压根没有候选表**（`platinum`）。打开后这些矿的筛 / 锤产出、创造栏条目和 JEI
+  页面一起消失（无模组时只剩铁 / 金 / 铜）。
+- `gems` 条目本来就按候选模组跳过注册，不受影响；`iron` / `gold` / `copper` 指向原版物品
+  （minecraft 也算「别的模组」），永远保留。
 - **不注销注册**：物品 / 方块仍然存在（旧存档安全，`/give` 还能拿到），只是不再产出和展示。
   原因是 NeoForge 的加载顺序是「物品注册 → 配置加载」，配置项读不到注册期；要连注册一起跳过
   就得在构造期手动解析 TOML，而且切换开关会让旧存档里已放置的方块变空气。

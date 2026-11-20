@@ -63,14 +63,15 @@ public final class ModConfig implements ConfigSource {
 
         builder.comment("Ore materials").push("ores");
         ORES_HIDE_UNPROVIDED = builder
-                .comment("Hide ore materials whose provider mod is not installed.",
-                        "Only materials.json entries that list candidate mods are affected:",
-                        "when none of them is loaded, the ore's sift/hammer chain, its",
-                        "creative-tab entries and its JEI pages are dropped, so e.g. cobalt",
-                        "and ardite stop showing up without Tinkers' Construct.",
-                        "Entries without candidates (vanilla iron/gold/copper, platinum) are",
-                        "never hidden. Takes effect on the next start (registries and",
-                        "creative tabs are built once).")
+                .comment("Hide ore materials that no other mod supplies.",
+                        "A material counts as unprovided when the mod has to register its own",
+                        "fallback ingot: either its candidate list (tin/cobalt/...) has none of",
+                        "its mods installed, or it lists no provider at all (platinum). Its",
+                        "sift/hammer chain, creative-tab entries and JEI pages are dropped, so",
+                        "e.g. cobalt and ardite stop showing up without Tinkers' Construct.",
+                        "Iron / gold / copper keep their vanilla ingots and stay visible.",
+                        "Takes effect on the next start (registries and creative tabs are",
+                        "built once).")
                 .define("hideUnprovided", false);
         builder.pop();
 
