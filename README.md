@@ -69,7 +69,6 @@
 - [docs/data-format.md](docs/data-format.md) —— 堆肥 JSON、物品标签、NBT、命令
 - [docs/textures.md](docs/textures.md) —— 纹理路线、引用规则、检查脚本
 - [THIRD-PARTY.md](THIRD-PARTY.md) —— 第三方/参考来源
-- [AGENTS.md](AGENTS.md) —— 仓库规则（给协作者/AI）
 
 ## 构建
 
