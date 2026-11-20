@@ -74,6 +74,10 @@ public final class ModCreativeTabs {
                         ModItems.UPGRADES.forEach(item -> output.accept(item.get()));
                         ModItems.BARREL_ITEMS.forEach(item -> output.accept(item.get()));
                         for (final OreMaterial material : OreMaterials.all()) {
+                            // ores.hideUnprovided: no candidates loaded -> keep it out of the tab.
+                            if (OreMaterials.hidden(material)) {
+                                continue;
+                            }
                             final var entries = ModOreItems.byMaterial().get(material.id());
                             for (final String kind : ModOreBlocks.KINDS) {
                                 output.accept(entries.get("ore_" + kind).get());

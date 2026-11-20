@@ -26,4 +26,10 @@ public interface ConfigSource {
     int machineEnergyCapacity();
 
     int machineBurnPerOperation();
+
+    /**
+     * When true, ore materials whose candidate mods are all missing are dropped
+     * from the sift/hammer tables, the creative tab and JEI.
+     */
+    boolean oresHideUnprovided();
 }

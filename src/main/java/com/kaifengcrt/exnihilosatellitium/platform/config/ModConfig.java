@@ -25,6 +25,8 @@ public final class ModConfig implements ConfigSource {
     public static final ModConfigSpec.IntValue MACHINE_ENERGY_CAPACITY;
     public static final ModConfigSpec.IntValue MACHINE_BURN_PER_OPERATION;
 
+    public static final ModConfigSpec.BooleanValue ORES_HIDE_UNPROVIDED;
+
     static {
         final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -57,6 +59,19 @@ public final class ModConfig implements ConfigSource {
                 .comment("Vanilla burn ticks consumed per completed operation by fuel machines.",
                         "Default 200: one coal (1600) is eight operations.")
                 .defineInRange("burnPerOperation", 200, 1, 20000);
+        builder.pop();
+
+        builder.comment("Ore materials").push("ores");
+        ORES_HIDE_UNPROVIDED = builder
+                .comment("Hide ore materials whose provider mod is not installed.",
+                        "Only materials.json entries that list candidate mods are affected:",
+                        "when none of them is loaded, the ore's sift/hammer chain, its",
+                        "creative-tab entries and its JEI pages are dropped, so e.g. cobalt",
+                        "and ardite stop showing up without Tinkers' Construct.",
+                        "Entries without candidates (vanilla iron/gold/copper, platinum) are",
+                        "never hidden. Takes effect on the next start (registries and",
+                        "creative tabs are built once).")
+                .define("hideUnprovided", false);
         builder.pop();
 
         SPEC = builder.build();
@@ -101,5 +116,11 @@ public final class ModConfig implements ConfigSource {
     @Override
     public int machineBurnPerOperation() {
         return MACHINE_BURN_PER_OPERATION.get();
+    }
+
+    @Override
+    public boolean oresHideUnprovided() {
+        // Datagen never loads configs; treat "not loaded yet" as the default (off).
+        return SPEC.isLoaded() && ORES_HIDE_UNPROVIDED.get();
     }
 }

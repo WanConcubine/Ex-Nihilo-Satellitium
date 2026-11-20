@@ -444,6 +444,26 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   工匠巧思补回了 `forge:molten_ardite`，所以 **14 种金属 × 6 形态 = 84 条**里包含阿迪特
   （碎矿 45 mB / 矿块 180 mB，950°C）。叶绿素是 `gems`，没有对应的熔融液体，不写熔炼。
 
+### 配置：`ores.hideUnprovided`（2026-11-20）
+
+`config/exnihilosatellitium-common.toml`：
+
+| 键 | 默认 | 作用 |
+|---|---|---|
+| `ores.hideUnprovided` | `false` | 候选模组一个都没装的矿，整条链不再出现 |
+
+- 只对**列了候选模组**的条目生效：`tin` / `silver` / `lead` / `nickel` / `aluminum` /
+  `osmium` / `zinc` / `cobalt` / `ardite` / `uranium`。打开后，没装对应模组时这 10 种矿的
+  筛 / 锤产出、创造栏条目和 JEI 页面一起消失（无模组时只剩铁 / 金 / 铜 / 铂）。
+- `gems` 条目本来就按候选模组跳过注册，不受影响；`iron` / `gold` / `copper` 指向原版物品、
+  `platinum` 没有候选表，这两类永远不会被隐藏。
+- **不注销注册**：物品 / 方块仍然存在（旧存档安全，`/give` 还能拿到），只是不再产出和展示。
+  原因是 NeoForge 的加载顺序是「物品注册 → 配置加载」，配置项读不到注册期；要连注册一起跳过
+  就得在构造期手动解析 TOML，而且切换开关会让旧存档里已放置的方块变空气。
+- 改完要**重启**：创造栏和筛 / 锤表都在启动时构建；`/reload` 只重读数据包。
+- 实现入口：`OreMaterials.hidden()` / `hiddenPrefixes()`；筛表在 `SieveRegistry.dropHiddenOres()`、
+  锤表在 `HammerRecipes.dropHiddenOres()`、创造栏在 `ModCreativeTabs`、JEI 在 `OreJeiPlugin`。
+
 ## 9. 筛子 JSON（M2）
 
 **路径**：`data/<namespace>/sieve/*.json`，一个输入一个文件。
@@ -787,6 +807,7 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
 
 - 运行时读取；改配置后 BE 下一 tick 生效，不需要重启。
 - 客户端 JEI 读 `capacity` 画流体槽。
+- 其余键：`[machine]` 见 §15，`[ores]` 见 §8。
 
 ### 方块与配方
 

@@ -66,4 +66,8 @@ public final class ConfigValues {
     public static int machineBurnPerOperation() {
         return source().machineBurnPerOperation();
     }
+
+    public static boolean oresHideUnprovided() {
+        return source().oresHideUnprovided();
+    }
 }

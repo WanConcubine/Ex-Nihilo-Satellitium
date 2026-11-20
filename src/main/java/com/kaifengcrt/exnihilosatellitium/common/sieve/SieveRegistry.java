@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
 import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
 import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -127,7 +129,7 @@ public final class SieveRegistry {
             return;
         }
 
-        final Map<Item, List<SieveDrop>> snapshot = builder.build();
+        final Map<Item, List<SieveDrop>> snapshot = dropHiddenOres(builder.build());
         if (clientView) {
             clientTable = snapshot;
         } else {
@@ -140,6 +142,34 @@ public final class SieveRegistry {
                 snapshot.size(), drops, tagFiles.size(), patchFiles.size(),
                 CustomizationOverlay.forTable(TableId.SIEVE).size(),
                 tagsReady ? "" : ", waiting for tags", clientView ? " (client)" : "");
+    }
+
+    /**
+     * Removes drops that belong to ore materials hidden by {@code ores.hideUnprovided}
+     * (candidate mods listed, none installed). The parsed sources are left intact,
+     * so the drops come back when the option is turned off and the table reloads.
+     */
+    private static Map<Item, List<SieveDrop>> dropHiddenOres(final Map<Item, List<SieveDrop>> table) {
+        final Set<String> hidden = OreMaterials.hiddenPrefixes();
+        if (hidden.isEmpty()) {
+            return table;
+        }
+        final Map<Item, List<SieveDrop>> out = new LinkedHashMap<>();
+        table.forEach((input, drops) -> {
+            final List<SieveDrop> kept = new ArrayList<>(drops.size());
+            for (final SieveDrop drop : drops) {
+                if (!OreMaterials.hides(hidden, drop.item())) {
+                    kept.add(drop);
+                }
+            }
+            if (!kept.isEmpty()) {
+                out.put(input, List.copyOf(kept));
+            }
+        });
+        ExNihiloSatellitium.LOGGER.info(
+                "[sieve] ores.hideUnprovided: dropped the ore chains of {} ({} inputs left)",
+                hidden, out.size());
+        return Map.copyOf(out);
     }
 
     private static void applyFile(final TableBuilder<Item, List<SieveDrop>> builder,
