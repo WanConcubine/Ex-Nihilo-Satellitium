@@ -18,6 +18,7 @@ import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 /**
@@ -50,6 +51,12 @@ public final class ExNihiloSatellitium {
         ModCreativeTabs.register(modBus);
 
         modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON, ModConfig.SPEC);
+
+        // The config screen is client-only: NeoForge enables the mod list's "Config"
+        // button only when this extension point exists.
+        if (FMLEnvironment.dist.isClient()) {
+            com.kaifengcrt.exnihilosatellitium.client.ConfigScreens.register(modContainer);
+        }
 
         LOGGER.info("Ex Nihilo: Satellitium initialised on NeoForge (clean-room build).");
     }

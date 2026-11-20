@@ -8,6 +8,8 @@
   这种矿的整条链（筛 / 锤产出、创造栏条目、JEI 页面）不再出现——例如没装匠魂却筛出钴 / 阿迪特。
   铁 / 金 / 铜（原版物品）和宝石条目不隐藏；确认没有别的模组提供、只能回退到自有锭的（铂）默认保留，
   想连它一起隐藏就把它从 `ores.keep` 里删掉。**不注销注册**（旧存档安全，`/give` 仍能拿到），改完需重启。
+- **游戏内配置界面**：1.21.1 在模组列表点 **Config** 就能改（NeoForge 通用界面，8 个键都带中英标签）；
+  1.20.1 是手写的小屏，只放 `[ores]` 两项。两项都标成“需要重启”，界面里会提示，改完要重启游戏。
 - **验证**：两线 `build` 通过，纹理 / core / data / wiki 守卫通过；1.21.1 开发服开开关后，隐藏集合为
   `silver_ / nickel_ / aluminum_ / zinc_ / cobalt_ / ardite_`（本机只有 Mekanism 在场，锡 / 铅 / 锇 / 铀
   保留；铂因默认 `keep` 保留），锤表 67 → 49 条规则（6 个材料 × 3 条）；筛表也按前缀剔掉同样的 18 条，
@@ -22,6 +24,9 @@
   which is classic content of this mod, is kept by default via `ores.keep` — drop it from that list
   to hide it as well. Registration is left in place (existing worlds stay safe, `/give` still works);
   restart after changing it.
+- **In-game config screen**: on 1.21.1 the mod list's **Config** button opens NeoForge's generic screen
+  (all 8 keys, translated); on 1.20.1 a small hand-written screen covers the two `[ores]` keys. Both
+  options are marked restart-only and the screen says so.
 - **Verified**: `build` plus the texture / core / data / wiki guards on both lines; with the switch on,
   the 1.21.1 dev server hid `silver_ / nickel_ / aluminum_ / zinc_ / cobalt_ / ardite_` (only Mekanism
   was installed, so tin / lead / osmium / uranium stayed; platinum stayed via the default `keep`) and

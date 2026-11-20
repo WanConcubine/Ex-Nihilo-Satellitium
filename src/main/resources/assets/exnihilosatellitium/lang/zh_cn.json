@@ -395,5 +395,16 @@
   "tooltip.exnihilosatellitium.fortune_upgrade": "额外 %s 次独立判定",
   "tooltip.exnihilosatellitium.fortune_upgrade.stack": "每叠加一个生效几率减少20%，且增加25%能量消耗",
   "tooltip.exnihilosatellitium.speed_upgrade": "筛/锤速度 ×%s",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "每叠加一个效果衰减20%，且增加25%能量消耗"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "每叠加一个效果衰减20%，且增加25%能量消耗",
+  "exnihilosatellitium.configuration.title": "无中生有：众星捧月 设置",
+  "exnihilosatellitium.configuration.section.exnihilosatellitium.common.toml": "通用设置",
+  "exnihilosatellitium.config.crucible.capacity": "坩埚流体容量（mB）",
+  "exnihilosatellitium.config.crucible.melt_capacity": "坩埚熔料容量（mB）",
+  "exnihilosatellitium.config.crucible.heat_speed_multiplier": "热源速度倍率",
+  "exnihilosatellitium.config.machine.ticks_per_operation": "机器单次处理耗时（tick）",
+  "exnihilosatellitium.config.machine.energy_per_tick": "电动机器每 tick 耗电（FE）",
+  "exnihilosatellitium.config.machine.energy_capacity": "机器内部电量缓冲（FE）",
+  "exnihilosatellitium.config.machine.burn_per_operation": "内能机器每次消耗的燃烧值",
+  "exnihilosatellitium.config.ores.hide_unprovided": "隐藏没有模组提供的矿",
+  "exnihilosatellitium.config.ores.keep": "保留的矿 id 列表"
 }

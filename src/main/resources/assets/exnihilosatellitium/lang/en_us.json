@@ -395,5 +395,16 @@
   "tooltip.exnihilosatellitium.fortune_upgrade": "Adds %s extra independent roll(s)",
   "tooltip.exnihilosatellitium.fortune_upgrade.stack": "Each extra stack reduces the proc chance by 20% and adds 25% energy use",
   "tooltip.exnihilosatellitium.speed_upgrade": "Sifts and crushes %s× faster",
-  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Each extra stack reduces the effect by 20% and adds 25% energy use"
+  "tooltip.exnihilosatellitium.speed_upgrade.stack": "Each extra stack reduces the effect by 20% and adds 25% energy use",
+  "exnihilosatellitium.configuration.title": "Ex Nihilo: Satellitium Settings",
+  "exnihilosatellitium.configuration.section.exnihilosatellitium.common.toml": "Common settings",
+  "exnihilosatellitium.config.crucible.capacity": "Crucible tank capacity (mB)",
+  "exnihilosatellitium.config.crucible.melt_capacity": "Crucible melt capacity (mB)",
+  "exnihilosatellitium.config.crucible.heat_speed_multiplier": "Heat source speed multiplier",
+  "exnihilosatellitium.config.machine.ticks_per_operation": "Ticks per machine operation",
+  "exnihilosatellitium.config.machine.energy_per_tick": "FE consumed per working tick",
+  "exnihilosatellitium.config.machine.energy_capacity": "Machine energy buffer (FE)",
+  "exnihilosatellitium.config.machine.burn_per_operation": "Burn value per operation",
+  "exnihilosatellitium.config.ores.hide_unprovided": "Hide ores no mod supplies",
+  "exnihilosatellitium.config.ores.keep": "Ore keep list"
 }

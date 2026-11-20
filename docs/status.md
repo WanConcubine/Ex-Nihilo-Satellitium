@@ -69,6 +69,11 @@ Thermal 时生效（本地目前只有 1.20.1 版），主线没装就按基线�
   或者像铂这样没有任何候选表）都会被隐藏，**除非 id 写在 `ores.keep`（默认 `["platinum"]`）里**；
   铁 / 金 / 铜（原版物品）与宝石条目不受影响。
 - 文档：`docs/data-format.md` §8 有完整键表与实现入口；`CHANGELOG.md` 有中英条目。
+- **游戏内配置界面**：1.21.1 注册了 `IConfigScreenFactory` → NeoForge 通用 `ConfigurationScreen`
+  （`client/ConfigScreens`，构造期按 `FMLEnvironment.dist` 守门）；1.20.1 手写了 `client/ConfigScreens`
+  小屏（`[ores]` 两项）。两项都标了重启类型（`gameRestart()` / `worldRestart()`），界面会提示；
+  `OreMaterials` 里另外做了**会话快照**，所以中途改配置不会只生效一半，必须重启。
+  **界面本身未进游戏目视**（开发客户端探针没起来）。
 - 验证：两线 `build` 通过；1.21.1 开发服开 `hideUnprovided=true` 后隐藏集合为
   `silver_/nickel_/aluminum_/zinc_/cobalt_/ardite_`（本机只有 Mekanism，锡 / 铅 / 锇 / 铀 保留；铂因默认
   `keep` 保留），`[hammer] loaded 49 recipes`（基线 67，6 材料 × 3 条）；筛表同样剔除这 18 条。

@@ -466,8 +466,11 @@ config/自动发现留给后续 schema 修订（见 [tech-debt.md](tech-debt.md)
   原因是 NeoForge 的加载顺序是「物品注册 → 配置加载」，配置项读不到注册期；要连注册一起跳过
   就得在构造期手动解析 TOML，而且切换开关会让旧存档里已放置的方块变空气。
 - 改完要**重启**：创造栏和筛 / 锤表都在启动时构建；`/reload` 只重读数据包。
+- 游戏内也能改：1.21.1 是模组列表 → Config（NeoForge 通用界面）；1.20.1 是手写小屏。两项都标了
+  重启类型，界面会提示“需要重启”；`OreMaterials` 每次会话只读一次，所以中途改不会半生效。
 - 实现入口：`OreMaterials.hidden()` / `hiddenPrefixes()`；筛表在 `SieveRegistry.dropHiddenOres()`、
-  锤表在 `HammerRecipes.dropHiddenOres()`、创造栏在 `ModCreativeTabs`、JEI 在 `OreJeiPlugin`。
+  锤表在 `HammerRecipes.dropHiddenOres()`、创造栏在 `ModCreativeTabs`、JEI 在 `OreJeiPlugin`、
+  配置界面在 `client/ConfigScreens`。
 
 ## 9. 筛子 JSON（M2）
 
