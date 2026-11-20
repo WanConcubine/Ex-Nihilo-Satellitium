@@ -6,8 +6,8 @@
 
 - **矿物开关**（`ores.hideUnprovided`，默认 `false`）：`materials.json` 里列的候选模组一个都没装时，
   这种矿的整条链（筛 / 锤产出、创造栏条目、JEI 页面）不再出现——例如没装匠魂却筛出钴 / 阿迪特。
-  铁 / 金 / 铜（原版物品）和宝石条目不隐藏；确认没有别的模组提供、只能回退到自有锭的（铂）同样隐藏。
-  **不注销注册**（旧存档安全，`/give` 仍能拿到），改完需重启。
+  铁 / 金 / 铜（原版物品）和宝石条目不隐藏；确认没有别的模组提供、只能回退到自有锭的（铂）默认保留，
+  想连它一起隐藏就把它从 `ores.keep` 里删掉。**不注销注册**（旧存档安全，`/give` 仍能拿到），改完需重启。
 - 1.20.1 线顺带补了 `common/config/{ConfigSource,ConfigValues}` 门面（此前只有 `ExConfig` 静态值），
   配置读取路径与 1.21.1 主线一致。
 - **验证**：`build` 通过，纹理 / core 守卫通过；**未进游戏目视**筛子 / 锤子 / JEI 表现。
@@ -17,8 +17,9 @@
 - **Ore toggle** (`ores.hideUnprovided`, default `false`): when none of the candidate mods listed in
   `materials.json` is installed, that ore's whole chain (sift/hammer drops, creative-tab entries,
   JEI pages) stops appearing — e.g. cobalt / ardite without Tinkers' Construct. Iron/gold/copper
-  (vanilla items) and the gem entries are unaffected; platinum has no provider at all, so it is
-  hidden too. Registration is left in place (existing worlds stay safe, `/give` still works);
+  (vanilla items) and the gem entries are unaffected; platinum, which no other mod supplies and
+  which is classic content of this mod, is kept by default via `ores.keep` — drop it from that list
+  to hide it as well. Registration is left in place (existing worlds stay safe, `/give` still works);
   restart after changing it.
 - This line also gained the `common/config/{ConfigSource,ConfigValues}` facade so the config read
   path matches the 1.21.1 mainline.

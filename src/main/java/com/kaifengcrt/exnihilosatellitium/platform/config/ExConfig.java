@@ -2,6 +2,9 @@ package com.kaifengcrt.exnihilosatellitium.platform.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 /**
  * Common config for the 1.20.1 branch.
  *
@@ -14,6 +17,9 @@ import net.minecraftforge.common.ForgeConfigSpec;
  */
 public final class ExConfig {
 
+    /** Same shape materials.json uses for {@code id}; keeps typos out of {@code ores.keep}. */
+    private static final Pattern KEEP_ID = Pattern.compile("[a-z0-9_]{1,64}");
+
     public static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.IntValue CRUCIBLE_CAPACITY;
     public static final ForgeConfigSpec.IntValue CRUCIBLE_MELT_CAPACITY;
@@ -25,6 +31,7 @@ public final class ExConfig {
     public static final ForgeConfigSpec.IntValue MACHINE_BURN_PER_OPERATION;
 
     public static final ForgeConfigSpec.BooleanValue ORES_HIDE_UNPROVIDED;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> ORES_KEEP;
 
     static {
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -72,6 +79,16 @@ public final class ExConfig {
                         "Takes effect on the next start (registries and creative tabs are",
                         "built once).")
                 .define("hideUnprovided", false);
+        ORES_KEEP = builder
+                .comment("Material ids that stay visible even when no mod supplies them.",
+                        "Classic content this mod owns outright lives here: platinum has no",
+                        "provider mod at all, so without it the hideUnprovided switch would",
+                        "delete platinum along with the unprovided metals. Ids are the",
+                        "'id' field of materials.json (lowercase, underscores).",
+                        "Only the hideUnprovided rule is affected; gems that are skipped at",
+                        "registration cannot be brought back this way.")
+                .defineListAllowEmpty("keep", List.of("platinum"),
+                        o -> o instanceof String s && KEEP_ID.matcher(s).matches());
         builder.pop();
 
         SPEC = builder.build();
@@ -111,5 +128,12 @@ public final class ExConfig {
     public static boolean oresHideUnprovided() {
         // Datagen never loads configs; treat "not loaded yet" as the default (off).
         return SPEC.isLoaded() && ORES_HIDE_UNPROVIDED.get();
+    }
+
+    public static List<String> oresKeep() {
+        if (!SPEC.isLoaded()) {
+            return List.of("platinum");
+        }
+        return List.copyOf(ORES_KEEP.get());
     }
 }

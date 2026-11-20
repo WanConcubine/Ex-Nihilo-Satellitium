@@ -2,6 +2,8 @@ package com.kaifengcrt.exnihilosatellitium.platform.config;
 
 import com.kaifengcrt.exnihilosatellitium.common.config.ConfigSource;
 
+import java.util.List;
+
 /**
  * {@link ConfigSource} adapter over the Forge {@link ExConfig} spec.
  *
@@ -53,5 +55,10 @@ public final class ExConfigSource implements ConfigSource {
     @Override
     public boolean oresHideUnprovided() {
         return ExConfig.oresHideUnprovided();
+    }
+
+    @Override
+    public List<String> oresKeep() {
+        return ExConfig.oresKeep();
     }
 }

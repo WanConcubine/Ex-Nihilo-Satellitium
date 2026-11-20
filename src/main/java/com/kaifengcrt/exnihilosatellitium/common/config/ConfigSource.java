@@ -1,5 +1,7 @@
 package com.kaifengcrt.exnihilosatellitium.common.config;
 
+import java.util.List;
+
 /**
  * Values the core gameplay code is allowed to read from the common config.
  *
@@ -28,8 +30,16 @@ public interface ConfigSource {
     int machineBurnPerOperation();
 
     /**
-     * When true, ore materials whose candidate mods are all missing are dropped
-     * from the sift/hammer tables, the creative tab and JEI.
+     * When true, ore materials that no other mod supplies (the mod has to register
+     * its own fallback ingot) are dropped from the sift/hammer tables, the creative
+     * tab and JEI, unless their id is listed in {@link #oresKeep()}.
      */
     boolean oresHideUnprovided();
+
+    /**
+     * Material ids (from {@code materials.json}) that stay visible even when no
+     * other mod supplies them, so classic content the mod owns outright is not
+     * caught by {@link #oresHideUnprovided()}.
+     */
+    List<String> oresKeep();
 }
