@@ -24,6 +24,8 @@ public final class ExConfig {
     public static final ForgeConfigSpec.IntValue MACHINE_ENERGY_CAPACITY;
     public static final ForgeConfigSpec.IntValue MACHINE_BURN_PER_OPERATION;
 
+    public static final ForgeConfigSpec.BooleanValue ORES_HIDE_UNPROVIDED;
+
     static {
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
@@ -58,6 +60,19 @@ public final class ExConfig {
                 .defineInRange("burnPerOperation", 200, 1, 20000);
         builder.pop();
 
+        builder.comment("Ore materials").push("ores");
+        ORES_HIDE_UNPROVIDED = builder
+                .comment("Hide ore materials whose provider mod is not installed.",
+                        "Only materials.json entries that list candidate mods are affected:",
+                        "when none of them is loaded, the ore's sift/hammer chain, its",
+                        "creative-tab entries and its JEI pages are dropped, so e.g. cobalt",
+                        "and ardite stop showing up without Tinkers' Construct.",
+                        "Entries without candidates (vanilla iron/gold/copper, platinum) are",
+                        "never hidden. Takes effect on the next start (registries and",
+                        "creative tabs are built once).")
+                .define("hideUnprovided", false);
+        builder.pop();
+
         SPEC = builder.build();
     }
 
@@ -90,5 +105,10 @@ public final class ExConfig {
 
     public static int machineBurnPerOperation() {
         return MACHINE_BURN_PER_OPERATION.get();
+    }
+
+    public static boolean oresHideUnprovided() {
+        // Datagen never loads configs; treat "not loaded yet" as the default (off).
+        return SPEC.isLoaded() && ORES_HIDE_UNPROVIDED.get();
     }
 }

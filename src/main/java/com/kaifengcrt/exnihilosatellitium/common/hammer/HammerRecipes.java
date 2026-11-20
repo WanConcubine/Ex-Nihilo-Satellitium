@@ -3,6 +3,7 @@ package com.kaifengcrt.exnihilosatellitium.common.hammer;
 import com.google.gson.JsonObject;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
 import com.kaifengcrt.exnihilosatellitium.common.datapack.DataPackJson;
+import com.kaifengcrt.exnihilosatellitium.common.material.OreMaterials;
 import com.kaifengcrt.exnihilosatellitium.common.table.CustomizationOverlay;
 import com.kaifengcrt.exnihilosatellitium.common.table.TableBuilder;
 import com.kaifengcrt.exnihilosatellitium.common.table.TableId;
@@ -18,8 +19,10 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Hammer crush table, loaded from {@code data/<namespace>/hammer/*.json}.
@@ -148,7 +151,7 @@ public final class HammerRecipes {
             return;
         }
 
-        final Map<Block, Rule> snapshot = builder.build();
+        final Map<Block, Rule> snapshot = dropHiddenOres(builder.build());
         if (clientView) {
             clientRecipes = snapshot;
         } else {
@@ -264,6 +267,29 @@ public final class HammerRecipes {
             return List.of();
         }
         return DataPackJson.resolve(BuiltInRegistries.BLOCK, raw, "hammer", file).values();
+    }
+
+    /**
+     * Removes rules whose input block or output item belongs to an ore material
+     * hidden by {@code ores.hideUnprovided}. Sources are untouched, so the rules
+     * return once the option is off again.
+     */
+    private static Map<Block, Rule> dropHiddenOres(final Map<Block, Rule> table) {
+        final Set<String> hidden = OreMaterials.hiddenPrefixes();
+        if (hidden.isEmpty()) {
+            return table;
+        }
+        final Map<Block, Rule> out = new LinkedHashMap<>();
+        table.forEach((block, rule) -> {
+            if (OreMaterials.hides(hidden, block.asItem()) || OreMaterials.hides(hidden, rule.item())) {
+                return;
+            }
+            out.put(block, rule);
+        });
+        ExNihiloSatellitium.LOGGER.info(
+                "[hammer] ores.hideUnprovided: dropped {} rules for {} ({} left)",
+                table.size() - out.size(), hidden, out.size());
+        return Map.copyOf(out);
     }
 
     private static Rule parseRule(final JsonObject root, final ResourceLocation file) {

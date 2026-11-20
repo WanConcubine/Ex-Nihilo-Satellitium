@@ -1,6 +1,8 @@
 package com.kaifengcrt.exnihilosatellitium;
 
+import com.kaifengcrt.exnihilosatellitium.common.config.ConfigValues;
 import com.kaifengcrt.exnihilosatellitium.platform.config.ExConfig;
+import com.kaifengcrt.exnihilosatellitium.platform.config.ExConfigSource;
 import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
 import com.kaifengcrt.exnihilosatellitium.compat.MoonlightCompat;
 import com.kaifengcrt.exnihilosatellitium.platform.ForgeModProbe;
@@ -40,6 +42,7 @@ public final class ExNihiloSatellitium {
         final IEventBus modBus = context.getModEventBus();
 
         Platform.install(new ForgeModProbe());
+        ConfigValues.install(ExConfigSource.INSTANCE);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ExConfig.SPEC);
 
         ModBlocks.register(modBus);

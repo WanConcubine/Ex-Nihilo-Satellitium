@@ -88,6 +88,10 @@ public final class ModCreativeTabs {
                     output.accept(ModItems.BLIZZ_DOLL.get());
                 }
                 for (final OreMaterial material : OreMaterials.all()) {
+                    // ores.hideUnprovided: no candidates loaded -> keep it out of the tab.
+                    if (OreMaterials.hidden(material)) {
+                        continue;
+                    }
                     final var entries = ModOreItems.byMaterial().get(material.id());
                     for (final String kind : ModOreBlocks.KINDS) {
                         final RegistryObject<? extends net.minecraft.world.item.Item> item =

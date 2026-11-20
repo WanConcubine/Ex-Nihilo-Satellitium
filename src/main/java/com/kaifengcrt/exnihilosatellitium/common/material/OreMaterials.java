@@ -5,15 +5,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kaifengcrt.exnihilosatellitium.ExNihiloSatellitium;
+import com.kaifengcrt.exnihilosatellitium.common.config.ConfigValues;
 import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -42,6 +47,62 @@ public final class OreMaterials {
 
     public static List<OreMaterial> all() {
         return ALL;
+    }
+
+    /**
+     * True when {@code material} should stay out of the sift/hammer tables, the
+     * creative tab and JEI: {@code ores.hideUnprovided} is on and none of the
+     * material's candidate mods is installed.
+     *
+     * <p>Entries without a candidate list are never hidden: {@code iron} /
+     * {@code gold} / {@code copper} point at vanilla items, and entries such as
+     * {@code platinum} are content this mod owns outright. Read the answer once
+     * per table rebuild instead of caching it, so the config stays live.</p>
+     */
+    public static boolean hidden(final OreMaterial material) {
+        if (!ConfigValues.oresHideUnprovided() || material.candidates().isEmpty()) {
+            return false;
+        }
+        for (final OreMaterial.ProductCandidate candidate : material.candidates()) {
+            if (candidate.mod() == null || Platform.isModLoaded(candidate.mod())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Registry-id prefixes ({@code "cobalt_"}) of every hidden material, or an
+     * empty set when the option is off. Pass one snapshot to {@link #hides} when
+     * filtering a whole table.
+     */
+    public static Set<String> hiddenPrefixes() {
+        final Set<String> out = new LinkedHashSet<>();
+        for (final OreMaterial material : all()) {
+            if (hidden(material)) {
+                out.add(material.id() + "_");
+            }
+        }
+        return out;
+    }
+
+    /** True when {@code item} is one of our items that belongs to a hidden material. */
+    public static boolean hides(final Set<String> prefixes, final Item item) {
+        return hides(prefixes, BuiltInRegistries.ITEM.getKey(item));
+    }
+
+    /** True when {@code id} is one of our registry ids that belongs to a hidden material. */
+    public static boolean hides(final Set<String> prefixes, final ResourceLocation id) {
+        if (prefixes.isEmpty() || !ExNihiloSatellitium.MOD_ID.equals(id.getNamespace())) {
+            return false;
+        }
+        final String path = id.getPath();
+        for (final String prefix : prefixes) {
+            if (path.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static List<OreMaterial> load() {
