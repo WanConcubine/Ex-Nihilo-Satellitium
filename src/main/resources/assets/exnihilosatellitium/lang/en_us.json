@@ -413,5 +413,14 @@
   "module.exnihilosatellitium.chain_mining.blocks": "Chain limit: %s blocks",
   "module.exnihilosatellitium.chain_mining.blocks.info": "One crush also breaks connected blocks of the same kind",
   "item.exnihilosatellitium.earth_slime_grass_seeds": "Earthslime Grass Seeds",
-  "item.exnihilosatellitium.slime_grass_seeds.tooltip": "Right-click dirt or grass to grow slime grass; mining it also drops slime dirt"
+  "item.exnihilosatellitium.slime_grass_seeds.tooltip": "Right-click dirt or grass to grow slime grass; mining it also drops slime dirt",
+  "exnihilosatellitium.config.title": "Ex Nihilo: Satellitium Settings",
+  "exnihilosatellitium.config.hide_unprovided": "Hide ores no mod supplies",
+  "exnihilosatellitium.config.keep": "Keep list (comma separated)",
+  "exnihilosatellitium.config.restart": "These options need a game restart.",
+  "exnihilosatellitium.config.restart_detail": "Saved values apply on the next start.",
+  "exnihilosatellitium.config.saved": "Saved. Restart the game to apply.",
+  "exnihilosatellitium.config.bad_id": "Invalid material id: %s",
+  "exnihilosatellitium.config.value.on": "On",
+  "exnihilosatellitium.config.value.off": "Off"
 }

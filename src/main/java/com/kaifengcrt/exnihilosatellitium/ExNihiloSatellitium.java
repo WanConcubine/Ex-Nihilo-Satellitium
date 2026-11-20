@@ -4,6 +4,7 @@ import com.kaifengcrt.exnihilosatellitium.common.config.ConfigValues;
 import com.kaifengcrt.exnihilosatellitium.platform.config.ExConfig;
 import com.kaifengcrt.exnihilosatellitium.platform.config.ExConfigSource;
 import com.kaifengcrt.exnihilosatellitium.common.platform.Platform;
+import com.kaifengcrt.exnihilosatellitium.client.ConfigScreens;
 import com.kaifengcrt.exnihilosatellitium.compat.MoonlightCompat;
 import com.kaifengcrt.exnihilosatellitium.platform.ForgeModProbe;
 import com.kaifengcrt.exnihilosatellitium.registry.ModBlockEntities;
@@ -18,6 +19,7 @@ import com.kaifengcrt.exnihilosatellitium.registry.ModOreItems;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -44,6 +46,12 @@ public final class ExNihiloSatellitium {
         Platform.install(new ForgeModProbe());
         ConfigValues.install(ExConfigSource.INSTANCE);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ExConfig.SPEC);
+
+        // Forge enables the mod list's "Config" button only when this extension
+        // point exists; the screen class is client-only and must not load on a server.
+        if (FMLEnvironment.dist.isClient()) {
+            ConfigScreens.register();
+        }
 
         ModBlocks.register(modBus);
         ModFluids.register(modBus);

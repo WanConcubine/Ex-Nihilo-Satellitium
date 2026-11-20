@@ -42,6 +42,10 @@ public final class OreMaterials {
 
     private static final List<OreMaterial> ALL = load();
 
+    /** Session snapshot of the ore options; {@code null} until the first table/JEI use. */
+    private static volatile Boolean SESSION_HIDE;
+    private static volatile List<String> SESSION_KEEP;
+
     private OreMaterials() {
     }
 
@@ -62,16 +66,17 @@ public final class OreMaterials {
      * {@code iron} / {@code gold} / {@code copper} point at vanilla items, so they
      * never qualify; gem entries are either skipped at registration or supplied by
      * a loaded mod. {@code ores.keep} protects classic content the mod owns (platinum
-     * by default). Read the answer once per table rebuild instead of caching it, so
-     * the config stays live.</p>
+     * by default).</p>
+     *
+     * <p>The two options are captured once per game session (see
+     * {@link #captureOreOptions()}): the creative tab and the sift/hammer tables are
+     * both built at startup, so applying half of a change mid-session would leave
+     * them out of sync. The config comment and the in-game config screen both say
+     * "restart required", and this snapshot is what makes that true.</p>
      */
     public static boolean hidden(final OreMaterial material) {
-        return isHidden(material, ConfigValues.oresHideUnprovided(), ConfigValues.oresKeep());
-    }
-
-    private static boolean isHidden(final OreMaterial material, final boolean hide,
-                                    final List<String> keep) {
-        return hide && material.hasOwnProduct() && !keep.contains(material.id());
+        captureOreOptions();
+        return SESSION_HIDE && material.hasOwnProduct() && !SESSION_KEEP.contains(material.id());
     }
 
     /**
@@ -80,15 +85,30 @@ public final class OreMaterials {
      * filtering a whole table.
      */
     public static Set<String> hiddenPrefixes() {
-        final boolean hide = ConfigValues.oresHideUnprovided();
-        final List<String> keep = ConfigValues.oresKeep();
+        captureOreOptions();
         final Set<String> out = new LinkedHashSet<>();
         for (final OreMaterial material : all()) {
-            if (isHidden(material, hide, keep)) {
+            if (SESSION_HIDE && material.hasOwnProduct() && !SESSION_KEEP.contains(material.id())) {
                 out.add(material.id() + "_");
             }
         }
         return out;
+    }
+
+    /**
+     * Reads {@code ores.hideUnprovided} / {@code ores.keep} once and keeps the
+     * answer for the rest of the session: editing the file or the config screen
+     * afterwards only changes the file, and the next start picks it up.
+     */
+    private static synchronized void captureOreOptions() {
+        if (SESSION_HIDE != null) {
+            return;
+        }
+        SESSION_HIDE = ConfigValues.oresHideUnprovided();
+        SESSION_KEEP = List.copyOf(ConfigValues.oresKeep());
+        ExNihiloSatellitium.LOGGER.info(
+                "[materials] ores.hideUnprovided={}, ores.keep={} (a restart is needed to change them)",
+                SESSION_HIDE, SESSION_KEEP);
     }
 
     /** True when {@code item} is one of our items that belongs to a hidden material. */

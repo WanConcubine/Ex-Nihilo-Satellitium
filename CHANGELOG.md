@@ -10,6 +10,8 @@
   想连它一起隐藏就把它从 `ores.keep` 里删掉。**不注销注册**（旧存档安全，`/give` 仍能拿到），改完需重启。
 - 1.20.1 线顺带补了 `common/config/{ConfigSource,ConfigValues}` 门面（此前只有 `ExConfig` 静态值），
   配置读取路径与 1.21.1 主线一致。
+- **游戏内配置界面**：模组列表 → Config 打开手写小屏，改 `[ores]` 两项；两项都标成“需要重启”，
+  保存后界面会提示重启游戏。
 - **验证**：`build` 通过，纹理 / core 守卫通过；**未进游戏目视**筛子 / 锤子 / JEI 表现。
 
 ### English
@@ -23,6 +25,8 @@
   restart after changing it.
 - This line also gained the `common/config/{ConfigSource,ConfigValues}` facade so the config read
   path matches the 1.21.1 mainline.
+- **In-game config screen**: the mod list's Config button opens a small hand-written screen for the two
+  `[ores]` keys; both are restart-only and the screen says so after saving.
 - **Verified**: `build` plus the texture / core guards; the in-game sieve / hammer / JEI behaviour is
   **not** visually verified yet.
 

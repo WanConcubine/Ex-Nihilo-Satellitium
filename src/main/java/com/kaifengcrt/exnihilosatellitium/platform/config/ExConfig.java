@@ -78,6 +78,7 @@ public final class ExConfig {
                         "Iron / gold / copper keep their vanilla ingots and stay visible.",
                         "Takes effect on the next start (registries and creative tabs are",
                         "built once).")
+                .worldRestart()
                 .define("hideUnprovided", false);
         ORES_KEEP = builder
                 .comment("Material ids that stay visible even when no mod supplies them.",
@@ -87,6 +88,7 @@ public final class ExConfig {
                         "'id' field of materials.json (lowercase, underscores).",
                         "Only the hideUnprovided rule is affected; gems that are skipped at",
                         "registration cannot be brought back this way.")
+                .worldRestart()
                 .defineListAllowEmpty("keep", List.of("platinum"),
                         o -> o instanceof String s && KEEP_ID.matcher(s).matches());
         builder.pop();

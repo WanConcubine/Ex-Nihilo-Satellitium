@@ -413,5 +413,14 @@
   "module.exnihilosatellitium.chain_mining.blocks": "连锁上限：%s 块",
   "module.exnihilosatellitium.chain_mining.blocks.info": "一次粉碎会连带打碎相连的同类方块",
   "item.exnihilosatellitium.earth_slime_grass_seeds": "大地黏液草种子",
-  "item.exnihilosatellitium.slime_grass_seeds.tooltip": "右键泥土 / 草方块种出黏液草；挖掉黏液草会掉黏液泥土"
+  "item.exnihilosatellitium.slime_grass_seeds.tooltip": "右键泥土 / 草方块种出黏液草；挖掉黏液草会掉黏液泥土",
+  "exnihilosatellitium.config.title": "无中生有：众星捧月 配置",
+  "exnihilosatellitium.config.hide_unprovided": "隐藏没有模组提供的矿",
+  "exnihilosatellitium.config.keep": "保留列表（逗号分隔）",
+  "exnihilosatellitium.config.restart": "这些选项需要重启游戏后生效。",
+  "exnihilosatellitium.config.restart_detail": "保存后下次启动才会生效。",
+  "exnihilosatellitium.config.saved": "已保存，重启游戏后生效。",
+  "exnihilosatellitium.config.bad_id": "无效的材料 id：%s",
+  "exnihilosatellitium.config.value.on": "开",
+  "exnihilosatellitium.config.value.off": "关"
 }
