@@ -51,24 +51,21 @@ public final class OreMaterials {
 
     /**
      * True when {@code material} should stay out of the sift/hammer tables, the
-     * creative tab and JEI: {@code ores.hideUnprovided} is on and none of the
-     * material's candidate mods is installed.
+     * creative tab and JEI: {@code ores.hideUnprovided} is on and no other mod
+     * supplies the material.
      *
-     * <p>Entries without a candidate list are never hidden: {@code iron} /
-     * {@code gold} / {@code copper} point at vanilla items, and entries such as
-     * {@code platinum} are content this mod owns outright. Read the answer once
-     * per table rebuild instead of caching it, so the config stays live.</p>
+     * <p>"No other mod supplies it" is exactly {@link OreMaterial#hasOwnProduct()}:
+     * {@link #load()} registers {@code <id>_ingot} itself when neither an explicit
+     * {@code ingot} nor any loaded candidate provides one. That covers both cases
+     * the option is about — a candidate list with nothing installed (cobalt without
+     * Tinkers' Construct) and an entry with no provider at all ({@code platinum}).
+     * {@code iron} / {@code gold} / {@code copper} point at vanilla items, so they
+     * never qualify; gem entries are either skipped at registration or supplied by
+     * a loaded mod. Read the answer once per table rebuild instead of caching it,
+     * so the config stays live.</p>
      */
     public static boolean hidden(final OreMaterial material) {
-        if (!ConfigValues.oresHideUnprovided() || material.candidates().isEmpty()) {
-            return false;
-        }
-        for (final OreMaterial.ProductCandidate candidate : material.candidates()) {
-            if (candidate.mod() == null || Platform.isModLoaded(candidate.mod())) {
-                return false;
-            }
-        }
-        return true;
+        return ConfigValues.oresHideUnprovided() && material.hasOwnProduct();
     }
 
     /**
