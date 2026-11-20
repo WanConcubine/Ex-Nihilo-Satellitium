@@ -79,7 +79,6 @@
 - [docs/customization-roadmap.md](docs/customization-roadmap.md) —— 三路径等价路线图（P1–P4、验收标准）
 - [docs/textures.md](docs/textures.md) —— 纹理路线、引用规则、检查脚本
 - [THIRD-PARTY.md](THIRD-PARTY.md) —— 第三方/参考来源
-- [AGENTS.md](AGENTS.md) —— 仓库规则（给协作者/AI）
 
 ## 构建
 

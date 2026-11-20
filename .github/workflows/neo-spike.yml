@@ -34,7 +34,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       # Cheap guards first so a bad data path / resource fails before the
-      # 10-minute compile. Keep this list in sync with AGENTS.md §2.
+      # 10-minute compile. Keep this list in sync with README.md 的「构建」一节.
       - name: Texture guard
         run: python3 scripts/check-textures.py
 

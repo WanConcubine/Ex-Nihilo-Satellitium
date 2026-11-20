@@ -495,7 +495,7 @@
   base 配方用 `neoforge:not(...)` 兜底。首个接入 **Mekanism 1.21.1**（tin / lead / osmium / uranium）。
   服务端已验证：有 Mek 时这 4 种自有锭不注册、熔炉产出 `mekanism:ingot_*`；无 Mek 时回退自有锭。
 - **双版本恢复**：`1.20.1-forge` 分支从 `e0bc177` 恢复并推送；`legacy/1.20.1-forge` tag
-  本地+远端删除；AGENTS/status/README/parity/DESIGN 全部改成双版本（复盘见
+  本地+远端删除；status/README/parity/DESIGN 全部改成双版本（复盘见
   [incidents/2026-11-01-unauthorized-archive.md](incidents/2026-11-01-unauthorized-archive.md)）。
 - **移植审计**：[porting.md](porting.md) 记录分层契约、1.20.1↔1.21.1 API 差异、P0–P4 顺序；
   `scripts/check-core-imports.py` 守住 core（4 个已知漏点，新增 NeoForge import 直接失败）。
